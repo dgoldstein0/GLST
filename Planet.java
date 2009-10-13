@@ -6,6 +6,7 @@ public class Planet extends Satellite
 	long population;
 	HashSet<Satellite> satellites;
 	HashSet<Facility> facilities;
+	Player owner;
 	
 	
 	public Planet(String nm, long pop, int sz, double m, byte habitable)
@@ -28,4 +29,6 @@ public class Planet extends Satellite
 	public void setSatellites(HashSet<Satellite> sat){satellites=sat;}
 	public HashSet<Facility> getFacilities(){return facilities;}
 	public void setFacilities(HashSet<Facility> fac){facilities=fac;}
+	public Player getOwner(){return owner;}
+	public void setOwner(Player p){owner=p;}
 }
