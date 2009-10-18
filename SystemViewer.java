@@ -388,22 +388,13 @@ public class SystemViewer extends JDialog implements ActionListener, ChangeListe
 			{
 				for(Satellite orbiting : system.orbiting_objects)
 				{
-					if(orbiting instanceof Planet && (selected_obj instanceof Moon || selected_obj instanceof Station))
+					if(orbiting instanceof Planet && (selected_obj instanceof Moon))
 					{
 						Planet cur_planet=(Planet)orbiting;
 						for(Satellite sat : cur_planet.satellites)
 						{
 							if(selected_obj == sat)
 								cur_planet.satellites.remove(sat);
-							else if(selected_obj instanceof Station && sat instanceof Moon)
-							{
-								Moon cur_moon=(Moon)sat;
-								for(Object sat2 : cur_moon.satellites)
-								{
-									if(sat2==selected_obj)
-										cur_moon.satellites.remove(sat2);
-								}
-							}
 						}
 					}
 					else if(orbiting == selected_obj)
@@ -523,17 +514,6 @@ public class SystemViewer extends JDialog implements ActionListener, ChangeListe
 							for(Satellite sat2 : planet_sats)
 							{
 								sat2.orbit.move((double)time);
-								if(sat2 instanceof Moon)
-								{
-									HashSet<? super Station> moon_sats = ((Moon)sat2).satellites;
-									if(moon_sats instanceof HashSet)
-									{
-										for(Object stat : moon_sats)
-										{
-											((Satellite)stat).orbit.move((double)time);
-										}
-									}
-								}
 							}
 						}
 					}

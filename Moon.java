@@ -3,7 +3,8 @@ import java.util.*;
 public class Moon extends Satellite
 {
 	String name;
-	HashSet<? super Station> satellites;
+	HashSet<Facility> facilities;
+	Player owner;
 	
 	public Moon(double m, String name)
 	{
@@ -14,6 +15,8 @@ public class Moon extends Satellite
 	public Moon(){}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
-	public HashSet getSatellites(){return satellites;}
-	public void setSatellites(HashSet<? super Station> sat){satellites=sat;}
+	public HashSet<Facility> getFacilities(){return facilities;}
+	public void setFacilities(HashSet<Facility> fac){facilities=fac;}
+	public Player getOwner(){return owner;}
+	public void setOwner(Player p){owner=p;}
 }

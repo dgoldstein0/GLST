@@ -83,18 +83,6 @@ public class SystemPainter extends JPanel
 							drawOrbit(sat, g);
 							g.setColor(Color.GRAY);
 							g.fillOval(sat.absoluteCurX()-sat.size/2, sat.absoluteCurY()-sat.size/2, sat.size, sat.size);
-							
-							//draw objects orbiting moons
-							if(sat instanceof Moon && ((Moon)sat).satellites instanceof HashSet)
-							{
-								HashSet<? super Station> moon_sats = ((Moon)sat).satellites;
-								for(Object satx : moon_sats)
-								{
-									Station sat2=(Station)satx;
-									drawOrbit(sat2, g);
-									g.fillOval(sat2.absoluteCurX()-sat2.size/2, sat2.absoluteCurY()-sat2.size/2, sat2.size, sat2.size);
-								}
-							}
 						}
 					}
 				}
