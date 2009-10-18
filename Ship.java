@@ -1,7 +1,9 @@
 public class Ship
 {
 	static int JUNK=0;
-	static ShipType[] sTypes={new ShipType("Junk",20,100)};
+	static ShipType[] sTypes={new ShipType("Junk",20,100,10,200)};
+	
+	Player owner;
 	
 	int type;
 	String name;
@@ -12,13 +14,22 @@ public class Ship
 	int hull_strength;
 	int damage;
 	
-	public Ship(String nm, int type)
+	int pos_x;
+	int pos_y;
+	
+	int cost;
+	int soldier;
+	
+	public Ship(Player ow, String nm, int type)
 	{
 		name = nm;
 		this.type = type;
+		owner=ow;
 		energy = sTypes[type].max_energy;
 		max_energy = sTypes[type].max_energy;
 		hull_strength = sTypes[type].hull;
+		cost=sTypes[type].cost;
+		soldier=sTypes[type].soldier_capacity;						//assume ships are fully loaded when built
 		damage=0;
 	}
 	
@@ -47,4 +58,9 @@ public class Ship
 	public void setHull_strength(int hs){hull_strength=hs;}
 	public int getDamage(){return damage;}
 	public void setDamage(int d){damage=d;}
+	public void setX(int x){pos_x=x;}
+	public void setY(int y){pos_y=y;}
+	public void assemble(int x, int y) {};
+	public Player getOwner() {return owner;}
+	public int getSoldier() {return soldier;}
 }
