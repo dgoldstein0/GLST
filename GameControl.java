@@ -1,4 +1,8 @@
 import javax.swing.JFrame;
+import java.util.*;
+import java.beans.*;
+import java.net.*;
+import java.io.*;
 
 public class GameControl
 {
@@ -6,6 +10,10 @@ public class GameControl
 	long start_time; 
 	Player player;
 	Galaxy map;
+	Socket the_socket; 
+	
+	HashSet<Event> events_pending;
+	
 	
 	public GameControl(JFrame frame)
 	{
@@ -35,6 +43,15 @@ public class GameControl
 		
 		//start events that need to occur before time_elapsed
 		
+		for(Event e: events_pending)
+		{
+			if(e.scheduled_time >= time_elapsed)
+			{
+				e.execute();
+				events_pending.remove(e);
+			}
+		}
+		
 		//update all data
 		for(GSystem sys : map.systems)
 		{
@@ -59,5 +76,19 @@ public class GameControl
 		}
 		
 		//draw everything
+	}
+	
+	public void notifyAllPlayers(Event e)
+	{
+		try
+		{
+			XMLEncoder encoder = new XMLEncoder(the_socket.getOutputStream());
+			encoder.writeObject(e);
+			encoder.close();
+		}
+		catch(IOException x)
+		{
+			//no socket open?
+		}
 	}
 }
