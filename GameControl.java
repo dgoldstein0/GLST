@@ -6,8 +6,7 @@ import java.io.*;
 
 public class GameControl
 {
-	long time_elapsed; //can support over 292 years
-	long start_time; 
+	TimeControl TC;
 	Player player;
 	Galaxy map;
 	Socket the_socket; 
@@ -17,7 +16,6 @@ public class GameControl
 	
 	public GameControl(JFrame frame)
 	{
-		time_elapsed=0;
 		player=Player.createPlayer();
 		map=new Galaxy();
 	}
@@ -26,20 +24,17 @@ public class GameControl
 	
 	public Player getPlayer(){return player;}
 	public void setPlayer(Player p){player=p;}
-	public long gettime_elapsed(){return time_elapsed;}
-	public void settime_elapsed(long t){time_elapsed=t;}
 	public Galaxy getMap(){return map;}
 	public void setMap(Galaxy g){map=g;}
 	
 	public void startGame()
 	{
-		start_time=System.nanoTime();
-		time_elapsed=0;
+		TC = new TimeControl();
 	}
 	
-	public void updateTime()
+	public void updateGame()
 	{
-		time_elapsed=System.nanoTime()-start_time;
+		long time_elapsed=TC.getTime();
 		
 		//start events that need to occur before time_elapsed
 		

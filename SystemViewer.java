@@ -4,12 +4,12 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
 
-public class SystemViewer extends JDialog implements ActionListener, ChangeListener, MouseListener, MouseMotionListener
+public class SystemViewer extends JDialog implements ActionListener, MouseListener, MouseMotionListener
 {
 	static int DEFAULT_STAR_SIZE=25;
 	static int DEFAULT_STAR_ZONE_SIZE=50;
 	static int DEFAULT_PLANET_SIZE = 10;
-	static double DEFAULT_PLANET_MASS = 100;
+	static double DEFAULT_PLANET_MASS = 10;
 	static double DEFAULT_STAR_MASS = 10000;
 	
 	final static int ADD_NOTHING=0;
@@ -32,7 +32,12 @@ public class SystemViewer extends JDialog implements ActionListener, ChangeListe
 	JButton t_add;
 	JButton t_delete;
 	JButton t_edit;
-	JSlider t_time;
+	JButton t_time;
+	JButton t_reset_time;
+	
+	TimeControl TC;
+	java.util.Timer timer;
+	UpdateTask task;
 	
 	public SystemViewer(JFrame frame, GSystem sys)
 	{
@@ -72,9 +77,15 @@ public class SystemViewer extends JDialog implements ActionListener, ChangeListe
 		t_edit.addActionListener(this);
 		toolbar.add(t_edit);
 		
-		t_time = new JSlider(JSlider.HORIZONTAL,0,5000,0);
-		t_time.addChangeListener(this);
+		t_time = new JButton("Start Time");
+		t_time.setMnemonic(KeyEvent.VK_T);
+		t_time.addActionListener(this);
 		toolbar.add(t_time);
+		
+		t_reset_time = new JButton("Reset Time");
+		t_reset_time.setMnemonic(KeyEvent.VK_R);
+		t_reset_time.addActionListener(this);
+		toolbar.add(t_reset_time);
 		
 		add(toolbar, BorderLayout.NORTH);
 		
@@ -125,6 +136,58 @@ public class SystemViewer extends JDialog implements ActionListener, ChangeListe
 			deleteSelected();
 		else if(e.getSource()==t_edit)
 			editSelected();
+		else if(e.getSource()==t_time)
+		{
+			TC = new TimeControl();
+			timer=new java.util.Timer(true);
+			if(task instanceof UpdateTask)
+				task.cancel();
+			task=new UpdateTask();
+			timer.scheduleAtFixedRate(task,0,20);
+		}
+		else if(e.getSource()==t_reset_time)
+		{
+			//clear timer
+			if(task instanceof UpdateTask)
+			{
+				task.cancel();
+				TimeUpdater(0);
+				TC=null;
+			}
+		}
+	}
+	
+	private class UpdateTask extends TimerTask
+	{
+		public void run()
+		{
+			TimeUpdater(TC.getTime());
+		}
+	}
+	
+	private void TimeUpdater(long time)
+	{		
+		if(system.orbiting_objects instanceof HashSet)
+		{
+			for(Satellite sat : system.orbiting_objects)
+			{
+				//update orbit of sat
+				sat.orbit.move(time);
+				if(sat instanceof Planet)
+				{
+					if(((Planet)sat).satellites instanceof HashSet)
+					{
+						for(Satellite sat2 : ((Planet)sat).satellites)
+						{
+							//update orbit of sat2
+							sat2.orbit.move(time);
+						}
+					}
+				}
+			}
+		}
+		
+		drawSystem();
 	}
 	
 	private void ObjectSelected(boolean select)
@@ -381,7 +444,10 @@ public class SystemViewer extends JDialog implements ActionListener, ChangeListe
 				for(Satellite orbiting : system.orbiting_objects)
 				{
 					if(selected_obj == orbiting)
+					{
 						system.orbiting_objects.remove(orbiting);
+						break;
+					}
 				}
 			}
 			else //search for moons and stations
@@ -493,33 +559,4 @@ public class SystemViewer extends JDialog implements ActionListener, ChangeListe
 	}
 	
 	private void editSelected(){new editDialog();}
-	
-	public void stateChanged(ChangeEvent e)
-	{
-		JSlider source = (JSlider)e.getSource();
-		if(source == t_time && !source.getValueIsAdjusting())
-		{
-			int time = (int)source.getValue();
-			System.out.println("time = " + Integer.toString(time));
-			if(system.orbiting_objects instanceof HashSet)
-			{
-				for(Satellite sat : system.orbiting_objects)
-				{
-					sat.orbit.move((double)time);
-					if(sat instanceof Planet)
-					{
-						HashSet<Satellite> planet_sats = ((Planet)sat).satellites;
-						if(planet_sats instanceof HashSet)
-						{
-							for(Satellite sat2 : planet_sats)
-							{
-								sat2.orbit.move((double)time);
-							}
-						}
-					}
-				}
-			}
-			drawSystem();
-		}
-	}
 }

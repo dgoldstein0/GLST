@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Orbit
 {
-	static double PERIOD_CONSTANT=50; //equiv to 2pi/sqrt(G), where G is the gravity constant
+	static double PERIOD_CONSTANT=1000; //equiv to 2pi/sqrt(G), where G is the gravity constant
 	int init_x;
 	int init_y;
 	
@@ -57,16 +57,17 @@ public class Orbit
 	
 	public void calcTimeOffset()
 	{
-		b=Math.sqrt(Math.pow(a,2.0d)-Math.pow(c,2.0d));
+		
 		c=Math.hypot((double)focus2_x,(double)focus2_y)/2;
+		b=Math.sqrt(Math.pow(a,2.0d)-Math.pow(c,2.0d));
 		
 		double rot_angle;
 		if(focus2_x != 0)
 			rot_angle=-Math.atan(focus2_y/focus2_x);
 		else if(focus2_y>0)
-			rot_angle = Math.PI/2;
-		else if(focus2_y<0)
 			rot_angle = -Math.PI/2;
+		else if(focus2_y<0)
+			rot_angle = Math.PI/2;
 		else
 			rot_angle=0; //doesn't matter, perfect circle
 		
