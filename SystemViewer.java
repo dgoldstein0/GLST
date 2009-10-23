@@ -92,9 +92,9 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		pack();
 		setSize(800,650);
 		
-		drawSystem();
+
 		ObjectSelected(false);
-		
+		SwingUtilities.invokeLater(new Runnable(){public void run(){drawSystem();}}); //it is necessary to invoke this later because before the systemviewer is setvisible it has no height and width, which drawSystem() uses to determine the height/width of GSystem, which is then referenced in absoluteCurX/CurY/InitX/InitY to determine where the center of the system is for coordinate purposes.
 		setVisible(true);//since systemviewer is modal, nothing can come after here.
 	}
 	
@@ -138,21 +138,20 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			editSelected();
 		else if(e.getSource()==t_time)
 		{
-			TC = new TimeControl();
-			timer=new java.util.Timer(true);
-			if(task instanceof UpdateTask)
-				task.cancel();
-			task=new UpdateTask();
-			timer.scheduleAtFixedRate(task,0,20);
+			if(TC instanceof TimeControl)
+				TC.resetTime();
+			else
+				TC = new TimeControl();
+
+			TC.startConstIntervalTask(new UpdateTask(),20);
 		}
 		else if(e.getSource()==t_reset_time)
 		{
 			//clear timer
-			if(task instanceof UpdateTask)
+			if(TC instanceof TimeControl)
 			{
-				task.cancel();
+				TC.stopTask();
 				TimeUpdater(0);
-				TC=null;
 			}
 		}
 	}
