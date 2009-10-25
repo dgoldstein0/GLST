@@ -348,7 +348,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		Planet theplanet = new Planet("", (long)0, DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, (byte)0);
 		theplanet.orbit = new Orbit((Satellite)theplanet, (Positioning)system, x, y, x, y, 1);
 		new_sats.add(theplanet);
-		system.setorbiting_objects(new_sats);
+		system.setOrbiting_objects(new_sats);
 		
 		selected_obj = theplanet;
 		wait_to_add = ADD_FOCUS;

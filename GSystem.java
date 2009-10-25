@@ -38,7 +38,7 @@ public class GSystem implements Positioning
 	//methods required for save/load
 	public GSystem(){}
 	public HashSet<Satellite> getorbiting_objects(){return orbiting_objects;}
-	public void setorbiting_objects(HashSet<Satellite> s){orbiting_objects=s;}
+	public void setOrbiting_objects(HashSet<Satellite> s){orbiting_objects=s;}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 	public HashSet<Star> getStars(){return stars;}

@@ -106,7 +106,7 @@ public class Orbit
 			double d_at_theta1=1-c/a*Math.cos(theta1);
 			theta2=theta1-(theta1-c/a*Math.sin(theta1) - 2*Math.PI*frac_time)/d_at_theta1;
 		}
-		while(Math.abs(theta2-c/a*Math.sin(theta2) - 2*Math.PI*frac_time)>.000000001 || Math.abs(theta1-theta2)>.000000001);
+		while(Math.abs(theta2-c/a*Math.sin(theta2) - 2*Math.PI*frac_time)>.00000000001 || Math.abs(theta1-theta2)>.00000000001);
 		
 		double needs_rot_x = a*Math.cos(theta2);
 		
@@ -151,6 +151,10 @@ public class Orbit
 	
 	//methods required for save/load
 	public Orbit(){}
+	public Positioning getBoss(){return boss;}
+	public void setBoss(Positioning p){boss=p;}
+	public Satellite getObj(){return obj;}
+	public void setObj(Satellite o){obj=o;}
 	public int getInit_x(){return init_x;}
 	public void setInit_x(int x){init_x=x;}
 	public int getInit_y(){return init_y;}
