@@ -4,7 +4,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
 
-public class SystemViewer extends JDialog implements ActionListener, MouseListener, MouseMotionListener
+public class SystemViewer extends JDialog implements ActionListener, MouseListener, MouseMotionListener, MouseWheelListener
 {
 	static int DEFAULT_STAR_SIZE=25;
 	static int DEFAULT_STAR_ZONE_SIZE=50;
@@ -15,10 +15,10 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	final static int ADD_NOTHING=0;
 	final static int ADD_STAR=1;
 	final static int ADD_PLANET=2;
-	final static int ADD_STATION=3;
-	final static int ADD_ASTEROID=4;
-	final static int ADD_MOON=5;
-	final static int ADD_FOCUS=6;
+	final static int ADD_ASTEROID=3;
+	final static int ADD_MOON=4;
+	final static int ADD_FOCUS=5;
+	final static int RECENTER=6;
 	
 	int wait_to_add = ADD_NOTHING;
 	boolean drag_start;	
@@ -32,12 +32,17 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	JButton t_add;
 	JButton t_delete;
 	JButton t_edit;
+	JButton t_recenter;
 	JButton t_time;
 	JButton t_reset_time;
 	
 	TimeControl TC;
 	java.util.Timer timer;
 	UpdateTask task;
+	
+	int center_x;
+	int center_y;
+	double scale=1.0d;
 	
 	public SystemViewer(JFrame frame, GSystem sys)
 	{
@@ -50,6 +55,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		painter = new SystemPainter(true);
 		painter.addMouseListener(this);
 		painter.addMouseMotionListener(this);
+		painter.addMouseWheelListener(this);
 		add(painter, BorderLayout.CENTER);
 		
 		JToolBar toolbar=new JToolBar("System Toolbar");
@@ -77,8 +83,13 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		t_edit.addActionListener(this);
 		toolbar.add(t_edit);
 		
+		t_recenter = new JButton("Recenter");
+		t_recenter.setMnemonic(KeyEvent.VK_C);
+		t_recenter.addActionListener(this);
+		toolbar.add(t_recenter);
+		
 		t_time = new JButton("Start Time");
-		t_time.setMnemonic(KeyEvent.VK_T);
+		t_time.setMnemonic(KeyEvent.VK_S);
 		t_time.addActionListener(this);
 		toolbar.add(t_time);
 		
@@ -94,14 +105,20 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		
 
 		ObjectSelected(false);
-		SwingUtilities.invokeLater(new Runnable(){public void run(){drawSystem();}}); //it is necessary to invoke this later because before the systemviewer is setvisible it has no height and width, which drawSystem() uses to determine the height/width of GSystem, which is then referenced in absoluteCurX/CurY/InitX/InitY to determine where the center of the system is for coordinate purposes.
+		
+		//it is necessary to invoke this later because before the systemviewer is setvisible it has no height and width, which drawSystem() uses to determine the height/width of GSystem, which is then referenced in absoluteCurX/CurY/InitX/InitY to determine where the center of the system is for coordinate purposes.
+		SwingUtilities.invokeLater(new Runnable(){public void run(){
+			center_x=painter.getWidth()/2;
+			center_y=painter.getHeight()/2;
+			drawSystem();}});
+		
 		setVisible(true);//since systemviewer is modal, nothing can come after here.
 	}
 	
 	public void actionPerformed(ActionEvent e)
 	{
 		if(e.getSource()==t_toggle)
-			painter.paintSystem(system, selected_obj, !painter.design_view);
+			painter.paintSystem(system, selected_obj, !painter.design_view, center_x, center_y, scale);
 		else if(e.getSource()==t_add)
 		{
 			String obj_to_add;
@@ -109,12 +126,12 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			{
 				if(!(selected_obj instanceof Planet))
 				{
-					String[] add_options={"Star", "Planet", "Space Station", "Asteroid"};
+					String[] add_options={"Planet", "Star", "Asteroid"};
 					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
 				}
 				else
 				{
-					String[] add_options={"Moon", "Space Station", "Asteroid"};
+					String[] add_options={"Planet", "Star", "Moon", "Asteroid"};
 					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
 				}
 			}
@@ -125,17 +142,20 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				wait_to_add=ADD_STAR;
 			else if(obj_to_add=="Planet")
 				wait_to_add=ADD_PLANET;
-			else if(obj_to_add=="Space Station")
-				wait_to_add=ADD_STATION;
 			else if(obj_to_add=="Asteroid")
 				wait_to_add=ADD_ASTEROID;
 			else if(obj_to_add=="Moon")
 				wait_to_add=ADD_MOON;
+			t_recenter.setEnabled(false);
 		}
 		else if(e.getSource()==t_delete)
 			deleteSelected();
 		else if(e.getSource()==t_edit)
 			editSelected();
+		else if(e.getSource()==t_recenter)
+		{
+			wait_to_add=RECENTER;
+		}
 		else if(e.getSource()==t_time)
 		{
 			if(TC instanceof TimeControl)
@@ -198,7 +218,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	private void locateObj(int x, int y) throws NoObjectLocatedException
 	{
 		//search for stars, then orbiting objects and their satellites
-		final int OBJ_TOL = 5;
+		final double OBJ_TOL = 5/scale; //tolerance
 		
 		if(system.stars instanceof HashSet)
 		{
@@ -264,7 +284,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		{
 			try
 			{
-				locateObj(e.getX(),e.getY());
+				locateObj(screenToDataX(e.getX()),screenToDataY(e.getY()));
 				ObjectSelected(true);
 				drawSystem();
 				
@@ -283,7 +303,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		{
 			try
 			{
-				locateObj(e.getX(),e.getY());
+				locateObj(screenToDataX(e.getX()),screenToDataY(e.getY()));
 				ObjectSelected(true);
 				drawSystem();
 			}
@@ -299,12 +319,10 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			switch(wait_to_add)
 			{
 				case ADD_STAR:
-					addStar(e.getX(), e.getY());
+					addStar(screenToDataX(e.getX()), screenToDataY(e.getY()));
 					break;
 				case ADD_PLANET:
-					addPlanet(e.getX(),e.getY());
-					break;
-				case ADD_STATION:
+					addPlanet(screenToDataX(e.getX()),screenToDataY(e.getY()));
 					break;
 				case ADD_ASTEROID:
 					break;
@@ -313,11 +331,34 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				case ADD_FOCUS:
 					wait_to_add=ADD_NOTHING;
 					break;
+				case RECENTER:
+					setCenter(screenToDataX(e.getX()),screenToDataY(e.getY()));
+					break;
 			}
 			if(wait_to_add != ADD_FOCUS)
+			{
 				wait_to_add=ADD_NOTHING;
+				t_recenter.setEnabled(true);
+			}
 			ObjectSelected(true);
 		}
+	}
+	
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+		scale -= ((double)e.getWheelRotation())/10;
+		if(scale < 1.0d)
+			scale =1.0d;
+		else if(scale > 5.0d)
+			scale = 5.0d;
+		drawSystem();
+	}
+	
+	private void setCenter(int x, int y)
+	{
+		center_x=x;
+		center_y=y;
+		drawSystem();
 	}
 	
 	private void addStar(int x, int y)
@@ -333,6 +374,16 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		}
 		
 		drawSystem();
+	}
+	
+	private int screenToDataX(int x)
+	{
+		return (int)((x-painter.getWidth()/2)/scale)+center_x;
+	}
+	
+	private int screenToDataY(int y)
+	{
+		return (int)((y-painter.getHeight()/2)/scale)+center_y;
 	}
 	
 	private void addPlanet(int x, int y)
@@ -410,7 +461,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			{
 				case ADD_STAR:
 					if(locationStarSuitable(e.getX(), e.getY()))
-						painter.paintGhostObj(system, selected_obj, e.getX(), e.getY(), DEFAULT_STAR_SIZE);
+						painter.paintGhostObj(system, selected_obj, e.getX(), e.getY(), DEFAULT_STAR_SIZE, center_x, center_y, scale);
 					else
 						drawSystem();
 					break;
@@ -429,7 +480,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	{
 		system.setWidth(painter.getWidth());
 		system.setHeight(painter.getHeight());
-		painter.paintSystem(system, selected_obj);
+		painter.paintSystem(system, selected_obj, center_x, center_y, scale);
 	}
 	
 	private void deleteSelected()

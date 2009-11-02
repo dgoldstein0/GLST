@@ -1,128 +1,224 @@
 Acamar
-AchernarAcrux
-AcubensAdhaferaAdhara
+Achernar
+Acrux
+Acubens
+Adhafera
+Adhara
 Agena
-AlbaliAlbireo
+Albali
+Albireo
 Alchiba
-AlcorAlcyone
-AldebaranAlderaminAlfirkAlgediAlgenib
+Alcor
+Alcyone
+Aldebaran
+Alderamin
+Alfirk
+Algedi
+Algenib
 Algieba
-AlgolAlgorab
+Algol
+Algorab
 Alhena
 Alioth
-AlkaidAlkalurops
+Alkaid
+Alkalurops
 Alkes
-AlmachAl Na`irAlnasl
+Almach
+Al Na`ir
+Alnasl
 Alnilam
 Alnitak
 Al Niyat
 Alphard
-AlpheccaAlpheratz
+Alphecca
+Alpheratz
 Alrescha
-AlshainAltairAltais
+Alshain
+Altair
+Altais
 Alterf
 Aludra
 Alula Australis
 Alula Borealis
 Alya
-AnchaAnkaa
+Ancha
+Ankaa
 Antares
 Arcturus
 Arkab
 Arneb
 Ascella
-Asellus AustralisAsellus Borealis
+Asellus Australis
+Asellus Borealis
 Aspidiske
 Asterope
 AtikAtlas
 Atria
 Avior
 Azha
-Baten KaitosBecruxBeidBellatrixBenetnaschBetelgeuse
+Baten Kaitos
+Becrux
+Beid
+Bellatrix
+Benetnasch
+Betelgeuse
 Biham
-CanopusCapellaCaphCastor
-CebalraiCelaeno
+Canopus
+Capella
+Caph
+Castor
+Cebalrai
+Celaeno
 Chara
 Cheleb
 Chertan
 Chort
 Cor Caroli
-CursaDabihDenebDeneb AlgediDeneb Kaitos
+Cursa
+Dabih
+Deneb
+Deneb Algedi
+Deneb Kaitos
 Denebola
 Diphda
-DnocesDschubba
-DubheEdasichElectraElnathEltanin
-EnifErraiFomalhaut
-FurudGacrux
-Garnet StarGemma
-GiausarGienahGirtabGomeisaGraffiasGrumium
+Dnoces
+Dschubba
+Dubhe
+Edasich
+Electra
+Elnath
+Eltanin
+Enif
+Errai
+Fomalhaut
+Furud
+Gacrux
+Garnet Star
+Gemma
+Giausar
+Gienah
+Girtab
+Gomeisa
+Graffias
+Grumium
 Hadar
-HamalHomam
+Hamal
+Homam
 Izar
-Kaus AustralisKaus Borealis
-Kaus MediaKaus Meridianalis
+Kaus Australis
+Kaus Borealis
+Kaus Media
+Kaus Meridianalis
 Keid
 KitalphaKochab
 Kornephoros
 Lesath
 Maia
-MarfikMarkabMatar
+Marfik
+Markab
+Matar
 Mebsuta
-MediaMegrezMeissa
+Media
+Megrez
+Meissa
 Mekbuda
 Menkab
-MenkalinanMenkar
+Menkalinan
+Menkar
 Menkent
 Merak
 Merope
-MesarthimMiaplacidus
-MimosaMintaka
-MiraMirach
+Mesarthim
+Miaplacidus
+Mimosa
+Mintaka
+Mira
+Mirach
 Mirfak
 Mirzam
-MizarMothallah
+Mizar
+Mothallah
 Muhlifain
 Muliphen
-MuphridMuscidaNaos
+Muphrid
+Muscida
+Naos
 Nashira
 Navi
 Nekkar
 Nihal
-NunkiNusakanPeacock
+Nunki
+Nusakan
+Peacock
 Phact
-PhadPhecdaPherkad
-PleionePolarisPollux
-PorrimaProcyon
-PropusPulcherrima
-RasalgethiRasalhagueRas ElasedRastabanRegorRegulusRigelRigil Kent
-Rigil KentaurusRotanevRuchbaRuchbahRukbatRunaway Star
-SabikSadalachbia
-SadalbariSadalmelik
-SadalsuudSadatoni
+Phad
+Phecda
+Pherkad
+Pleione
+Polaris
+Pollux
+Porrima
+Procyon
+Propus
+Pulcherrima
+Rasalgethi
+Rasalhague
+Ras Elased
+Rastaban
+Regor
+Regulus
+Rigel
+Rigil Kent
+Rigil Kentaurus
+Rotanev
+Ruchba
+Ruchbah
+Rukbat
+Runaway Star
+Sabik
+Sadalachbia
+Sadalbari
+Sadalmelik
+Sadalsuud
+Sadatoni
 Sadr
-SaiphSargas
+Saiph
+Sargas
 Scheat
 Schedar
 Seginus
-ShaulaSheliak
-SheratanSirius
-SitulaSkatSpica
-Sterope ISterope II
-SualocinSuhail
+Shaula
+Sheliak
+Sheratan
+Sirius
+Situla
+Skat
+Spica
+Sterope I
+Sterope II
+Sualocin
+Suhail
 Sulafat
 Syrma
 Talitha
 Tania Australis
 Tania Borealis
 Tarazed
-TaygetaTegmineThubanUnukalhai
-VegaVindemiatrix
+Taygeta
+Tegmine
+Thuban
+Unukalhai
+Vega
+Vindemiatrix
 Wasat
 Wazn
 Wezen
 Yed Posterior
-Yed PriorYildun
+Yed Prior
+Yildun
 Zaniah
-ZaurakZavijava
+Zaurak
+Zavijava
 Zosma
-ZubenelgenubiZubeneschamali
+Zubenelgenubi
+Zubeneschamali

@@ -21,6 +21,10 @@ public class SystemPainter extends JPanel
 	int ghost_y;
 	int ghost_size;
 	
+	double scale=1.0d; //always greater than or equal to 1
+	int center_x;
+	int center_y;
+	
 	public SystemPainter(boolean design)
 	{
 		setMinimumSize(new Dimension(800,600));
@@ -36,18 +40,18 @@ public class SystemPainter extends JPanel
 		if(design_view)
 		{
 			g.setColor(new Color(255,255,0,100));
-			g.drawOval((getWidth()-100)/2,(getHeight()-100)/2,100,100);
+			g.drawOval(drawX((getWidth()-100)/2),drawY((getHeight()-100)/2),(int)(100*scale),(int)(100*scale));
 			
 			if(selected instanceof Satellite)
 			{
 				g.setColor(Color.YELLOW);
-				g.drawOval(((Satellite)selected).absoluteInitX()-selected.size/2-2, ((Satellite)selected).absoluteInitY()-selected.size/2-2, selected.size+4, selected.size+4);
+				g.drawOval(drawX(((Satellite)selected).absoluteInitX()-selected.size/2)-2, drawY(((Satellite)selected).absoluteInitY()-selected.size/2)-2, (int)(selected.size*scale)+4, (int)(selected.size*scale)+4);
 			}
 			else if(selected instanceof Star)
 			{
 				//select a star
 				g.setColor(Color.YELLOW);
-				g.drawOval(((Star)selected).x-selected.size/2, ((Star)selected).y-selected.size/2, selected.size, selected.size);
+				g.drawOval(drawX(((Star)selected).x-selected.size/2), drawY(((Star)selected).y-selected.size/2), (int)(selected.size*scale), (int)(selected.size*scale));
 			}
 		}
 		
@@ -60,7 +64,7 @@ public class SystemPainter extends JPanel
 				{
 					//drawStar
 					Image star_img = Toolkit.getDefaultToolkit().getImage(Star.color_choice[st.color]);
-					g.drawImage(star_img, st.x-(st.size/2), st.y-(st.size/2), st.size, st.size, this);
+					g.drawImage(star_img, drawX(st.x-(st.size/2)), drawY(st.y-(st.size/2)), (int)(st.size*scale), (int)(st.size*scale), this);
 				}
 			}
 			
@@ -72,7 +76,7 @@ public class SystemPainter extends JPanel
 					//draw object
 					drawOrbit(orbiting, g);
 					g.setColor(Color.WHITE);
-					g.fillOval(orbiting.absoluteCurX()-(orbiting.size/2), orbiting.absoluteCurY()-(orbiting.size/2), orbiting.size, orbiting.size);
+					g.fillOval(drawX(orbiting.absoluteCurX()-(orbiting.size/2)), drawY(orbiting.absoluteCurY()-(orbiting.size/2)), (int)(orbiting.size*scale), (int)(orbiting.size*scale));
 					
 					//draw objects orbiting planets					
 					if(orbiting instanceof Planet && ((Planet)orbiting).satellites instanceof HashSet)
@@ -82,7 +86,7 @@ public class SystemPainter extends JPanel
 						{
 							drawOrbit(sat, g);
 							g.setColor(Color.GRAY);
-							g.fillOval(sat.absoluteCurX()-sat.size/2, sat.absoluteCurY()-sat.size/2, sat.size, sat.size);
+							g.fillOval(drawX(sat.absoluteCurX()-sat.size/2), drawY(sat.absoluteCurY()-sat.size/2), (int)(sat.size*scale), (int)(sat.size*scale));
 						}
 					}
 				}
@@ -94,26 +98,37 @@ public class SystemPainter extends JPanel
 			g.setColor(Color.GRAY);
 			g.drawOval(ghost_x-ghost_size/2, ghost_y-ghost_size/2, ghost_size, ghost_size);
 		}
+		
+		
+		g.setColor(Color.RED);
+		g.drawLine(drawX(center_x-5),drawY(center_y),drawX(center_x+5),drawY(center_y));
+		g.drawLine(drawX(center_x),drawY(center_y-5),drawX(center_x),drawY(center_y+5));
 	}
 	
-	public void paintSystem(GSystem system, StellarObject selected, boolean view)
+	public void paintSystem(GSystem system, StellarObject selected, boolean view, int centerx, int centery, double sc)
 	{
 		this.system=system;
 		this.selected=selected;
 		design_view=view;
 		ghost_obj=GHOST_NONE;
+		center_x=centerx;
+		center_y=centery;
+		scale=sc;
 		repaint();
 	}
 	
-	public void paintSystem(GSystem system, StellarObject selected)
+	public void paintSystem(GSystem system, StellarObject selected, int centerx, int centery, double sc)
 	{
 		this.system=system;
 		this.selected=selected;
 		ghost_obj=GHOST_NONE;
+		center_x=centerx;
+		center_y=centery;
+		scale=sc;
 		repaint();
 	}
 	
-	public void paintGhostObj(GSystem system, StellarObject selected, int x, int y, int size)
+	public void paintGhostObj(GSystem system, StellarObject selected, int x, int y, int size, int centerx, int centery, double sc)
 	{
 		this.system=system;
 		this.selected=selected;
@@ -121,7 +136,20 @@ public class SystemPainter extends JPanel
 		ghost_x=x;
 		ghost_y=y;
 		ghost_size=size;
+		center_x=centerx;
+		center_y=centery;
+		scale=sc;
 		repaint();
+	}
+	
+	public int drawX(int the_x) //the_x is pixels from upper left corner
+	{
+		return (int)((the_x-center_x)*scale)+getWidth()/2;
+	}
+	
+	public int drawY(int the_y)
+	{
+		return (int)((the_y-center_y)*scale)+getHeight()/2;
 	}
 	
 	private void drawOrbit(Satellite obj, Graphics g)
@@ -129,11 +157,14 @@ public class SystemPainter extends JPanel
 		int focus1_x = ((Satellite)obj).orbit.boss.absoluteCurX();
 		int focus1_y = ((Satellite)obj).orbit.boss.absoluteCurY();
 		
-		int focus2_x = ((Satellite)obj).orbit.focus2_x+focus1_x;
-		int focus2_y = ((Satellite)obj).orbit.focus2_y+focus1_y;
+		int focus2_x = drawX(((Satellite)obj).orbit.focus2_x+focus1_x);
+		int focus2_y = drawY(((Satellite)obj).orbit.focus2_y+focus1_y);
 		
-		int x = ((Satellite)(obj)).absoluteCurX();
-		int y = ((Satellite)(obj)).absoluteCurY();
+		focus1_x=drawX(focus1_x);
+		focus1_y=drawY(focus1_y);
+		
+		int x = drawX(((Satellite)(obj)).absoluteCurX());
+		int y = drawY(((Satellite)(obj)).absoluteCurY());
 		
 		if(obj==selected)
 		{
@@ -143,9 +174,9 @@ public class SystemPainter extends JPanel
 			g.drawOval(focus2_x-1, focus2_y-1, 3,3);
 		}
 		
-		double a = ((Satellite)obj).orbit.a;
-		double c = ((Satellite)obj).orbit.c;
-		double b = ((Satellite)obj).orbit.b;
+		double a = ((Satellite)obj).orbit.a*scale;
+		double c = ((Satellite)obj).orbit.c*scale;
+		double b = ((Satellite)obj).orbit.b*scale;
 		
 		double theta = Math.atan(((double)(focus2_y-focus1_y))/(focus2_x-focus1_x));
 		

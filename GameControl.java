@@ -83,7 +83,7 @@ public class GameControl
 		}
 		catch(IOException x)
 		{
-			//no socket open?
+			//no socket open? shouldn't happen
 		}
 	}
 }
