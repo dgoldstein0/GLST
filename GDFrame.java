@@ -594,6 +594,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				map = (Galaxy)d.readObject();
 				d.close();
 				fileIsOpen();
+				drawGalaxy();
 			}
 			catch(FileNotFoundException e)
 			{

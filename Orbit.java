@@ -171,4 +171,10 @@ public class Orbit
 	public void setPeriod(double d){period=d;}
 	public int getDirection(){return direction;}
 	public void setDirection(int d){direction=d;}
+	public double getA(){return a;}
+	public void setA(double x){a=x;}
+	public double getB(){return b;}
+	public void setB(double x){b=x;}
+	public double getC(){return c;}
+	public void setC(double x){c=x;}
 }
