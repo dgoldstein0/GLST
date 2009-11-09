@@ -821,11 +821,14 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				
 				if(!alt_down_on_click)
 				{
-					for(GSystem sys : map.systems)
+					if(map.systems instanceof HashSet)
 					{
-						//if system is with the selected area and navigable
-						if(x1 <= sys.x && sys.x <= x2 && y1 <= sys.y && sys.y < y2 && (sys.navigability >= current_nav_level || display_unnavigable))
-							possibly_sel_desel_sys.add(sys); //duplicates automatically prevented
+						for(GSystem sys : map.systems)
+						{
+							//if system is with the selected area and navigable
+							if(x1 <= sys.x && sys.x <= x2 && y1 <= sys.y && sys.y < y2 && (sys.navigability >= current_nav_level || display_unnavigable))
+								possibly_sel_desel_sys.add(sys); //duplicates automatically prevented
+						}
 					}
 				}
 				else

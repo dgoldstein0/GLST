@@ -6,10 +6,11 @@ public class Moon extends Satellite
 	HashSet<Facility> facilities;
 	Player owner;
 	
-	public Moon(double m, String name)
+	public Moon(double m, String name, int sz)
 	{
 		this.mass=m;
 		this.name=name;
+		this.size=sz;
 	}
 	
 	public Moon(){}

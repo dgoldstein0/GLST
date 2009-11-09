@@ -16,6 +16,7 @@ public class Planet extends Satellite
 		size=sz;
 		mass=m;
 		habitability=habitable;
+		satellites=new HashSet<Satellite>();
 	}
 	
 	public void popChange()

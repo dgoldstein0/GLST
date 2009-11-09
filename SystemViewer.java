@@ -9,8 +9,10 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	static int DEFAULT_STAR_SIZE=25;
 	static int DEFAULT_STAR_ZONE_SIZE=50;
 	static int DEFAULT_PLANET_SIZE = 10;
+	static int DEFAULT_MOON_SIZE = 6;
 	static double DEFAULT_PLANET_MASS = 10;
 	static double DEFAULT_STAR_MASS = 10000;
+	static double DEFAULT_MOON_MASS= 1;
 	
 	final static int ADD_NOTHING=0;
 	final static int ADD_STAR=1;
@@ -327,6 +329,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				case ADD_ASTEROID:
 					break;
 				case ADD_MOON:
+					addMoon(screenToDataX(e.getX()),screenToDataY(e.getY()));
 					break;
 				case ADD_FOCUS:
 					wait_to_add=ADD_NOTHING;
@@ -406,14 +409,26 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		drawSystem();
 	}
 	
+	private void addMoon(int x, int y)
+	{
+		Moon themoon = new Moon(DEFAULT_MOON_MASS, "", DEFAULT_MOON_SIZE);
+		themoon.orbit = new Orbit((Satellite)themoon, (Positioning)selected_obj,x,y,x,y,1);
+		((Planet)selected_obj).satellites.add(themoon);
+		
+		selected_obj=themoon;
+		wait_to_add=ADD_FOCUS;
+		drawSystem();
+	}
+	
 	private boolean locationStarSuitable(StellarObject obj, int x, int y)
 	{
-		return (Math.hypot(x-painter.getWidth()/2, y-painter.getHeight()/2) <= DEFAULT_STAR_ZONE_SIZE-obj.size/2);
+		return (Math.hypot(x - painter.getWidth()/2, y-painter.getHeight()/2) <= DEFAULT_STAR_ZONE_SIZE-obj.size/2);
 	}
 	
 	private boolean locationStarSuitable(int x, int y)
 	{
-		return (Math.hypot(x-painter.getWidth()/2, y-painter.getHeight()/2) <= DEFAULT_STAR_ZONE_SIZE-DEFAULT_STAR_SIZE/2);
+		//System.out.println("(" + Integer.toString(x) + "," + Integer.toString(y) + ")");
+		return (Math.hypot(x - painter.getWidth()/2, y-painter.getHeight()/2) <= DEFAULT_STAR_ZONE_SIZE-DEFAULT_STAR_SIZE/2);
 	}
 	
 	public void mouseClicked(MouseEvent e){}
@@ -428,25 +443,25 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		{
 			if(selected_obj instanceof Star)
 			{
-				if(locationStarSuitable(selected_obj,e.getX(),e.getY()))
+				if(locationStarSuitable(selected_obj,screenToDataX(e.getX()),screenToDataY(e.getY())))
 				{
-					((Star)selected_obj).x = e.getX();
-					((Star)selected_obj).y = e.getY();
+					((Star)selected_obj).x = screenToDataX(e.getX());
+					((Star)selected_obj).y = screenToDataY(e.getY());
 					drawSystem();
 				}
 				else
 				{
-					((Star)selected_obj).x = (int)((e.getX()-painter.getWidth()/2)/Math.hypot(e.getX()-painter.getWidth()/2, e.getY()-painter.getHeight()/2)*(50-selected_obj.size/2) + painter.getWidth()/2);
-					((Star)selected_obj).y = (int)((e.getY()-painter.getHeight()/2)/Math.hypot(e.getX()-painter.getWidth()/2, e.getY()-painter.getHeight()/2)*(50-selected_obj.size/2) + painter.getHeight()/2);
+					((Star)selected_obj).x = (int)((screenToDataX(e.getX())-painter.getWidth()/2)/Math.hypot(screenToDataX(e.getX())-painter.getWidth()/2, screenToDataY(e.getY())-painter.getHeight()/2)*(50-selected_obj.size/2) + painter.getWidth()/2);
+					((Star)selected_obj).y = (int)((screenToDataY(e.getY())-painter.getHeight()/2)/Math.hypot(screenToDataX(e.getX())-painter.getWidth()/2, screenToDataY(e.getY())-painter.getHeight()/2)*(50-selected_obj.size/2) + painter.getHeight()/2);
 					drawSystem();
 				}
 			}
 			else if(selected_obj instanceof Planet)
 			{
-				((Satellite)selected_obj).orbit.cur_x = e.getX()-painter.getWidth()/2;
-				((Satellite)selected_obj).orbit.cur_y = e.getY()-painter.getHeight()/2;
-				((Satellite)selected_obj).orbit.init_x = e.getX()-painter.getWidth()/2;
-				((Satellite)selected_obj).orbit.init_y = e.getY()-painter.getHeight()/2;
+				((Satellite)selected_obj).orbit.cur_x = screenToDataX(e.getX())-((Satellite)selected_obj).orbit.boss.absoluteCurX();
+				((Satellite)selected_obj).orbit.cur_y = screenToDataY(e.getY())-((Satellite)selected_obj).orbit.boss.absoluteCurY();
+				((Satellite)selected_obj).orbit.init_x = screenToDataX(e.getX())-((Satellite)selected_obj).orbit.boss.absoluteInitX();
+				((Satellite)selected_obj).orbit.init_y = screenToDataY(e.getY())-((Satellite)selected_obj).orbit.boss.absoluteInitY();
 				((Satellite)selected_obj).orbit.calculateOrbit();
 				drawSystem();
 			}
@@ -460,14 +475,14 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			switch(wait_to_add)
 			{
 				case ADD_STAR:
-					if(locationStarSuitable(e.getX(), e.getY()))
-						painter.paintGhostObj(system, selected_obj, e.getX(), e.getY(), DEFAULT_STAR_SIZE, center_x, center_y, scale);
+					if(locationStarSuitable(screenToDataX(e.getX()), screenToDataY(e.getY())))
+						painter.paintGhostObj(system, selected_obj, screenToDataX(e.getX()), screenToDataY(e.getY()), DEFAULT_STAR_SIZE, center_x, center_y, scale);
 					else
 						drawSystem();
 					break;
 				case ADD_FOCUS:
-					((Satellite)selected_obj).orbit.focus2_x = e.getX()-painter.getWidth()/2;
-					((Satellite)selected_obj).orbit.focus2_y = e.getY()-painter.getHeight()/2;
+					((Satellite)selected_obj).orbit.focus2_x = screenToDataX(e.getX())-((Satellite)selected_obj).orbit.boss.absoluteInitX();
+					((Satellite)selected_obj).orbit.focus2_y = screenToDataY(e.getY())-((Satellite)selected_obj).orbit.boss.absoluteInitY();
 					((Satellite)selected_obj).orbit.calculateOrbit();
 					drawSystem();
 					break;

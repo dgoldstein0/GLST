@@ -96,7 +96,7 @@ public class SystemPainter extends JPanel
 		if(ghost_obj==GHOST_OBJ)
 		{
 			g.setColor(Color.GRAY);
-			g.drawOval(ghost_x-ghost_size/2, ghost_y-ghost_size/2, ghost_size, ghost_size);
+			g.drawOval(drawX(ghost_x-ghost_size/2), drawY(ghost_y-ghost_size/2), (int)(ghost_size*scale), (int)(ghost_size*scale));
 		}
 		
 		
