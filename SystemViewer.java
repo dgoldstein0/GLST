@@ -21,6 +21,13 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	final static int ADD_MOON=4;
 	final static int ADD_FOCUS=5;
 	final static int RECENTER=6;
+		
+	int move_center_x_speed = 0; //left is negqtive, right is positive
+	int move_center_y_speed = 0; //up is negative, down is positive
+	int EDGE_BOUND=40;
+	
+	int SYS_WIDTH=1200;
+	int SYS_HEIGHT=1000;
 	
 	int wait_to_add = ADD_NOTHING;
 	boolean drag_start;	
@@ -207,6 +214,15 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				}
 			}
 		}
+		
+		center_x += move_center_x_speed;
+		center_y +=move_center_y_speed;
+		
+		if(screenToDataX(0)<(painter.getWidth()-SYS_WIDTH)/2 || screenToDataX(painter.getWidth())>(painter.getWidth()+SYS_WIDTH)/2)
+			center_x -= move_center_x_speed;
+		
+		if(screenToDataY(0)<(painter.getHeight()-SYS_HEIGHT)/2 || screenToDataY(painter.getHeight())>(painter.getHeight()+SYS_HEIGHT)/2)
+			center_y -= move_center_y_speed;
 		
 		drawSystem();
 	}
@@ -433,7 +449,11 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	public void mouseClicked(MouseEvent e){}
 	public void mouseEntered(MouseEvent e){}
-	public void mouseExited(MouseEvent e){}
+	public void mouseExited(MouseEvent e)
+	{
+		move_center_x_speed=0;
+		move_center_y_speed=0;
+	}
 	//end mouselistener code
 	
 	//mouse motion listener code
@@ -456,7 +476,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 					drawSystem();
 				}
 			}
-			else if(selected_obj instanceof Planet)
+			else if(selected_obj instanceof Satellite) //picks up planets, moons and asteroids here
 			{
 				((Satellite)selected_obj).orbit.cur_x = screenToDataX(e.getX())-((Satellite)selected_obj).orbit.boss.absoluteCurX();
 				((Satellite)selected_obj).orbit.cur_y = screenToDataY(e.getY())-((Satellite)selected_obj).orbit.boss.absoluteCurY();
@@ -487,6 +507,23 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 					drawSystem();
 					break;
 			}
+		}
+		else
+		{
+			//push edges of screen?
+			if(EDGE_BOUND<e.getX() && e.getX()<painter.getWidth()-EDGE_BOUND)
+				move_center_x_speed=0;
+			else if(e.getX()>painter.getWidth()-EDGE_BOUND && e.getX()<=painter.getWidth())
+				move_center_x_speed=e.getX()-painter.getWidth()+EDGE_BOUND;
+			else if(e.getX()< EDGE_BOUND && e.getX() >=0)
+				move_center_x_speed=e.getX()-EDGE_BOUND;
+
+			if(EDGE_BOUND<e.getY() && e.getY()<painter.getHeight()-EDGE_BOUND)
+				move_center_y_speed=0;
+			else if(e.getY()>painter.getHeight()-EDGE_BOUND && e.getY()<=painter.getHeight())
+				move_center_y_speed=e.getY()-painter.getHeight()+EDGE_BOUND;
+			else if(e.getY()< EDGE_BOUND && e.getY() >=0)
+				move_center_y_speed=e.getY()-EDGE_BOUND;
 		}
 	}
 	//end mouse motion listener code
