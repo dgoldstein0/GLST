@@ -42,7 +42,7 @@ public class GameControl
 		{
 			if(e.scheduled_time >= time_elapsed)
 			{
-				e.execute();
+				e.run();
 				events_pending.remove(e);
 			}
 		}

@@ -457,6 +457,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		saveas_item.setEnabled(true);
 		
 		//enable viewing options
+		t_nav.setEnabled(true);
 		t_disp_navs.setEnabled(true);
 		t_disp_unnav_sys.setEnabled(true);
 		
@@ -502,7 +503,6 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		t_delete.setEnabled(false);
 		t_distance.setEnabled(false);
 		show_dist.setEnabled(false);
-		t_nav.setEnabled(false);
 		n_slide.setEnabled(true);
 		
 		//hmm... leave this or not?
@@ -540,7 +540,6 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			show_dist.setEnabled(false);
 		else
 			show_dist.setEnabled(true);
-		t_nav.setEnabled(true);
 		n_slide.setEnabled(true);
 		
 		c_add.setEnabled(false);
@@ -963,7 +962,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private void addSystem(int x, int y)
 	{
-		GSystem new_sys = new GSystem(x,y,null,null,null,current_nav_level);
+		GSystem new_sys = new GSystem(x,y,null,null,null,Integer.parseInt(t_nav.getValue().toString()));
 		if(!(map.systems instanceof HashSet))
 			map.systems = new HashSet<GSystem>();
 		map.systems.add(new_sys);
@@ -1017,6 +1016,12 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				noSystemSelected();
 			}
 			
+			if(nav_display==NAV_DISP_NONE)
+			{
+				nav_display=NAV_DISP_SELECTED;
+				t_disp_navs.setSelectedIndex(NAV_DISP_SELECTED);
+			}
+			
 			drawGalaxy();
 		}
 	}
@@ -1033,7 +1038,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		else if(e.getSource()==n_slide)
 		{
 			current_nav_level=(int)((JSlider)e.getSource()).getValue();
-			if(selected_systems instanceof HashSet && !display_unnavigable)
+			/*if(selected_systems instanceof HashSet && !display_unnavigable)
 			{
 				//scan navigabilities and create a list of still-navigable systems selected.
 				// do not remove directly to avoid Concurrent Modification exception
@@ -1052,18 +1057,28 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 					selected_systems=null;
 					noSystemSelected();
 				}
-			}
+			}*/
+			
 			drawGalaxy();
 		}
 		else if(e.getSource()==t_nav)
 		{
 			int set_nav_to = Integer.valueOf(((JSpinner)e.getSource()).getValue().toString());
-			for(GSystem sys : selected_systems)
-				sys.navigability = set_nav_to;
-			if(set_nav_to < current_nav_level && !display_unnavigable)
+			if(selected_systems instanceof HashSet)
+			{
+				for(GSystem sys : selected_systems)
+					sys.navigability = set_nav_to;
+			}
+			else if(set_nav_to < current_nav_level && !display_unnavigable)
 			{
 				selected_systems=null;
 				noSystemSelected();
+			}
+			
+			if(nav_display==NAV_DISP_NONE)
+			{
+				nav_display=NAV_DISP_SELECTED;
+				t_disp_navs.setSelectedIndex(NAV_DISP_SELECTED);
 			}
 			drawGalaxy();
 		}
@@ -1132,11 +1147,11 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		String nav_text="<html><body style='padding:2px 2px 2px 4px' width=\"400\" height=\""+the_height+"\"><p>"
 			+ "Navigability is the ease with which a system can be reached.  Navigability is represented by an integer from"
 			+ " 1 to 10.  Systems with a navigability of 10 are extremely easy to reach, while systems with lower navigabilities"
-			+ " will require better navigation data for a player to reach.  The Navigability slider on the toolbar changes the lowest"
+			+ " will require better astronomical data for a player to reach.  The Navigability slider on the toolbar changes the lowest"
 			+ " navigability shown on the galactic map.  For instance, if the slider is set at 5, you can see any system with a"
 			+ " navigability of 5 or greater.  Effectively, sliding the slider to 1 at the far left will display all systems."
 			+ "</p><br /><p>"
-			+ "When adding systems, keep in mind that the slider controls the navigability they are automatically given.  You "
+			+ "When adding systems, the \"set navigability\" box sets the navigability they are automatically given.  You "
 			+ "can use the \"set navigability\" feature to change the navigability of any individual system."
 			+ "</p></body></html>";
 		JLabel nav_desc=new JLabel(nav_text);

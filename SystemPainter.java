@@ -178,7 +178,15 @@ public class SystemPainter extends JPanel
 		double c = ((Satellite)obj).orbit.c*scale;
 		double b = ((Satellite)obj).orbit.b*scale;
 		
-		double theta = Math.atan(((double)(focus2_y-focus1_y))/(focus2_x-focus1_x));
+		double theta;
+		if(focus2_x != focus1_x)
+			theta = Math.atan(((double)(focus2_y-focus1_y))/(focus2_x-focus1_x));
+		else if(focus2_y>focus1_y)
+			theta=Math.PI/2;
+		else if(focus2_y < focus1_y)
+			theta=-Math.PI/2;
+		else
+			theta=0;
 		
 		Graphics2D g2=(Graphics2D)g;
 		g2.rotate(theta);
