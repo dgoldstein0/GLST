@@ -10,7 +10,7 @@ public class SimpleSocketServer {
     ServerSocket serverSocket;
     int portNumber = 1777;
     Socket socket;    
-    String str="11";
+   // String str="1afdgfshbsafeqwtfwrgwahfdhdfwegwrhwhfbfeagWTWGAHFDHAHRWHEAHBGDNBWAHWHWHHBFDSGSWQETQSFGSGFDHHFHWAGRGWAGFSAGRWGRGFGDSGR1";
     
     serverSocket = new ServerSocket(portNumber);
 
@@ -19,16 +19,21 @@ public class SimpleSocketServer {
     socket = serverSocket.accept();
 
     
-    XMLDecoder decoder = new XMLDecoder(socket.getInputStream());
-     str =(String) decoder.readObject();
-     System.out.println(str);
+     XMLDecoder decoder = new XMLDecoder(socket.getInputStream());
+     Galaxy str =(Galaxy) decoder.readObject();
+     System.out.println("error");
+   //  System.out.println(str);     
+     decoder.close();
+     socket.close();
+     //str="1afdgfshbsafeqwtfwrgwahfdhdfwegwrhwhfbfeagWTWGAHFDHAHRWHEAHBGDNBWAHWHWHHBFDSGSWQETQSFGSGFDHHFHWAGRGWAGFSAGRWGRGFGDSGR1";
+     socket = serverSocket.accept();
+     
+     XMLEncoder encoder=new XMLEncoder(socket.getOutputStream());
+     encoder.writeObject(str);
     
     //XMLEncoder encoder = new XMLEncoder(socket.getOutputStream());
-   // encoder.writeObject(str);
-  
-        
-    decoder.close();
-
+   // encoder.writeObject(str);  
+    encoder.close();  
     socket.close();
 
   }
