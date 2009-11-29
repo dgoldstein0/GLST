@@ -567,10 +567,16 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			
 				try
 				{
-					XMLEncoder e = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(cur_file)));
+					BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(cur_file));
+					XMLEncoder2 e = new XMLEncoder2(os);
 	
 					e.writeObject(map);
-					e.close();
+					e.finish();
+					try
+					{
+						os.close();
+					}
+					catch(IOException ioe){}
 				}
 				catch(FileNotFoundException f)
 				{
