@@ -22,17 +22,15 @@ public class SimpleSocketServer {
 	
 	BufferedReader reader = new BufferedReader(new InputStreamReader(IS));
 
-	String line=reader.readLine();
+	String line="";
 	StringBuffer str = new StringBuffer("");
-	Boolean kill=false;
-	while(line != null && !kill)
+	boolean keeptry=true;
+	while(reader.ready() || keeptry)
 	{
-		str.append(line);
+		line = reader.readLine();
 		System.out.println(line);
-		if(line.indexOf("</java>") == -1)
-			line = reader.readLine();
-		else
-			kill=true;
+		str.append(line);
+		keeptry=false;
 	}
 	
 	//for(int i=0; i<50; i++)
