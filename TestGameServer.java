@@ -19,6 +19,13 @@ public class TestGameServer
 			GC.loadMap(cur_file);
 			GC.sendMap();
 		}
-		catch(FileNotFoundException fnfe){}
+		catch(FileNotFoundException fnfe)
+		{
+			System.out.println("File not found.  Ending Connection...");
+			GC.endConnection();
+			return;
+		}
+		
+		GC.startGame();
 	}
 }

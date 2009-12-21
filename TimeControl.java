@@ -7,22 +7,28 @@ public class TimeControl
 	Timer timer;
 	TimerTask task;
 	
-	public TimeControl()
+	public TimeControl(int offset)
 	{
-		resetTime();
+		resetTime(offset);
 		timer=new java.util.Timer(true);
 	}
 	
-	public void resetTime()
+	public void resetTime(int offset)
 	{
-		start_time=System.nanoTime();
-		time_elapsed=0;
+		start_time=System.nanoTime()-offset;
+		time_elapsed=offset;
 	}
 	
 	public long getTime()
 	{
 		time_elapsed=System.nanoTime()-start_time;
 		return time_elapsed/1000000; //convert to milliseconds - don't need to keep the decimal so no cast to doubles
+	}
+	
+	public long getNanoTime()
+	{
+		time_elapsed=System.nanoTime()-start_time;
+		return time_elapsed;
 	}
 	
 	public void startConstIntervalTask(TimerTask t, int repeatrate)

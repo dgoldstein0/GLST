@@ -38,8 +38,9 @@ public class GameControl
 	
 	public void startGame()
 	{
+		System.out.println("starting game...");
 		//stop the server socket.  Once the game is started, more players cannot join.
-		try{serverThread.join();}
+		/*try{serverThread.join();}
 		catch(InterruptedException IE)
 		{
 			System.out.println("what the heck? The main thread has been interrupted");
@@ -51,11 +52,111 @@ public class GameControl
 			if(the_server_socket instanceof ServerSocket)
 				the_server_socket.close();
 		}
-		catch(IOException e){}
+		catch(IOException e){}*/
 
+		try
+		{
+			PrintWriter writer = new PrintWriter(OS, true);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(IS));
+			
+			if(hosting)
+			{
+				System.out.println("host start sequence begin");
+				
+				//estimate time delay
+				
+				//ping
+				boolean pong=false;
+				while(!pong)
+				{
+					writer.println("ping");
+					TC= new TimeControl(0);
+					System.out.println("ping");
+					//pong
+					if(reader.ready())
+					{
+						reader.readLine();
+						pong=true;
+						System.out.println("that was a pong!");
+					}
+					try
+					{
+						Thread t = new Thread();
+						t.start();
+						t.sleep(500);
+						t.join();
+					}
+					catch(InterruptedException ie){}
+				}
+					
+				int offset_estimate = (int)TC.getNanoTime()/2;
+				System.out.println("Offset estimated: "+Integer.toString(offset_estimate));
+				
+				//send offset_estimate
+				writer.println(Integer.toString(offset_estimate));
+				System.out.println("estimate sent");
+				
+				//Start time
+				TC=new TimeControl(0);
+				System.out.println("time started!");
+				
+				//send start signal
+				
+				writer.println("Start");
+				System.out.println("Start signal sent!");
+			}
+			else
+			{
+				System.out.println("Client start sequence initiated.");
+
+				//return message for offset estimate
+				System.out.println("waiting for ping");
+				reader.readLine();
+				System.out.println("pong time");
+				writer.println("pong");
+				System.out.println("pong!");
+				
+				//recieve offset_estimate
+				String received;
+				do 
+				{
+					received=reader.readLine();
+					System.out.println(received);
+				}
+				while(received.equals("ping"));
+				
+				int offset = Integer.parseInt(received);
+				System.out.println("offset recieved");
+				
+				//start time when start signal is recieved
+				reader.readLine();
+				TC = new TimeControl(offset);
+			}
+		}
+		catch(IOException ioe)
+		{
+			System.out.println("Start Game failed.  Ending Connection...");
+			endConnection();
+			return;
+		}
+		
+		//start event reading
 		readThread = new Thread(new EventReader());
-		//Start time
-		TC = new TimeControl();
+		readThread.start();
+		
+		//set game to update itself
+		TC.startConstIntervalTask(new Updater(),5);
+	}
+	
+	private class Updater extends TimerTask
+	{
+		private Updater(){}
+		
+		public void run()
+		{
+			//updateGame();
+			System.out.println("update!!" + Long.toString(TC.getTime()));
+		}
 	}
 	
 	public void updateGame()
@@ -101,6 +202,7 @@ public class GameControl
 	
 	public void host() //creates new thread to host the game on
 	{
+		hosting=true;
 		serverThread = new Thread(new HostRunnable());
 		serverThread.start();
 	}
@@ -161,6 +263,8 @@ public class GameControl
 	
 	public void joinAsClient() //throws UnknownHostException
 	{
+		System.out.println("joinAsClient started");
+		
 		try
 		{
 			if(the_socket instanceof Socket)
@@ -168,19 +272,24 @@ public class GameControl
 		}
 		catch(IOException e){}
 		
-		/*String ip_in_string;                                            
-		ip_in_string=JOptionPane.showInputDialog("Enter the IP address of the host:");
+		//String ip_in_string;                                            
+		String ip_in_string=JOptionPane.showInputDialog("Enter the IP address of the host:");
 		byte[] ip_in_byte=new byte[4];
-		String[] ip=ip_in_string.split(".");              
+		String[] ip=ip_in_string.split("\\.");              
 		for (int i=0; i<=3; i++)
-			ip_in_byte[i]=(byte) Integer.parseInt(ip[i]);      */
-
+		{
+			//System.out.println(ip[i]);
+			ip_in_byte[i]=(byte) Integer.parseInt(ip[i]);
+		}
+		System.out.println("IP address read");
         
 		try {	
-			//InetAddress ipaddress=InetAddress.getByAddress(ip_in_byte);
-			InetAddress ipaddress=InetAddress.getLocalHost();
-			the_socket = new Socket(ipaddress, DEFAULT_PORT_NUMBER);   
+			InetAddress ipaddress=InetAddress.getByAddress(ip_in_byte);
+			//InetAddress ipaddress=InetAddress.getLocalHost();
+			the_socket = new Socket(ipaddress, DEFAULT_PORT_NUMBER);
 			setUpIOStreams();
+			hosting=false;
+			System.out.println("Connection Established");
 		} catch (UnknownHostException e) {
 			System.err.println("Unknown host");
 		} catch (IOException e) {
@@ -201,7 +310,7 @@ public class GameControl
 		encoder.finish();
 	}
 	
-	public void downloadAndLoadMap(boolean SAVE) throws IOException
+	public void downloadAndLoadMap(boolean SAVE) throws IOException //for the client
 	{
 		BufferedReader reader = new BufferedReader(new InputStreamReader(IS));
 
@@ -230,14 +339,14 @@ public class GameControl
 		}
 	}
 	
-	public void loadMap(File f) throws FileNotFoundException
+	public void loadMap(File f) throws FileNotFoundException //for the server
 	{
 		XMLDecoder d=new XMLDecoder(new BufferedInputStream(new FileInputStream(f)));
 		map = (Galaxy)d.readObject();
 		d.close();
 	}
 	
-	public void sendMap()
+	public void sendMap() //for the server
 	{
 		XMLEncoder2 e = new XMLEncoder2(OS);
 		e.writeObject(map);
@@ -255,6 +364,7 @@ public class GameControl
 			{
 				while(!Thread.interrupted())
 				{
+					System.out.println("reading object...");
 					String line="";
 					StringBuffer str = new StringBuffer("");
 					Boolean kill=false;
