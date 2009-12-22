@@ -67,15 +67,19 @@ public class GameControl
 				
 				//ping
 				boolean pong=false;
-				while(!pong)
+				long[] pingtimes = new long[100];
+				long pongtime=0;
+				String pongmsg="";
+				for(int i=0; !pong && i<100; i++)
 				{
-					writer.println("ping");
-					TC= new TimeControl(0);
-					System.out.println("ping");
+					writer.println("ping" + Integer.toString(i));
+					pingtimes[i] = System.nanoTime();
+					System.out.println("ping" + Integer.toString(i));
 					//pong
 					if(reader.ready())
 					{
-						reader.readLine();
+						pongmsg = reader.readLine();
+						pongtime=System.nanoTime();
 						pong=true;
 						System.out.println("that was a pong!");
 					}
@@ -83,13 +87,22 @@ public class GameControl
 					{
 						Thread t = new Thread();
 						t.start();
-						t.sleep(500);
+						t.sleep(10);
 						t.join();
 					}
 					catch(InterruptedException ie){}
 				}
-					
-				int offset_estimate = (int)TC.getNanoTime()/2;
+				
+				if(!pong) //if pongtime is 0 or (and) pongmsg empty - i.e. no pong recieved - then the function will die here, and not try to process a nonexistent pong
+				{
+					System.out.println("Connection Lost.  Closing connection.");
+					endConnection();
+					return;
+				}
+				
+				//figure out which ping was returned, and compute estimate
+				
+				int offset_estimate = (int)((pongtime-pingtimes[Integer.parseInt(pongmsg)])/2);
 				System.out.println("Offset estimated: "+Integer.toString(offset_estimate));
 				
 				//send offset_estimate
@@ -111,19 +124,19 @@ public class GameControl
 
 				//return message for offset estimate
 				System.out.println("waiting for ping");
-				reader.readLine();
+				String pingmsg= reader.readLine();
 				System.out.println("pong time");
-				writer.println("pong");
+				writer.println(pingmsg.substring(4));
 				System.out.println("pong!");
 				
 				//recieve offset_estimate
 				String received;
-				do 
+				do
 				{
 					received=reader.readLine();
 					System.out.println(received);
 				}
-				while(received.equals("ping"));
+				while(received.indexOf("ping") != -1);
 				
 				int offset = Integer.parseInt(received);
 				System.out.println("offset recieved");
@@ -384,7 +397,12 @@ public class GameControl
 					pending_execution.add(e);
 				}
 			}
-			catch(IOException ioe){System.err.println("Connection lost.");}//terminate.  exception due to either readLine or due to unsupported encoding (UTF-8)
+			catch(IOException ioe)
+			{
+				System.err.println("Connection lost.");
+				endConnection();
+				return;
+			}//terminate.  exception due to either readLine or due to unsupported encoding (UTF-8)
 		}
 	}
 	
