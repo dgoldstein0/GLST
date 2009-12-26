@@ -4,8 +4,6 @@ import java.awt.*;
 
 public class Player
 {
-	static long DEFAULT_MONEY=100;
-	
 	String name;
 	long money;
 	long metal;
@@ -19,7 +17,7 @@ public class Player
 		}
 		while(!(the_player.name instanceof String) || the_player.name.equals(""));
 		
-		the_player.money=DEFAULT_MONEY;
+		the_player.money=GalacticStrategyConstants.DEFAULT_MONEY;
 		return the_player;
 	}
 	

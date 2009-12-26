@@ -4,14 +4,13 @@ import java.util.*;
 public class Shipyard extends Facility{
 
 	ArrayList<Ship> manufac_queue;      //manufacture queue
-	final int queue_capa=10;						//the capacity of the queue
 	int assemble_x;      				//x coord of assemble point
 	int assemble_y;						//y coord
 	int default_x;						//default coords to create the new ship, then move to assemble point
 	int default_y;
 	
 	public Shipyard() {		
-		manufac_queue=new ArrayList<Ship>(queue_capa);
+		manufac_queue=new ArrayList<Ship>(GalacticStrategyConstants.queue_capa);
 	}	
 	
 	public void addToQueue(Ship ship)

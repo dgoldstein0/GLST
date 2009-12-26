@@ -1,8 +1,5 @@
 public class Ship
 {
-	static int JUNK=0;
-	static ShipType[] sTypes={new ShipType("Junk",20,100,10,200)};
-	
 	Player owner;
 	
 	int type;
@@ -25,11 +22,11 @@ public class Ship
 		name = nm;
 		this.type = type;
 		owner=ow;
-		energy = sTypes[type].max_energy;
-		max_energy = sTypes[type].max_energy;
-		hull_strength = sTypes[type].hull;
-		cost=sTypes[type].cost;
-		soldier=sTypes[type].soldier_capacity;						//assume ships are fully loaded when built
+		energy = GalacticStrategyConstants.sTypes[type].max_energy;
+		max_energy = GalacticStrategyConstants.sTypes[type].max_energy;
+		hull_strength = GalacticStrategyConstants.sTypes[type].hull;
+		cost=GalacticStrategyConstants.sTypes[type].cost;
+		soldier=GalacticStrategyConstants.sTypes[type].soldier_capacity;						//assume ships are fully loaded when built
 		damage=0;
 	}
 	

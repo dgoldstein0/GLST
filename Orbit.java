@@ -1,8 +1,13 @@
-`import java.util.*;
+import java.util.*;
 
 public class Orbit
 {
-	static double PERIOD_CONSTANT=1000; //equiv to 2pi/sqrt(G), where G is the gravity constant
+	static double PERIOD_CONSTANT=GalacticStrategyConstants.PERIOD_CONSTANT;
+
+	static int CLOCKWISE = 1;
+	static int COUNTERCLOCKWISE=-1;
+
+	//equiv to 2pi/sqrt(G), where G is the gravity constant
 	int init_x;
 	int init_y;
 	
@@ -13,7 +18,7 @@ public class Orbit
 	int cur_y;
 	double period;
 	double time_offset;
-	int direction; //1=clockwise, -1=counterclockwise
+	int direction; //1=clockwise, -1=counterclockwise - use constants CLOCKWISE and COUNTERCLOCKWISE
 	
 	double a;
 	double b;

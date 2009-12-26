@@ -63,7 +63,7 @@ public class SystemPainter extends JPanel
 				for(Star st : system.stars)
 				{
 					//drawStar
-					Image star_img = Toolkit.getDefaultToolkit().getImage(Star.color_choice[st.color]);
+					Image star_img = Toolkit.getDefaultToolkit().getImage(GalacticStrategyConstants.color_choice[st.color]);
 					g.drawImage(star_img, drawX(st.x-(st.size/2)), drawY(st.y-(st.size/2)), (int)(st.size*scale), (int)(st.size*scale), this);
 				}
 			}

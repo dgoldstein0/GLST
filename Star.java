@@ -1,15 +1,5 @@
 public class Star extends StellarObject
 {
-	final static int COLOR_NULL=0;
-	final static int COLOR_RED=1;
-	final static int COLOR_ORANGE=2;
-	final static int COLOR_YELLOW=3;
-	final static int COLOR_WHITE=4;
-	final static int COLOR_BLUE=5;
-	
-	//stores image URLs
-	final static String[] color_choice={"images/null.png","images/red.png","images/orange.png","images/yellow.png","images/white.png","images/blue.png"};
-	
 	String name;
 	int color;
 	

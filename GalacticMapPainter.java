@@ -29,8 +29,8 @@ public class GalacticMapPainter extends JPanel
 		setPreferredSize(new Dimension(800,600));
 		setMaximumSize(new Dimension(800,600));
 		drag_options=GDFrame.DRAG_NONE;
-		max_dist_shown=100;
-		nav_level=10;
+		max_dist_shown=GalacticStrategyConstants.DEFAULT_MAX_DIST_SHOWN;
+		nav_level=GalacticStrategyConstants.DEFAULT_NAV_LEVEL;
 	}
 	
 	public void paintComponent(Graphics g)

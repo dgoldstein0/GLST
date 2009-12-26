@@ -8,7 +8,7 @@ import java.io.*;
 
 public class GameControl
 {
-	static final int DEFAULT_PORT_NUMBER = 7007;
+	static final int DEFAULT_PORT_NUMBER = GalacticStrategyConstants.DEFAULT_PORT_NUMBER;
 	
 	TimeControl TC;
 	Player player;

@@ -1,11 +1,6 @@
 
 public class Base extends Facility{
 	
-	static int initial_soldier=1000;
-	static int initial_endu=100;
-	static int solider_upgraderate=1000;
-	static int endu_upgraderate=100;
-		
 	int soldier;
 	int damage;
 	int endurance;	
@@ -13,14 +8,14 @@ public class Base extends Facility{
 	public Base()
 	{
 		damage=0;
-		soldier=initial_soldier;
-		endurance=initial_endu;
+		soldier=GalacticStrategyConstants.initial_soldier;
+		endurance=GalacticStrategyConstants.initial_endu;
 	}
 	
 	public void upgrade()
 	{
-		soldier+=solider_upgraderate;
-		endurance+=endu_upgraderate;
+		soldier+= GalacticStrategyConstants.solider_upgraderate;
+		endurance+= GalacticStrategyConstants.endu_upgraderate;
 	}
 	
 	public void taken(Player enemy)

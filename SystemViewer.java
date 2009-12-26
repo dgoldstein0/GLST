@@ -6,13 +6,13 @@ import java.util.*;
 
 public class SystemViewer extends JDialog implements ActionListener, MouseListener, MouseMotionListener, MouseWheelListener
 {
-	static int DEFAULT_STAR_SIZE=25;
-	static int DEFAULT_STAR_ZONE_SIZE=50;
-	static int DEFAULT_PLANET_SIZE = 10;
-	static int DEFAULT_MOON_SIZE = 6;
-	static double DEFAULT_PLANET_MASS = 10;
-	static double DEFAULT_STAR_MASS = 10000;
-	static double DEFAULT_MOON_MASS= 1;
+	static int DEFAULT_STAR_SIZE=GalacticStrategyConstants.DEFAULT_STAR_SIZE;
+	static int DEFAULT_STAR_ZONE_SIZE=GalacticStrategyConstants.DEFAULT_STAR_ZONE_SIZE;
+	static int DEFAULT_PLANET_SIZE = GalacticStrategyConstants.DEFAULT_PLANET_SIZE;
+	static int DEFAULT_MOON_SIZE = GalacticStrategyConstants.DEFAULT_MOON_SIZE;
+	static double DEFAULT_PLANET_MASS = GalacticStrategyConstants.DEFAULT_PLANET_MASS;
+	static double DEFAULT_STAR_MASS = GalacticStrategyConstants.DEFAULT_STAR_MASS;
+	static double DEFAULT_MOON_MASS= GalacticStrategyConstants.DEFAULT_MOON_MASS;
 	
 	final static int ADD_NOTHING=0;
 	final static int ADD_STAR=1;
@@ -21,13 +21,14 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	final static int ADD_MOON=4;
 	final static int ADD_FOCUS=5;
 	final static int RECENTER=6;
-		
+	
+	static int EDGE_BOUND=GalacticStrategyConstants.EDGE_BOUND; //this is the distance from the edge of the system, in pixels, at which the system will start to be scrolled
+	static int SYS_WIDTH=GalacticStrategyConstants.SYS_WIDTH; //the allowed width of a system
+	static int SYS_HEIGHT=GalacticStrategyConstants.SYS_HEIGHT; //the allowed height of a system
+	
+	//sets parameters for scrolling the system view around
 	int move_center_x_speed = 0; //left is negqtive, right is positive
 	int move_center_y_speed = 0; //up is negative, down is positive
-	int EDGE_BOUND=40;
-	
-	int SYS_WIDTH=1200;
-	int SYS_HEIGHT=1000;
 	
 	int wait_to_add = ADD_NOTHING;
 	boolean drag_start;	
@@ -37,6 +38,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	StellarObject selected_obj;
 	JFrame frame;
 	
+	//toolbar elements here
 	JButton t_toggle;
 	JButton t_add;
 	JButton t_delete;
@@ -45,10 +47,25 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	JButton t_time;
 	JButton t_reset_time;
 	
+	//elements used for the popup menu
+	JPopupMenu context_menu;
+	JMenuItem c_add;
+	JMenuItem c_delete;
+	JMenuItem c_edit;
+	JMenuItem c_recenter;
+	JMenuItem c_time;
+	JMenuItem c_reset_time;
+	
+	//these integers save the position the mouse click that opens the context menu
+	int c_x;
+	int c_y;
+	
+	//objects used to track time flow for time simulation
 	TimeControl TC;
 	java.util.Timer timer;
 	UpdateTask task;
 	
+	//sets up the viewpoint for the system
 	int center_x;
 	int center_y;
 	double scale=1.0d;
@@ -67,6 +84,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		painter.addMouseWheelListener(this);
 		add(painter, BorderLayout.CENTER);
 		
+		//Toolbar code start
 		JToolBar toolbar=new JToolBar("System Toolbar");
 		
 		t_toggle = new JButton("Toggle View");
@@ -108,6 +126,34 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		toolbar.add(t_reset_time);
 		
 		add(toolbar, BorderLayout.NORTH);
+		
+		//start context menu code////////////////////
+		context_menu = new JPopupMenu();
+		
+		c_add = new JMenuItem("Add");
+		c_add.addActionListener(this);
+		context_menu.add(c_add);
+		
+		c_edit = new JMenuItem("Edit");
+		c_edit.addActionListener(this);
+		context_menu.add(c_edit);
+		
+		c_delete=new JMenuItem("Delete");
+		c_delete.addActionListener(this);
+		context_menu.add(c_delete);
+		
+		c_recenter = new JMenuItem("Recenter");
+		c_recenter.addActionListener(this);
+		context_menu.add(c_recenter);
+		
+		c_time=new JMenuItem("Start Time");
+		c_time.addActionListener(this);
+		context_menu.add(c_time);
+		
+		c_reset_time=new JMenuItem("Reset Time");
+		c_reset_time.addActionListener(this);
+		context_menu.add(c_reset_time);
+		//end context menu code///////////////////
 		
 		pack();
 		setSize(800,650);
@@ -157,24 +203,62 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				wait_to_add=ADD_MOON;
 			t_recenter.setEnabled(false);
 		}
-		else if(e.getSource()==t_delete)
+		else if(e.getSource() == c_add) //here, the placement of the system has already been determined by a mouse click, and stored in c_x and c_y
+		{
+			String obj_to_add;
+			if(system.stars instanceof HashSet)
+			{
+				if(!(selected_obj instanceof Planet))
+				{
+					String[] add_options={"Planet", "Star", "Asteroid"};
+					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
+				}
+				else
+				{
+					String[] add_options={"Planet", "Star", "Moon", "Asteroid"};
+					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
+				}
+			}
+			else
+				obj_to_add="Star";
+			
+			if(obj_to_add=="Star")
+			{
+				if(!addStar(screenToDataX(c_x), screenToDataY(c_y)))
+					System.out.println("Can't place star there!");
+			}
+			else if(obj_to_add=="Planet")
+				addPlanet(screenToDataX(c_x),screenToDataY(c_y));
+			//else if(obj_to_add=="Asteroid")
+			//	;//no routine yet
+			else if(obj_to_add=="Moon")
+				addMoon(screenToDataX(c_x),screenToDataY(c_y));
+			if(wait_to_add != ADD_FOCUS)
+				wait_to_add=ADD_NOTHING;
+			drawSystem();
+		}
+		else if(e.getSource()==t_delete || e.getSource() == c_delete)
 			deleteSelected();
-		else if(e.getSource()==t_edit)
+		else if(e.getSource()==t_edit || e.getSource()==c_edit)
 			editSelected();
 		else if(e.getSource()==t_recenter)
 		{
 			wait_to_add=RECENTER;
 		}
-		else if(e.getSource()==t_time)
+		else if(e.getSource() == c_recenter)
+		{
+			setCenter(screenToDataX(c_x),screenToDataY(c_y));
+		}
+		else if(e.getSource()==t_time || e.getSource()==c_time)
 		{
 			if(TC instanceof TimeControl)
-				TC.resetTime();
+				TC.resetTime(0);
 			else
-				TC = new TimeControl();
+				TC = new TimeControl(0);
 
 			TC.startConstIntervalTask(new UpdateTask(),20);
 		}
-		else if(e.getSource()==t_reset_time)
+		else if(e.getSource()==t_reset_time || e.getSource() == c_reset_time)
 		{
 			//clear timer
 			if(TC instanceof TimeControl)
@@ -194,7 +278,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	}
 	
 	private void TimeUpdater(long time)
-	{		
+	{
 		if(system.orbiting_objects instanceof HashSet)
 		{
 			for(Satellite sat : system.orbiting_objects)
@@ -317,49 +401,61 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	public void mouseReleased(MouseEvent e)
 	{
-		if(wait_to_add==ADD_NOTHING)
+		if(!e.isPopupTrigger()) //(usually) left click
 		{
-			try
+			if(wait_to_add==ADD_NOTHING)
 			{
-				locateObj(screenToDataX(e.getX()),screenToDataY(e.getY()));
-				ObjectSelected(true);
-				drawSystem();
+				try
+				{
+					locateObj(screenToDataX(e.getX()),screenToDataY(e.getY()));
+					ObjectSelected(true);
+					drawSystem();
+				}
+				catch(NoObjectLocatedException x)
+				{
+					ObjectSelected(false);
+					selected_obj=null;
+					drawSystem();
+				}
+				
+				if(e.getClickCount()==2)
+					editSelected();
 			}
-			catch(NoObjectLocatedException x)
+			else
 			{
-				ObjectSelected(false);
-				selected_obj=null;
-				drawSystem();
+				switch(wait_to_add)
+				{
+					case ADD_STAR:
+						addStar(screenToDataX(e.getX()), screenToDataY(e.getY()));
+						break;
+					case ADD_PLANET:
+						addPlanet(screenToDataX(e.getX()),screenToDataY(e.getY()));
+						break;
+					case ADD_ASTEROID:
+						break;
+					case ADD_MOON:
+						addMoon(screenToDataX(e.getX()),screenToDataY(e.getY()));
+						break;
+					case ADD_FOCUS:
+						wait_to_add=ADD_NOTHING;
+						break;
+					case RECENTER:
+						setCenter(screenToDataX(e.getX()),screenToDataY(e.getY()));
+						break;
+				}
+				if(wait_to_add != ADD_FOCUS)
+				{
+					wait_to_add=ADD_NOTHING;
+					t_recenter.setEnabled(true);
+				}
+				ObjectSelected(true);
 			}
 		}
-		else
+		else //popup trigger = (usually) right click
 		{
-			switch(wait_to_add)
-			{
-				case ADD_STAR:
-					addStar(screenToDataX(e.getX()), screenToDataY(e.getY()));
-					break;
-				case ADD_PLANET:
-					addPlanet(screenToDataX(e.getX()),screenToDataY(e.getY()));
-					break;
-				case ADD_ASTEROID:
-					break;
-				case ADD_MOON:
-					addMoon(screenToDataX(e.getX()),screenToDataY(e.getY()));
-					break;
-				case ADD_FOCUS:
-					wait_to_add=ADD_NOTHING;
-					break;
-				case RECENTER:
-					setCenter(screenToDataX(e.getX()),screenToDataY(e.getY()));
-					break;
-			}
-			if(wait_to_add != ADD_FOCUS)
-			{
-				wait_to_add=ADD_NOTHING;
-				t_recenter.setEnabled(true);
-			}
-			ObjectSelected(true);
+			c_x=e.getX();
+			c_y=e.getY();
+			context_menu.show(e.getComponent(), c_x, c_y);
 		}
 	}
 	
@@ -380,19 +476,21 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		drawSystem();
 	}
 	
-	private void addStar(int x, int y)
+	private boolean addStar(int x, int y)
 	{
-		if(locationStarSuitable(x, y))
+		boolean success = locationStarSuitable(x, y);
+		if(success)
 		{
 			if (!(system.stars instanceof HashSet))
 				system.stars=new HashSet<Star>();
-			Star new_star = new Star("", DEFAULT_STAR_SIZE, DEFAULT_STAR_MASS, Star.COLOR_NULL, x, y);
+			Star new_star = new Star("", DEFAULT_STAR_SIZE, DEFAULT_STAR_MASS, GalacticStrategyConstants.COLOR_NULL, x, y);
 			system.stars.add(new_star);
 			
 			selected_obj=new_star;
 		}
 		
 		drawSystem();
+		return success;
 	}
 	
 	private int screenToDataX(int x)
@@ -540,7 +638,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		if(selected_obj instanceof Star)
 			system.stars.remove(selected_obj);
 		else //selected_obj is a satellite
-		{			
+		{
 			if(selected_obj instanceof Planet || selected_obj instanceof Asteroid)
 			{
 				for(Satellite orbiting : system.orbiting_objects)

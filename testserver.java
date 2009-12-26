@@ -11,9 +11,9 @@ public class testserver {
 		
 		ServerSocket serverSocket = null;
 		try {
-		    serverSocket = new ServerSocket(7007);
+		    serverSocket = new ServerSocket(7008);
 		} catch (IOException e) {
-		    System.out.println("Could not listen on port: 7");
+		    System.out.println("Could not listen on port: 7008");
 		    System.exit(-1);
 		}
 
@@ -21,7 +21,7 @@ public class testserver {
 		try {
 		    clientSocket = serverSocket.accept();
 		} catch (IOException e) {
-		    System.out.println("Accept failed: 7");
+		    System.out.println("Accept failed: 7008");
 		    System.exit(-1);
 		}
 		

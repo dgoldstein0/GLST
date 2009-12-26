@@ -38,7 +38,7 @@ public class SimpleSocketClient
 			InetAddress ipaddress=InetAddress.getByAddress(ip_in_byte);*/
 			InetAddress ipaddress = InetAddress.getLocalHost();
 			
-			TimeControl tc=new TimeControl();
+			TimeControl tc=new TimeControl(0);
 			
 			socket = new Socket(ipaddress, portNumber);		    
 			OutputStream OS=socket.getOutputStream();

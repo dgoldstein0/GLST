@@ -40,10 +40,11 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	JMenuItem c_distance;
 	JMenuItem c_nav;
 	
-	//saves click location which activates context menu and selecting
+	//saves click location which activates context menu, so once an option is selected it is known where the context menu came from
 	int c_x;
 	int c_y;
 	
+	//save shifts and alts for click-drag motion, which allows the selection of planets.  shift-drag adds planets to the current selection, whereas alt-drag removes them from selection
 	boolean shift_down_on_click;
 	boolean alt_down_on_click;
 	
@@ -55,7 +56,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	boolean wait_to_add_sys;//used with t_add so that the next click adds a system to the galactic map
 	
 	//variables necessary for proper drag-drop drawing
-	int drag_options; //keep distances/ranges drawn during dragging
+	int drag_options; //keep distances/ranges drawn during dragging.  Uses DRAG_NONE, DRAG_DIST, and DRAG_RANGE
 	boolean drag_end; //makes sure that systems aren't deselected after dragging them around
 	boolean drag_start; //make sure that you click on the system before you drag it (i.e, you are holding one of the systems)
 	
@@ -75,10 +76,10 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	JSpinner t_nav;
 	JSlider n_slide;
 	JComboBox t_disp_navs;
-		int nav_display=0; //0=none, 1=selected, 2=all
-		static int NAV_DISP_NONE=0;
-		static int NAV_DISP_SELECTED=1;
-		static int NAV_DISP_ALL=2;
+		int nav_display=0; //0=none, 1=selected, 2=all - use next 3 constants
+		final static int NAV_DISP_NONE=0;
+		final static int NAV_DISP_SELECTED=1;
+		final static int NAV_DISP_ALL=2;
 	JCheckBox t_disp_unnav_sys;
 		boolean display_unnavigable=false;
 	
@@ -717,7 +718,17 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		
 		//don't unselect systems after dragging
 		if(!drag_end)
-			maybeShowContextMenu(e);
+		{
+			if(!maybeShowContextMenu(e) && e.getClickCount()==2 && selected_systems instanceof HashSet) //ignore double right click, and double left click when no systems are selected
+			{
+				if(selected_systems.size()==1) //double click only opens a system when only 1 system is selected.  Happens when alt/shift not held
+				{
+					//open system
+					for(GSystem sys : selected_systems)
+						new SystemViewer(frame, sys);
+				}
+			}
+		}
 		else
 		{
 			drag_end=false;
@@ -743,11 +754,9 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		shift_down_on_click=false;
 	}
 	
-	private void maybeShowContextMenu(MouseEvent e)
+	private boolean maybeShowContextMenu(MouseEvent e)
 	{
-		if (e.isPopupTrigger())
-			context_menu.show(e.getComponent(),e.getX(), e.getY());
-		
+
 		try
 		{
 			GSystem temp_sys = locateSystem(e.getX(),e.getY());
@@ -763,6 +772,14 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			else
 				fileIsNotOpen();
 		}
+		
+		if (e.isPopupTrigger())
+		{
+			context_menu.show(e.getComponent(),e.getX(), e.getY());
+			return true;
+		}
+		else
+			return false;
 	}
 	
 	//start drag-and-move system code

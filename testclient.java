@@ -13,13 +13,13 @@
               String ip_in_string;                                            
               ip_in_string=JOptionPane.showInputDialog("Enter IP address");
               byte[] ip_in_byte=new byte[4];
-              String[] ip=ip_in_string.split(".");              
+              String[] ip=ip_in_string.split("\\.");              
               for (int i=0; i<=3; i++)
             	  ip_in_byte[i]=(byte) Integer.parseInt(ip[i]);      
               InetAddress ipaddress=InetAddress.getByAddress(ip_in_byte);
               
               try {
-                  echoSocket = new Socket(ipaddress, 7007);
+                  echoSocket = new Socket(ipaddress, 7008);
                   out = new PrintWriter(echoSocket.getOutputStream(), true);
                   in = new BufferedReader(new InputStreamReader(
                                               echoSocket.getInputStream()));
