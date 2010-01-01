@@ -68,7 +68,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	//sets up the viewpoint for the system
 	int center_x;
 	int center_y;
-	double scale=1.0d;
+	double scale=GalacticStrategyConstants.DEFAULT_SCALE;
 	
 	public SystemViewer(JFrame frame, GSystem sys)
 	{
@@ -177,21 +177,16 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		else if(e.getSource()==t_add)
 		{
 			String obj_to_add;
-			if(system.stars instanceof HashSet)
+			if(!(selected_obj instanceof Planet))
 			{
-				if(!(selected_obj instanceof Planet))
-				{
-					String[] add_options={"Planet", "Star", "Asteroid"};
-					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
-				}
-				else
-				{
-					String[] add_options={"Planet", "Star", "Moon", "Asteroid"};
-					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
-				}
+				String[] add_options={"Planet", "Star", "Asteroid"};
+				obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
 			}
 			else
-				obj_to_add="Star";
+			{
+				String[] add_options={"Planet", "Star", "Moon", "Asteroid"};
+				obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
+			}
 			
 			if(obj_to_add=="Star")
 				wait_to_add=ADD_STAR;
@@ -202,30 +197,45 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			else if(obj_to_add=="Moon")
 				wait_to_add=ADD_MOON;
 			t_recenter.setEnabled(false);
+			c_recenter.setEnabled(false);
 		}
 		else if(e.getSource() == c_add) //here, the placement of the system has already been determined by a mouse click, and stored in c_x and c_y
 		{
 			String obj_to_add;
-			if(system.stars instanceof HashSet)
+
+			//Moons and stars may only be added under certain conditions.  For moons, that condition is that the planet they will orbit is already selected.
+			//For stars, that condition is that the location is "star suitable."  The if statements take care of these conditions
+			if(!(selected_obj instanceof Planet))
 			{
-				if(!(selected_obj instanceof Planet))
+				if(locationStarSuitable(c_x,c_y))
 				{
 					String[] add_options={"Planet", "Star", "Asteroid"};
 					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
 				}
 				else
 				{
-					String[] add_options={"Planet", "Star", "Moon", "Asteroid"};
+					String[] add_options={"Planet", "Asteroid"};
 					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
 				}
 			}
 			else
-				obj_to_add="Star";
+			{
+				if(locationStarSuitable(c_x,c_y))
+				{
+					String[] add_options={"Planet", "Star", "Moon", "Asteroid"};
+					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
+				}
+				else
+				{
+					String[] add_options={"Planet", "Moon", "Asteroid"};
+					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
+				}
+			}
 			
 			if(obj_to_add=="Star")
 			{
 				if(!addStar(screenToDataX(c_x), screenToDataY(c_y)))
-					System.out.println("Can't place star there!");
+					System.out.println("Can't place star there!");//BOOKMARK - THIS SHOULD BE IMPOSSIBLE!!!!!
 			}
 			else if(obj_to_add=="Planet")
 				addPlanet(screenToDataX(c_x),screenToDataY(c_y));
@@ -315,12 +325,14 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	{
 		t_delete.setEnabled(select);
 		t_edit.setEnabled(select);
+		c_delete.setEnabled(select);
+		c_edit.setEnabled(select);
 	}
 	
 	private void locateObj(int x, int y) throws NoObjectLocatedException
 	{
 		//search for stars, then orbiting objects and their satellites
-		final double OBJ_TOL = 5/scale; //tolerance
+		final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/scale; //tolerance
 		
 		if(system.stars instanceof HashSet)
 		{
@@ -418,7 +430,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 					drawSystem();
 				}
 				
-				if(e.getClickCount()==2)
+				if(selected_obj instanceof StellarObject && e.getClickCount()==2)
 					editSelected();
 			}
 			else
@@ -447,6 +459,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				{
 					wait_to_add=ADD_NOTHING;
 					t_recenter.setEnabled(true);
+					c_recenter.setEnabled(true);
 				}
 				ObjectSelected(true);
 			}
@@ -461,11 +474,11 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
-		scale -= ((double)e.getWheelRotation())/10;
-		if(scale < 1.0d)
-			scale =1.0d;
-		else if(scale > 5.0d)
-			scale = 5.0d;
+		scale -= ((double)e.getWheelRotation())*GalacticStrategyConstants.SCROLL_SENSITIVITY;
+		if(scale < GalacticStrategyConstants.MIN_SCALE)
+			scale = GalacticStrategyConstants.MIN_SCALE;
+		else if(scale > GalacticStrategyConstants.MAX_SCALE)
+			scale = GalacticStrategyConstants.MAX_SCALE;
 		drawSystem();
 	}
 	
@@ -487,10 +500,22 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			system.stars.add(new_star);
 			
 			selected_obj=new_star;
+			recalculateOrbits();
 		}
 		
 		drawSystem();
 		return success;
+	}
+	
+	private void recalculateOrbits()
+	{
+		if(system.orbiting_objects instanceof HashSet)
+		{
+			for(Satellite sat: system.orbiting_objects)
+			{
+				sat.orbit.calculateOrbit();
+			}
+		}
 	}
 	
 	private int screenToDataX(int x)
@@ -636,7 +661,10 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	private void deleteSelected()
 	{
 		if(selected_obj instanceof Star)
+		{
 			system.stars.remove(selected_obj);
+			recalculateOrbits();
+		}
 		else //selected_obj is a satellite
 		{
 			if(selected_obj instanceof Planet || selected_obj instanceof Asteroid)
@@ -686,21 +714,25 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	private int minimumObjectSize(StellarObject obj)
 	{
 		if(obj instanceof Planet)
-			return 10;
+			return GalacticStrategyConstants.MIN_PLANET_SIZE;
 		else if(obj instanceof Star)
-			return 16;
-		else if(obj instanceof Satellite)
-			return 6;
-		return 2;
+			return GalacticStrategyConstants.MIN_STAR_SIZE;
+		else if(obj instanceof Moon)
+			return GalacticStrategyConstants.MIN_MOON_SIZE;
+		else
+			return GalacticStrategyConstants.MIN_ASTEROID_SIZE;
 	}
 	
 	private int maximumObjectSize(StellarObject obj)
 	{
 		if(obj instanceof Star)
-			return 100;
-		if(obj instanceof Planet)
-			return 75;
-		return 50;
+			return GalacticStrategyConstants.MAX_STAR_SIZE;
+		else if(obj instanceof Planet)
+			return GalacticStrategyConstants.MAX_PLANET_SIZE;
+		else if(obj instanceof Moon)
+			return GalacticStrategyConstants.MAX_MOON_SIZE;
+		else
+			return GalacticStrategyConstants.MAX_ASTEROID_SIZE;
 	}
 	
 	private class editDialog extends JDialog implements ActionListener, ChangeListener
@@ -724,8 +756,8 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			}
 			
 			JSlider resizer = new JSlider(JSlider.HORIZONTAL, minimumObjectSize(selected_obj),maximumObjectSize(selected_obj), selected_obj.size);
-			resizer.setMajorTickSpacing(25);
-			resizer.setMinorTickSpacing(5);
+			resizer.setMajorTickSpacing(GalacticStrategyConstants.MAJOR_TICKS_FOR_OBJECT_SIZE);
+			resizer.setMinorTickSpacing(GalacticStrategyConstants.MINOR_TICKS_FOR_OBJECT_SIZE);
 			resizer.setPaintTicks(true);
 			resizer.addChangeListener(this);
 			master.add(resizer);

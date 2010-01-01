@@ -51,7 +51,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	//when a click selects no systems, the button is saved for mouseDrag, which can draw a select box
 	int select_but;
 	
-	int current_nav_level=10;//saves the nav level from n_slide
+	int current_nav_level=GalacticStrategyConstants.DEFAULT_NAV_LEVEL;//saves the nav level from n_slide
 	
 	boolean wait_to_add_sys;//used with t_add so that the next click adds a system to the galactic map
 	
@@ -76,12 +76,12 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	JSpinner t_nav;
 	JSlider n_slide;
 	JComboBox t_disp_navs;
-		int nav_display=0; //0=none, 1=selected, 2=all - use next 3 constants
+		int nav_display=GalacticStrategyConstants.DEFAULT_NAV_OPTIONS; //0=none, 1=selected, 2=all - use next 3 constants
 		final static int NAV_DISP_NONE=0;
 		final static int NAV_DISP_SELECTED=1;
 		final static int NAV_DISP_ALL=2;
 	JCheckBox t_disp_unnav_sys;
-		boolean display_unnavigable=false;
+		boolean display_unnavigable=GalacticStrategyConstants.DEFAULT_DISPLAY_UNNAV;
 	
 	//open screen
 	JDialog open_screen_dialog;
@@ -258,10 +258,10 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		dist_panel.setMaximumSize(new Dimension((int)(dist_panel.getMinimumSize().getWidth()), (int)(dist_panel.getMinimumSize().getHeight())));
 		toolbar.add(dist_panel);
 		
-		show_dist= new JSlider(JSlider.HORIZONTAL, 0, 1000, 100);
+		show_dist= new JSlider(JSlider.HORIZONTAL, 0, GalacticStrategyConstants.MAX_DIST, GalacticStrategyConstants.DEFAULT_DIST);
 		show_dist.addChangeListener(this);
-		show_dist.setMajorTickSpacing(100);
-		show_dist.setMinorTickSpacing(25);
+		show_dist.setMajorTickSpacing(GalacticStrategyConstants.DIST_MAJOR_TICKS);
+		show_dist.setMinorTickSpacing(GalacticStrategyConstants.DIST_MINOR_TICKS);
 		show_dist.setPaintTicks(true);
 		show_dist.setBorder(BorderFactory.createTitledBorder("Distance and Range Limit"));
 		
@@ -269,9 +269,9 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		
 		toolbar.add(new JToolBar.Separator());
 		
-		n_slide=new JSlider(JSlider.HORIZONTAL, 1, 10, 10);
+		n_slide=new JSlider(JSlider.HORIZONTAL, GalacticStrategyConstants.MIN_NAV_LEVEL, GalacticStrategyConstants.MAX_NAV_LEVEL, GalacticStrategyConstants.DEFAULT_NAV_LEVEL);
 		n_slide.addChangeListener(this);
-		n_slide.setMinorTickSpacing(1);
+		n_slide.setMinorTickSpacing(GalacticStrategyConstants.NAV_LEVEL_TICK_SPACING);
 		n_slide.setPaintTicks(true);
 		n_slide.setSnapToTicks(true);
 		//n_slide.setMaximumSize(new Dimension(200,200));
@@ -281,7 +281,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		
 		JPanel nav_panel=new JPanel();
 		nav_panel.setBorder(BorderFactory.createTitledBorder("Set Nav"));
-		SpinnerModel nav_model=new SpinnerNumberModel(10,1,10,1);
+		SpinnerModel nav_model=new SpinnerNumberModel(GalacticStrategyConstants.DEFAULT_NAV_LEVEL, GalacticStrategyConstants.MIN_NAV_LEVEL, GalacticStrategyConstants.MAX_NAV_LEVEL, GalacticStrategyConstants.NAV_LEVEL_TICK_SPACING);//******************************BOOKMARK
 		t_nav=new JSpinner(nav_model);
 		t_nav.addChangeListener(this);
 		nav_panel.add(t_nav);
@@ -300,7 +300,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		
 		String[] nav_options = {"none", "selected", "all"};//do not change order without changing NAV_DISP_ constants
 		t_disp_navs = new JComboBox(nav_options);
-		t_disp_navs.setSelectedIndex(0);
+		t_disp_navs.setSelectedIndex(GalacticStrategyConstants.DEFAULT_NAV_OPTIONS);
 		t_disp_navs.setToolTipText("Display navigabilities next to each system");
 		t_disp_navs.addActionListener(this);
 		nav_ops_panel.add(t_disp_navs);
@@ -619,7 +619,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			{
 				map=null;
 				cur_file=null;
-				panel.paintGalaxy(null,null,DRAG_NONE,10, 0, display_unnavigable);
+				panel.paintGalaxy(null,null, DRAG_NONE, GalacticStrategyConstants.DEFAULT_NAV_LEVEL, GalacticStrategyConstants.DEFAULT_NAV_OPTIONS, display_unnavigable);
 				
 				fileIsNotOpen();
 				showOpenScreenDialog();
@@ -1022,6 +1022,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private void setNavigability()
 	{
+		//EDIT HERE FOR VARIABLE MAX AND MIN **************************BOOKMARK
 		String[] choices={"10","9","8","7","6","5","4","3","2","1"};
 		String val=(String)JOptionPane.showInputDialog(frame,"Select the desired navigability level from the list.\nKeep in mind that 10 is easiest to navigate to and 1 is the hardest.", "Set Navigability", JOptionPane.QUESTION_MESSAGE, null, choices,"10");
 		if(val instanceof String)

@@ -8,7 +8,7 @@ public class GalacticStrategyConstants
 	//******************************************PHYSICS TO PROGRAM CONVERSIONS*******************************************//
 	
 	//Used in orbit
-	static double PERIOD_CONSTANT =1000; //equiv to 2pi/sqrt(G), where G is the "gravity constant" of the game.
+	static double PERIOD_CONSTANT =10000; //equiv to 2pi/sqrt(G), where G is the "gravity constant" of the game.
 	
 	//*******************************DEFAULTS USED IN Galaxy Designer********************************************************//
 	
@@ -21,15 +21,46 @@ public class GalacticStrategyConstants
 	static double DEFAULT_STAR_MASS = 10000;
 	static double DEFAULT_MOON_MASS= 1;
 	
-	//Used in GalacticMapPainter
-	static final int DEFAULT_MAX_DIST_SHOWN=100;
-	static final int DEFAULT_NAV_LEVEL = 10;
+	static final int MIN_PLANET_SIZE=10;
+	static final int MIN_STAR_SIZE=16;
+	static final int MIN_MOON_SIZE=6;
+	static final int MIN_ASTEROID_SIZE=3;
+	static final int MAX_STAR_SIZE=100;
+	static final int MAX_PLANET_SIZE=75;
+	static final int MAX_MOON_SIZE=30;
+	static final int MAX_ASTEROID_SIZE=10;
 	
+	static final int MAJOR_TICKS_FOR_OBJECT_SIZE = 25;
+	static final int MINOR_TICKS_FOR_OBJECT_SIZE = 5;
+	
+	//Used in GalacticMapPainter and GDFrame
+	//these 4 control the distance slider that marks off the ranges to show or the maximum distances that should be drawn
+	static final int MAX_DIST=1000;
+	static final int DEFAULT_DIST=100; //this is used as the default value for the slider determining the distances shown.  used for max_dist_shown in GalacticMapPainter
+	static final int DIST_MINOR_TICKS = 25;
+	static final int DIST_MAJOR_TICKS = 100;
+	
+	//These 4 values set up the Nav level slider and spinner
+	static final int MIN_NAV_LEVEL=1;
+	static final int MAX_NAV_LEVEL=10;
+	static final int DEFAULT_NAV_LEVEL = MAX_NAV_LEVEL;//always start at the max. higher nav level = easier to navigate to.  So unless specified, systems placed are by default easy to get to.
+	static final int NAV_LEVEL_TICK_SPACING=1; //navigation slider automatically snaps to ticks.  This SHOULD NOT be changed!!!!!!!  This means nav_level can only take on integer values.  And the nav spinner does the same, using this variable to control how much it can change at a time
+	
+	//These values set the defaults for the other navigability controls.
+	static final int DEFAULT_NAV_OPTIONS = 0; //0=don't show navigabilities, 1=show navigabilities for only selected systems, 2=show all navigabilities
+	static final boolean DEFAULT_DISPLAY_UNNAV = false; //false = do not display systems with nav's below the threshold, true = display them, but gray instead of white
 	//**********************INTERFACE SETTINGS******************************************************************************//
 	
 	static int EDGE_BOUND=40; //this is the distance from the edge of the system, in pixels, at which the system will start to be scrolled
 	static int SYS_WIDTH=1200; //the allowed width of a system
 	static int SYS_HEIGHT=1000; //the allowed height of a system
+	
+	static final double DEFAULT_SCALE = 1.0d; //this sets the default scale for the view of the system
+	static final double MIN_SCALE = 1.0d;
+	static final double MAX_SCALE=5.0d;
+	static final double SCROLL_SENSITIVITY=.1d; //the amount the wheel is rotated will be multiplied by this number to determine how much the scale changes.
+	
+	static final double SELECTION_TOLERANCE = 5.0d; //when the system is clicked on, the program looks for an object centered at the click site within a circle of radius of this many pixels.
 	
 	//*************************************GAMEPLAY SETTINGS****************************************************************//
 	

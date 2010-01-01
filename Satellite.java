@@ -6,11 +6,16 @@ public abstract class Satellite extends StellarObject implements Positioning
 	byte habitability;
 	long population;
 	
-	public HashSet<Double> getMassSet()
+	/*public HashSet<Double> getMassSet()
 	{
 		HashSet<Double> mass_set=new HashSet<Double>();
 		mass_set.add(mass);
 		return mass_set;
+	}*/
+	
+	public double massSum()
+	{
+		return mass;
 	}
 	
 	public Orbit getOrbit(){return orbit;}
@@ -20,8 +25,8 @@ public abstract class Satellite extends StellarObject implements Positioning
 	public long getPopulation(){return population;}
 	public void setPopulation(long pop){population=pop;}
 	
-	public int absoluteCurX(){return orbit.absoluteCurX();}
-	public int absoluteCurY(){return orbit.absoluteCurY();}
-	public int absoluteInitX(){return orbit.absoluteInitX();}
-	public int absoluteInitY(){return orbit.absoluteInitY();}
+	public double absoluteCurX(){return orbit.absoluteCurX();}
+	public double absoluteCurY(){return orbit.absoluteCurY();}
+	public double absoluteInitX(){return orbit.absoluteInitX();}
+	public double absoluteInitY(){return orbit.absoluteInitY();}
 }

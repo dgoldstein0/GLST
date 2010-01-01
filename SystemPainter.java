@@ -22,8 +22,8 @@ public class SystemPainter extends JPanel
 	int ghost_size;
 	
 	double scale=1.0d; //always greater than or equal to 1
-	int center_x;
-	int center_y;
+	double center_x;
+	double center_y;
 	
 	public SystemPainter(boolean design)
 	{
@@ -142,20 +142,22 @@ public class SystemPainter extends JPanel
 		repaint();
 	}
 	
-	public int drawX(int the_x) //the_x is pixels from upper left corner
+	//drawX and drawY convert from data coordinates to place on the screen
+	
+	public int drawX(double the_x) //the_x is pixels from upper left corner
 	{
-		return (int)((the_x-center_x)*scale)+getWidth()/2;
+		return (int)((the_x-center_x)*scale+((double)getWidth())/2.0d);
 	}
 	
-	public int drawY(int the_y)
+	public int drawY(double the_y)
 	{
-		return (int)((the_y-center_y)*scale)+getHeight()/2;
+		return (int)((the_y-center_y)*scale+((double)getHeight())/2.0d);
 	}
 	
 	private void drawOrbit(Satellite obj, Graphics g)
 	{
-		int focus1_x = ((Satellite)obj).orbit.boss.absoluteCurX();
-		int focus1_y = ((Satellite)obj).orbit.boss.absoluteCurY();
+		double focus1_x = ((Satellite)obj).orbit.boss.absoluteCurX();
+		double focus1_y = ((Satellite)obj).orbit.boss.absoluteCurY();
 		
 		int focus2_x = drawX(((Satellite)obj).orbit.focus2_x+focus1_x);
 		int focus2_y = drawY(((Satellite)obj).orbit.focus2_y+focus1_y);
@@ -170,7 +172,7 @@ public class SystemPainter extends JPanel
 		{
 			g.setColor(Color.RED);
 			g.drawOval(x,y,2,2);
-			g.drawOval(focus1_x-1,focus1_y-1, 3,3);
+			g.drawOval((int)focus1_x-1,(int)focus1_y-1, 3,3);
 			g.drawOval(focus2_x-1, focus2_y-1, 3,3);
 		}
 		
@@ -191,8 +193,8 @@ public class SystemPainter extends JPanel
 		Graphics2D g2=(Graphics2D)g;
 		g2.rotate(theta);
 		
-		int center_x=(focus1_x+focus2_x)/2;
-		int center_y=(focus1_y+focus2_y)/2;
+		double center_x=(focus1_x+focus2_x)/2;
+		double center_y=(focus1_y+focus2_y)/2;
 		
 		int start_x=(int)(center_x*Math.cos(theta)+center_y*Math.sin(theta)-a);
 		int start_y=(int)(-center_x*Math.sin(theta)+center_y*Math.cos(theta)-b);

@@ -26,13 +26,28 @@ public class GSystem implements Positioning
 		navigability=nav;
 	}
 	
-	public HashSet<Double> getMassSet()
+	//this seems to not work right.  I don't know why.  so it is being replaced by massSum
+	/*public HashSet<Double> getMassSet()
 	{
 		HashSet<Double> mass_set = new HashSet<Double>();
-		for(Star st : stars)
-			mass_set.add(st.getMass());
+		if(stars instanceof HashSet)
+		{
+			for(Star st : stars)
+				mass_set.add(st.getMass());
+		}
 		
 		return mass_set;
+	}*/
+	
+	public double massSum()
+	{
+		double sum=0;
+		if(stars instanceof HashSet)
+		{
+			for(Star st : stars)
+				sum += st.getMass();
+		}
+		return sum;
 	}
 	
 	//methods required for save/load
@@ -55,8 +70,8 @@ public class GSystem implements Positioning
 	public int getHeight(){return height;}
 	public void setHeight(int h){height=h;}
 	
-	public int absoluteCurX(){return getWidth()/2;}
-	public int absoluteCurY(){return getHeight()/2;}
-	public int absoluteInitX(){return getWidth()/2;}
-	public int absoluteInitY(){return getHeight()/2;}
+	public double absoluteCurX(){return ((double)getWidth())/2;}
+	public double absoluteCurY(){return ((double)getHeight())/2;}
+	public double absoluteInitX(){return ((double)getWidth())/2;}
+	public double absoluteInitY(){return ((double)getHeight())/2;}
 }

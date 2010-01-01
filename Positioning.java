@@ -2,9 +2,10 @@ import java.util.*;
 
 interface Positioning
 {
-	public abstract int absoluteCurX();
-	public abstract int absoluteCurY();
-	public abstract int absoluteInitX();
-	public abstract int absoluteInitY();
-	public abstract HashSet<Double> getMassSet();
+	public abstract double absoluteCurX();
+	public abstract double absoluteCurY();
+	public abstract double absoluteInitX();
+	public abstract double absoluteInitY();
+	//public abstract HashSet<Double> getMassSet();
+	public abstract double massSum();
 }

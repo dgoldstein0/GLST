@@ -8,14 +8,14 @@ public class Orbit
 	static int COUNTERCLOCKWISE=-1;
 
 	//equiv to 2pi/sqrt(G), where G is the gravity constant
-	int init_x;
-	int init_y;
+	double init_x;
+	double init_y;
 	
-	int focus2_x;
-	int focus2_y;
+	double focus2_x;
+	double focus2_y;
 	
-	int cur_x;
-	int cur_y;
+	double cur_x;
+	double cur_y;
 	double period;
 	double time_offset;
 	int direction; //1=clockwise, -1=counterclockwise - use constants CLOCKWISE and COUNTERCLOCKWISE
@@ -44,11 +44,16 @@ public class Orbit
 		calculateOrbit();
 	}
 	
-	public void calculateOrbit()
+	public synchronized void calculateOrbit()
 	{
 		a = (Math.hypot((double)init_x, (double)init_y)+Math.hypot((double)focus2_x-init_x, (double)focus2_y-init_y))/2;
-		HashSet<Double> mass_set=boss.getMassSet();
+		
+		//Calculate period.  This depends on mass.
+
+		//*****reduced mass, which I tried before, neither seems to work here nor make sense (or is implemented wrong).  Thus this code has been commented out and replaced
+		/*HashSet<Double> mass_set=boss.getMassSet();
 		mass_set.add(obj.getMass());
+		
 		double mass_prod=1;
 		double inv_sum=0;
 		for(double mass : mass_set)
@@ -56,7 +61,13 @@ public class Orbit
 			mass_prod *= mass;
 			inv_sum += 1/mass;
 		}
-		period=PERIOD_CONSTANT*Math.sqrt(Math.pow(2*a,3.0d)/(inv_sum*mass_prod));
+		period=PERIOD_CONSTANT*Math.sqrt(Math.pow(2*a,3.0d)/(inv_sum*mass_prod));*/
+		
+		double mass_sum=boss.massSum() + obj.getMass();		
+		period=PERIOD_CONSTANT*Math.sqrt(Math.pow(2*a, 3.0d))/mass_sum;
+		
+		//System.out.println(Double.toString(mass_sum)); //this was used for debugging
+		
 		calcTimeOffset();
 	}
 	
@@ -88,13 +99,13 @@ public class Orbit
 		time_offset = period/(2*Math.PI)*(theta-c/a*Math.sin(theta));
 	}
 	
-	public int absoluteCurX(){return cur_x + boss.absoluteCurX();}
-	public int absoluteCurY(){return cur_y + boss.absoluteCurY();}
+	public double absoluteCurX(){return cur_x + boss.absoluteCurX();}
+	public double absoluteCurY(){return cur_y + boss.absoluteCurY();}
 	
-	public int absoluteInitX(){return init_x + boss.absoluteInitX();}
-	public int absoluteInitY(){return init_y + boss.absoluteInitY();}
+	public double absoluteInitX(){return init_x + boss.absoluteInitX();}
+	public double absoluteInitY(){return init_y + boss.absoluteInitY();}
 	
-	public void move(double time)
+	public synchronized void move(double time)
 	{		
 		double frac_time = (time_offset + ((double)direction)*time)/period; //ADD IN TIME!
 		frac_time=frac_time-Math.floor(frac_time);
@@ -160,18 +171,18 @@ public class Orbit
 	public void setBoss(Positioning p){boss=p;}
 	public Satellite getObj(){return obj;}
 	public void setObj(Satellite o){obj=o;}
-	public int getInit_x(){return init_x;}
-	public void setInit_x(int x){init_x=x;}
-	public int getInit_y(){return init_y;}
-	public void setInit_y(int y){init_y=y;}
-	public int getFocus2_x(){return focus2_x;}
-	public void setFocus2_x(int x){focus2_x=x;}
-	public int getFocus2_y(){return focus2_y;}
-	public void setFocus2_y(int y){focus2_y=y;}
-	public int getCur_x(){return cur_x;}
-	public void setCur_x(int x){cur_x=x;}
-	public int getCur_y(){return cur_y;}
-	public void setCur_y(int y){cur_y=y;}
+	public double getInit_x(){return init_x;}
+	public void setInit_x(double x){init_x=x;}
+	public double getInit_y(){return init_y;}
+	public void setInit_y(double y){init_y=y;}
+	public double getFocus2_x(){return focus2_x;}
+	public void setFocus2_x(double x){focus2_x=x;}
+	public double getFocus2_y(){return focus2_y;}
+	public void setFocus2_y(double y){focus2_y=y;}
+	public double getCur_x(){return cur_x;}
+	public void setCur_x(double x){cur_x=x;}
+	public double getCur_y(){return cur_y;}
+	public void setCur_y(double y){cur_y=y;}
 	public double getPeriod(){return period;}
 	public void setPeriod(double d){period=d;}
 	public int getDirection(){return direction;}
