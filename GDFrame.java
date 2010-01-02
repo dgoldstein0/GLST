@@ -7,7 +7,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.util.*;
 
-public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseMotionListener, MouseListener, WindowListener
+public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseMotionListener, MouseListener, WindowListener, KeyListener
 {
 	final static int DRAG_NONE=0;
 	final static int DRAG_DIST=1;
@@ -92,6 +92,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	Galaxy map;//the galactic map info object
 	HashSet<GSystem> selected_systems;//the system(s) currently selected
 	HashSet<GSystem> possibly_sel_desel_sys;//systems caught in an alt-drag or shift_drag
+	UndoRedoStack undostack; //this object handles the undo/redo functionality of the application
 	
 	public static void main(String[] args)
 	{
@@ -110,7 +111,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		
 		frame.setSize(800,650);
 		
-		
+		frame.addKeyListener(this);
 		
 		//start menubar code/////////////////////////////////////////////////*
 		JMenuBar menu_bar=new JMenuBar();
@@ -186,7 +187,8 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		panel.getActionMap().put("delete", delete_action);
 		
 		panel.addMouseMotionListener(this);
-		
+		panel.addKeyListener(this);
+		panel.addMouseListener(this);
 		
 		//start context menu code////////////////////
 		context_menu = new JPopupMenu();
@@ -214,8 +216,6 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		c_nav=new JMenuItem("Set Navigability");
 		c_nav.addActionListener(this);
 		context_menu.add(c_nav);
-		
-		panel.addMouseListener(this);
 		//end context menu code///////////////////
 		
 		//start toolbar code/////////////
@@ -378,6 +378,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			//note that this can only happen when selected_systems has only 1 element
 			for(GSystem sys : selected_systems)
 				new SystemViewer(frame, sys);
+			setUndoPoint();
 		}
 		else if (e.getSource()==c_delete || e.getSource()==t_delete)
 			deleteSystem();
@@ -463,6 +464,10 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		t_disp_unnav_sys.setEnabled(true);
 		
 		closeOpenScreenDialog();
+		
+		//create the UndoRedoStack
+		Object[] o = {map, selected_systems};
+		undostack = new UndoRedoStack(o);
 	}
 	
 	private void fileIsNotOpen()
@@ -493,6 +498,8 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		//disable viewing options
 		t_disp_navs.setEnabled(false);
 		t_disp_unnav_sys.setEnabled(false);
+		
+		undostack=null;
 	}
 	
 	private void noSystemSelected()
@@ -652,13 +659,37 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		frame.dispose();
 	}
 	
+	public void keyPressed(KeyEvent e){}
+	public void keyTyped(KeyEvent e){}
+	
+	public void keyReleased(KeyEvent e)
+	{
+		System.out.println("KEY!!!");
+		if(undostack.undoPossible() && UndoRedoStack.isCtrlZ(e))
+		{
+			//System.out.println("undo");
+			Object[] o = undostack.undoLoad();
+			map = (Galaxy)o[0];
+			selected_systems = (HashSet<GSystem>)o[1];
+			drawGalaxy();
+		}
+		else if(undostack.redoPossible() && UndoRedoStack.isCtrlY(e))
+		{
+			//System.out.println("redo");
+			Object[] o = undostack.redoLoad();
+			map = (Galaxy)o[0];
+			selected_systems = (HashSet<GSystem>)o[1];
+			drawGalaxy();
+		}
+	}
+	
 	public void mousePressed(MouseEvent e)
 	{
 		try
 		{
 			GSystem sys=locateSystem(e.getX(),e.getY());
 			
-			if(selected_systems instanceof HashSet)
+			if(selected_systems instanceof HashSet)//prepare for potential drag
 			{
 				boolean match=false;
 				//multiple system dragging set up
@@ -726,13 +757,16 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 					//open system
 					for(GSystem sys : selected_systems)
 						new SystemViewer(frame, sys);
+					setUndoPoint();
 				}
 			}
 		}
-		else
+		else //this is the end of a mouse drag
 		{
 			drag_end=false;
 			drawGalaxy();
+			if(selected_systems instanceof HashSet && selected_systems.size()!=0)
+				setUndoPoint(); //the drag is captured and undoable
 		}
 		
 		if(wait_to_add_sys)
@@ -752,6 +786,12 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		
 		alt_down_on_click=false;
 		shift_down_on_click=false;
+	}
+	
+	private void setUndoPoint()
+	{
+		Object[] o = {map, selected_systems};
+		undostack.objectsChanged(o);
 	}
 	
 	private boolean maybeShowContextMenu(MouseEvent e)
@@ -791,13 +831,13 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			{
 				boolean modified=false;
 				//checks to make sure that no systems in a multi-system drag a moved outside the map area
-				if(e.getX()+drag_box_left > 0 && e.getX()+drag_box_right < 800)
+				if(e.getX()+drag_box_left > 0 && e.getX()+drag_box_right < 800) //BOOKMARK
 				{
 					for(GSystem sys : selected_systems)
 						sys.x=e.getX()+sys.x_adj;
 					modified=true;
 				}
-				if(e.getY()+drag_box_top > 0 && e.getY()+drag_box_bottom < 600)
+				if(e.getY()+drag_box_top > 0 && e.getY()+drag_box_bottom < 600) //BOOKMARK
 				{
 					for(GSystem sys : selected_systems)
 						sys.y=e.getY()+sys.y_adj;
@@ -897,7 +937,10 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		
 	public void mouseExited(MouseEvent e){}
 	public void mouseEntered(MouseEvent e){}
-	public void mouseClicked(MouseEvent e){}
+	public void mouseClicked(MouseEvent e)
+	{
+		panel.requestFocusInWindow(); //this is necessary because otherwise toolbar elements can steal and hog the focus
+	}
 	
 	private GSystem locateSystem(int x_pos, int y_pos) throws NoSystemLocatedException
 	{
@@ -995,6 +1038,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		drawGalaxy();
 		
 		systemIsSelected();
+		setUndoPoint();
 	}
 	
 	private void addSystemOnClick()
@@ -1009,6 +1053,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		drawGalaxy();
 		
 		noSystemSelected();
+		setUndoPoint();
 	}
 	
 	Action delete_action = new AbstractAction()
@@ -1046,6 +1091,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				t_disp_navs.setSelectedIndex(NAV_DISP_SELECTED);
 			}
 			
+			setUndoPoint();
 			drawGalaxy();
 		}
 	}
@@ -1105,6 +1151,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				t_disp_navs.setSelectedIndex(NAV_DISP_SELECTED);
 			}
 			drawGalaxy();
+			setUndoPoint();
 		}
 	}
 	

@@ -4,7 +4,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
 
-public class SystemViewer extends JDialog implements ActionListener, MouseListener, MouseMotionListener, MouseWheelListener
+public class SystemViewer extends JDialog implements ActionListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
 {
 	static int DEFAULT_STAR_SIZE=GalacticStrategyConstants.DEFAULT_STAR_SIZE;
 	static int DEFAULT_STAR_ZONE_SIZE=GalacticStrategyConstants.DEFAULT_STAR_ZONE_SIZE;
@@ -37,6 +37,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	SystemPainter painter;
 	StellarObject selected_obj;
 	JFrame frame;
+	UndoRedoStack undostack;
 	
 	//toolbar elements here
 	JButton t_toggle;
@@ -82,6 +83,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		painter.addMouseListener(this);
 		painter.addMouseMotionListener(this);
 		painter.addMouseWheelListener(this);
+		painter.addKeyListener(this);
 		add(painter, BorderLayout.CENTER);
 		
 		//Toolbar code start
@@ -154,6 +156,9 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		c_reset_time.addActionListener(this);
 		context_menu.add(c_reset_time);
 		//end context menu code///////////////////
+		
+		Object[] o = {system, selected_obj};
+		undostack = new UndoRedoStack(o);
 		
 		pack();
 		setSize(800,650);
@@ -391,6 +396,30 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		}
 	}
 	
+	//keylistener code
+	public void keyPressed(KeyEvent e){}
+	public void keyTyped(KeyEvent e){}
+	public void keyReleased(KeyEvent e)
+	{
+		if(undostack.undoPossible() && UndoRedoStack.isCtrlZ(e))
+		{
+			Object[] o = undostack.undoLoad();
+			system = (GSystem)o[0];
+			selected_obj = (StellarObject)o[1];
+			recalculateOrbits(); //necessary since the orbit data is not all saved, but calculated from initial placement
+			drawSystem();
+		}
+		else if(undostack.redoPossible() && UndoRedoStack.isCtrlY(e))
+		{
+			//System.out.println("redo");
+			Object[] o = undostack.redoLoad();
+			system = (GSystem)o[0];
+			selected_obj = (StellarObject)o[1];
+			recalculateOrbits(); //necessary since the orbit data is not all saved, but calculated from initial placement
+			drawSystem();
+		}
+	}
+	
 	//mouselistener code
 	public void mousePressed(MouseEvent e)
 	{
@@ -404,15 +433,19 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				
 				drag_start=true;
 			}
-			catch(NoObjectLocatedException x)
-			{
-				drag_start=false;
-			}
+			catch(NoObjectLocatedException x){//drag_start=false; //this happens automatically, in mouseReleased.
+				}
 		}
 	}
 	
 	public void mouseReleased(MouseEvent e)
 	{
+		if(drag_start)
+		{
+			setUndoPoint();
+			drag_start=false;
+		}
+		
 		if(!e.isPopupTrigger()) //(usually) left click
 		{
 			if(wait_to_add==ADD_NOTHING)
@@ -450,6 +483,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 						break;
 					case ADD_FOCUS:
 						wait_to_add=ADD_NOTHING;
+						setUndoPoint();
 						break;
 					case RECENTER:
 						setCenter(screenToDataX(e.getX()),screenToDataY(e.getY()));
@@ -482,6 +516,12 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		drawSystem();
 	}
 	
+	private void setUndoPoint()
+	{
+		Object[] o = {system, selected_obj};
+		undostack.objectsChanged(o);
+	}
+	
 	private void setCenter(int x, int y)
 	{
 		center_x=x;
@@ -504,6 +544,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		}
 		
 		drawSystem();
+		setUndoPoint();
 		return success;
 	}
 	
@@ -570,7 +611,11 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		return (Math.hypot(x - painter.getWidth()/2, y-painter.getHeight()/2) <= DEFAULT_STAR_ZONE_SIZE-DEFAULT_STAR_SIZE/2);
 	}
 	
-	public void mouseClicked(MouseEvent e){}
+	public void mouseClicked(MouseEvent e)
+	{
+		painter.requestFocusInWindow();
+	}
+	
 	public void mouseEntered(MouseEvent e){}
 	public void mouseExited(MouseEvent e)
 	{
@@ -700,6 +745,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		selected_obj=null;
 		ObjectSelected(false);
 		drawSystem();
+		setUndoPoint();
 	}
 	
 	Action delete_action = new AbstractAction()
