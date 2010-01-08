@@ -7,18 +7,30 @@ public class Player
 	String name;
 	long money;
 	long metal;
+	Color color;
+	int id; //id is used to identify players.  These are assigned by the host of the game.
 	
-	public static Player createPlayer()
+	public static Player createPlayer() throws CancelException
 	{
 		Player the_player=new Player();
 		do
 		{
 			the_player.name=JOptionPane.showInputDialog("Please name your character.");
+			if(!(the_player.name instanceof String))
+				throw new CancelException();
 		}
-		while(!(the_player.name instanceof String) || the_player.name.equals(""));
+		while(the_player.name.equals(""));
 		
 		the_player.money=GalacticStrategyConstants.DEFAULT_MONEY;
+		the_player.metal=GalacticStrategyConstants.DEFAULT_METAL;
 		return the_player;
+	}
+	
+	public Player(String nm)
+	{
+		name = nm;
+		money=GalacticStrategyConstants.DEFAULT_MONEY;
+		metal=GalacticStrategyConstants.DEFAULT_METAL;
 	}
 	
 	//methods necessary for saving/loading
@@ -29,5 +41,6 @@ public class Player
 	public void setMoney(long m){money=m;}
 	public long getMetal(){return metal;}
 	public void setMetal(long m){metal=m;}
-	
+	public int getId(){return id;}
+	public void setId(int x){id=x;}
 }

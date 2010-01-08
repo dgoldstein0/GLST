@@ -9,6 +9,8 @@ import java.util.*;
 
 public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseMotionListener, MouseListener, WindowListener, KeyListener
 {
+	Notifier n;//REMOVE
+	
 	final static int DRAG_NONE=0;
 	final static int DRAG_DIST=1;
 	final static int DRAG_RANGE=2;
@@ -181,6 +183,9 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		
 		
 		panel=new GalacticMapPainter();
+		n = new Notifier();//REMOVE
+		panel.add(n);
+		
 		frame.add(panel, BorderLayout.CENTER);
 		
 		panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),"delete");
@@ -426,7 +431,10 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		}
 		else if (e.getSource()==help_item)
 			help();
-		else if (e.getSource()==about_item);
+		else if (e.getSource()==about_item)
+		{
+			n.showMessage("Made by David Goldstein and Yongzuan \"Mike\" Wu");
+		}
 	}
 	
 	private void showOpenScreenDialog()
@@ -664,7 +672,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	public void keyReleased(KeyEvent e)
 	{
-		System.out.println("KEY!!!");
+		//System.out.println("KEY!!!");
 		if(undostack.undoPossible() && UndoRedoStack.isCtrlZ(e))
 		{
 			//System.out.println("undo");
@@ -718,7 +726,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 					else if(system.y_adj < drag_box_top)
 						drag_box_top=system.y_adj;
 				}
-				//user must press the mouse on a system to drag systems.  this behavior is controlled with drag_start
+				//user must press the mouse on one of the selected systems to drag all of them.  this behavior is controlled with drag_start
 				drag_start=match;
 			}
 		}
@@ -881,25 +889,13 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				
 				possibly_sel_desel_sys=new HashSet<GSystem>();
 				
-				if(!alt_down_on_click)
-				{
-					if(map.systems instanceof HashSet)
-					{
-						for(GSystem sys : map.systems)
-						{
-							//if system is with the selected area and navigable
-							if(x1 <= sys.x && sys.x <= x2 && y1 <= sys.y && sys.y < y2 && (sys.navigability >= current_nav_level || display_unnavigable))
-								possibly_sel_desel_sys.add(sys); //duplicates automatically prevented
-						}
-					}
-				}
-				else
+				if(map.systems instanceof HashSet)
 				{
 					for(GSystem sys : map.systems)
 					{
 						//if system is with the selected area and navigable
 						if(x1 <= sys.x && sys.x <= x2 && y1 <= sys.y && sys.y < y2 && (sys.navigability >= current_nav_level || display_unnavigable))
-							possibly_sel_desel_sys.add(sys);
+							possibly_sel_desel_sys.add(sys); //duplicates automatically prevented
 					}
 				}
 				

@@ -64,10 +64,13 @@ public class GalacticStrategyConstants
 	
 	//*************************************GAMEPLAY SETTINGS****************************************************************//
 	
+	static int MAX_PLAYERS = 2;
+	
 	//Used by Mine
 	static int DEFAULT_MINING_RATE=10;
 	//Used by Player
-	static long DEFAULT_MONEY=100;
+	static long DEFAULT_MONEY=1000;
+	static long DEFAULT_METAL=1000;
 	
 	//setup for ship types
 	final static int JUNK=0;

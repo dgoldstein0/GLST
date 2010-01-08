@@ -24,7 +24,7 @@ public class GalacticMapPainter extends JPanel
 	
 	public GalacticMapPainter()
 	{
-		super();
+		super(new FlowLayout(FlowLayout.LEFT));
 		setMinimumSize(new Dimension(800,600));
 		setPreferredSize(new Dimension(800,600));
 		setMaximumSize(new Dimension(800,600));
@@ -108,17 +108,17 @@ public class GalacticMapPainter extends JPanel
 					g.drawOval(sel_sys.x-max_dist_shown,sel_sys.y-max_dist_shown,2*max_dist_shown,2*max_dist_shown);
 				}
 			}
-			
-			if(select_box)
-			{
-				g.setColor(Color.GRAY);
-				g.drawRect(select_box_x1, select_box_y1, select_box_x2-select_box_x1, select_box_y2-select_box_y1);
-			}
-			else if(ghost_system)
-			{
-				g.setColor(Color.GRAY);
-				g.fillOval(ghost_x-2,ghost_y-2,5,5);
-			}
+		}
+		
+		if(select_box)
+		{
+			g.setColor(Color.GRAY);
+			g.drawRect(select_box_x1, select_box_y1, select_box_x2-select_box_x1, select_box_y2-select_box_y1);
+		}
+		else if(ghost_system)
+		{
+			g.setColor(Color.GRAY);
+			g.fillOval(ghost_x-2,ghost_y-2,5,5);
 		}
 	}
 	

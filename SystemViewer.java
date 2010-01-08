@@ -63,7 +63,6 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	//objects used to track time flow for time simulation
 	TimeControl TC;
-	java.util.Timer timer;
 	UpdateTask task;
 	
 	//sets up the viewpoint for the system

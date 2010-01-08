@@ -11,8 +11,16 @@ public class GameControl
 	static final int DEFAULT_PORT_NUMBER = GalacticStrategyConstants.DEFAULT_PORT_NUMBER;
 	
 	TimeControl TC;
-	Player player;
+	Player the_player;
+	HashSet<Player> players;
+	private int last_id;
 	Galaxy map;
+	volatile boolean game_started;
+
+	GameLobby GL;
+	GameStartupDialog GSD;
+	JFrame frame;
+	
 	volatile ServerSocket the_server_socket; 
 	volatile Socket the_socket;
 	volatile OutputStream OS;
@@ -23,18 +31,37 @@ public class GameControl
 	
 	Set<Event> pending_execution = Collections.synchronizedSet(new HashSet());
 	
-	public GameControl(JFrame frame)
+	public GameControl(JFrame f)
 	{
-		player=Player.createPlayer();
+		frame = f;
+		players = new HashSet();
+		last_id=0;
 		map=new Galaxy();
 	}
 	
 	public GameControl(){}
+		
+	public void createThePlayer() throws CancelException
+	{
+		the_player = Player.createPlayer();
+		the_player.setId(last_id+1);
+		last_id++;
+	}
 	
-	public Player getPlayer(){return player;}
-	public void setPlayer(Player p){player=p;}
+	public Player getThe_player(){return the_player;}
+	public void setThe_player(Player p){the_player=p;}
 	public Galaxy getMap(){return map;}
 	public void setMap(Galaxy g){map=g;}
+	public HashSet<Player> getPlayers(){return players;}
+	public void setPlayers(HashSet<Player> h){players=h;}
+	
+	public void startupDialog()
+	{
+		if(GSD instanceof GameStartupDialog)
+			GSD.constructDialog();
+		else
+			GSD = new GameStartupDialog(frame, this);
+	}
 	
 	public void startGame()
 	{
@@ -63,6 +90,19 @@ public class GameControl
 			{
 				System.out.println("host start sequence begin");
 				
+				File cur_file = new File("C:\\Users\\David\\Desktop\\zoom_test.xml");
+				try
+				{
+					loadMap(cur_file);
+					sendMap();
+				}
+				catch(FileNotFoundException fnfe)
+				{
+					System.out.println("File not found.  Ending Connection...");
+					endConnection();
+					return;
+				}
+				
 				//estimate time delay
 				
 				//ping
@@ -85,10 +125,11 @@ public class GameControl
 					}
 					try
 					{
-						Thread t = new Thread();
+						/*Thread t = new Thread();
 						t.start();
 						t.sleep(10);
-						t.join();
+						t.join();*/
+						Thread.sleep(10);
 					}
 					catch(InterruptedException ie){}
 				}
@@ -122,6 +163,9 @@ public class GameControl
 			{
 				System.out.println("Client start sequence initiated.");
 
+				downloadAndLoadMap(false);
+				System.out.println("map loaded");
+				
 				//return message for offset estimate
 				System.out.println("waiting for ping");
 				String pingmsg= reader.readLine();
@@ -167,7 +211,7 @@ public class GameControl
 		
 		public void run()
 		{
-			//updateGame();
+			//updateGame(); //BOOKMARK!
 			System.out.println("update!!" + Long.toString(TC.getTime()));
 		}
 	}
@@ -215,9 +259,16 @@ public class GameControl
 	
 	public void host() //creates new thread to host the game on
 	{
+		try{
+			createThePlayer();
+		} catch(CancelException e){
+			startupDialog();
+			return;
+		}
 		hosting=true;
 		serverThread = new Thread(new HostRunnable());
 		serverThread.start();
+		GL=new GameLobby(frame, this);
 	}
 	
 	public void endHost()
@@ -233,6 +284,7 @@ public class GameControl
 		
 		public void run()
 		{
+			System.out.println("Host runnable running...");
 			try
 			{
 				if(the_server_socket instanceof ServerSocket)
@@ -244,6 +296,7 @@ public class GameControl
 			catch (IOException e)
 			{
 				System.out.println("Could not listen on port" + Integer.toString(DEFAULT_PORT_NUMBER)+".  Hosting failed.");
+				GL.leaveGame(true);
 				return;
 			}
 			
@@ -262,20 +315,67 @@ public class GameControl
 				{
 					try
 					{
+						System.out.println("Waiting for connections...");
 						the_socket = the_server_socket.accept();
 						go=false;
 						setUpIOStreams();
+						
+						//send player roster.  start with the number of players, and then send the_player and then go through players hashset
+						PrintWriter w = new PrintWriter(OS, true); //this should auto-flush
+						BufferedReader r = new BufferedReader(new InputStreamReader(IS));
+						
+						//r.readLine(); //wait until client is ready
+						int num_players = players.size()+1;
+						w.println(Integer.toString(num_players));
+						
+						w.println(the_player.getName());
+						w.println(Integer.toString(the_player.getId()));
+						for(Player p : players){
+							w.println(p.getName());
+							w.println(Integer.toString(p.getId()));
+						}
+						
+						
+						//request name
+						String name;
+						name=r.readLine();
+						Player p = new Player(name);
+						p.setId(last_id+1); //assign ID
+						players.add(p);
+						
+						//assign id number.  each ID is 1 more than last assigned
+						
+						w.println(Integer.toString(last_id+1));
+						last_id++;
+						
+						//notify other players and update the Lobby //BOOKMARK
 					}
 					catch (SocketTimeoutException ste){}
-					catch (IOException e) {System.out.println("Accept failed.");}
+					catch (IOException e)
+					{
+						System.out.println("Accept failed.");
+						//keep trying?
+					}
 				}
 			}
-			catch(SocketException se){System.out.println("hosting failed");}
+			catch(SocketException se)
+			{
+				System.out.println("hosting failed");
+				GL.leaveGame(true);
+				return;
+			}
 		}
 	}
 	
 	public void joinAsClient() //throws UnknownHostException
 	{
+		try{
+			createThePlayer();
+		} catch(CancelException e){
+			startupDialog();
+			return;
+		}
+		
 		System.out.println("joinAsClient started");
 		
 		try
@@ -285,28 +385,80 @@ public class GameControl
 		}
 		catch(IOException e){}
 		
-		//String ip_in_string;                                            
-		String ip_in_string=JOptionPane.showInputDialog("Enter the IP address of the host:");
-		byte[] ip_in_byte=new byte[4];
-		String[] ip=ip_in_string.split("\\.");              
-		for (int i=0; i<=3; i++)
-		{
-			//System.out.println(ip[i]);
-			ip_in_byte[i]=(byte) Integer.parseInt(ip[i]);
+		byte[] ip_in_byte = new byte[4];
+		boolean ip_valid=false;
+		while(!ip_valid) {
+			try {
+				String ip_in_string=JOptionPane.showInputDialog("Enter the IP address of the host:");
+				if(ip_in_string instanceof String){
+					String[] ip=ip_in_string.split("\\.");
+					
+					if(ip.length != 4)
+						throw new NumberFormatException();
+					
+					for (int i=0; i<=3; i++){
+						//System.out.println(ip[i]);
+						ip_in_byte[i]=(byte) Integer.parseInt(ip[i]);
+					}
+					System.out.println("IP address read");
+					ip_valid=true;
+				} else {
+					startupDialog();
+					return;
+				}
+			} catch(NumberFormatException nfe) {
+				JOptionPane.showMessageDialog(frame, "This is not a valid IP address.  Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+			}
 		}
-		System.out.println("IP address read");
-        
-		try {	
+		
+		try
+		{	
 			InetAddress ipaddress=InetAddress.getByAddress(ip_in_byte);
 			//InetAddress ipaddress=InetAddress.getLocalHost();
 			the_socket = new Socket(ipaddress, DEFAULT_PORT_NUMBER);
 			setUpIOStreams();
 			hosting=false;
+			
+			//receive other players' names and id's
+			BufferedReader r = new BufferedReader(new InputStreamReader(IS));
+			PrintWriter pw = new PrintWriter(OS, true); //this version of the constructor sets up automatic flushing
+			
+			int num_players = Integer.parseInt(r.readLine());
+			for(int i=0; i<num_players; i++){
+				Player p = new Player(r.readLine());
+				p.setId(Integer.parseInt(r.readLine()));
+				players.add(p);
+			}
+			
+			
+			//send name
+			pw.println(the_player.getName());
+			
+			//recieve player id number			
+			the_player.setId(Integer.parseInt(r.readLine()));
+			
 			System.out.println("Connection Established");
-		} catch (UnknownHostException e) {
+			
+			//display lobby
+			GL = new GameLobby(frame, this);
+		}
+		catch (UnknownHostException e)
+		{
 			System.err.println("Unknown host");
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			System.err.println("Couldn't get I/O for the connection to the host");
+			JOptionPane.showMessageDialog(frame, "The specified IP could not be reached.", "Error", JOptionPane.ERROR_MESSAGE);
+			endConnection();
+			startupDialog();
+		}
+		catch(NumberFormatException e)
+		{
+			System.err.println("Connection lost");
+			JOptionPane.showMessageDialog(frame, "Connection Lost.", "Error", JOptionPane.ERROR_MESSAGE);
+			endConnection();
+			startupDialog();
 		}
 	}
 	
@@ -408,8 +560,8 @@ public class GameControl
 	
 	public void endConnection()
 	{
-		try{OS.close();}catch(IOException e){}
-		try{IS.close();}catch(IOException e){}
-		try{the_socket.close();}catch(IOException e){}
+		try{OS.close();}catch(Exception e){}
+		try{IS.close();}catch(Exception e){}
+		try{the_socket.close();}catch(Exception e){}
 	}
 }
