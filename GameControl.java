@@ -9,14 +9,15 @@ import java.io.*;
 public class GameControl
 {
 	static final int DEFAULT_PORT_NUMBER = GalacticStrategyConstants.DEFAULT_PORT_NUMBER;
+	static final String LEFT_LOBBY_MSG = "Im leaving the lobby.";
 	
 	TimeControl TC;
-	Player the_player;
-	HashSet<Player> players;
-	private int last_id;
+	int player_id;
+	Player[] players;
 	Galaxy map;
 	volatile boolean game_started;
 
+	GameControl GC = this;
 	GameLobby GL;
 	GameStartupDialog GSD;
 	JFrame frame;
@@ -27,6 +28,7 @@ public class GameControl
 	volatile InputStream IS;
 	boolean hosting;//true if running as server  false if running as client
 	Thread serverThread;
+	Thread lobbyThread;
 	Thread readThread;
 	
 	Set<Event> pending_execution = Collections.synchronizedSet(new HashSet());
@@ -34,26 +36,35 @@ public class GameControl
 	public GameControl(JFrame f)
 	{
 		frame = f;
-		players = new HashSet();
-		last_id=0;
+		players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
 		map=new Galaxy();
 	}
 	
 	public GameControl(){}
 		
-	public void createThePlayer() throws CancelException
+	public Player createThePlayer() throws CancelException
 	{
-		the_player = Player.createPlayer();
-		the_player.setId(last_id+1);
-		last_id++;
+		return Player.createPlayer();
 	}
 	
-	public Player getThe_player(){return the_player;}
-	public void setThe_player(Player p){the_player=p;}
+	public int nextAvailableID(){
+		for(int i=0; i<players.length; i++){
+			if(!(players[i] instanceof Player))
+			{
+				System.out.println(Integer.toString(i) + "is available!");
+				return i;
+			}
+		}
+		System.out.println("no id's available!");
+		return -1; //indicates error
+	}
+	
+	public int getPlayer_id(){return player_id;}
+	public void setPlayer_id(int id){player_id=id;}
 	public Galaxy getMap(){return map;}
 	public void setMap(Galaxy g){map=g;}
-	public HashSet<Player> getPlayers(){return players;}
-	public void setPlayers(HashSet<Player> h){players=h;}
+	public Player[] getPlayers(){return players;}
+	public void setPlayers(Player[] h){players=h;}
 	
 	public void startupDialog()
 	{
@@ -66,6 +77,16 @@ public class GameControl
 	public void startGame()
 	{
 		System.out.println("starting game...");
+		
+		try{
+			lobbyThread.interrupt();
+			lobbyThread.join();
+			System.out.println("lobby thread terminated");
+		} catch(InterruptedException e){
+			System.out.println("What the heck?  Start game has been interrupted.  Terminating...");
+			GC.endConnection();
+			return;
+		}
 		//stop the server socket.  Once the game is started, more players cannot join.
 		/*try{serverThread.join();}
 		catch(InterruptedException IE)
@@ -90,18 +111,8 @@ public class GameControl
 			{
 				System.out.println("host start sequence begin");
 				
-				File cur_file = new File("C:\\Users\\David\\Desktop\\zoom_test.xml");
-				try
-				{
-					loadMap(cur_file);
-					sendMap();
-				}
-				catch(FileNotFoundException fnfe)
-				{
-					System.out.println("File not found.  Ending Connection...");
-					endConnection();
-					return;
-				}
+				//File cur_file = new File("C:\\Users\\David\\Desktop\\zoom_test.xml");
+				sendMap();
 				
 				//estimate time delay
 				
@@ -260,18 +271,21 @@ public class GameControl
 	public void host() //creates new thread to host the game on
 	{
 		try{
-			createThePlayer();
+			Player the_player = createThePlayer();
+			player_id=0;
+			the_player.setId(0);
+			players[0] = the_player;
 		} catch(CancelException e){
 			startupDialog();
 			return;
 		}
 		hosting=true;
+		GL=new GameLobby(frame, this);
 		serverThread = new Thread(new HostRunnable());
 		serverThread.start();
-		GL=new GameLobby(frame, this);
 	}
 	
-	public void endHost()
+	public void endHost() //closes down the serverThread, which is responsible for listening for players trying to join
 	{
 		serverThread.interrupt();
 	}
@@ -296,7 +310,7 @@ public class GameControl
 			catch (IOException e)
 			{
 				System.out.println("Could not listen on port" + Integer.toString(DEFAULT_PORT_NUMBER)+".  Hosting failed.");
-				GL.leaveGame(true);
+				GL.leaveGame();
 				return;
 			}
 			
@@ -325,14 +339,16 @@ public class GameControl
 						BufferedReader r = new BufferedReader(new InputStreamReader(IS));
 						
 						//r.readLine(); //wait until client is ready
-						int num_players = players.size()+1;
+						int num_players = players.length;
 						w.println(Integer.toString(num_players));
 						
-						w.println(the_player.getName());
-						w.println(Integer.toString(the_player.getId()));
-						for(Player p : players){
-							w.println(p.getName());
-							w.println(Integer.toString(p.getId()));
+						for(int i=0; i<num_players; i++){
+							if(players[i] instanceof Player){
+								w.println(players[i].getName());
+								w.println(Integer.toString(i));
+							} else {
+								w.println("skip player>>");
+							}
 						}
 						
 						
@@ -340,15 +356,16 @@ public class GameControl
 						String name;
 						name=r.readLine();
 						Player p = new Player(name);
-						p.setId(last_id+1); //assign ID
-						players.add(p);
 						
 						//assign id number.  each ID is 1 more than last assigned
+						int next_id = nextAvailableID();
+						p.setId(next_id); //assign ID
+						players[next_id] = p;
+						w.println(Integer.toString(next_id));
 						
-						w.println(Integer.toString(last_id+1));
-						last_id++;
-						
-						//notify other players and update the Lobby //BOOKMARK
+						//notify other players and update the Lobby
+						GC.updateGL();
+						GC.setUpLobbyUpdater(); //THIS WILL BE AN ISSUE FOR 3+ PLAYER GAMES.  ESPECIALLY IF ONLY 1 LobbyUpdater used, which checks for msgs from all.  Then we cannot let LobbyUpdater check for updates before player is done being set up
 					}
 					catch (SocketTimeoutException ste){}
 					catch (IOException e)
@@ -361,7 +378,7 @@ public class GameControl
 			catch(SocketException se)
 			{
 				System.out.println("hosting failed");
-				GL.leaveGame(true);
+				GL.leaveGame();
 				return;
 			}
 		}
@@ -369,13 +386,6 @@ public class GameControl
 	
 	public void joinAsClient() //throws UnknownHostException
 	{
-		try{
-			createThePlayer();
-		} catch(CancelException e){
-			startupDialog();
-			return;
-		}
-		
 		System.out.println("joinAsClient started");
 		
 		try
@@ -411,6 +421,14 @@ public class GameControl
 			}
 		}
 		
+		Player the_player;
+		try{
+			the_player = createThePlayer();
+		} catch(CancelException e){
+			startupDialog();
+			return;
+		}
+		
 		try
 		{	
 			InetAddress ipaddress=InetAddress.getByAddress(ip_in_byte);
@@ -425,21 +443,27 @@ public class GameControl
 			
 			int num_players = Integer.parseInt(r.readLine());
 			for(int i=0; i<num_players; i++){
-				Player p = new Player(r.readLine());
-				p.setId(Integer.parseInt(r.readLine()));
-				players.add(p);
+				String name_input = r.readLine();
+				if(!name_input.equals("skip player>>")) {
+					Player p = new Player(name_input);
+					p.setId(Integer.parseInt(r.readLine()));
+					players[p.getId()] = p;
+				}
 			}
 			
 			
 			//send name
 			pw.println(the_player.getName());
 			
-			//recieve player id number			
-			the_player.setId(Integer.parseInt(r.readLine()));
+			//recieve player id number
+			player_id = Integer.parseInt(r.readLine());
+			the_player.setId(player_id);
+			players[player_id] = the_player;
 			
 			System.out.println("Connection Established");
 			
 			//display lobby
+			GC.setUpLobbyUpdater();
 			GL = new GameLobby(frame, this);
 		}
 		catch (UnknownHostException e)
@@ -459,6 +483,67 @@ public class GameControl
 			JOptionPane.showMessageDialog(frame, "Connection Lost.", "Error", JOptionPane.ERROR_MESSAGE);
 			endConnection();
 			startupDialog();
+		}
+	}
+	
+	private void updateGL()
+	{
+		GL.updateNames();
+	}
+	
+	private void setUpLobbyUpdater()
+	{
+		lobbyThread = new Thread(new LobbyUpdater());
+		lobbyThread.start();
+	}
+	
+	//Right now, this is set up based on the 2 player/1 connection model.  The lobbyUpdater, in it's current form, only listens to see if the single other player drops
+	
+	public class LobbyUpdater implements Runnable
+	{
+		public LobbyUpdater(){}
+		
+		public void run()
+		{
+			BufferedReader r = new BufferedReader(new InputStreamReader(IS));
+			try {
+				while(!Thread.interrupted()){
+					if(r.ready()) {
+						String notification = r.readLine();
+						if(notification.indexOf(":")!= -1 && notification.split(":")[1].equals(LEFT_LOBBY_MSG)) {
+							if(hosting){
+								int id_leaving = Integer.parseInt(notification.split(":")[0]);
+								players[id_leaving]=null;
+								GC.updateGL();
+								GC.serverThread = new Thread(new HostRunnable());
+								GC.serverThread.start();
+								return;
+							} else {
+								JOptionPane.showMessageDialog(frame, "The host has left the game.", "Host Left", JOptionPane.INFORMATION_MESSAGE);
+								GL.leaveGame();
+								return;
+							}
+						}
+					}
+					else
+						Thread.sleep(200);
+				}
+			} catch(IOException ioe){
+				System.out.println("IO fail in lobby updater.  GG.");
+				return;
+			} catch(InterruptedException ie){
+				return;
+			}
+		}
+	}
+	
+	public void leavingLobby() //responsible for informing other players of the user leaving the game.
+	{
+		if(OS instanceof OutputStream)
+		{
+			PrintWriter w = new PrintWriter(OS, true);
+			w.println(Integer.toString(player_id) +":" + LEFT_LOBBY_MSG);
+			players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
 		}
 	}
 	
@@ -504,11 +589,14 @@ public class GameControl
 		}
 	}
 	
-	public void loadMap(File f) throws FileNotFoundException //for the server
+	public void loadMap(File f) throws FileNotFoundException, ClassCastException, NullPointerException //for the server
 	{
 		XMLDecoder d=new XMLDecoder(new BufferedInputStream(new FileInputStream(f)));
 		map = (Galaxy)d.readObject();
 		d.close();
+		
+		if(!(map instanceof Galaxy)) //BOOKMARK!  NEEDS BETTER VALIDITY TESTS.  empty galaxies still pass this test... but it is a start.
+			throw new NullPointerException();
 	}
 	
 	public void sendMap() //for the server

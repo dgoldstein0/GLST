@@ -1,3 +1,5 @@
+import java.awt.Color;
+
 public class GalacticStrategyConstants
 {
 	//this class contains constants relavent to the games/galaxy designer's configuration.
@@ -65,6 +67,8 @@ public class GalacticStrategyConstants
 	//*************************************GAMEPLAY SETTINGS****************************************************************//
 	
 	static int MAX_PLAYERS = 2;
+	
+	static Color[] DEFAULT_COLORS = {Color.GREEN, Color.RED, Color.YELLOW, Color.CYAN, Color.ORANGE, Color.MAGENTA, Color.PINK, Color.BLUE};
 	
 	//Used by Mine
 	static int DEFAULT_MINING_RATE=10;

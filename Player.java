@@ -33,6 +33,18 @@ public class Player
 		metal=GalacticStrategyConstants.DEFAULT_METAL;
 	}
 	
+	public Color getColor()
+	{
+		if(!(color instanceof Color))
+			color = GalacticStrategyConstants.DEFAULT_COLORS[getId()];
+		return color;
+	}
+	
+	public void setColor(Color c)
+	{
+		color=c;
+	}
+	
 	//methods necessary for saving/loading
 	public Player(){}
 	public String getName(){return name;}

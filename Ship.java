@@ -17,6 +17,8 @@ public class Ship
 	int cost;
 	int soldier;
 	
+	Ship target;
+	
 	public Ship(Player ow, String nm, int type)
 	{
 		name = nm;
@@ -60,4 +62,6 @@ public class Ship
 	public void assemble(int x, int y) {};
 	public Player getOwner() {return owner;}
 	public int getSoldier() {return soldier;}
+	public Ship getTarget(){return target;}
+	public void setTarget(Ship s){target = s;}
 }
