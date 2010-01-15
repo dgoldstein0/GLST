@@ -31,11 +31,11 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	int move_center_y_speed = 0; //up is negative, down is positive
 	
 	int wait_to_add = ADD_NOTHING;
-	boolean drag_start;	
+	boolean drag_start;
 	
 	GSystem system;
 	SystemPainter painter;
-	StellarObject selected_obj;
+	Selectable selected_obj;
 	JFrame frame;
 	UndoRedoStack undostack;
 	
@@ -64,11 +64,23 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	//objects used to track time flow for time simulation
 	TimeControl TC;
 	UpdateTask task;
+	java.util.Timer camera_timer;
+	centerMover recenter_task;
 	
 	//sets up the viewpoint for the system
 	int center_x;
 	int center_y;
 	double scale=GalacticStrategyConstants.DEFAULT_SCALE;
+	
+	//sets up custom cursors
+	Cursor left_arrow;
+	Cursor right_arrow;
+	Cursor up_arrow;
+	Cursor down_arrow;
+	Cursor up_right_arrow;
+	Cursor up_left_arrow;
+	Cursor down_right_arrow;
+	Cursor down_left_arrow;
 	
 	public SystemViewer(JFrame frame, GSystem sys)
 	{
@@ -164,6 +176,21 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		
 
 		ObjectSelected(false);
+		//set up timing device for camera motion
+		camera_timer = new java.util.Timer(true);
+		recenter_task = new centerMover();
+		
+		//set up custom cursor
+		Toolkit toolkit = Toolkit.getDefaultToolkit();
+		right_arrow = toolkit.createCustomCursor(toolkit.getImage("images/right_arrow.png"), new Point(30,15), "right arrow");
+		left_arrow = toolkit.createCustomCursor(toolkit.getImage("images/left_arrow.png"), new Point(0,15), "left arrow");
+		up_arrow = toolkit.createCustomCursor(toolkit.getImage("images/up_arrow.png"), new Point(15,0), "up arrow");
+		down_arrow = toolkit.createCustomCursor(toolkit.getImage("images/down_arrow.png"), new Point(15,30), "down arrow");
+		
+		up_right_arrow = toolkit.createCustomCursor(toolkit.getImage("images/up_right_arrow.png"), new Point(30,0), "up right arrow");
+		up_left_arrow = toolkit.createCustomCursor(toolkit.getImage("images/up_left_arrow.png"), new Point(0,0), "up left arrow");
+		down_right_arrow = toolkit.createCustomCursor(toolkit.getImage("images/down_right_arrow.png"), new Point(30,30), "down right arrow");
+		down_left_arrow = toolkit.createCustomCursor(toolkit.getImage("images/down_left_arrow.png"), new Point(0,30), "down left arrow");
 		
 		//it is necessary to invoke this later because before the systemviewer is setvisible it has no height and width, which drawSystem() uses to determine the height/width of GSystem, which is then referenced in absoluteCurX/CurY/InitX/InitY to determine where the center of the system is for coordinate purposes.
 		SwingUtilities.invokeLater(new Runnable(){public void run(){
@@ -211,7 +238,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			//For stars, that condition is that the location is "star suitable."  The if statements take care of these conditions
 			if(!(selected_obj instanceof Planet))
 			{
-				if(locationStarSuitable(c_x,c_y))
+				if(locationStarSuitable(screenToDataX(c_x),screenToDataY(c_y)))
 				{
 					String[] add_options={"Planet", "Star", "Asteroid"};
 					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
@@ -224,7 +251,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			}
 			else
 			{
-				if(locationStarSuitable(c_x,c_y))
+				if(locationStarSuitable(screenToDataX(c_x),screenToDataY(c_y)))
 				{
 					String[] add_options={"Planet", "Star", "Moon", "Asteroid"};
 					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
@@ -239,7 +266,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			if(obj_to_add=="Star")
 			{
 				if(!addStar(screenToDataX(c_x), screenToDataY(c_y)))
-					System.out.println("Can't place star there!");//BOOKMARK - THIS SHOULD BE IMPOSSIBLE!!!!!
+					JOptionPane.showMessageDialog(this, "You can't place a star there!", "Invalid star location", JOptionPane.ERROR_MESSAGE);
 			}
 			else if(obj_to_add=="Planet")
 				addPlanet(screenToDataX(c_x),screenToDataY(c_y));
@@ -313,15 +340,27 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			}
 		}
 		
+		drawSystem();
+	}
+	
+	private class centerMover extends TimerTask
+	{
+		public void run()
+		{
+			moveCenter();
+		}
+	}
+	
+	private void moveCenter()
+	{
 		center_x += move_center_x_speed;
-		center_y +=move_center_y_speed;
+		center_y += move_center_y_speed;
 		
 		if(screenToDataX(0)<(painter.getWidth()-SYS_WIDTH)/2 || screenToDataX(painter.getWidth())>(painter.getWidth()+SYS_WIDTH)/2)
 			center_x -= move_center_x_speed;
 		
 		if(screenToDataY(0)<(painter.getHeight()-SYS_HEIGHT)/2 || screenToDataY(painter.getHeight())>(painter.getHeight()+SYS_HEIGHT)/2)
 			center_y -= move_center_y_speed;
-		
 		drawSystem();
 	}
 	
@@ -374,6 +413,27 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 							return;
 						}
 					}
+				}
+			}
+			
+			if(selected_obj instanceof Satellite) {//check to see if focus2 of the selected planet was just clicked on
+				if(((Satellite)selected_obj).orbit.focus2.getX()+((Satellite)selected_obj).orbit.boss.absoluteCurX() - OBJ_TOL <= x &&
+					x <= ((Satellite)selected_obj).orbit.focus2.getX()+((Satellite)selected_obj).orbit.boss.absoluteCurX()+OBJ_TOL &&
+					((Satellite)selected_obj).orbit.focus2.getY()+((Satellite)selected_obj).orbit.boss.absoluteCurY()-OBJ_TOL <= y &&
+					y <= ((Satellite)selected_obj).orbit.focus2.getY()+((Satellite)selected_obj).orbit.boss.absoluteCurY()+OBJ_TOL)
+				{
+					selected_obj = ((Satellite)selected_obj).orbit.focus2;//select the focus!
+					return;
+				}
+			}
+			else if(selected_obj instanceof Focus) //if a focus is selected
+			{
+				if(((Focus)selected_obj).getX()+((Focus)selected_obj).owner.boss.absoluteCurX() - OBJ_TOL <= x &&
+					x <= ((Focus)selected_obj).getX()+((Focus)selected_obj).owner.boss.absoluteCurX()+OBJ_TOL &&
+					((Focus)selected_obj).getY()+((Focus)selected_obj).owner.boss.absoluteCurY()-OBJ_TOL <= y &&
+					y <= ((Focus)selected_obj).getY()+((Focus)selected_obj).owner.boss.absoluteCurY()+OBJ_TOL)
+				{
+					return; //the Focus is already selected!
 				}
 			}
 		}
@@ -433,7 +493,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				drag_start=true;
 			}
 			catch(NoObjectLocatedException x){//drag_start=false; //this happens automatically, in mouseReleased.
-				}
+			}
 		}
 	}
 	
@@ -505,6 +565,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		}
 	}
 	
+	//implements zooming
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
 		scale -= ((double)e.getWheelRotation())*GalacticStrategyConstants.SCROLL_SENSITIVITY;
@@ -512,20 +573,34 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			scale = GalacticStrategyConstants.MIN_SCALE;
 		else if(scale > GalacticStrategyConstants.MAX_SCALE)
 			scale = GalacticStrategyConstants.MAX_SCALE;
+		
+		//adjust center if part of screen goes out of bounds ////BOOKMARK
+		if(screenToDataX(0)<(painter.getWidth()-SYS_WIDTH)/2)
+			center_x = (int)((painter.getWidth()-SYS_WIDTH)/2 + painter.getWidth()/(2*scale));//this should be the value of center_x that makes screenToDataX equal to (painter.getWidth()-SYS_WIDTH)/2
+		else if(screenToDataX(painter.getWidth())>(painter.getWidth()+SYS_WIDTH)/2)
+			center_x = (int)((painter.getWidth()+SYS_WIDTH)/2 - painter.getWidth()/(2*scale));
+		
+		if(screenToDataY(0)<(painter.getHeight()-SYS_HEIGHT)/2)
+			center_y = (int)((painter.getHeight()-SYS_HEIGHT)/2 + painter.getHeight()/(2*scale));
+		else if(screenToDataY(painter.getHeight())>(painter.getHeight()+SYS_HEIGHT)/2)
+			center_y = (int)((painter.getHeight()+SYS_HEIGHT)/2 - painter.getHeight()/(2*scale));
+		
 		drawSystem();
 	}
 	
-	private void setUndoPoint()
-	{
-		Object[] o = {system, selected_obj};
-		undostack.objectsChanged(o);
-	}
-	
+	//center_x = (painter.getWidth()+SYS_WIDTH)/2 - ((x-painter.getWidth()/2)/scale)
+		
 	private void setCenter(int x, int y)
 	{
 		center_x=x;
 		center_y=y;
 		drawSystem();
+	}
+
+	private void setUndoPoint()
+	{
+		Object[] o = {system, selected_obj};
+		undostack.objectsChanged(o);
 	}
 	
 	private boolean addStar(int x, int y)
@@ -620,17 +695,20 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	{
 		move_center_x_speed=0;
 		move_center_y_speed=0;
+		recenter_task.cancel();
+		recenter_task = new centerMover();
 	}
 	//end mouselistener code
 	
 	//mouse motion listener code
 	public void mouseDragged(MouseEvent e)
 	{
-		if(selected_obj instanceof StellarObject && drag_start)
+		painter.setCursor(Cursor.getDefaultCursor());
+		if(selected_obj instanceof Selectable && drag_start)
 		{
 			if(selected_obj instanceof Star)
 			{
-				if(locationStarSuitable(selected_obj,screenToDataX(e.getX()),screenToDataY(e.getY())))
+				if(locationStarSuitable((Star)selected_obj,screenToDataX(e.getX()),screenToDataY(e.getY())))
 				{
 					((Star)selected_obj).x = screenToDataX(e.getX());
 					((Star)selected_obj).y = screenToDataY(e.getY());
@@ -638,8 +716,8 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				}
 				else
 				{
-					((Star)selected_obj).x = (int)((screenToDataX(e.getX())-painter.getWidth()/2)/Math.hypot(screenToDataX(e.getX())-painter.getWidth()/2, screenToDataY(e.getY())-painter.getHeight()/2)*(50-selected_obj.size/2) + painter.getWidth()/2);
-					((Star)selected_obj).y = (int)((screenToDataY(e.getY())-painter.getHeight()/2)/Math.hypot(screenToDataX(e.getX())-painter.getWidth()/2, screenToDataY(e.getY())-painter.getHeight()/2)*(50-selected_obj.size/2) + painter.getHeight()/2);
+					((Star)selected_obj).x = (int)((screenToDataX(e.getX())-painter.getWidth()/2)/Math.hypot(screenToDataX(e.getX())-painter.getWidth()/2, screenToDataY(e.getY())-painter.getHeight()/2)*(50-((StellarObject)selected_obj).size/2) + painter.getWidth()/2);
+					((Star)selected_obj).y = (int)((screenToDataY(e.getY())-painter.getHeight()/2)/Math.hypot(screenToDataX(e.getX())-painter.getWidth()/2, screenToDataY(e.getY())-painter.getHeight()/2)*(50-((StellarObject)selected_obj).size/2) + painter.getHeight()/2);
 					drawSystem();
 				}
 			}
@@ -650,6 +728,12 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				((Satellite)selected_obj).orbit.init_x = screenToDataX(e.getX())-((Satellite)selected_obj).orbit.boss.absoluteInitX();
 				((Satellite)selected_obj).orbit.init_y = screenToDataY(e.getY())-((Satellite)selected_obj).orbit.boss.absoluteInitY();
 				((Satellite)selected_obj).orbit.calculateOrbit();
+				drawSystem();
+			} else {
+				//selected_obj is a Focus!
+				((Focus)selected_obj).setX(screenToDataX(e.getX())-((Focus)selected_obj).owner.boss.absoluteCurX());
+				((Focus)selected_obj).setY(screenToDataY(e.getY())-((Focus)selected_obj).owner.boss.absoluteCurY());
+				((Focus)selected_obj).owner.calculateOrbit();
 				drawSystem();
 			}
 		}
@@ -668,29 +752,64 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 						drawSystem();
 					break;
 				case ADD_FOCUS:
-					((Satellite)selected_obj).orbit.focus2_x = screenToDataX(e.getX())-((Satellite)selected_obj).orbit.boss.absoluteInitX();
-					((Satellite)selected_obj).orbit.focus2_y = screenToDataY(e.getY())-((Satellite)selected_obj).orbit.boss.absoluteInitY();
+					((Satellite)selected_obj).orbit.focus2.setX(screenToDataX(e.getX())-((Satellite)selected_obj).orbit.boss.absoluteInitX());
+					((Satellite)selected_obj).orbit.focus2.setY(screenToDataY(e.getY())-((Satellite)selected_obj).orbit.boss.absoluteInitY());
 					((Satellite)selected_obj).orbit.calculateOrbit();
 					drawSystem();
 					break;
 			}
 		}
-		else
-		{
-			//push edges of screen?
-			if(EDGE_BOUND<e.getX() && e.getX()<painter.getWidth()-EDGE_BOUND)
-				move_center_x_speed=0;
-			else if(e.getX()>painter.getWidth()-EDGE_BOUND && e.getX()<=painter.getWidth())
-				move_center_x_speed=e.getX()-painter.getWidth()+EDGE_BOUND;
-			else if(e.getX()< EDGE_BOUND && e.getX() >=0)
-				move_center_x_speed=e.getX()-EDGE_BOUND;
 
-			if(EDGE_BOUND<e.getY() && e.getY()<painter.getHeight()-EDGE_BOUND)
-				move_center_y_speed=0;
-			else if(e.getY()>painter.getHeight()-EDGE_BOUND && e.getY()<=painter.getHeight())
-				move_center_y_speed=e.getY()-painter.getHeight()+EDGE_BOUND;
-			else if(e.getY()< EDGE_BOUND && e.getY() >=0)
-				move_center_y_speed=e.getY()-EDGE_BOUND;
+		boolean previously_moving = true;
+		if(move_center_x_speed==0 && move_center_y_speed==0)
+			previously_moving = false;
+		
+		//sets the speed for camera motion
+		if(EDGE_BOUND<e.getX() && e.getX()<painter.getWidth()-EDGE_BOUND)
+			move_center_x_speed=0;
+		else if(e.getX()>painter.getWidth()-EDGE_BOUND && e.getX()<=painter.getWidth())
+			move_center_x_speed=e.getX()-painter.getWidth()+EDGE_BOUND;
+		else if(e.getX()< EDGE_BOUND && e.getX() >=0)
+			move_center_x_speed=e.getX()-EDGE_BOUND;
+
+		if(EDGE_BOUND<e.getY() && e.getY()<painter.getHeight()-EDGE_BOUND)
+			move_center_y_speed=0;
+		else if(e.getY()>painter.getHeight()-EDGE_BOUND && e.getY()<=painter.getHeight())
+			move_center_y_speed=e.getY()-painter.getHeight()+EDGE_BOUND;
+		else if(e.getY()< EDGE_BOUND && e.getY() >=0)
+			move_center_y_speed=e.getY()-EDGE_BOUND;
+		
+		if(move_center_x_speed==0 && move_center_y_speed==0){//now not moving
+			recenter_task.cancel();
+			recenter_task = new centerMover();
+		}
+		else if(!previously_moving)
+			camera_timer.schedule(recenter_task, 200, 20); //task, then delay, then period
+		
+		//Set the cursor
+		if(move_center_x_speed > 0){
+			if(move_center_y_speed > 0)
+				painter.setCursor(down_right_arrow);
+			else if(move_center_y_speed < 0)
+				painter.setCursor(up_right_arrow);
+			else
+				painter.setCursor(right_arrow);
+		}
+		else if(move_center_x_speed < 0){
+			if(move_center_y_speed > 0)
+				painter.setCursor(down_left_arrow);
+			else if(move_center_y_speed < 0)
+				painter.setCursor(up_left_arrow);
+			else
+				painter.setCursor(left_arrow);
+		}
+		else{ //if move_center_x_speed equals 0
+			if(move_center_y_speed > 0)
+				painter.setCursor(down_arrow);
+			else if(move_center_y_speed < 0)
+				painter.setCursor(up_arrow);
+			else
+				painter.setCursor(Cursor.getDefaultCursor());
 		}
 	}
 	//end mouse motion listener code
@@ -800,7 +919,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			{
 			}
 			
-			JSlider resizer = new JSlider(JSlider.HORIZONTAL, minimumObjectSize(selected_obj),maximumObjectSize(selected_obj), selected_obj.size);
+			JSlider resizer = new JSlider(JSlider.HORIZONTAL, minimumObjectSize((StellarObject)selected_obj),maximumObjectSize((StellarObject)selected_obj), ((StellarObject)selected_obj).size);
 			resizer.setMajorTickSpacing(GalacticStrategyConstants.MAJOR_TICKS_FOR_OBJECT_SIZE);
 			resizer.setMinorTickSpacing(GalacticStrategyConstants.MINOR_TICKS_FOR_OBJECT_SIZE);
 			resizer.setPaintTicks(true);
@@ -830,7 +949,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		
 		public void stateChanged(ChangeEvent e)
 		{
-			selected_obj.size = ((JSlider)e.getSource()).getValue();
+			((StellarObject)selected_obj).size = ((JSlider)e.getSource()).getValue();
 			drawSystem();
 		}
 	}

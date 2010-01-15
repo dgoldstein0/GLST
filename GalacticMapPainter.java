@@ -65,7 +65,7 @@ public class GalacticMapPainter extends JPanel
 							if(sel_sys != sys && drag_options == GDFrame.DRAG_DIST)
 							{
 								double d=Math.hypot(sys.x-sel_sys.x,sys.y-sel_sys.y);
-								if(d<=max_dist_shown)
+								if(((int)d) <= max_dist_shown)
 								{
 									String dist=Integer.toString((int)d);
 									

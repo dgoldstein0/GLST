@@ -8,7 +8,7 @@ public class SystemPainter extends JPanel
 	final int GHOST_OBJ=1;
 	
 	GSystem system;
-	StellarObject selected;
+	Selectable selected;
 	
 	boolean design_view;
 	int focus2_x;
@@ -45,13 +45,18 @@ public class SystemPainter extends JPanel
 			if(selected instanceof Satellite)
 			{
 				g.setColor(Color.YELLOW);
-				g.drawOval(drawX(((Satellite)selected).absoluteInitX()-selected.size/2)-2, drawY(((Satellite)selected).absoluteInitY()-selected.size/2)-2, (int)(selected.size*scale)+4, (int)(selected.size*scale)+4);
+				g.drawOval(drawX(((Satellite)selected).absoluteInitX()-((StellarObject)selected).size/2)-2, drawY(((Satellite)selected).absoluteInitY()-((StellarObject)selected).size/2)-2, (int)(((StellarObject)selected).size*scale)+4, (int)(((StellarObject)selected).size*scale)+4);
 			}
 			else if(selected instanceof Star)
 			{
 				//select a star
 				g.setColor(Color.YELLOW);
-				g.drawOval(drawX(((Star)selected).x-selected.size/2), drawY(((Star)selected).y-selected.size/2), (int)(selected.size*scale), (int)(selected.size*scale));
+				g.drawOval(drawX(((Star)selected).x-((StellarObject)selected).size/2), drawY(((Star)selected).y-((StellarObject)selected).size/2), (int)(((StellarObject)selected).size*scale), (int)(((StellarObject)selected).size*scale));
+			}
+			else if(selected instanceof Focus)
+			{
+				g.setColor(Color.YELLOW);
+				g.drawOval(drawX(((Focus)selected).getX()+(((Focus)selected).owner.boss.absoluteCurX()))-2, drawY(((Focus)selected).getY()+(((Focus)selected).owner.boss.absoluteCurY()))-2, 5,5);
 			}
 		}
 		
@@ -105,7 +110,7 @@ public class SystemPainter extends JPanel
 		g.drawLine(drawX(center_x),drawY(center_y-5),drawX(center_x),drawY(center_y+5));
 	}
 	
-	public void paintSystem(GSystem system, StellarObject selected, boolean view, int centerx, int centery, double sc)
+	public void paintSystem(GSystem system, Selectable selected, boolean view, int centerx, int centery, double sc)
 	{
 		this.system=system;
 		this.selected=selected;
@@ -117,7 +122,7 @@ public class SystemPainter extends JPanel
 		repaint();
 	}
 	
-	public void paintSystem(GSystem system, StellarObject selected, int centerx, int centery, double sc)
+	public void paintSystem(GSystem system, Selectable selected, int centerx, int centery, double sc)
 	{
 		this.system=system;
 		this.selected=selected;
@@ -128,7 +133,7 @@ public class SystemPainter extends JPanel
 		repaint();
 	}
 	
-	public void paintGhostObj(GSystem system, StellarObject selected, int x, int y, int size, int centerx, int centery, double sc)
+	public void paintGhostObj(GSystem system, Selectable selected, int x, int y, int size, int centerx, int centery, double sc)
 	{
 		this.system=system;
 		this.selected=selected;
@@ -159,8 +164,8 @@ public class SystemPainter extends JPanel
 		double focus1_x = ((Satellite)obj).orbit.boss.absoluteCurX();
 		double focus1_y = ((Satellite)obj).orbit.boss.absoluteCurY();
 		
-		int focus2_x = drawX(((Satellite)obj).orbit.focus2_x+focus1_x);
-		int focus2_y = drawY(((Satellite)obj).orbit.focus2_y+focus1_y);
+		int focus2_x = drawX(((Satellite)obj).orbit.focus2.getX()+focus1_x);
+		int focus2_y = drawY(((Satellite)obj).orbit.focus2.getY()+focus1_y);
 		
 		focus1_x=drawX(focus1_x);
 		focus1_y=drawY(focus1_y);

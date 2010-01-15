@@ -4,6 +4,7 @@ public class GSystem implements Positioning
 {
 	HashSet<Satellite> orbiting_objects;
 	HashSet<Star> stars;
+	Fleet[] fleets; //indices = player id's
 	String name;
 	int x;
 	int y;
@@ -24,6 +25,7 @@ public class GSystem implements Positioning
 		this.x=x;
 		this.y=y;
 		navigability=nav;
+		fleets = new Fleet[GalacticStrategyConstants.MAX_PLAYERS];
 	}
 	
 	//this seems to not work right.  I don't know why.  so it is being replaced by massSum
@@ -64,6 +66,8 @@ public class GSystem implements Positioning
 	public void setY(int y){this.y=y;}
 	public int getNavigability(){return navigability;}
 	public void setNavigability(int nav){navigability=nav;}
+	public Fleet[] getFleets(){return fleets;}
+	public void setFleets(Fleet[] f){fleets=f;}
 	
 	public int getWidth(){return width;}
 	public void setWidth(int w){width=w;}

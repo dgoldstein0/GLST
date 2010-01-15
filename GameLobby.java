@@ -26,6 +26,8 @@ import java.awt.event.MouseEvent;
 
 public class GameLobby extends JDialog implements ActionListener, WindowListener, MouseListener
 {
+	static final String LOAD_MAP_MSG = "No map selected";
+	
 	JButton start_game;
 	JButton leave_game;
 	JButton choose_map;
@@ -53,7 +55,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 		
 		JPanel map_panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));//use flowLayout to right-align the row
 		
-		map_label = new JLabel("No map selected"); //BOOKMARK!  should check with GC to see if map_file is already choosen.   
+		map_label = new JLabel(LOAD_MAP_MSG); //BOOKMARK!  should check with GC to see if map_file is already choosen.   
 		map_panel.add(map_label);
 		
 		choose_map = new JButton("Select Map");
@@ -125,6 +127,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 		start_game = new JButton("Start Game");
 		start_game.addActionListener(this);
 		start_game.setMnemonic(KeyEvent.VK_S);
+		start_game.setEnabled(false);
 		p2.add(start_game);
 		
 		leave_game = new JButton("Leave Game");
@@ -164,6 +167,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 	{
 		if(e.getSource()==start_game)
 		{
+			GC.startGame();
 		}
 		else if(e.getSource()==leave_game)
 		{
@@ -178,16 +182,30 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 				//load the map.  notify if errors.  This is supposed to validate the map by attempting to load it
 				
 				try{
-					GC.loadMap(map_file);
-					//BOOKMARK - need to change text in map_label to the NAME of the map
-					map_label.setText(GC.map.getName());
+					GC.loadMap(map_file); //parsing errors render the map invalid, causing one of the messages in the catch statements.
+					//the existence of the name is the second line of defense.
+					if(GC.map.getName() instanceof String){
+						map_label.setText(GC.map.getName());
+					}
+					else{
+						GC.map=null;
+						map_label.setText(LOAD_MAP_MSG);
+						JOptionPane.showMessageDialog(frame, "The selected file is not a completed map.  Please pick a different map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
+					}
 				} catch(FileNotFoundException fnfe) {
+					map_label.setText(LOAD_MAP_MSG); //just in case switching from valid to invalid map
 					JOptionPane.showMessageDialog(frame, "The file was not found.  Please choose another file.", "Error - File not Found", JOptionPane.ERROR_MESSAGE);
 				} catch(ClassCastException cce) {
+					map_label.setText(LOAD_MAP_MSG); //just in case switching from valid to invalid map
 					JOptionPane.showMessageDialog(frame, "The file you have selected is not a map", "Class Casting Error", JOptionPane.ERROR_MESSAGE);
 				} catch(NullPointerException npe) {
+					map_label.setText(LOAD_MAP_MSG); //just in case switching from valid to invalid map
 					JOptionPane.showMessageDialog(frame, "Map loading failed.  The selected file is not a valid map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
 				}
+				
+				//notify other players - send the text in map_label
+				GC.mapChosen();
+				start_game.setEnabled(readyToStart()); //after chosing a valid map, the host could choose an invalid one, thus making the game not ready to start.  For this reason, the setEnabled of start_game belongs down here
 			}
 		}
 		
@@ -203,6 +221,29 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 		GC.endConnection();
 		dispose();
 		GC.startupDialog();
+	}
+	
+	public boolean readyToStart(){
+		System.out.println("check ready to start");
+		if(GC.getNumberOfPlayers()>=2) {
+			if(!map_label.getText().equals(LOAD_MAP_MSG)){
+				//check colors
+				for(int i=0; i<GC.players.length-1; i++){
+					if(color_nums[i] instanceof Integer){
+						for(int j=i+1; j<GC.players.length; j++){
+							if(color_nums[j] instanceof Integer){
+								if(color_nums[i]==color_nums[j])
+									return false;
+							}
+						}
+					}
+				}
+				return true;
+			} else
+				return false;
+		} else {
+			return false;
+		}
 	}
 	
 	//mouselistener code.  used for the color samples.
@@ -225,6 +266,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 				}
 			}
 		}
+		start_game.setEnabled(readyToStart());
 	}
 	public void mousePressed(MouseEvent e){}
 	public void mouseReleased(MouseEvent e){}

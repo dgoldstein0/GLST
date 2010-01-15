@@ -11,8 +11,7 @@ public class Orbit
 	double init_x;
 	double init_y;
 	
-	double focus2_x;
-	double focus2_y;
+	Focus focus2;
 	
 	double cur_x;
 	double cur_y;
@@ -27,7 +26,7 @@ public class Orbit
 	Positioning boss;
 	Satellite obj;
 	
-	public Orbit(Satellite theobj, Positioning boss_obj, int focus2_x, int focus2_y, int init_x, int init_y, int dir)
+	public Orbit(Satellite theobj, Positioning boss_obj, double focus2_x, double focus2_y, double init_x, double init_y, int dir)
 	{
 		boss=boss_obj;
 		obj=theobj;
@@ -35,8 +34,7 @@ public class Orbit
 		direction=dir;
 		this.init_x=init_x-boss.absoluteCurX();
 		this.init_y=init_y-boss.absoluteCurY();
-		this.focus2_x=focus2_x-boss.absoluteCurX();
-		this.focus2_y=focus2_y-boss.absoluteCurY();
+		focus2 = new Focus(focus2_x-boss.absoluteCurX(),focus2_y=focus2_y-boss.absoluteCurY(),this);
 		
 		cur_x=init_x-boss.absoluteCurX();
 		cur_y=init_y-boss.absoluteCurY();
@@ -46,7 +44,7 @@ public class Orbit
 	
 	public synchronized void calculateOrbit()
 	{
-		a = (Math.hypot((double)init_x, (double)init_y)+Math.hypot((double)focus2_x-init_x, (double)focus2_y-init_y))/2;
+		a = (Math.hypot(init_x, init_y)+Math.hypot(focus2.getX()-init_x, focus2.getY()-init_y))/2.0d;
 		
 		//Calculate period.  This depends on mass.
 
@@ -73,22 +71,21 @@ public class Orbit
 	
 	public void calcTimeOffset()
 	{
-		
-		c=Math.hypot((double)focus2_x,(double)focus2_y)/2;
+		c=Math.hypot(focus2.getX(),focus2.getY())/2.0d;
 		b=Math.sqrt(Math.pow(a,2.0d)-Math.pow(c,2.0d));
 		
 		double rot_angle;
-		if(focus2_x != 0)
-			rot_angle=-Math.atan(focus2_y/focus2_x);
-		else if(focus2_y>0)
-			rot_angle = -Math.PI/2;
-		else if(focus2_y<0)
-			rot_angle = Math.PI/2;
+		if(focus2.getX() != 0)
+			rot_angle=-Math.atan(focus2.getY()/focus2.getX());
+		else if(focus2.getY()>0)
+			rot_angle = -Math.PI/2.0d;
+		else if(focus2.getY()<0)
+			rot_angle = Math.PI/2.0d;
 		else
 			rot_angle=0; //doesn't matter, perfect circle
 		
-		double shift_x = (double)(init_x-focus2_x/2);
-		double shift_y = (double)(init_y-focus2_y/2);
+		double shift_x = init_x-focus2.getX()/2.0d;
+		double shift_y = init_y-focus2.getY()/2.0d;
 		
 		double rot_x = shift_x*Math.cos(rot_angle) + shift_y*Math.sin(rot_angle);
 		double rot_y = -shift_x*Math.sin(rot_angle) + shift_y*Math.cos(rot_angle);
@@ -97,6 +94,8 @@ public class Orbit
 		if(rot_y < 0)
 			theta = 2*Math.PI - theta;
 		time_offset = period/(2*Math.PI)*(theta-c/a*Math.sin(theta));
+		
+		System.out.println(Double.toString(time_offset));
 	}
 	
 	public double absoluteCurX(){return cur_x + boss.absoluteCurX();}
@@ -149,11 +148,11 @@ public class Orbit
 
 		
 		double rot_angle;
-		if(focus2_x != 0)
-			rot_angle=-Math.atan(focus2_y/focus2_x);
-		else if(focus2_y>0)
+		if(focus2.getX() != 0)
+			rot_angle=-Math.atan(focus2.getY()/focus2.getX());
+		else if(focus2.getY()>0)
 			rot_angle = Math.PI/2;
-		else if(focus2_y<0)
+		else if(focus2.getY()<0)
 			rot_angle = -Math.PI/2;
 		else
 			rot_angle=0; //doesn't matter, perfect circle
@@ -161,8 +160,8 @@ public class Orbit
 		double needs_shift_x = needs_rot_x*Math.cos(rot_angle) + needs_rot_y*Math.sin(rot_angle);
 		double needs_shift_y = -needs_rot_x*Math.sin(rot_angle) + needs_rot_y*Math.cos(rot_angle);
 		
-		cur_x=(int)(needs_shift_x+focus2_x/2); //shift by focus2x/2?
-		cur_y=(int)(needs_shift_y+focus2_y/2); //shift by focus2y/2?
+		cur_x=(int)(needs_shift_x+focus2.getX()/2); //shift by focus2x/2?
+		cur_y=(int)(needs_shift_y+focus2.getY()/2); //shift by focus2y/2?
 	}
 	
 	//methods required for save/load
@@ -175,10 +174,8 @@ public class Orbit
 	public void setInit_x(double x){init_x=x;}
 	public double getInit_y(){return init_y;}
 	public void setInit_y(double y){init_y=y;}
-	public double getFocus2_x(){return focus2_x;}
-	public void setFocus2_x(double x){focus2_x=x;}
-	public double getFocus2_y(){return focus2_y;}
-	public void setFocus2_y(double y){focus2_y=y;}
+	public Focus getFocus2(){return focus2;}
+	public void setFocus2(Focus x){focus2=x;}
 	public double getCur_x(){return cur_x;}
 	public void setCur_x(double x){cur_x=x;}
 	public double getCur_y(){return cur_y;}

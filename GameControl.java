@@ -10,6 +10,7 @@ public class GameControl
 {
 	static final int DEFAULT_PORT_NUMBER = GalacticStrategyConstants.DEFAULT_PORT_NUMBER;
 	static final String LEFT_LOBBY_MSG = "Im leaving the lobby.";
+	static final String MAP_CHOSEN = "Host chooses map::"; //do not change ending
 	
 	TimeControl TC;
 	int player_id;
@@ -31,7 +32,7 @@ public class GameControl
 	Thread lobbyThread;
 	Thread readThread;
 	
-	Set<Event> pending_execution = Collections.synchronizedSet(new HashSet());
+	Set<Event> pending_execution = Collections.synchronizedSet(new HashSet<Event>());
 	
 	public GameControl(JFrame f)
 	{
@@ -47,7 +48,8 @@ public class GameControl
 		return Player.createPlayer();
 	}
 	
-	public int nextAvailableID(){
+	public int nextAvailableID()
+	{
 		for(int i=0; i<players.length; i++){
 			if(!(players[i] instanceof Player))
 			{
@@ -57,6 +59,16 @@ public class GameControl
 		}
 		System.out.println("no id's available!");
 		return -1; //indicates error
+	}
+	
+	public int getNumberOfPlayers()
+	{
+		int num_players=0;
+		for(int i=0; i<GC.players.length; i++){
+			if(GC.players[i] instanceof Player)
+				num_players++;
+		}
+		return num_players;
 	}
 	
 	public int getPlayer_id(){return player_id;}
@@ -112,6 +124,7 @@ public class GameControl
 				System.out.println("host start sequence begin");
 				
 				//File cur_file = new File("C:\\Users\\David\\Desktop\\zoom_test.xml");
+				reader.readLine();//wait for client
 				sendMap();
 				
 				//estimate time delay
@@ -127,19 +140,13 @@ public class GameControl
 					pingtimes[i] = System.nanoTime();
 					System.out.println("ping" + Integer.toString(i));
 					//pong
-					if(reader.ready())
-					{
+					if(reader.ready()) {
 						pongmsg = reader.readLine();
 						pongtime=System.nanoTime();
 						pong=true;
 						System.out.println("that was a pong!");
 					}
-					try
-					{
-						/*Thread t = new Thread();
-						t.start();
-						t.sleep(10);
-						t.join();*/
+					try {
 						Thread.sleep(10);
 					}
 					catch(InterruptedException ie){}
@@ -174,6 +181,7 @@ public class GameControl
 			{
 				System.out.println("Client start sequence initiated.");
 
+				writer.println("I'm ready!");
 				downloadAndLoadMap(false);
 				System.out.println("map loaded");
 				
@@ -366,6 +374,7 @@ public class GameControl
 						//notify other players and update the Lobby
 						GC.updateGL();
 						GC.setUpLobbyUpdater(); //THIS WILL BE AN ISSUE FOR 3+ PLAYER GAMES.  ESPECIALLY IF ONLY 1 LobbyUpdater used, which checks for msgs from all.  Then we cannot let LobbyUpdater check for updates before player is done being set up
+						mapChosen(); //notify new player of currently chosen map - or lack thereof
 					}
 					catch (SocketTimeoutException ste){}
 					catch (IOException e)
@@ -462,9 +471,9 @@ public class GameControl
 			
 			System.out.println("Connection Established");
 			
-			//display lobby
-			GC.setUpLobbyUpdater();
+			//display lobby.  This order is important.  The lobby must be created before we create the updater for it, since the Host immediately fires off a message containing the current choice of map, but framed as an update
 			GL = new GameLobby(frame, this);
+			GC.setUpLobbyUpdater();
 		}
 		catch (UnknownHostException e)
 		{
@@ -489,6 +498,7 @@ public class GameControl
 	private void updateGL()
 	{
 		GL.updateNames();
+		GL.start_game.setEnabled(GL.readyToStart()); //check to see if the player was the only thing holding up the game - or allowing it to start.  If so, enable/disable start button appropriately
 	}
 	
 	private void setUpLobbyUpdater()
@@ -524,6 +534,11 @@ public class GameControl
 								return;
 							}
 						}
+						else if(notification.indexOf(MAP_CHOSEN) != -1)
+						{
+							GL.map_label.setText(notification.split("::")[1]);
+							GL.start_game.setEnabled(GL.readyToStart()); //check to see if we are ready to start the game, and enable start button if so.
+						}
 					}
 					else
 						Thread.sleep(200);
@@ -544,6 +559,15 @@ public class GameControl
 			PrintWriter w = new PrintWriter(OS, true);
 			w.println(Integer.toString(player_id) +":" + LEFT_LOBBY_MSG);
 			players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
+		}
+	}
+	
+	public void mapChosen() //responsible for informing other players of map choice, or lack thereof
+	{
+		if(OS instanceof OutputStream)
+		{
+			PrintWriter w = new PrintWriter(OS, true);
+			w.println(MAP_CHOSEN + GL.map_label.getText());
 		}
 	}
 	

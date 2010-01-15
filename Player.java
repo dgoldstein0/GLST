@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
+import java.util.HashSet;
 
 public class Player
 {
@@ -9,6 +10,10 @@ public class Player
 	long metal;
 	Color color;
 	int id; //id is used to identify players.  These are assigned by the host of the game.
+	
+	//used for exploration
+	HashSet<GSystem> known_systems; //if you know a system, you know the stars in it.
+	HashSet<Satellite> known_satellites;
 	
 	public static Player createPlayer() throws CancelException
 	{

@@ -9,7 +9,7 @@ import java.util.*;
 
 public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseMotionListener, MouseListener, WindowListener, KeyListener
 {
-	Notifier n;//REMOVE
+	SimpleNotifier n;//REMOVE
 	
 	final static int DRAG_NONE=0;
 	final static int DRAG_DIST=1;
@@ -28,6 +28,10 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	JMenuItem save_item;
 	JMenuItem saveas_item;
 	JMenuItem exit_item;
+	
+	//Galaxy menu items
+	JMenuItem name_gal_item;
+	JMenuItem set_start_loc_item;
 	
 	//help menu items
 	JMenuItem help_item;
@@ -159,6 +163,21 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		
 		menu_bar.add(file_menu);
 		
+		JMenu galaxy_menu = new JMenu("Galaxy");
+		galaxy_menu.setMnemonic(KeyEvent.VK_G);
+		
+		name_gal_item = new JMenuItem("Name the Galaxy");
+		name_gal_item.addActionListener(this);
+		name_gal_item.setMnemonic(KeyEvent.VK_N);
+		galaxy_menu.add(name_gal_item);
+		
+		set_start_loc_item = new JMenuItem("Set Start Locations");
+		set_start_loc_item.addActionListener(this);
+		set_start_loc_item.setMnemonic(KeyEvent.VK_S);
+		galaxy_menu.add(set_start_loc_item);
+		
+		menu_bar.add(galaxy_menu);
+		
 		JMenu help_menu=new JMenu("Help");
 		help_menu.setMnemonic(KeyEvent.VK_H);
 		
@@ -183,7 +202,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		
 		
 		panel=new GalacticMapPainter();
-		n = new Notifier();//REMOVE
+		n = new SimpleNotifier();//REMOVE
 		panel.add(n);
 		
 		frame.add(panel, BorderLayout.CENTER);
@@ -374,6 +393,10 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			save(true);
 		else if (e.getSource()==exit_item || e.getSource()==o_screen_exit)
 			exitProgram();
+		else if (e.getSource() == name_gal_item)
+			nameGalaxy();
+		else if (e.getSource() == set_start_loc_item)
+			;//BOOKMARK!  Must be fixed!
 		else if (e.getSource()==t_add)
 			addSystemOnClick();
 		else if (e.getSource()==c_add)
@@ -393,6 +416,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			{
 				show_dist.setEnabled(true);
 				drag_options=DRAG_RANGE;
+				displayLimit();
 				drawGalaxy();
 			}
 			else
@@ -408,6 +432,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			{
 				show_dist.setEnabled(true);
 				drag_options=DRAG_DIST;
+				displayLimit();
 				drawGalaxy();
 			}
 			else
@@ -570,6 +595,19 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	{
 		if(map instanceof Galaxy)
 		{
+			if(!(map.name instanceof String) || map.name =="")
+			{
+				String temp_name="";
+
+				do{
+					temp_name = JOptionPane.showInputDialog(frame, "The map does not have a name yet.  What would you like to name it?", "Please name the map", JOptionPane.QUESTION_MESSAGE);
+				}while(!(temp_name instanceof String) || temp_name.matches("\\s+") || temp_name =="");
+				
+				map.name = temp_name;
+			}
+			
+
+			
 			boolean ask=(save_as||!(cur_file instanceof File));
 			
 			int returnVal=0;
@@ -667,6 +705,22 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		frame.dispose();
 	}
 	
+	public void nameGalaxy()
+	{
+		String temp_name="";
+
+		do{
+			if(!(map.name instanceof String))
+				temp_name = JOptionPane.showInputDialog(frame, "The map does not have a name yet.  What would you like to name it?", "Please name the map", JOptionPane.QUESTION_MESSAGE);
+			else
+				temp_name = JOptionPane.showInputDialog(frame, "The map's name is: " + map.name + "\nType a new name below and click OK, or\n click CANCEL to keep the current name", "Check Map Name", JOptionPane.QUESTION_MESSAGE);
+			if(!(temp_name instanceof String))
+				return; //the user clicked cancel
+		}while(temp_name.matches("\\s+") || temp_name =="");
+		
+		map.name=temp_name;
+	}
+	
 	public void keyPressed(KeyEvent e){}
 	public void keyTyped(KeyEvent e){}
 	
@@ -678,7 +732,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			//System.out.println("undo");
 			Object[] o = undostack.undoLoad();
 			map = (Galaxy)o[0];
-			selected_systems = (HashSet<GSystem>)o[1];
+			selected_systems = (HashSet<GSystem>)o[1]; //THIS GENERATES A WARNING - unchecked cast
 			drawGalaxy();
 		}
 		else if(undostack.redoPossible() && UndoRedoStack.isCtrlY(e))
@@ -686,7 +740,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			//System.out.println("redo");
 			Object[] o = undostack.redoLoad();
 			map = (Galaxy)o[0];
-			selected_systems = (HashSet<GSystem>)o[1];
+			selected_systems = (HashSet<GSystem>)o[1]; //THIS GENERATES A WARNING - unchecked cast
 			drawGalaxy();
 		}
 	}
@@ -738,15 +792,12 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				if(map instanceof Galaxy)
 					noSystemSelected();
 			}
-			else
-			{
-				shift_down_on_click = e.isShiftDown();
-				alt_down_on_click=e.isAltDown() && !shift_down_on_click; //shift takes precedence to alt
-			}
 			drag_start=false; //insures that the select box behavior is viable
 		}
 		c_x=e.getX();
 		c_y=e.getY();
+		shift_down_on_click = e.isShiftDown();
+		alt_down_on_click=e.isAltDown() && !shift_down_on_click; //shift takes precedence to alt
 		select_but=e.getButton();
 	}
 	
@@ -758,7 +809,26 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		//don't unselect systems after dragging
 		if(!drag_end)
 		{
-			if(!maybeShowContextMenu(e) && e.getClickCount()==2 && selected_systems instanceof HashSet) //ignore double right click, and double left click when no systems are selected
+			try
+			{
+				GSystem temp_sys = locateSystem(e.getX(),e.getY());
+				selectSystem(temp_sys, e.getButton());
+			}
+			catch(NoSystemLocatedException x)
+			{
+				if(!shift_down_on_click && !alt_down_on_click){
+					selected_systems=null;
+					drawGalaxy();
+					
+					if(map instanceof Galaxy)
+						noSystemSelected();
+					else
+						fileIsNotOpen();
+				}
+			}
+		
+			maybeShowContextMenu(e);
+			if(e.getButton()==MouseEvent.BUTTON1 && e.getClickCount()==2 && selected_systems instanceof HashSet) //ignore double right click, and double left click when no systems are selected
 			{
 				if(selected_systems.size()==1) //double click only opens a system when only 1 system is selected.  Happens when alt/shift not held
 				{
@@ -787,9 +857,13 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		{
 			selected_systems = combineSelection();
 			possibly_sel_desel_sys=null;
-			drawGalaxy();
-			if(selected_systems.size() != 0)
+			if(selected_systems.size()==0){
+				selected_systems = null;
+				noSystemSelected();
+			} else
 				systemIsSelected();
+			
+			drawGalaxy();
 		}
 		
 		alt_down_on_click=false;
@@ -804,23 +878,6 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private boolean maybeShowContextMenu(MouseEvent e)
 	{
-
-		try
-		{
-			GSystem temp_sys = locateSystem(e.getX(),e.getY());
-			selectSystem(temp_sys, e.getButton());
-		}
-		catch(NoSystemLocatedException x)
-		{
-			selected_systems=null;
-			drawGalaxy();
-			
-			if(map instanceof Galaxy)
-				noSystemSelected();
-			else
-				fileIsNotOpen();
-		}
-		
 		if (e.isPopupTrigger())
 		{
 			context_menu.show(e.getComponent(),e.getX(), e.getY());
@@ -832,7 +889,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	//start drag-and-move system code
 	public void mouseDragged(MouseEvent e)
-	{
+	{		
 		if(!wait_to_add_sys && map instanceof Galaxy)
 		{
 			if(selected_systems instanceof HashSet && drag_start)
@@ -957,33 +1014,33 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private void selectSystem(GSystem sys, int button)
 	{
-		//shift will allow the use to select multiple systems. shift-clicking a selected system deselects it.  
-		if(shift_down_on_click && selected_systems instanceof HashSet)
-		{
-			if(!selected_systems.contains(sys) && !alt_down_on_click)
-				selected_systems.add(sys);
-			else if(selected_systems.contains(sys) && (button==MouseEvent.BUTTON1 || alt_down_on_click))
+		//shift will allow the use to select multiple systems. shift-clicking a selected system deselects it.
+		if(button==MouseEvent.BUTTON1){
+			if((shift_down_on_click||alt_down_on_click) && selected_systems instanceof HashSet)
 			{
-				selected_systems.remove(sys);
-				
-				//make sure that we didn't wipe out the selected_system list
-				if(selected_systems.size() ==0)
-				{			
-					//if there are no novigable systems left, do this:
+				if(!selected_systems.contains(sys))
+					selected_systems.add(sys);
+				else if(selected_systems.contains(sys) && (button==MouseEvent.BUTTON1 || alt_down_on_click))
+				{
+					selected_systems.remove(sys);
 					
-					selected_systems=null;
-					noSystemSelected();
-					
-					//these lines are necessary because of the systemIsSelected call at the end of the function
-					drawGalaxy();
-					return;
+					//make sure that we didn't wipe out the selected_system list
+					if(selected_systems.size() ==0)
+					{			
+						//if there are no novigable systems left, do this:
+						
+						selected_systems=null;
+						noSystemSelected();
+					} else {
+						systemIsSelected();
+					}
 				}
+				drawGalaxy();
+				return;
+			} else {
+				selected_systems = new HashSet<GSystem>();
+				selected_systems.add(sys);
 			}
-		}
-		else if(button==MouseEvent.BUTTON1)
-		{
-			selected_systems = new HashSet<GSystem>();
-			selected_systems.add(sys);
 		}
 		else //right click, eliminate the need to hold the shift key when right clicking to pull up the context menu with multiple systems
 		{
@@ -1098,6 +1155,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		if(e.getSource()==show_dist)
 		{
 			panel.max_dist_shown=(int)((JSlider)e.getSource()).getValue();
+			displayLimit();
 			if(selected_systems instanceof HashSet)
 				drawGalaxy();
 		}
@@ -1149,6 +1207,11 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			drawGalaxy();
 			setUndoPoint();
 		}
+	}
+	
+	private void displayLimit()
+	{
+		n.showMessage("Limit = "+ Integer.toString(panel.max_dist_shown));
 	}
 	
 	private void help()
