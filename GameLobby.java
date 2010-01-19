@@ -7,6 +7,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.GroupLayout;
+import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import javax.swing.JOptionPane;
@@ -167,11 +168,11 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 	{
 		if(e.getSource()==start_game)
 		{
-			GC.startGame();
+			GC.startGameViaThread();
 		}
 		else if(e.getSource()==leave_game)
 		{
-			leaveGame();
+			leaveGame(true);
 		}
 		else if(e.getSource() == choose_map)
 		{
@@ -212,14 +213,20 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 		//BOOKMARK - need to validate whether or not we are ready to start the game.  based on the result, enable or disable start_game
 	}
 	
-	public void leaveGame()
+	public void leaveGame(boolean swing_thread)
 	{
 		if(GC.hosting)
 			GC.endHost();
 		GC.leavingLobby();
 		
+		if(GC.startThread instanceof Thread)
+			GC.startThread.interrupt();
+		
 		GC.endConnection();
-		dispose();
+		if(swing_thread)//does this always run on the event thread?  need to double check
+			dispose();
+		else
+			SwingUtilities.invokeLater(new Runnable(){public void run(){dispose();}});
 		GC.startupDialog();
 	}
 	
@@ -274,7 +281,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 	public void mouseExited(MouseEvent e){}
 	
 	//window listener used to check if you want to save your file when frame's X is clicked
-	public void windowClosing(WindowEvent e){leaveGame();}
+	public void windowClosing(WindowEvent e){leaveGame(true);}
 	public void windowActivated(WindowEvent e){}
 	public void windowClosed(WindowEvent e){}
 	public void windowDeactivated(WindowEvent e){}
