@@ -2,7 +2,6 @@ import java.util.HashSet;
 
 public class Fleet
 {
-	String name;
 	HashSet<Ship> ships;
 	Player owner;
 	

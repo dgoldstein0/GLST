@@ -72,7 +72,7 @@ public class Orbit
 	public void calcTimeOffset()
 	{
 		c=Math.hypot(focus2.getX(),focus2.getY())/2.0d;
-		b=Math.sqrt(Math.pow(a,2.0d)-Math.pow(c,2.0d));
+		b=Math.sqrt(a*a-c*c);
 		
 		double rot_angle;
 		if(focus2.getX() != 0)
@@ -94,8 +94,6 @@ public class Orbit
 		if(rot_y < 0)
 			theta = 2*Math.PI - theta;
 		time_offset = period/(2*Math.PI)*(theta-c/a*Math.sin(theta));
-		
-		System.out.println(Double.toString(time_offset));
 	}
 	
 	public double absoluteCurX(){return cur_x + boss.absoluteCurX();}
