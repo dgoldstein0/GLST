@@ -31,6 +31,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	//Galaxy menu items
 	JMenuItem name_gal_item;
+	JMenuItem rand_name_sys_item;
 	JMenuItem set_start_loc_item;
 	
 	//help menu items
@@ -170,6 +171,11 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		name_gal_item.addActionListener(this);
 		name_gal_item.setMnemonic(KeyEvent.VK_N);
 		galaxy_menu.add(name_gal_item);
+		
+		rand_name_sys_item = new JMenuItem("Randomize Names for Unnamed Systems");
+		rand_name_sys_item.addActionListener(this);
+		rand_name_sys_item.setMnemonic(KeyEvent.VK_R);
+		galaxy_menu.add(rand_name_sys_item);
 		
 		set_start_loc_item = new JMenuItem("Set Start Locations");
 		set_start_loc_item.addActionListener(this);
@@ -395,6 +401,8 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			exitProgram();
 		else if (e.getSource() == name_gal_item)
 			nameGalaxy();
+		else if (e.getSource() == rand_name_sys_item)
+			randomizeSystemNames();
 		else if (e.getSource() == set_start_loc_item)
 			;//BOOKMARK!  Must be fixed!
 		else if (e.getSource()==t_add)
@@ -601,7 +609,11 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 
 				do{
 					temp_name = JOptionPane.showInputDialog(frame, "The map does not have a name yet.  What would you like to name it?", "Please name the map", JOptionPane.QUESTION_MESSAGE);
-				}while(!(temp_name instanceof String) || temp_name.matches("\\s+") || temp_name =="");
+					if(!(temp_name instanceof String)){
+						JOptionPane.showMessageDialog(frame, "Saving cancelled.  The map must be given a valid name to be able to be saved.", "Nota Bene", JOptionPane.INFORMATION_MESSAGE);
+						return;
+					}
+				}while(temp_name.matches("\\s+") || temp_name =="");
 				
 				map.name = temp_name;
 			}
@@ -713,7 +725,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			if(!(map.name instanceof String))
 				temp_name = JOptionPane.showInputDialog(frame, "The map does not have a name yet.  What would you like to name it?", "Please name the map", JOptionPane.QUESTION_MESSAGE);
 			else
-				temp_name = JOptionPane.showInputDialog(frame, "The map's name is: " + map.name + "\nType a new name below and click OK, or\n click CANCEL to keep the current name", "Check Map Name", JOptionPane.QUESTION_MESSAGE);
+				temp_name = JOptionPane.showInputDialog(frame, "The map's name is: " + map.name + "\nType a new name below and click OK, or\n click CANCEL to keep the current name", map.name);
 			if(!(temp_name instanceof String))
 				return; //the user clicked cancel
 		}while(temp_name.matches("\\s+") || temp_name =="");
@@ -742,6 +754,55 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			map = (Galaxy)o[0];
 			selected_systems = (HashSet<GSystem>)o[1]; //THIS GENERATES A WARNING - unchecked cast
 			drawGalaxy();
+		}
+	}
+	
+	private void randomizeSystemNames()
+	{		
+		LinkedHashSet<String> name_choices = new LinkedHashSet<String>(225); //set the initial capacity of the hashset, so it doesn't waste time expanding
+		
+		try{
+			BufferedReader r = new BufferedReader(new FileReader("star names.txt"));
+			
+			String temp;
+			boolean end=false;
+			while(!end)
+			{
+				temp = r.readLine();
+				if(temp instanceof String)
+					name_choices.add(temp);
+				else
+					end=true;
+			}
+		} catch(FileNotFoundException fnfe) {
+			System.out.println("star names.txt not found!");
+			return;
+		} catch(IOException ioe) {
+			System.out.println("IO error loading star names.");
+			return;
+		}
+		
+		for(GSystem sys : map.systems){
+			if(sys.name instanceof String)
+				name_choices.remove(sys.name);
+		}
+		
+		int i, choice;
+		Random generator= new Random(System.nanoTime());
+		for(GSystem sys : map.systems){
+			if(!(sys.name instanceof String))
+			{
+				//pick random name from name_choices
+				choice = generator.nextInt(name_choices.size());
+				i=0;
+				for(String nm : name_choices)
+				{
+					if(i == choice)
+						sys.name = nm;
+					i++;
+				}
+				name_choices.remove(sys.name);
+			}
 		}
 	}
 	

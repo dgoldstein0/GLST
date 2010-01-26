@@ -11,6 +11,7 @@ public class GalacticMapPainter extends JPanel
 	int nav_level;
 	int nav_display; //the number 0, 1, or 2 specifying which navigabilities to display
 	boolean display_unnavigable;
+	boolean disp_names=true;
 	
 	boolean select_box;
 	int select_box_x1;
@@ -90,12 +91,24 @@ public class GalacticMapPainter extends JPanel
 					g.setColor(Color.ORANGE);
 					g.drawOval(sys.x-4,sys.y-4,9,9);
 					g.setColor(Color.WHITE);
+					
+					g.setFont(g.getFont().deriveFont(Font.BOLD,12.0f));
+					FontMetrics m=g.getFontMetrics(g.getFont());
+					
 					if(nav_display == GDFrame.NAV_DISP_SELECTED)
 					{
-						g.setFont(g.getFont().deriveFont(Font.BOLD,12.0f));
-						FontMetrics m=g.getFontMetrics(g.getFont());
 						g.setColor(Color.WHITE);
 						g.drawString(Integer.toString(sys.navigability), sys.x+3, sys.y+m.getHeight());
+					}
+					else if(disp_names)
+					{
+						if(sys.name instanceof String) {
+							g.setColor(Color.GREEN);
+							g.drawString(sys.name, sys.x+3, sys.y+m.getHeight());
+						} else {
+							g.setColor(Color.YELLOW);
+							g.drawString("Unnamed", sys.x+3, sys.y+m.getHeight());
+						}
 					}
 				}
 			}

@@ -10,6 +10,7 @@ public class Player
 	long metal;
 	Color color;
 	int id; //id is used to identify players.  These are assigned by the host of the game.
+	boolean ready;
 	
 	//used for exploration
 	HashSet<GSystem> known_systems; //if you know a system, you know the stars in it.
@@ -28,6 +29,7 @@ public class Player
 		
 		the_player.money=GalacticStrategyConstants.DEFAULT_MONEY;
 		the_player.metal=GalacticStrategyConstants.DEFAULT_METAL;
+		the_player.ready=false;
 		return the_player;
 	}
 	
@@ -36,6 +38,7 @@ public class Player
 		name = nm;
 		money=GalacticStrategyConstants.DEFAULT_MONEY;
 		metal=GalacticStrategyConstants.DEFAULT_METAL;
+		ready=false;
 	}
 	
 	public Color getColor()
@@ -60,4 +63,6 @@ public class Player
 	public void setMetal(long m){metal=m;}
 	public int getId(){return id;}
 	public void setId(int x){id=x;}
+	public boolean getReady(){return ready;}
+	public void setReady(boolean r){ready=r;}
 }

@@ -103,6 +103,10 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 			color_samples[i] = new JPanel();
 			if(GC.players[i] instanceof Player){
 				player_names[i].setText(GC.players[i].getName());
+				if(GC.players[i].ready)
+					player_names[i].setForeground(Color.GREEN);
+				else
+					player_names[i].setForeground(Color.RED);
 				color_samples[i].setBackground(GC.players[i].getColor()); //player.getColor() returns the default color here, since color is not yet set
 				color_nums[i] = i;
 			}
@@ -125,7 +129,10 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 		
 		JPanel p2 = new JPanel();
 		
-		start_game = new JButton("Start Game");
+		if(GC.hosting)
+			start_game = new JButton("Start Game");
+		else
+			start_game = new JButton("Ready!");
 		start_game.addActionListener(this);
 		start_game.setMnemonic(KeyEvent.VK_S);
 		start_game.setEnabled(false);
@@ -156,6 +163,10 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 					color_samples[i].setBackground(GC.players[i].getColor()); //player.getColor() returns the default color here, since color is not yet set
 					color_nums[i]=i;
 				}
+				if(GC.players[i].ready)
+					player_names[i].setForeground(Color.GREEN);
+				else
+					player_names[i].setForeground(Color.RED);
 			} else {
 				player_names[i].setText("");
 				color_nums[i]=null;
@@ -168,7 +179,12 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 	{
 		if(e.getSource()==start_game)
 		{
-			GC.startGameViaThread();
+			if(GC.hosting)
+				GC.startGameViaThread();
+			else {
+				GC.declareReady();
+				updateNames();
+			}
 		}
 		else if(e.getSource()==leave_game)
 		{
@@ -234,15 +250,18 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 		System.out.println("check ready to start");
 		if(GC.getNumberOfPlayers()>=2) {
 			if(!map_label.getText().equals(LOAD_MAP_MSG)){
+				
 				//check colors
 				for(int i=0; i<GC.players.length-1; i++){
-					if(color_nums[i] instanceof Integer){
+					if(color_nums[i] instanceof Integer){ 
 						for(int j=i+1; j<GC.players.length; j++){
 							if(color_nums[j] instanceof Integer){
 								if(color_nums[i]==color_nums[j])
-									return false;
+									return false; //two colors match
 							}
 						}
+						if(GC.hosting && !GC.players[i].ready)//color_nums[i] instanceof Integer iff players[i] instanceof Player... else error here...
+							return false; //host can't start until all clients are ready
 					}
 				}
 				return true;
@@ -255,25 +274,27 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 	
 	//mouselistener code.  used for the color samples.
 	public void mouseClicked(MouseEvent e){
-		for(int i=0; i<color_samples.length; i++){
-			if(e.getSource() == color_samples[i]){
-				if(GC.players[i] instanceof Player){
-					if(e.getButton() == MouseEvent.BUTTON1){
-						color_nums[i]++;
-						if(color_nums[i] >= GalacticStrategyConstants.DEFAULT_COLORS.length)
-							color_nums[i]=0;
+		if(!GC.players[GC.player_id].ready){ //once ready is clicked by a client, the colors cannot be altered
+			for(int i=0; i<color_samples.length; i++){
+				if(e.getSource() == color_samples[i]){
+					if(GC.players[i] instanceof Player){
+						if(e.getButton() == MouseEvent.BUTTON1){
+							color_nums[i]++;
+							if(color_nums[i] >= GalacticStrategyConstants.DEFAULT_COLORS.length)
+								color_nums[i]=0;
+						}
+						else if(e.getButton() == MouseEvent.BUTTON3){
+							color_nums[i]--;
+							if(color_nums[i] <0)
+								color_nums[i]=GalacticStrategyConstants.DEFAULT_COLORS.length-1;
+						}
+						GC.players[i].setColor(GalacticStrategyConstants.DEFAULT_COLORS[color_nums[i]]);
+						color_samples[i].setBackground(GC.players[i].getColor());
 					}
-					else if(e.getButton() == MouseEvent.BUTTON3){
-						color_nums[i]--;
-						if(color_nums[i] <0)
-							color_nums[i]=GalacticStrategyConstants.DEFAULT_COLORS.length-1;
-					}
-					GC.players[i].setColor(GalacticStrategyConstants.DEFAULT_COLORS[color_nums[i]]);
-					color_samples[i].setBackground(GC.players[i].getColor());
 				}
 			}
+			start_game.setEnabled(readyToStart());
 		}
-		start_game.setEnabled(readyToStart());
 	}
 	public void mousePressed(MouseEvent e){}
 	public void mouseReleased(MouseEvent e){}

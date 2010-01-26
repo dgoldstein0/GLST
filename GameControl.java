@@ -12,6 +12,9 @@ public class GameControl
 	static final int DEFAULT_PORT_NUMBER = GalacticStrategyConstants.DEFAULT_PORT_NUMBER;
 	static final String LEFT_LOBBY_MSG = "Im leaving the lobby.";
 	static final String MAP_CHOSEN = "Host chooses map::"; //do not change ending
+	static final String READY_MSG = "I'm ready, let's start!";
+	static final String NOT_READY_MSG = "wait, I take that back, I'm not ready";
+	static final String START_MSG = "START THE GAME";
 	
 	TimeControl TC;
 	int player_id;
@@ -125,13 +128,15 @@ public class GameControl
 			{
 				System.out.println("host start sequence begin");
 				
+				writer.println(START_MSG);
+				
 				//File cur_file = new File("C:\\Users\\David\\Desktop\\zoom_test.xml");
 				boolean retry=true;
 				while(retry)
 				{
 					if(!Thread.interrupted()){
 						if(reader.ready()){
-							reader.readLine();//wait for client
+							reader.readLine();//wait for client BMM
 							sendMap();
 							retry=false;
 						} else {
@@ -196,7 +201,7 @@ public class GameControl
 			{
 				System.out.println("Client start sequence initiated.");
 
-				writer.println("I'm ready!");
+				writer.println("I'm ready!");//helps make sure the map is sent safely
 				downloadAndLoadMap(false);
 				System.out.println("map loaded");
 				
@@ -393,6 +398,7 @@ public class GameControl
 							if(players[i] instanceof Player){
 								w.println(players[i].getName());
 								w.println(Integer.toString(i));
+								w.println(Boolean.toString(players[i].ready));
 							} else {
 								w.println("skip player>>");
 							}
@@ -500,6 +506,7 @@ public class GameControl
 				if(!name_input.equals("skip player>>")) {
 					Player p = new Player(name_input);
 					p.setId(Integer.parseInt(r.readLine()));
+					p.setReady(Boolean.parseBoolean(r.readLine()));
 					players[p.getId()] = p;
 				}
 			}
@@ -564,9 +571,10 @@ public class GameControl
 				while(!Thread.interrupted()){
 					if(r.ready()) {
 						String notification = r.readLine();
-						if(notification.indexOf(":")!= -1 && notification.split(":")[1].equals(LEFT_LOBBY_MSG)) {
+						String[] split_notification = notification.split(":");
+						if(notification.indexOf(":")!= -1 && split_notification[1].equals(LEFT_LOBBY_MSG)) {
 							if(hosting){
-								int id_leaving = Integer.parseInt(notification.split(":")[0]);
+								int id_leaving = Integer.parseInt(split_notification[0]);
 								players[id_leaving]=null;
 								GC.updateGL();
 								GC.serverThread = new Thread(new HostRunnable());
@@ -577,11 +585,25 @@ public class GameControl
 								GL.leaveGame(false);
 								return;
 							}
+						} else if(notification.indexOf(":")!= -1 && split_notification[1].equals(READY_MSG)) {
+							//only the host should recieve this message
+							int id_ready = Integer.parseInt(split_notification[0]);
+							players[id_ready].ready=true;
+							GC.updateGL(); //this function takes care of enabling/disabling start button for us
+						} else if(notification.indexOf(":")!= -1 && split_notification[1].equals(NOT_READY_MSG)) {
+							//only the host should recieve this message
+							int id_ready = Integer.parseInt(split_notification[0]);
+							players[id_ready].ready=false;
+							GC.updateGL(); //this function takes care of enabling/disabling start button for us
 						}
 						else if(notification.indexOf(MAP_CHOSEN) != -1)
 						{
 							GL.map_label.setText(notification.split("::")[1]);
 							GL.start_game.setEnabled(GL.readyToStart()); //check to see if we are ready to start the game, and enable start button if so.
+						}
+						else if(notification.equals(START_MSG))
+						{
+							GC.startGameViaThread(); //must start on a different thread because start game terminates this one.  If start game ran on this thread, it would end itself.
 						}
 					}
 					else
@@ -603,6 +625,24 @@ public class GameControl
 			PrintWriter w = new PrintWriter(OS, true);
 			w.println(Integer.toString(player_id) +":" + LEFT_LOBBY_MSG);
 			players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
+		}
+	}
+	
+	public void declareReady() //BOOKMARK - in a 3+ player game, this function will need to be modified to notify ALL players in the game
+	{
+		if(OS instanceof OutputStream)
+		{
+			PrintWriter w = new PrintWriter(OS, true);
+			if(!players[player_id].ready)
+			{
+				w.println(Integer.toString(player_id) +":" + READY_MSG);
+				players[player_id].ready=true;
+			}
+			else
+			{
+				w.println(Integer.toString(player_id) +":" + NOT_READY_MSG);
+				players[player_id].ready=false;
+			}
 		}
 	}
 	
