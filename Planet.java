@@ -2,12 +2,10 @@ import java.util.*;
 
 public class Planet extends Satellite
 {
-	String name;
 	long population;
 	HashSet<Satellite> satellites;
 	HashSet<Facility> facilities;
 	Player owner;
-	
 	
 	public Planet(String nm, long pop, int sz, double m, byte habitable)
 	{

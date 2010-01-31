@@ -610,7 +610,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		{
 			if (!(system.stars instanceof HashSet))
 				system.stars=new HashSet<Star>();
-			Star new_star = new Star("", DEFAULT_STAR_SIZE, DEFAULT_STAR_MASS, GalacticStrategyConstants.COLOR_NULL, x, y);
+			Star new_star = new Star("", DEFAULT_STAR_SIZE, DEFAULT_STAR_MASS, GalacticStrategyConstants.COLOR_NULL, x, y, system);
 			system.stars.add(new_star);
 			
 			selected_obj=new_star;

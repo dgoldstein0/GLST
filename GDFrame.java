@@ -32,6 +32,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	//Galaxy menu items
 	JMenuItem name_gal_item;
 	JMenuItem rand_name_sys_item;
+	JMenuItem rand_name_satellites_item;
 	JMenuItem set_start_loc_item;
 	
 	//help menu items
@@ -176,6 +177,11 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		rand_name_sys_item.addActionListener(this);
 		rand_name_sys_item.setMnemonic(KeyEvent.VK_R);
 		galaxy_menu.add(rand_name_sys_item);
+		
+		rand_name_satellites_item = new JMenuItem("Randomize Names for Unnamed Satellites");
+		rand_name_satellites_item.addActionListener(this);
+		rand_name_satellites_item.setMnemonic(KeyEvent.VK_N);
+		galaxy_menu.add(rand_name_satellites_item);
 		
 		set_start_loc_item = new JMenuItem("Set Start Locations");
 		set_start_loc_item.addActionListener(this);
@@ -403,6 +409,8 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			nameGalaxy();
 		else if (e.getSource() == rand_name_sys_item)
 			randomizeSystemNames();
+		else if (e.getSource() == rand_name_satellites_item)
+			randomizeSatelliteNames();
 		else if (e.getSource() == set_start_loc_item)
 			;//BOOKMARK!  Must be fixed!
 		else if (e.getSource()==t_add)
@@ -806,6 +814,78 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		}
 	}
 	
+	private void randomizeSatelliteNames()
+	{		
+		LinkedHashSet<String> name_choices = new LinkedHashSet<String>(13805); //set the initial capacity of the hashset, so it doesn't waste time expanding
+		
+		try{
+			BufferedReader r = new BufferedReader(new FileReader("planet names.txt"));
+			
+			String temp;
+			boolean end=false;
+			while(!end)
+			{
+				temp = r.readLine();
+				if(temp instanceof String)
+					name_choices.add(temp);
+				else
+					end=true;
+			}
+		} catch(FileNotFoundException fnfe) {
+			System.out.println("planet names.txt not found!");
+			return;
+		} catch(IOException ioe) {
+			System.out.println("IO error loading planet names.");
+			return;
+		}
+		
+		for(GSystem sys : map.systems){
+			if(sys.name instanceof String)
+				name_choices.remove(sys.name);
+		}
+		
+		int i, choice;
+		Random generator= new Random(System.nanoTime());
+		for(GSystem sys : map.systems){
+			for(Satellite sat : sys.orbiting_objects)
+			{
+				if(!(sat.name instanceof String))
+				{
+					//pick random name from name_choices
+					choice = generator.nextInt(name_choices.size());
+					i=0;
+					for(String nm : name_choices)
+					{
+						if(i == choice)
+							sat.name = nm;
+						i++;
+					}
+					name_choices.remove(sat.name);
+				}
+				
+				if(sat instanceof Planet)
+				{
+					for(Satellite sat2 : ((Planet)sat).satellites)
+					{
+						if(!(sat2.name instanceof String))
+						{
+							//pick random name from name_choices
+							choice = generator.nextInt(name_choices.size());
+							i=0;
+							for(String nm : name_choices)
+							{
+								if(i == choice)
+									sat2.name = nm;
+								i++;
+							}
+							name_choices.remove(sat2.name);
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	public void mousePressed(MouseEvent e)
 	{
 		try
@@ -1142,7 +1222,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private void addSystem(int x, int y)
 	{
-		GSystem new_sys = new GSystem(x,y,null,null,null,Integer.parseInt(t_nav.getValue().toString()));
+		GSystem new_sys = new GSystem(x,y,null,new HashSet<Satellite>(),null,Integer.parseInt(t_nav.getValue().toString()));
 		if(!(map.systems instanceof HashSet))
 			map.systems = new HashSet<GSystem>();
 		map.systems.add(new_sys);
