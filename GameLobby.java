@@ -252,7 +252,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 			if(!map_label.getText().equals(LOAD_MAP_MSG)){
 				
 				//check colors
-				for(int i=0; i<GC.players.length-1; i++){
+				for(int i=0; i<GC.players.length; i++){
 					if(color_nums[i] instanceof Integer){ 
 						for(int j=i+1; j<GC.players.length; j++){
 							if(color_nums[j] instanceof Integer){
@@ -260,7 +260,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 									return false; //two colors match
 							}
 						}
-						if(GC.hosting && !GC.players[i].ready)//color_nums[i] instanceof Integer iff players[i] instanceof Player... else error here...
+						if(i != 0 && GC.hosting && !GC.players[i].ready)//color_nums[i] instanceof Integer iff players[i] instanceof Player... else error here...
 							return false; //host can't start until all clients are ready
 					}
 				}
