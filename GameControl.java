@@ -7,6 +7,11 @@ import java.net.*;
 import java.io.*;
 import javax.swing.SwingUtilities;
 
+import javax.swing.JFileChooser;
+import java.awt.Color;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+
 public class GameControl
 {
 	static final int DEFAULT_PORT_NUMBER = GalacticStrategyConstants.DEFAULT_PORT_NUMBER;
@@ -318,6 +323,52 @@ public class GameControl
 		}
 		
 		//draw everything
+	}
+	
+	public void startSinglePlayerTest()
+	{
+		try{
+			Player the_player = createThePlayer();
+			player_id=0;
+			the_player.setId(0);
+			the_player.setColor(Color.GREEN);
+			players[0] = the_player;
+		} catch(CancelException e){
+			startupDialog();
+			return;
+		}
+		
+		//CHOOSE AND LOAD MAP
+		JFileChooser filechooser = new JFileChooser();
+		filechooser.setFileFilter(new FileNameExtensionFilter("XML files only", "xml"));
+		
+		//stolen from GameLobby.actionPreformed
+		int val = filechooser.showOpenDialog(frame);
+		if(val==JFileChooser.APPROVE_OPTION){
+			File map_file = filechooser.getSelectedFile();
+			
+			//load the map.  notify if errors.  This is supposed to validate the map by attempting to load it
+			
+			try{
+				loadMap(map_file); //parsing errors render the map invalid, causing one of the messages in the catch statements.
+				//the existence of the name is the second line of defense.
+				if(!(map.getName() instanceof String)){
+					map=null;
+					JOptionPane.showMessageDialog(frame, "The selected file is not a completed map.  Please pick a different map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
+				}
+			} catch(FileNotFoundException fnfe) {
+				JOptionPane.showMessageDialog(frame, "The file was not found.  Please choose another file.", "Error - File not Found", JOptionPane.ERROR_MESSAGE);
+			} catch(ClassCastException cce) {
+				JOptionPane.showMessageDialog(frame, "The file you have selected is not a map", "Class Casting Error", JOptionPane.ERROR_MESSAGE);
+			} catch(NullPointerException npe) {
+				JOptionPane.showMessageDialog(frame, "Map loading failed.  The selected file is not a valid map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
+			}
+			
+			TC = new TimeControl(0);
+			
+			//set game to update itself
+			TC.startConstIntervalTask(new Updater(),5);
+		}
 	}
 	
 	public void host() //creates new thread to host the game on

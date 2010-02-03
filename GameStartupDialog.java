@@ -11,6 +11,7 @@ public class GameStartupDialog implements ActionListener
 {
 	JButton o_screen_host;
 	JButton o_screen_join;
+	JButton o_screen_test;
 	JButton o_screen_about;
 	JButton o_screen_exit;
 	JDialog open_screen_dialog;
@@ -30,6 +31,10 @@ public class GameStartupDialog implements ActionListener
 		o_screen_join.setMnemonic(KeyEvent.VK_J);
 		o_screen_join.addActionListener(this);
 		
+		o_screen_test = new JButton("Single Player Testing");
+		o_screen_test.setMnemonic(KeyEvent.VK_S);
+		o_screen_test.addActionListener(this);
+		
 		o_screen_about = new JButton("Help/About");
 		o_screen_about.setMnemonic(KeyEvent.VK_A);
 		o_screen_about.addActionListener(this);
@@ -44,10 +49,11 @@ public class GameStartupDialog implements ActionListener
 	public void constructDialog()
 	{
 		open_screen_dialog = new JDialog(frame, "Galactic Strategy Game Start", true);
-		open_screen_dialog.setLayout(new GridLayout(4,1));
+		open_screen_dialog.setLayout(new GridLayout(5,1));
 		
 		open_screen_dialog.add(o_screen_host);
 		open_screen_dialog.add(o_screen_join);
+		open_screen_dialog.add(o_screen_test);
 		open_screen_dialog.add(o_screen_about);
 		open_screen_dialog.add(o_screen_exit);
 		
@@ -76,6 +82,11 @@ public class GameStartupDialog implements ActionListener
 		else if(e.getSource() == o_screen_exit)
 		{
 			System.exit(0);
+		}
+		else if(e.getSource() == o_screen_test)
+		{
+			open_screen_dialog.dispose();
+			GC.startSinglePlayerTest();
 		}
 	}
 }
