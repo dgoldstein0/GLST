@@ -812,6 +812,8 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				name_choices.remove(sys.name);
 			}
 		}
+		
+		drawGalaxy();
 	}
 	
 	private void randomizeSatelliteNames()
@@ -849,7 +851,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		for(GSystem sys : map.systems){
 			for(Satellite sat : sys.orbiting_objects)
 			{
-				if(!(sat.name instanceof String))
+				if(sat.name.length() == 0)
 				{
 					//pick random name from name_choices
 					choice = generator.nextInt(name_choices.size());
@@ -867,7 +869,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				{
 					for(Satellite sat2 : ((Planet)sat).satellites)
 					{
-						if(!(sat2.name instanceof String))
+						if(sat2.name.length() == 0)
 						{
 							//pick random name from name_choices
 							choice = generator.nextInt(name_choices.size());

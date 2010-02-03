@@ -76,12 +76,23 @@ public class SystemPainter extends JPanel
 			//draw orbiting objects
 			if(system.orbiting_objects instanceof HashSet)
 			{
+				g.setFont(g.getFont().deriveFont(Font.BOLD,12.0f));
+				FontMetrics m=g.getFontMetrics(g.getFont());
+				
 				for(Satellite orbiting : system.orbiting_objects)
 				{
 					//draw object
 					drawOrbit(orbiting, g);
 					g.setColor(Color.WHITE);
 					g.fillOval(drawX(orbiting.absoluteCurX()-(orbiting.size/2)), drawY(orbiting.absoluteCurY()-(orbiting.size/2)), (int)(orbiting.size*scale), (int)(orbiting.size*scale));
+					
+					if(orbiting.name.length() == 0) {
+						g.setColor(Color.YELLOW);
+						g.drawString("Unnamed", drawX(orbiting.absoluteCurX())+3, drawY(orbiting.absoluteCurY())+m.getHeight());
+					} else {
+						g.setColor(Color.GREEN);
+						g.drawString(orbiting.name, drawX(orbiting.absoluteCurX())+3, drawY(orbiting.absoluteCurY())+m.getHeight());
+					}
 					
 					//draw objects orbiting planets					
 					if(orbiting instanceof Planet && ((Planet)orbiting).satellites instanceof HashSet)
@@ -92,6 +103,14 @@ public class SystemPainter extends JPanel
 							drawOrbit(sat, g);
 							g.setColor(Color.GRAY);
 							g.fillOval(drawX(sat.absoluteCurX()-sat.size/2), drawY(sat.absoluteCurY()-sat.size/2), (int)(sat.size*scale), (int)(sat.size*scale));
+							
+							if(sat.name.length() == 0) {
+								g.setColor(Color.YELLOW);
+								g.drawString("Unnamed", drawX(sat.absoluteCurX())+3, drawY(sat.absoluteCurY())+m.getHeight());
+							} else {
+								g.setColor(Color.GREEN);
+								g.drawString(sat.name, drawX(sat.absoluteCurX())+3, drawY(sat.absoluteCurY())+m.getHeight());
+							}
 						}
 					}
 				}
