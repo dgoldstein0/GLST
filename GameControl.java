@@ -263,6 +263,10 @@ public class GameControl
 		readThread = new Thread(new EventReader());
 		readThread.start();
 		
+		//start game graphics...
+		setupGraphics();
+		showGalaxy();
+		
 		//set game to update itself
 		TC.startConstIntervalTask(new Updater(),5);
 	}
@@ -271,58 +275,6 @@ public class GameControl
 	{
 		startThread = new Thread(new Runnable(){public void run(){GC.startGame();}});
 		startThread.start();
-	}
-	
-	private class Updater extends TimerTask
-	{
-		private Updater(){}
-		
-		public void run()
-		{
-			//updateGame(); //BOOKMARK!
-			System.out.println("update!!" + Long.toString(TC.getTime()));
-		}
-	}
-	
-	public void updateGame()
-	{
-		long time_elapsed=TC.getTime();
-		
-		//start events that need to occur before time_elapsed
-		
-		for(Event e: pending_execution)
-		{
-			if(e.scheduled_time >= time_elapsed)
-			{
-				e.run();
-				pending_execution.remove(e);
-			}
-		}
-		
-		//update all data
-		for(GSystem sys : map.systems)
-		{
-			for(Satellite sat : sys.orbiting_objects)
-			{
-				if(sat instanceof Planet)
-				{
-					for(Facility f : ((Planet)sat).facilities)
-					{
-						f.newTime(time_elapsed);
-					}
-					for(Satellite sat2 : ((Planet)sat).satellites)
-					{
-						if(sat2 instanceof Moon)
-						{
-							for(Facility f : ((Moon)sat2).facilities)
-								f.newTime(time_elapsed);
-						}
-					}
-				}
-			}
-		}
-		
-		//draw everything
 	}
 	
 	public void startSinglePlayerTest()
@@ -365,6 +317,10 @@ public class GameControl
 			}
 			
 			TC = new TimeControl(0);
+			
+			//set up graphics
+			setupGraphics();
+			showGalaxy();
 			
 			//set game to update itself
 			TC.startConstIntervalTask(new Updater(),5);
@@ -810,5 +766,69 @@ public class GameControl
 		try{OS.close();}catch(Exception e){}
 		try{IS.close();}catch(Exception e){}
 		try{the_socket.close();}catch(Exception e){}
+	}
+	
+	//***************************************************************************These next few methods deal with in game updating and game graphics
+	
+	private void setupGraphics()
+	{
+		//sets up GalacticMapPainter, SystemPainter
+	}
+	
+	public void showGalaxy()
+	{
+		//this method shows the GalacticMapPainter in the main viewspace
+	}
+	
+	private class Updater extends TimerTask
+	{
+		private Updater(){}
+		
+		public void run()
+		{
+			//updateGame(); //BOOKMARK!
+			System.out.println("update!!" + Long.toString(TC.getTime()));
+		}
+	}
+	
+	public void updateGame()
+	{
+		long time_elapsed=TC.getTime();
+		
+		//start events that need to occur before time_elapsed
+		
+		for(Event e: pending_execution)
+		{
+			if(e.scheduled_time >= time_elapsed)
+			{
+				e.run();
+				pending_execution.remove(e);
+			}
+		}
+		
+		//update all data
+		for(GSystem sys : map.systems)
+		{
+			for(Satellite sat : sys.orbiting_objects)
+			{
+				if(sat instanceof Planet)
+				{
+					for(Facility f : ((Planet)sat).facilities)
+					{
+						f.newTime(time_elapsed);
+					}
+					for(Satellite sat2 : ((Planet)sat).satellites)
+					{
+						if(sat2 instanceof Moon)
+						{
+							for(Facility f : ((Moon)sat2).facilities)
+								f.newTime(time_elapsed);
+						}
+					}
+				}
+			}
+		}
+		
+		//draw everything
 	}
 }
