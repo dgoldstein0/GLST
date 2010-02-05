@@ -27,9 +27,9 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 	JPanel panel,topbar;
 	JLabel time,resource;	
 	JButton menubutton;
-	JPopupMenu menu;
+	GameMenu menu;
 	JTabbedPane tabbedPane;
-	GamingInterface theinterface;
+	//GamingInterface theinterface;
 	JTextArea log;
 	JPanel stat_and_order;
 	
@@ -40,6 +40,7 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 	{
 		//create frame and layout	
 		frame=new JFrame("Galactic Strategy Game");
+		menu=new GameMenu(frame);
 		//frame.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		frame.setVisible(true);
 		frame.setSize(1500,900);
@@ -85,21 +86,15 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 		panel.add(topbar,c);
 		
 
-	    //Create the popup menu.
+		//Create the menu button
 		menubutton=new JButton("menu");
 		ActionListener actionListener = new ActionListener() {
-		  public void actionPerformed(ActionEvent actionEvent) {
-		    	  menu=new JPopupMenu("menu");
-		    	  Runnable showDialog = new Runnable() {
-		    		  public void run() {
-		    			   menu.show();
-		    		  }
-		    	  };
-          SwingUtilities.invokeLater(showDialog);
-          }
-        };
-        menubutton.addActionListener(actionListener);
-        menubutton.setSize(300, 100);
+			public void actionPerformed(ActionEvent actionEvent) {
+				menu.showMenu();
+			}
+		};
+		menubutton.addActionListener(actionListener);
+		menubutton.setSize(300, 100);
 		c.fill = GridBagConstraints.NONE;
 		c.gridwidth=GridBagConstraints.REMAINDER;
 		c.weightx =0.41;
@@ -129,7 +124,8 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 
 
 		//create the interface
-		theinterface=new GamingInterface();
+		//theinterface=new GamingInterface();
+		JPanel theinterface = new JPanel();
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor=GridBagConstraints.CENTER;
 		c.weightx =0.5;
