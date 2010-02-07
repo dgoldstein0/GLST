@@ -28,9 +28,9 @@ public class GameControl
 	volatile boolean game_started;
 
 	GameControl GC = this;
+	GameInterface GI;
 	GameLobby GL;
 	GameStartupDialog GSD;
-	JFrame frame;
 	
 	volatile ServerSocket the_server_socket; 
 	volatile Socket the_socket;
@@ -44,9 +44,9 @@ public class GameControl
 	
 	Set<Event> pending_execution = Collections.synchronizedSet(new HashSet<Event>());
 	
-	public GameControl(JFrame f)
+	public GameControl(GameInterface gi)
 	{
-		frame = f;
+		GI = gi;
 		players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
 		map=new Galaxy();
 	}
@@ -93,7 +93,7 @@ public class GameControl
 		if(GSD instanceof GameStartupDialog)
 			GSD.constructDialog();
 		else
-			GSD = new GameStartupDialog(frame, this);
+			GSD = new GameStartupDialog(GI.frame, this);
 	}
 	
 	private void startGame()
@@ -264,8 +264,7 @@ public class GameControl
 		readThread.start();
 		
 		//start game graphics...
-		setupGraphics();
-		showGalaxy();
+		GI.drawGalaxy();
 		
 		//set game to update itself
 		TC.startConstIntervalTask(new Updater(),5);
@@ -295,7 +294,7 @@ public class GameControl
 		filechooser.setFileFilter(new FileNameExtensionFilter("XML files only", "xml"));
 		
 		//stolen from GameLobby.actionPreformed
-		int val = filechooser.showOpenDialog(frame);
+		int val = filechooser.showOpenDialog(GI.frame);
 		if(val==JFileChooser.APPROVE_OPTION){
 			File map_file = filechooser.getSelectedFile();
 			
@@ -306,21 +305,20 @@ public class GameControl
 				//the existence of the name is the second line of defense.
 				if(!(map.getName() instanceof String)){
 					map=null;
-					JOptionPane.showMessageDialog(frame, "The selected file is not a completed map.  Please pick a different map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(GI.frame, "The selected file is not a completed map.  Please pick a different map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
 				}
 			} catch(FileNotFoundException fnfe) {
-				JOptionPane.showMessageDialog(frame, "The file was not found.  Please choose another file.", "Error - File not Found", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(GI.frame, "The file was not found.  Please choose another file.", "Error - File not Found", JOptionPane.ERROR_MESSAGE);
 			} catch(ClassCastException cce) {
-				JOptionPane.showMessageDialog(frame, "The file you have selected is not a map", "Class Casting Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(GI.frame, "The file you have selected is not a map", "Class Casting Error", JOptionPane.ERROR_MESSAGE);
 			} catch(NullPointerException npe) {
-				JOptionPane.showMessageDialog(frame, "Map loading failed.  The selected file is not a valid map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(GI.frame, "Map loading failed.  The selected file is not a valid map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
 			}
 			
 			TC = new TimeControl(0);
 			
-			//set up graphics
-			setupGraphics();
-			showGalaxy();
+			//display the Galaxy
+			GI.drawGalaxy();
 			
 			//set game to update itself
 			TC.startConstIntervalTask(new Updater(),5);
@@ -339,7 +337,7 @@ public class GameControl
 			return;
 		}
 		hosting=true;
-		GL=new GameLobby(frame, this);
+		GL=new GameLobby(GI.frame, this);
 		serverThread = new Thread(new HostRunnable());
 		serverThread.start();
 	}
@@ -483,7 +481,7 @@ public class GameControl
 					return;
 				}
 			} catch(NumberFormatException nfe) {
-				JOptionPane.showMessageDialog(frame, "This is not a valid IP address.  Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(GI.frame, "This is not a valid IP address.  Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		
@@ -530,7 +528,7 @@ public class GameControl
 			System.out.println("Connection Established");
 			
 			//display lobby.  This order is important.  The lobby must be created before we create the updater for it, since the Host immediately fires off a message containing the current choice of map, but framed as an update
-			GL = new GameLobby(frame, this);
+			GL = new GameLobby(GI.frame, this);
 			GC.setUpLobbyUpdater();
 		}
 		catch (UnknownHostException e)
@@ -540,14 +538,14 @@ public class GameControl
 		catch (IOException e)
 		{
 			System.err.println("Couldn't get I/O for the connection to the host");
-			JOptionPane.showMessageDialog(frame, "The specified IP could not be reached.", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(GI.frame, "The specified IP could not be reached.", "Error", JOptionPane.ERROR_MESSAGE);
 			endConnection();
 			startupDialog();
 		}
 		catch(NumberFormatException e)
 		{
 			System.err.println("Connection lost");
-			JOptionPane.showMessageDialog(frame, "Connection Lost.", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(GI.frame, "Connection Lost.", "Error", JOptionPane.ERROR_MESSAGE);
 			endConnection();
 			startupDialog();
 		}
@@ -588,7 +586,7 @@ public class GameControl
 								GC.serverThread.start();
 								return;
 							} else {
-								JOptionPane.showMessageDialog(frame, "The host has left the game.", "Host Left", JOptionPane.INFORMATION_MESSAGE);
+								JOptionPane.showMessageDialog(GI.frame, "The host has left the game.", "Host Left", JOptionPane.INFORMATION_MESSAGE);
 								GL.leaveGame(false);
 								return;
 							}
@@ -768,17 +766,28 @@ public class GameControl
 		try{the_socket.close();}catch(Exception e){}
 	}
 	
-	//***************************************************************************These next few methods deal with in game updating and game graphics
-	
-	private void setupGraphics()
+	public void endAllThreads()
 	{
-		//sets up GalacticMapPainter, SystemPainter
+		if(serverThread instanceof Thread)
+			serverThread.interrupt();
+		if(lobbyThread instanceof Thread)
+		{
+			leavingLobby();
+			lobbyThread.interrupt();
+		}
+		if(readThread instanceof Thread)
+		{
+			//BOOKMARK!  send leaving game message
+			readThread.interrupt();
+		}
+		if(startThread instanceof Thread)
+			startThread.interrupt(); //BOOKMARK - in this case, the other player needs to be able to detect if the person left the game.  perhaps modify this to send a notification, and StartGame function to recieve it.
+		if(TC instanceof TimeControl)
+			TC.stopTask();
+		endConnection();
 	}
 	
-	public void showGalaxy()
-	{
-		//this method shows the GalacticMapPainter in the main viewspace
-	}
+	//***************************************************************************These next few methods deal with in game updating
 	
 	private class Updater extends TimerTask
 	{
@@ -787,7 +796,7 @@ public class GameControl
 		public void run()
 		{
 			//updateGame(); //BOOKMARK!
-			System.out.println("update!!" + Long.toString(TC.getTime()));
+			//System.out.println("update!!" + Long.toString(TC.getTime()));
 		}
 	}
 	

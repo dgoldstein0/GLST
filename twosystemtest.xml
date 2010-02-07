@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_17" class="java.beans.XMLDecoder"> 
+ <object class="Galaxy"> 
+  <void property="name"> 
+   <string>Rule of Two</string> 
+  </void> 
+  <void property="systems"> 
+   <object class="java.util.HashSet"> 
+    <void method="add"> 
+     <object id="GSystem0" class="GSystem"> 
+      <void property="fleets"> 
+       <array class="Fleet" length="2"/> 
+      </void> 
+      <void property="height"> 
+       <int>585</int> 
+      </void> 
+      <void property="name"> 
+       <string>Canopus</string> 
+      </void> 
+      <void property="navigability"> 
+       <int>10</int> 
+      </void> 
+      <void property="orbiting_objects"> 
+       <object class="java.util.HashSet"> 
+        <void method="add"> 
+         <object id="Planet0" class="Planet"> 
+          <void property="mass"> 
+           <double>10.0</double> 
+          </void> 
+          <void property="name"> 
+           <string>Nickjames</string> 
+          </void> 
+          <void property="orbit"> 
+           <object id="Orbit0" class="Orbit"> 
+            <void property="a"> 
+             <double>145.36514675407648</double> 
+            </void> 
+            <void property="b"> 
+             <double>83.51923964473208</double> 
+            </void> 
+            <void property="boss"> 
+             <object idref="GSystem0"/> 
+            </void> 
+            <void property="c"> 
+             <double>118.97715116777675</double> 
+            </void> 
+            <void property="cur_x"> 
+             <double>-39.0</double> 
+            </void> 
+            <void property="cur_y"> 
+             <double>119.5</double> 
+            </void> 
+            <void property="direction"> 
+             <int>1</int> 
+            </void> 
+            <void property="focus2"> 
+             <object class="Focus"> 
+              <void property="owner"> 
+               <object idref="Orbit0"/> 
+              </void> 
+              <void property="x"> 
+               <double>-204.0</double> 
+              </void> 
+              <void property="y"> 
+               <double>122.5</double> 
+              </void> 
+             </object> 
+            </void> 
+            <void property="init_x"> 
+             <double>-39.0</double> 
+            </void> 
+            <void property="init_y"> 
+             <double>119.5</double> 
+            </void> 
+            <void property="obj"> 
+             <object idref="Planet0"/> 
+            </void> 
+            <void property="period"> 
+             <double>4952.236224736014</double> 
+            </void> 
+           </object> 
+          </void> 
+          <void property="satellites"> 
+           <object class="java.util.HashSet"/> 
+          </void> 
+          <void property="size"> 
+           <int>10</int> 
+          </void> 
+         </object> 
+        </void> 
+        <void method="add"> 
+         <object id="Planet1" class="Planet"> 
+          <void property="mass"> 
+           <double>10.0</double> 
+          </void> 
+          <void property="name"> 
+           <string>Slouka</string> 
+          </void> 
+          <void property="orbit"> 
+           <object id="Orbit1" class="Orbit"> 
+            <void property="a"> 
+             <double>127.83236022533121</double> 
+            </void> 
+            <void property="b"> 
+             <double>104.83940013553513</double> 
+            </void> 
+            <void property="boss"> 
+             <object idref="GSystem0"/> 
+            </void> 
+            <void property="c"> 
+             <double>73.14241245679554</double> 
+            </void> 
+            <void property="cur_x"> 
+             <double>-121.0</double> 
+            </void> 
+            <void property="cur_y"> 
+             <double>-159.5</double> 
+            </void> 
+            <void property="direction"> 
+             <int>1</int> 
+            </void> 
+            <void property="focus2"> 
+             <object class="Focus"> 
+              <void property="owner"> 
+               <object idref="Orbit1"/> 
+              </void> 
+              <void property="x"> 
+               <double>-97.0</double> 
+              </void> 
+              <void property="y"> 
+               <double>-109.5</double> 
+              </void> 
+             </object> 
+            </void> 
+            <void property="init_x"> 
+             <double>-121.0</double> 
+            </void> 
+            <void property="init_y"> 
+             <double>-159.5</double> 
+            </void> 
+            <void property="obj"> 
+             <object idref="Planet1"/> 
+            </void> 
+            <void property="period"> 
+             <double>4083.8720540023432</double> 
+            </void> 
+           </object> 
+          </void> 
+          <void property="satellites"> 
+           <object class="java.util.HashSet"/> 
+          </void> 
+          <void property="size"> 
+           <int>10</int> 
+          </void> 
+         </object> 
+        </void> 
+        <void method="add"> 
+         <object id="Planet2" class="Planet"> 
+          <void property="mass"> 
+           <double>10.0</double> 
+          </void> 
+          <void property="name"> 
+           <string>Lub</string> 
+          </void> 
+          <void property="orbit"> 
+           <object id="Orbit2" class="Orbit"> 
+            <void property="a"> 
+             <double>159.62742608421664</double> 
+            </void> 
+            <void property="b"> 
+             <double>85.72836554065428</double> 
+            </void> 
+            <void property="boss"> 
+             <object idref="GSystem0"/> 
+            </void> 
+            <void property="c"> 
+             <double>134.653490485765</double> 
+            </void> 
+            <void property="cur_x"> 
+             <double>193.0</double> 
+            </void> 
+            <void property="cur_y"> 
+             <double>-62.5</double> 
+            </void> 
+            <void property="direction"> 
+             <int>1</int> 
+            </void> 
+            <void property="focus2"> 
+             <object class="Focus"> 
+              <void property="owner"> 
+               <object idref="Orbit2"/> 
+              </void> 
+              <void property="x"> 
+               <double>268.0</double> 
+              </void> 
+              <void property="y"> 
+               <double>26.5</double> 
+              </void> 
+             </object> 
+            </void> 
+            <void property="init_x"> 
+             <double>193.0</double> 
+            </void> 
+            <void property="init_y"> 
+             <double>-62.5</double> 
+            </void> 
+            <void property="obj"> 
+             <object idref="Planet2"/> 
+            </void> 
+            <void property="period"> 
+             <double>5698.6525995484235</double> 
+            </void> 
+           </object> 
+          </void> 
+          <void property="satellites"> 
+           <object class="java.util.HashSet"/> 
+          </void> 
+          <void property="size"> 
+           <int>10</int> 
+          </void> 
+         </object> 
+        </void> 
+       </object> 
+      </void> 
+      <void property="stars"> 
+       <object class="java.util.HashSet"> 
+        <void method="add"> 
+         <object class="Star"> 
+          <void property="color"> 
+           <int>2</int> 
+          </void> 
+          <void property="mass"> 
+           <double>10000.0</double> 
+          </void> 
+          <void property="name"> 
+           <string></string> 
+          </void> 
+          <void property="owner"> 
+           <object idref="GSystem0"/> 
+          </void> 
+          <void property="size"> 
+           <int>27</int> 
+          </void> 
+          <void property="x"> 
+           <int>394</int> 
+          </void> 
+          <void property="y"> 
+           <int>283</int> 
+          </void> 
+         </object> 
+        </void> 
+       </object> 
+      </void> 
+      <void property="width"> 
+       <int>790</int> 
+      </void> 
+      <void property="x"> 
+       <int>450</int> 
+      </void> 
+      <void property="y"> 
+       <int>222</int> 
+      </void> 
+     </object> 
+    </void> 
+    <void method="add"> 
+     <object id="GSystem1" class="GSystem"> 
+      <void property="fleets"> 
+       <array class="Fleet" length="2"/> 
+      </void> 
+      <void property="height"> 
+       <int>585</int> 
+      </void> 
+      <void property="name"> 
+       <string>Procyon</string> 
+      </void> 
+      <void property="navigability"> 
+       <int>10</int> 
+      </void> 
+      <void property="orbiting_objects"> 
+       <object class="java.util.HashSet"> 
+        <void method="add"> 
+         <object id="Planet3" class="Planet"> 
+          <void property="mass"> 
+           <double>10.0</double> 
+          </void> 
+          <void property="name"> 
+           <string>Conrada</string> 
+          </void> 
+          <void property="orbit"> 
+           <object id="Orbit3" class="Orbit"> 
+            <void property="a"> 
+             <double>154.29301552992519</double> 
+            </void> 
+            <void property="b"> 
+             <double>146.3882582084975</double> 
+            </void> 
+            <void property="boss"> 
+             <object idref="GSystem1"/> 
+            </void> 
+            <void property="c"> 
+             <double>48.75256403513563</double> 
+            </void> 
+            <void property="cur_x"> 
+             <double>-91.0</double> 
+            </void> 
+            <void property="cur_y"> 
+             <double>-181.5</double> 
+            </void> 
+            <void property="direction"> 
+             <int>1</int> 
+            </void> 
+            <void property="focus2"> 
+             <object class="Focus"> 
+              <void property="owner"> 
+               <object idref="Orbit3"/> 
+              </void> 
+              <void property="x"> 
+               <double>-45.0</double> 
+              </void> 
+              <void property="y"> 
+               <double>-86.5</double> 
+              </void> 
+             </object> 
+            </void> 
+            <void property="init_x"> 
+             <double>-91.0</double> 
+            </void> 
+            <void property="init_y"> 
+             <double>-181.5</double> 
+            </void> 
+            <void property="obj"> 
+             <object idref="Planet3"/> 
+            </void> 
+            <void property="period"> 
+             <double>5415.397206470903</double> 
+            </void> 
+           </object> 
+          </void> 
+          <void property="satellites"> 
+           <object class="java.util.HashSet"/> 
+          </void> 
+          <void property="size"> 
+           <int>10</int> 
+          </void> 
+         </object> 
+        </void> 
+        <void method="add"> 
+         <object id="Planet4" class="Planet"> 
+          <void property="mass"> 
+           <double>10.0</double> 
+          </void> 
+          <void property="name"> 
+           <string>O`Keefe</string> 
+          </void> 
+          <void property="orbit"> 
+           <object id="Orbit4" class="Orbit"> 
+            <void property="a"> 
+             <double>165.24900684589124</double> 
+            </void> 
+            <void property="b"> 
+             <double>81.97055424695758</double> 
+            </void> 
+            <void property="boss"> 
+             <object idref="GSystem1"/> 
+            </void> 
+            <void property="c"> 
+             <double>143.48540866582914</double> 
+            </void> 
+            <void property="cur_x"> 
+             <double>194.0</double> 
+            </void> 
+            <void property="cur_y"> 
+             <double>-124.5</double> 
+            </void> 
+            <void property="direction"> 
+             <int>1</int> 
+            </void> 
+            <void property="focus2"> 
+             <object class="Focus"> 
+              <void property="owner"> 
+               <object idref="Orbit4"/> 
+              </void> 
+              <void property="x"> 
+               <double>180.0</double> 
+              </void> 
+              <void property="y"> 
+               <double>-223.5</double> 
+              </void> 
+             </object> 
+            </void> 
+            <void property="init_x"> 
+             <double>194.0</double> 
+            </void> 
+            <void property="init_y"> 
+             <double>-124.5</double> 
+            </void> 
+            <void property="obj"> 
+             <object idref="Planet4"/> 
+            </void> 
+            <void property="period"> 
+             <double>6002.320800843194</double> 
+            </void> 
+           </object> 
+          </void> 
+          <void property="satellites"> 
+           <object class="java.util.HashSet"/> 
+          </void> 
+          <void property="size"> 
+           <int>10</int> 
+          </void> 
+         </object> 
+        </void> 
+        <void method="add"> 
+         <object id="Planet5" class="Planet"> 
+          <void property="mass"> 
+           <double>10.0</double> 
+          </void> 
+          <void property="name"> 
+           <string>Stirling</string> 
+          </void> 
+          <void property="orbit"> 
+           <object id="Orbit5" class="Orbit"> 
+            <void property="a"> 
+             <double>188.52211275420888</double> 
+            </void> 
+            <void property="b"> 
+             <double>182.10992421422466</double> 
+            </void> 
+            <void property="boss"> 
+             <object idref="GSystem1"/> 
+            </void> 
+            <void property="c"> 
+             <double>48.75</double> 
+            </void> 
+            <void property="cur_x"> 
+             <double>-222.0</double> 
+            </void> 
+            <void property="cur_y"> 
+             <double>-69.5</double> 
+            </void> 
+            <void property="direction"> 
+             <int>1</int> 
+            </void> 
+            <void property="focus2"> 
+             <object class="Focus"> 
+              <void property="owner"> 
+               <object idref="Orbit5"/> 
+              </void> 
+              <void property="x"> 
+               <double>-78.0</double> 
+              </void> 
+              <void property="y"> 
+               <double>-58.5</double> 
+              </void> 
+             </object> 
+            </void> 
+            <void property="init_x"> 
+             <double>-222.0</double> 
+            </void> 
+            <void property="init_y"> 
+             <double>-69.5</double> 
+            </void> 
+            <void property="obj"> 
+             <object idref="Planet5"/> 
+            </void> 
+            <void property="period"> 
+             <double>7313.990019108101</double> 
+            </void> 
+           </object> 
+          </void> 
+          <void property="satellites"> 
+           <object class="java.util.HashSet"> 
+            <void method="add"> 
+             <object id="Moon0" class="Moon"> 
+              <void property="mass"> 
+               <double>1.0</double> 
+              </void> 
+              <void property="name"> 
+               <string>Borisivanov</string> 
+              </void> 
+              <void property="orbit"> 
+               <object id="Orbit6" class="Orbit"> 
+                <void property="a"> 
+                 <double>37.06749494730992</double> 
+                </void> 
+                <void property="b"> 
+                 <double>28.231173933594157</double> 
+                </void> 
+                <void property="boss"> 
+                 <object idref="Planet5"/> 
+                </void> 
+                <void property="c"> 
+                 <double>24.020824298928627</double> 
+                </void> 
+                <void property="cur_x"> 
+                 <double>-26.0</double> 
+                </void> 
+                <void property="cur_y"> 
+                 <double>-42.0</double> 
+                </void> 
+                <void property="direction"> 
+                 <int>1</int> 
+                </void> 
+                <void property="focus2"> 
+                 <object class="Focus"> 
+                  <void property="owner"> 
+                   <object idref="Orbit6"/> 
+                  </void> 
+                  <void property="x"> 
+                   <double>-2.0</double> 
+                  </void> 
+                  <void property="y"> 
+                   <double>-48.0</double> 
+                  </void> 
+                 </object> 
+                </void> 
+                <void property="init_x"> 
+                 <double>-26.0</double> 
+                </void> 
+                <void property="init_y"> 
+                 <double>-42.0</double> 
+                </void> 
+                <void property="obj"> 
+                 <object idref="Moon0"/> 
+                </void> 
+                <void property="period"> 
+                 <double>580286.0948661397</double> 
+                </void> 
+               </object> 
+              </void> 
+              <void property="size"> 
+               <int>6</int> 
+              </void> 
+             </object> 
+            </void> 
+           </object> 
+          </void> 
+          <void property="size"> 
+           <int>10</int> 
+          </void> 
+         </object> 
+        </void> 
+       </object> 
+      </void> 
+      <void property="stars"> 
+       <object class="java.util.HashSet"> 
+        <void method="add"> 
+         <object class="Star"> 
+          <void property="color"> 
+           <int>5</int> 
+          </void> 
+          <void property="mass"> 
+           <double>10000.0</double> 
+          </void> 
+          <void property="name"> 
+           <string></string> 
+          </void> 
+          <void property="owner"> 
+           <object idref="GSystem1"/> 
+          </void> 
+          <void property="size"> 
+           <int>39</int> 
+          </void> 
+          <void property="x"> 
+           <int>391</int> 
+          </void> 
+          <void property="y"> 
+           <int>289</int> 
+          </void> 
+         </object> 
+        </void> 
+       </object> 
+      </void> 
+      <void property="width"> 
+       <int>790</int> 
+      </void> 
+      <void property="x"> 
+       <int>388</int> 
+      </void> 
+      <void property="y"> 
+       <int>248</int> 
+      </void> 
+     </object> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 

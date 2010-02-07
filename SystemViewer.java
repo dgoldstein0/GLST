@@ -4,7 +4,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
 
-public class SystemViewer extends JDialog implements ActionListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
+public class SystemViewer extends JDialog implements ActionListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, WindowListener
 {
 	static int DEFAULT_STAR_SIZE=GalacticStrategyConstants.DEFAULT_STAR_SIZE;
 	static int DEFAULT_STAR_ZONE_SIZE=GalacticStrategyConstants.DEFAULT_STAR_ZONE_SIZE;
@@ -89,6 +89,8 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		
 		this.frame=frame;
 		system=sys;
+		
+		addWindowListener(this);
 		
 		painter = new SystemPainter(true);
 		painter.addMouseListener(this);
@@ -955,4 +957,20 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	}
 	
 	private void editSelected(){new editDialog();}
+	
+	public void windowClosing(WindowEvent e)
+	{
+		if(TC instanceof TimeControl)
+		{
+			TC.stopTask();
+			TimeUpdater(0);
+		}
+	}
+	
+	public void windowClosed(WindowEvent e){}
+	public void windowIconified(WindowEvent e){}
+	public void windowDeiconified(WindowEvent e){}
+	public void windowDeactivated(WindowEvent e){}
+	public void windowActivated(WindowEvent e){}
+	public void windowOpened(WindowEvent e){}
 }

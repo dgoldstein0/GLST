@@ -18,6 +18,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.FlowLayout;
+import java.awt.BorderLayout;
 
 
 public class GameInterface implements Runnable, ActionListener, ChangeListener, MouseMotionListener, MouseListener, WindowListener
@@ -29,9 +30,16 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 	JButton menubutton;
 	GameMenu menu;
 	JTabbedPane tabbedPane;
-	//GamingInterface theinterface;
 	JTextArea log;
 	JPanel stat_and_order;
+	JPanel theinterface;
+	
+	GalacticMapPainter GalaxyPanel;
+	SystemPainter SystemPanel;
+	
+	GameControl GC;
+	
+	boolean mode; //Galaxy=true, system=false.  reflected by isGalaxyDisplayed and isSystemDisplayed
 	
 	final String indentation="     ";
 
@@ -42,9 +50,10 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 		frame=new JFrame("Galactic Strategy Game");
 		menu=new GameMenu(frame);
 		//frame.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		frame.setVisible(true);
 		frame.setSize(1500,900);
 		frame.setMinimumSize(new Dimension(800,600));
+		frame.addWindowListener(this);
+		
 		panel= new JPanel(new GridBagLayout());
 		GridBagConstraints c=new GridBagConstraints();
 		frame.add(panel);
@@ -124,8 +133,7 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 
 
 		//create the interface
-		//theinterface=new GamingInterface();
-		JPanel theinterface = new JPanel();
+		theinterface = new JPanel(new BorderLayout());
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor=GridBagConstraints.CENTER;
 		c.weightx =0.5;
@@ -155,9 +163,16 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 		c.gridy=2;
 		stat_and_order.setBorder(BorderFactory.createLineBorder(Color.RED));
 		panel.add(stat_and_order,c);	
-		
 	
-				      
+		setupGraphics();
+	
+		frame.pack();
+		
+		//set up game control
+		GC = new GameControl(this);
+		
+		frame.setVisible(true);	
+		GC.startupDialog();
 	}	
 	
 	//for the tabbed pane
@@ -178,6 +193,45 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 	{
 		SwingUtilities.invokeLater(new GameInterface());
 	}
+	
+	private void setupGraphics()
+	{
+		//sets up GalacticMapPainter, SystemPainter
+		GalaxyPanel = new GalacticMapPainter();
+		SystemPanel = new SystemPainter(false);
+		mode=false;//should soon be fixed;
+	}
+	
+	public void drawGalaxy()
+	{
+		System.out.println("Draw Galaxy!");
+		//this method shows the GalacticMapPainter in the main viewspace
+		if(isSystemDisplayed())
+		{
+			theinterface.removeAll();
+			theinterface.add(GalaxyPanel); //automatically adds to center
+			mode=true;
+		}
+		GalaxyPanel.paintGalaxy(GC.map, null, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false);
+		frame.pack();
+	}
+	
+	public void drawSystem(GSystem sys, Selectable selected)
+	{
+		System.out.println("Draw System!");
+		//this method shows the GalacticMapPainter in the main viewspace
+		if(isGalaxyDisplayed())
+		{
+			theinterface.removeAll();
+			theinterface.add(SystemPanel); //automatically adds to center
+			mode=false;
+		}
+		SystemPanel.paintSystem(sys, selected, theinterface.getWidth()/2, theinterface.getHeight()/2, 1.0d);
+		frame.pack();
+	}
+	
+	public boolean isGalaxyDisplayed(){return mode;}
+	public boolean isSystemDisplayed(){return !mode;}
 	
 	public void run()
 	{
@@ -248,13 +302,14 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 	@Override
 	public void windowClosed(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowClosing(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+		GC.endAllThreads(); //used to end any connections, and notify other players, in addition to closing errant threads.
+		System.exit(0);
 	}
 
 	@Override
@@ -280,5 +335,4 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 		// TODO Auto-generated method stub
 		
 	}
-
 }

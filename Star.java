@@ -18,15 +18,17 @@ public class Star extends StellarObject
 		owner=o;
 	}
 	
-	//save/loading methods
-	public Star(){}
-	public String getName()
+	public String generateName()
 	{
 		if(name != "")
 			return owner.name + " " + name;
 		else
 			return owner.name;
 	}
+	
+	//save/loading methods
+	public Star(){}
+	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 	public GSystem getOwner(){return owner;}
 	public void setOwner(GSystem o){owner=o;}
