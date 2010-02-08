@@ -53,9 +53,12 @@ public class GalacticStrategyConstants
 	static final boolean DEFAULT_DISPLAY_UNNAV = false; //false = do not display systems with nav's below the threshold, true = display them, but gray instead of white
 	//**********************INTERFACE SETTINGS******************************************************************************//
 	
-	static int EDGE_BOUND=40; //this is the distance from the edge of the system, in pixels, at which the system will start to be scrolled
-	static int SYS_WIDTH=1200; //the allowed width of a system
-	static int SYS_HEIGHT=1000; //the allowed height of a system
+	static final int EDGE_BOUND=40; //this is the distance from the edge of the system, in pixels, at which the system will start to be scrolled
+	static final int SYS_WIDTH=1200; //the allowed width of a system
+	static final int SYS_HEIGHT=1000; //the allowed height of a system
+	
+	static final int GALAXY_WIDTH=800; //the width of the galaxy
+	static final int GALAXY_HEIGHT=600; //the height of the galaxy
 	
 	static final double DEFAULT_SCALE = 1.0d; //this sets the default scale for the view of the system
 	static final double MIN_SCALE = 1.0d;

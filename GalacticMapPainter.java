@@ -23,12 +23,15 @@ public class GalacticMapPainter extends JPanel
 	int ghost_x;
 	int ghost_y;
 	
+	double scale;
+	
 	public GalacticMapPainter()
 	{
 		super(new FlowLayout(FlowLayout.LEFT));
 		drag_options=GDFrame.DRAG_NONE;
 		max_dist_shown=GalacticStrategyConstants.DEFAULT_DIST;
 		nav_level=GalacticStrategyConstants.DEFAULT_NAV_LEVEL;
+		scale=1.0d;
 	}
 	
 	public void paintComponent(Graphics g)
@@ -47,13 +50,13 @@ public class GalacticMapPainter extends JPanel
 						g.setColor(Color.GRAY);
 					else
 						g.setColor(Color.WHITE);
-					g.fillOval(sys.x-2,sys.y-2,5,5);
+					g.fillOval(scaleNum(sys.x-2),scaleNum(sys.y-2),scaleNum(5),scaleNum(5));
 					if(nav_display == GDFrame.NAV_DISP_ALL)
 					{
 						g.setFont(g.getFont().deriveFont(Font.BOLD,12.0f));
 						FontMetrics m=g.getFontMetrics(g.getFont());
 						g.setColor(Color.WHITE);
-						g.drawString(Integer.toString(sys.navigability), sys.x+3, sys.y+m.getHeight());
+						g.drawString(Integer.toString(sys.navigability), scaleNum(sys.x+3), scaleNum(sys.y)+m.getHeight());
 					}
 					
 					if(selected instanceof HashSet)
@@ -68,12 +71,12 @@ public class GalacticMapPainter extends JPanel
 									String dist=Integer.toString((int)d);
 									
 									g.setColor(Color.RED);
-									g.drawLine(sel_sys.x, sel_sys.y, sys.x, sys.y);
+									g.drawLine(scaleNum(sel_sys.x), scaleNum(sel_sys.y), scaleNum(sys.x), scaleNum(sys.y));
 									
 									g.setFont(g.getFont().deriveFont(Font.BOLD,11.0f));
 									FontMetrics m=g.getFontMetrics(g.getFont());
 									g.setColor(Color.WHITE);
-									g.drawString(dist,(sel_sys.x+sys.x)/2-m.stringWidth(dist)/2,(sel_sys.y+sys.y)/2+m.getHeight()/2);
+									g.drawString(dist,scaleNum((sel_sys.x+sys.x)/2)-m.stringWidth(dist)/2,scaleNum((sel_sys.y+sys.y)/2)+m.getHeight()/2);
 								}
 							}
 						}
@@ -86,7 +89,7 @@ public class GalacticMapPainter extends JPanel
 				for(GSystem sys : selected)
 				{
 					g.setColor(Color.ORANGE);
-					g.drawOval(sys.x-4,sys.y-4,9,9);
+					g.drawOval(scaleNum(sys.x-4),scaleNum(sys.y-4),scaleNum(9),scaleNum(9));
 					g.setColor(Color.WHITE);
 					
 					g.setFont(g.getFont().deriveFont(Font.BOLD,12.0f));
@@ -95,16 +98,16 @@ public class GalacticMapPainter extends JPanel
 					if(nav_display == GDFrame.NAV_DISP_SELECTED)
 					{
 						g.setColor(Color.WHITE);
-						g.drawString(Integer.toString(sys.navigability), sys.x+3, sys.y+m.getHeight());
+						g.drawString(Integer.toString(sys.navigability), scaleNum(sys.x+3), scaleNum(sys.y)+m.getHeight());
 					}
 					else if(disp_names)
 					{
 						if(sys.name instanceof String) {
 							g.setColor(Color.GREEN);
-							g.drawString(sys.name, sys.x+3, sys.y+m.getHeight());
+							g.drawString(sys.name, scaleNum(sys.x+3), scaleNum(sys.y)+m.getHeight());
 						} else {
 							g.setColor(Color.YELLOW);
-							g.drawString("Unnamed", sys.x+3, sys.y+m.getHeight());
+							g.drawString("Unnamed", scaleNum(sys.x+3), scaleNum(sys.y)+m.getHeight());
 						}
 					}
 				}
@@ -115,7 +118,7 @@ public class GalacticMapPainter extends JPanel
 				for(GSystem sel_sys : selected)
 				{
 					g.setColor(Color.GREEN);
-					g.drawOval(sel_sys.x-max_dist_shown,sel_sys.y-max_dist_shown,2*max_dist_shown,2*max_dist_shown);
+					g.drawOval(scaleNum(sel_sys.x-max_dist_shown),scaleNum(sel_sys.y-max_dist_shown),scaleNum(2*max_dist_shown),scaleNum(2*max_dist_shown));
 				}
 			}
 		}
@@ -123,16 +126,19 @@ public class GalacticMapPainter extends JPanel
 		if(select_box)
 		{
 			g.setColor(Color.GRAY);
-			g.drawRect(select_box_x1, select_box_y1, select_box_x2-select_box_x1, select_box_y2-select_box_y1);
+			g.drawRect(scaleNum(select_box_x1), scaleNum(select_box_y1), scaleNum(select_box_x2-select_box_x1), scaleNum(select_box_y2-select_box_y1));
 		}
 		else if(ghost_system)
 		{
 			g.setColor(Color.GRAY);
-			g.fillOval(ghost_x-2,ghost_y-2,5,5);
+			g.fillOval(scaleNum(ghost_x-2),scaleNum(ghost_y-2),scaleNum(5),scaleNum(5));
 		}
+		
+		g.setColor(Color.WHITE);
+		g.drawRect(0,0,scaleNum(GalacticStrategyConstants.GALAXY_WIDTH), scaleNum(GalacticStrategyConstants.GALAXY_HEIGHT));
 	}
 	
-	public void paintGalaxy(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav)
+	public void paintGalaxy(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, double sc)
 	{
 		this.map=map;
 		this.selected=selected;
@@ -147,10 +153,12 @@ public class GalacticMapPainter extends JPanel
 		else
 			drag_options=options;
 		
+		scale=sc;
+		
 		repaint();
 	}
 	
-	public void paintSelect(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, int x1, int y1, int x2, int y2)
+	public void paintSelect(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, int x1, int y1, int x2, int y2, double sc)
 	{
 		this.map=map;
 		this.selected=selected;
@@ -168,10 +176,12 @@ public class GalacticMapPainter extends JPanel
 		select_box=true;
 		ghost_system=false;
 		
+		scale=sc;
+		
 		repaint();
 	}
 	
-	public void paintGhostSystem(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, int ghost_x, int ghost_y)
+	public void paintGhostSystem(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, int ghost_x, int ghost_y, double sc)
 	{
 		this.map=map;
 		this.selected=selected;
@@ -189,6 +199,13 @@ public class GalacticMapPainter extends JPanel
 		else
 			drag_options=options;
 		
+		scale=sc;
+		
 		repaint();
+	}
+	
+	private int scaleNum(int x)
+	{
+		return (int)(((double)x)*scale);
 	}
 }

@@ -13,15 +13,15 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.event.ComponentListener;
+import java.awt.event.ComponentEvent;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.FlowLayout;
 import java.awt.BorderLayout;
 
 
-public class GameInterface implements Runnable, ActionListener, ChangeListener, MouseMotionListener, MouseListener, WindowListener
+public class GameInterface implements Runnable, ActionListener, MouseMotionListener, MouseListener, WindowListener, ComponentListener
 {
 	
 	JFrame frame;
@@ -38,8 +38,11 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 	SystemPainter SystemPanel;
 	
 	GameControl GC;
+	GSystem sys;
+	Selectable selected_in_sys;
 	
 	boolean mode; //Galaxy=true, system=false.  reflected by isGalaxyDisplayed and isSystemDisplayed
+	boolean graphics_started; //used to indicate whether graphics have been started yet - that is, whether the Galaxy has been drawn yet.
 	
 	final String indentation="     ";
 
@@ -53,6 +56,7 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 		frame.setSize(1500,900);
 		frame.setMinimumSize(new Dimension(800,600));
 		frame.addWindowListener(this);
+		frame.addComponentListener(this);
 		
 		panel= new JPanel(new GridBagLayout());
 		GridBagConstraints c=new GridBagConstraints();
@@ -199,24 +203,28 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 		//sets up GalacticMapPainter, SystemPainter
 		GalaxyPanel = new GalacticMapPainter();
 		SystemPanel = new SystemPainter(false);
-		mode=false;//should soon be fixed;
+		graphics_started=false;
 	}
 	
 	public void drawGalaxy()
 	{
 		System.out.println("Draw Galaxy!");
 		//this method shows the GalacticMapPainter in the main viewspace
-		if(isSystemDisplayed())
+		if(isSystemDisplayed() || !graphics_started)
 		{
 			theinterface.removeAll();
 			theinterface.add(GalaxyPanel); //automatically adds to center
 			mode=true;
+			graphics_started=true;
 		}
-		GalaxyPanel.paintGalaxy(GC.map, null, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false);
+		double scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
+		GalaxyPanel.paintGalaxy(GC.map, null, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, scale);
 		frame.pack();
 	}
 	
-	public void drawSystem(GSystem sys, Selectable selected)
+	
+	//before calling this function, sys and selected_in_sys should be specified.  the latter may be null.
+	public void drawSystem()
 	{
 		System.out.println("Draw System!");
 		//this method shows the GalacticMapPainter in the main viewspace
@@ -226,8 +234,25 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 			theinterface.add(SystemPanel); //automatically adds to center
 			mode=false;
 		}
-		SystemPanel.paintSystem(sys, selected, theinterface.getWidth()/2, theinterface.getHeight()/2, 1.0d);
+		SystemPanel.paintSystem(sys, selected_in_sys, theinterface.getWidth()/2, theinterface.getHeight()/2, 1.0d);
 		frame.pack();
+	}
+	
+	public void redraw()
+	{
+		if(graphics_started)
+		{
+			if(isGalaxyDisplayed())
+			{
+				double scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
+				System.out.println(Double.toString(scale));
+				GalaxyPanel.paintGalaxy(GC.map, null, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, scale);
+			}
+			else //before getting to here, sys and selected_in_sys should be specified.  the latter may be null.
+			{
+				SystemPanel.paintSystem(sys, selected_in_sys, theinterface.getWidth()/2, theinterface.getHeight()/2, 1.0d);
+			}
+		}
 	}
 	
 	public boolean isGalaxyDisplayed(){return mode;}
@@ -241,12 +266,6 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void stateChanged(ChangeEvent arg0) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -334,5 +353,14 @@ public class GameInterface implements Runnable, ActionListener, ChangeListener, 
 	public void windowOpened(WindowEvent arg0) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void componentHidden(ComponentEvent e){}
+	public void componentMoved(ComponentEvent e){}
+	public void componentShown(ComponentEvent e){}
+	
+	public void componentResized(ComponentEvent e)
+	{
+		redraw();
 	}
 }
