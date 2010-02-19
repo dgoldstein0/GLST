@@ -25,11 +25,17 @@ public class SystemPainter extends JPanel
 	double center_x;
 	double center_y;
 	
+	boolean display_back=false;
+	Image return_arrow;
+	
+	static int arrow_size = 25;
+	
 	public SystemPainter(boolean design)
 	{
 		setMinimumSize(new Dimension(800,600));
 		design_view=design;
 		ghost_obj=GHOST_NONE;
+		return_arrow=Toolkit.getDefaultToolkit().getImage("images/return_arrow.jpg");
 	}
 	
 	public void paintComponent(Graphics g)
@@ -37,27 +43,21 @@ public class SystemPainter extends JPanel
 		super.paintComponent(g);
 		setBackground(Color.BLACK);
 		
-		if(design_view)
-		{
+		if(design_view) {
 			g.setColor(new Color(255,255,0,100));
 			g.drawOval(drawX((getWidth()-100)/2),drawY((getHeight()-100)/2),(int)(100*scale),(int)(100*scale));
-			
-			if(selected instanceof Satellite)
-			{
-				g.setColor(Color.YELLOW);
-				g.drawOval(drawX(((Satellite)selected).absoluteInitX()-((StellarObject)selected).size/2)-2, drawY(((Satellite)selected).absoluteInitY()-((StellarObject)selected).size/2)-2, (int)(((StellarObject)selected).size*scale)+4, (int)(((StellarObject)selected).size*scale)+4);
-			}
-			else if(selected instanceof Star)
-			{
-				//select a star
-				g.setColor(Color.YELLOW);
-				g.drawOval(drawX(((Star)selected).x-((StellarObject)selected).size/2), drawY(((Star)selected).y-((StellarObject)selected).size/2), (int)(((StellarObject)selected).size*scale), (int)(((StellarObject)selected).size*scale));
-			}
-			else if(selected instanceof Focus)
-			{
-				g.setColor(Color.YELLOW);
-				g.drawOval(drawX(((Focus)selected).getX()+(((Focus)selected).owner.boss.absoluteCurX()))-2, drawY(((Focus)selected).getY()+(((Focus)selected).owner.boss.absoluteCurY()))-2, 5,5);
-			}
+		}
+		
+		if(selected instanceof Satellite) {
+			g.setColor(Color.YELLOW);
+			g.drawOval(drawX(((Satellite)selected).absoluteInitX()-((StellarObject)selected).size/2)-2, drawY(((Satellite)selected).absoluteInitY()-((StellarObject)selected).size/2)-2, (int)(((StellarObject)selected).size*scale)+4, (int)(((StellarObject)selected).size*scale)+4);
+		} else if(selected instanceof Star) {
+			//select a star
+			g.setColor(Color.YELLOW);
+			g.drawOval(drawX(((Star)selected).x-((StellarObject)selected).size/2), drawY(((Star)selected).y-((StellarObject)selected).size/2), (int)(((StellarObject)selected).size*scale), (int)(((StellarObject)selected).size*scale));
+		} else if(selected instanceof Focus) {
+			g.setColor(Color.YELLOW);
+			g.drawOval(drawX(((Focus)selected).getX()+(((Focus)selected).owner.boss.absoluteCurX()))-2, drawY(((Focus)selected).getY()+(((Focus)selected).owner.boss.absoluteCurY()))-2, 5,5);
 		}
 		
 		if(system instanceof GSystem)
@@ -127,9 +127,12 @@ public class SystemPainter extends JPanel
 		g.setColor(Color.RED);
 		g.drawLine(drawX(center_x-5),drawY(center_y),drawX(center_x+5),drawY(center_y));
 		g.drawLine(drawX(center_x),drawY(center_y-5),drawX(center_x),drawY(center_y+5));
+		
+		if(display_back)
+			g.drawImage(return_arrow, getWidth()-arrow_size, 0, arrow_size, arrow_size, this);
 	}
 	
-	public void paintSystem(GSystem system, Selectable selected, boolean view, int centerx, int centery, double sc)
+	public void paintSystem(GSystem system, Selectable selected, boolean view, double centerx, double centery, double sc)
 	{
 		this.system=system;
 		this.selected=selected;
@@ -141,7 +144,7 @@ public class SystemPainter extends JPanel
 		repaint();
 	}
 	
-	public void paintSystem(GSystem system, Selectable selected, int centerx, int centery, double sc)
+	public void paintSystem(GSystem system, Selectable selected, double centerx, double centery, double sc)
 	{
 		this.system=system;
 		this.selected=selected;
@@ -152,7 +155,19 @@ public class SystemPainter extends JPanel
 		repaint();
 	}
 	
-	public void paintGhostObj(GSystem system, Selectable selected, int x, int y, int size, int centerx, int centery, double sc)
+	public void paintSystem(GSystem system, Selectable selected, double centerx, double centery, double sc, boolean back)
+	{
+		this.system=system;
+		this.selected=selected;
+		ghost_obj=GHOST_NONE;
+		center_x=centerx;
+		center_y=centery;
+		scale=sc;
+		display_back = back;
+		repaint();
+	}
+	
+	public void paintGhostObj(GSystem system, Selectable selected, int x, int y, int size, double centerx, double centery, double sc)
 	{
 		this.system=system;
 		this.selected=selected;

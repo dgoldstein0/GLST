@@ -20,8 +20,10 @@ import javax.swing.*;
 import java.awt.FlowLayout;
 import java.awt.BorderLayout;
 
+import java.util.*;
 
-public class GameInterface implements Runnable, ActionListener, MouseMotionListener, MouseListener, WindowListener, ComponentListener
+
+public class GameInterface implements ActionListener, MouseMotionListener, MouseListener, WindowListener, ComponentListener
 {
 	
 	JFrame frame;
@@ -34,12 +36,18 @@ public class GameInterface implements Runnable, ActionListener, MouseMotionListe
 	JPanel stat_and_order;
 	JPanel theinterface;
 	
-	GalacticMapPainter GalaxyPanel;
-	SystemPainter SystemPanel;
-	
 	GameControl GC;
-	GSystem sys;
+	
+	GalacticMapPainter GalaxyPanel;
+	double gal_scale; //the scale which the galaxy is painted at.
+	HashSet<GSystem> selected_sys; //stores a set of currently selected systems - that is, a set of one item.  This is necessary because multiple selection is possible in GDFrame
+	
+	SystemPainter SystemPanel;
+	GSystem sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
 	Selectable selected_in_sys;
+	double sys_scale;
+	double sys_center_x;
+	double sys_center_y;
 	
 	boolean mode; //Galaxy=true, system=false.  reflected by isGalaxyDisplayed and isSystemDisplayed
 	boolean graphics_started; //used to indicate whether graphics have been started yet - that is, whether the Galaxy has been drawn yet.
@@ -51,9 +59,8 @@ public class GameInterface implements Runnable, ActionListener, MouseMotionListe
 	{
 		//create frame and layout	
 		frame=new JFrame("Galactic Strategy Game");
-		menu=new GameMenu(frame);
 		//frame.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		frame.setSize(1500,900);
+		//frame.setSize(1500,900);
 		frame.setMinimumSize(new Dimension(800,600));
 		frame.addWindowListener(this);
 		frame.addComponentListener(this);
@@ -145,6 +152,7 @@ public class GameInterface implements Runnable, ActionListener, MouseMotionListe
 		c.gridx = 0;
 		c.gridy = 1;    
 		theinterface.setBorder(BorderFactory.createLineBorder(Color.BLUE));
+		theinterface.addMouseListener(this);
 		panel.add(theinterface,c);
 		
 		//create the chat and information log
@@ -169,11 +177,15 @@ public class GameInterface implements Runnable, ActionListener, MouseMotionListe
 		panel.add(stat_and_order,c);	
 	
 		setupGraphics();
+		selected_sys = new HashSet<GSystem>();
 	
 		frame.pack();
 		
 		//set up game control
 		GC = new GameControl(this);
+		
+		//set up in-game menu for later display
+		menu=new GameMenu(GC, frame);
 		
 		frame.setVisible(true);	
 		GC.startupDialog();
@@ -195,7 +207,7 @@ public class GameInterface implements Runnable, ActionListener, MouseMotionListe
 
 	public static void main(String[] args)
 	{
-		SwingUtilities.invokeLater(new GameInterface());
+		SwingUtilities.invokeLater(new Runnable(){public void run(){new GameInterface();}});
 	}
 	
 	private void setupGraphics()
@@ -217,9 +229,9 @@ public class GameInterface implements Runnable, ActionListener, MouseMotionListe
 			mode=true;
 			graphics_started=true;
 		}
-		double scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
-		GalaxyPanel.paintGalaxy(GC.map, null, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, scale);
-		frame.pack();
+		gal_scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
+		GalaxyPanel.paintGalaxy(GC.map, selected_sys, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, gal_scale);
+		frame.setVisible(true); //makes all components within the frame displayable.  frame.pack() does this too, but pack resizes the frame to fit all components in their preferred sizes
 	}
 	
 	
@@ -234,8 +246,11 @@ public class GameInterface implements Runnable, ActionListener, MouseMotionListe
 			theinterface.add(SystemPanel); //automatically adds to center
 			mode=false;
 		}
-		SystemPanel.paintSystem(sys, selected_in_sys, theinterface.getWidth()/2, theinterface.getHeight()/2, 1.0d);
-		frame.pack();
+		sys_scale = 1.0d;
+		sys_center_x = theinterface.getWidth()/2;
+		sys_center_y = theinterface.getHeight()/2;
+		SystemPanel.paintSystem(sys, selected_in_sys, sys_center_x, sys_center_y, sys_scale, true);
+		frame.setVisible(true); //makes all components within the frame displayable.  frame.pack() does this too, but pack resizes the frame to fit all components in their preferred sizes
 	}
 	
 	public void redraw()
@@ -244,13 +259,13 @@ public class GameInterface implements Runnable, ActionListener, MouseMotionListe
 		{
 			if(isGalaxyDisplayed())
 			{
-				double scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
-				System.out.println(Double.toString(scale));
-				GalaxyPanel.paintGalaxy(GC.map, null, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, scale);
+				gal_scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
+				System.out.println(Double.toString(gal_scale));
+				GalaxyPanel.paintGalaxy(GC.map, selected_sys, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, gal_scale);
 			}
 			else //before getting to here, sys and selected_in_sys should be specified.  the latter may be null.
 			{
-				SystemPanel.paintSystem(sys, selected_in_sys, theinterface.getWidth()/2, theinterface.getHeight()/2, 1.0d);
+				SystemPanel.paintSystem(sys, selected_in_sys, sys_center_x, sys_center_y, sys_scale, true);
 			}
 		}
 	}
@@ -258,12 +273,6 @@ public class GameInterface implements Runnable, ActionListener, MouseMotionListe
 	public boolean isGalaxyDisplayed(){return mode;}
 	public boolean isSystemDisplayed(){return !mode;}
 	
-	public void run()
-	{
-		//set the frame
-
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		// TODO Auto-generated method stub
@@ -300,16 +309,103 @@ public class GameInterface implements Runnable, ActionListener, MouseMotionListe
 		
 	}
 
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	public void mousePressed(MouseEvent e) {
 	}
 
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
+	public void mouseReleased(MouseEvent e) {
+		if(graphics_started) {
+			if(isGalaxyDisplayed()){
+				selectSystemAt(((double)e.getX())/gal_scale, ((double)e.getY())/gal_scale);
+				if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2 && sys instanceof GSystem)
+					drawSystem();
+				else
+					redraw();
+			} else { //system is displayed
+				if(e.getX() >= theinterface.getWidth() - SystemPainter.arrow_size && e.getY() <= SystemPainter.arrow_size)
+					drawGalaxy();
+				else
+				{
+					//look for object to select
+					selectInSystemAt(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
+					redraw();
+				}
+			}
+		}
+	}
+	
+	private void selectSystemAt(double x, double y)
+	{
+		for(GSystem the_sys : GC.map.systems) //BOOKMARK - this should search through GC.players[GC.player_id].known_systems
+		{
+			if(Math.hypot(the_sys.x - x, the_sys.y-y) <= GalacticStrategyConstants.SELECTION_TOLERANCE)
+			{
+				sys=the_sys;
+				selected_sys.clear();
+				selected_sys.add(sys);
+				return;
+			}
+		}
 		
+		//if no system found, make sure to deselect
+		sys=null;
+		selected_sys.clear();
+	}
+	
+	private void selectInSystemAt(double x, double y)
+	{
+		final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/sys_scale; //tolerance
+		
+		if(sys.stars instanceof HashSet)
+		{
+			for(Star st : sys.stars)
+			{
+				//search for star...
+				if(st.x-st.size/2 <= x && x <= st.x+st.size/2 && st.y-st.size/2 <= y && y <= st.y+st.size/2)
+				{
+					selected_in_sys = st;
+					return;
+				}
+			}
+		}
+		
+		//search orbiting planets/objects
+		if(sys.orbiting_objects instanceof Set)
+		{
+			for(Satellite orbiting : sys.orbiting_objects)
+			{
+				//search for satellites...
+				if(orbiting.absoluteCurX()-orbiting.size/2 <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 && orbiting.absoluteCurY()-orbiting.size/2 <= y && y <= orbiting.absoluteCurY() + orbiting.size/2)
+				{
+					selected_in_sys=orbiting;
+					return;
+				}
+				
+				if(orbiting instanceof Planet && ((Planet)(orbiting)).satellites instanceof Set)
+				{
+					Planet cur_planet=(Planet)orbiting;
+					for(Satellite sat : cur_planet.satellites)
+					{
+						if(sat.absoluteCurX()-OBJ_TOL <= x && x <= sat.absoluteCurX()+OBJ_TOL && sat.absoluteCurY()-OBJ_TOL <= y && y <= sat.absoluteCurY()+OBJ_TOL)
+						{
+							selected_in_sys=sat;
+							return;
+						}
+					}
+				}
+			}
+		}
+		//if nothing found
+		selected_in_sys = null;
+	}
+	
+	private double sysScreenToDataX(int x)
+	{
+		return (x-theinterface.getWidth()/2)/sys_scale+sys_center_x;
+	}
+	
+	private double sysScreenToDataY(int y)
+	{
+		return (y-theinterface.getHeight()/2)/sys_scale+sys_center_y;
 	}
 
 	@Override

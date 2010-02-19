@@ -695,7 +695,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			{
 				map=null;
 				cur_file=null;
-				panel.paintGalaxy(null,null, DRAG_NONE, GalacticStrategyConstants.DEFAULT_NAV_LEVEL, GalacticStrategyConstants.DEFAULT_NAV_OPTIONS, display_unnavigable);
+				panel.paintGalaxy(null,null, DRAG_NONE, GalacticStrategyConstants.DEFAULT_NAV_LEVEL, GalacticStrategyConstants.DEFAULT_NAV_OPTIONS, display_unnavigable, 1.0d);
 				
 				fileIsNotOpen();
 				showOpenScreenDialog();
@@ -895,6 +895,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	{
 		try
 		{
+			//look for a system as a potential point for a user to start a drag
 			GSystem sys=locateSystem(e.getX(),e.getY());
 			
 			if(selected_systems instanceof HashSet)//prepare for potential drag
@@ -1102,7 +1103,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 					}
 				}
 				
-				panel.paintSelect(map, combineSelection(), drag_options, current_nav_level, nav_display, display_unnavigable, x1, y1, x2, y2);
+				panel.paintSelect(map, combineSelection(), drag_options, current_nav_level, nav_display, display_unnavigable, x1, y1, x2, y2, 1.0d);
 				drag_end=true;
 				
 				if(selected_systems instanceof HashSet && selected_systems.size() != 0)
@@ -1131,7 +1132,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	public void mouseMoved(MouseEvent e)
 	{
 		if(wait_to_add_sys)
-			panel.paintGhostSystem(map, selected_systems, drag_options, current_nav_level, nav_display, display_unnavigable, e.getX(), e.getY());
+			panel.paintGhostSystem(map, selected_systems, drag_options, current_nav_level, nav_display, display_unnavigable, e.getX(), e.getY(), 1.0d);
 	}
 		
 	public void mouseExited(MouseEvent e){}
@@ -1208,7 +1209,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private void drawGalaxy()
 	{
-		panel.paintGalaxy(map, selected_systems, drag_options, current_nav_level, nav_display, display_unnavigable);
+		panel.paintGalaxy(map, selected_systems, drag_options, current_nav_level, nav_display, display_unnavigable, 1.0d);
 	}
 	
 	private class NoSystemLocatedException extends Exception
