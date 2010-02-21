@@ -260,7 +260,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			if(isGalaxyDisplayed())
 			{
 				gal_scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
-				System.out.println(Double.toString(gal_scale));
+				//System.out.println(Double.toString(gal_scale));
 				GalaxyPanel.paintGalaxy(GC.map, selected_sys, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, gal_scale);
 			}
 			else //before getting to here, sys and selected_in_sys should be specified.  the latter may be null.

@@ -820,6 +820,7 @@ public class GameControl
 		{
 			for(Satellite sat : sys.orbiting_objects)
 			{
+				sat.orbit.move(time_elapsed);
 				if(sat instanceof Planet)
 				{
 					for(Facility f : ((Planet)sat).facilities)
@@ -828,6 +829,7 @@ public class GameControl
 					}
 					for(Satellite sat2 : ((Planet)sat).satellites)
 					{
+						sat2.orbit.move(time_elapsed);
 						if(sat2 instanceof Moon)
 						{
 							for(Facility f : ((Moon)sat2).facilities)
@@ -837,8 +839,10 @@ public class GameControl
 				}
 			}
 			
+			
 		}
 		
 		//draw everything
+		GI.redraw();
 	}
 }

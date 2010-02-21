@@ -17,6 +17,7 @@ public class Planet extends Satellite
 		mass=m;
 		habitability=habitable;
 		satellites=new HashSet<Satellite>();
+		facilities=new HashSet<Facility>();
 	}
 	
 	public void popChange()
@@ -25,7 +26,7 @@ public class Planet extends Satellite
 	}
 	
 	//methods required for load/save
-	public Planet(){}
+	public Planet(){facilities = new HashSet<Facility>();}
 	public HashSet<Satellite> getSatellites(){return satellites;}
 	public void setSatellites(HashSet<Satellite> sat){satellites=sat;}
 	public HashSet<Facility> getFacilities(){return facilities;}

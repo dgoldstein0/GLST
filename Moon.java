@@ -10,9 +10,10 @@ public class Moon extends Satellite
 		this.mass=m;
 		this.name=nm;
 		this.size=sz;
+		facilities = new HashSet<Facility>();
 	}
 	
-	public Moon(){}
+	public Moon(){facilities = new HashSet<Facility>();}
 	public HashSet<Facility> getFacilities(){return facilities;}
 	public void setFacilities(HashSet<Facility> fac){facilities=fac;}
 	public Player getOwner(){return owner;}
