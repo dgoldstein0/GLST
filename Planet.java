@@ -6,9 +6,11 @@ public class Planet extends Satellite
 	HashSet<Satellite> satellites;
 	HashSet<Facility> facilities;
 	Player owner;
+	GSystem system;
 	
-	public Planet(String nm, long pop, int sz, double m, byte habitable)
+	public Planet(GSystem sys, String nm, long pop, int sz, double m, byte habitable)
 	{
+		system=sys;
 		name=nm;
 		population=pop;
 		size=sz;

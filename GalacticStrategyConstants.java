@@ -88,7 +88,9 @@ public class GalacticStrategyConstants
 	
 	//Defaults for Bases
 	final static int initial_soldier=1000;
-	final static int initial_endu=100;
+	final static int initial_base_endu=500;
+	final static int initial_shipyard_endu = 200;
+	final static int initial_mine_endu = 150;
 	final static int solider_upgraderate=1000;
 	final static int endu_upgraderate=100;
 	

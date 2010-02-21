@@ -1,4 +1,6 @@
-public class Ship
+import java.util.HashSet;
+
+public class Ship extends Targetter implements Targetable
 {
 	Player owner;
 	
@@ -11,25 +13,32 @@ public class Ship
 	int hull_strength;
 	int damage;
 	
-	int pos_x;
+	GSystem location;
+	int pos_x; //pos_x and pos_y indicate where in the system the ship is located
 	int pos_y;
 	
-	int cost;
 	int soldier;
 	
-	Ship target;
+	HashSet<Targetter> aggressors;
 	
-	public Ship(Player ow, String nm, int type)
+	public Ship(String nm, int type)
 	{
 		name = nm;
 		this.type = type;
-		owner=ow;
 		energy = GalacticStrategyConstants.sTypes[type].max_energy;
-		max_energy = GalacticStrategyConstants.sTypes[type].max_energy;
+		max_energy = energy;
 		hull_strength = GalacticStrategyConstants.sTypes[type].hull;
-		cost=GalacticStrategyConstants.sTypes[type].cost;
-		soldier=GalacticStrategyConstants.sTypes[type].soldier_capacity;						//assume ships are fully loaded when built
+		soldier=GalacticStrategyConstants.sTypes[type].soldier_capacity;//assume ships are fully loaded when built
 		damage=0;
+		aggressors = new HashSet<Targetter>();
+	}
+	
+	public void assemble(Shipyard builder)
+	{
+		owner=builder.location.owner;
+		pos_x = builder.assemble_x;
+		pos_y = builder.assemble_y;
+		location.fleets[owner.getId()].add(this);
 	}
 	
 	public void addDamage(int d)
@@ -41,7 +50,10 @@ public class Ship
 	
 	public void destroyed()
 	{
+		location.fleets[owner.getId()].remove(this);
 	}
+	
+	public HashSet<Targetter> getAggressors(){return aggressors;}
 	
 	//methods required for save/load
 	public Ship(){}
@@ -59,9 +71,6 @@ public class Ship
 	public void setDamage(int d){damage=d;}
 	public void setX(int x){pos_x=x;}
 	public void setY(int y){pos_y=y;}
-	public void assemble(int x, int y) {};
 	public Player getOwner() {return owner;}
 	public int getSoldier() {return soldier;}
-	public Ship getTarget(){return target;}
-	public void setTarget(Ship s){target = s;}
 }

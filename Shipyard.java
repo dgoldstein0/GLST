@@ -4,14 +4,17 @@ import java.util.*;
 public class Shipyard extends Facility{
 
 	ArrayList<Ship> manufac_queue;      //manufacture queue
-	int assemble_x;      				//x coord of assemble point
-	int assemble_y;						//y coord
-	int default_x;						//default coords to create the new ship, then move to assemble point
+	int assemble_x;      //x coord of assemble point
+	int assemble_y;	//y coord
+	int default_x;	//default coords to create the new ship, then move to assemble point
 	int default_y;
 	
-	public Shipyard() {		
+	public Shipyard(Planet loc) {		
 		manufac_queue=new ArrayList<Ship>(GalacticStrategyConstants.queue_capa);
-	}	
+		location = loc;
+		damage=0;
+		endurance = GalacticStrategyConstants.initial_shipyard_endu;
+	}
 	
 	public void addToQueue(Ship ship)
 	{
@@ -20,11 +23,8 @@ public class Shipyard extends Facility{
 		
 	public void produce()
 	{
-		Ship newship=new Ship(location.owner,manufac_queue.get(0).name,manufac_queue.get(0).type);         	//produce the 1st one in the queue
+		Ship newship=manufac_queue.get(0);//produce the 1st one in the queue
 		manufac_queue.remove(0);
-		newship.setX(default_x);
-		newship.setY(default_y);
-		newship.assemble(assemble_x,assemble_y);
+		newship.assemble(this);
 	}
-			
 }
