@@ -11,11 +11,13 @@ public class Player
 	Color color;
 	int id; //id is used to identify players.  These are assigned by the host of the game.
 	boolean ready;
+	HashSet<Ship> ships;
 	
-	//used for exploration
+	//used for exploration.  Only the computer
 	HashSet<GSystem> known_systems; //if you know a system, you know the stars in it.
 	HashSet<Satellite> known_satellites;
 	
+	//this constructor prompts for the user to name the player himself
 	public static Player createPlayer() throws CancelException
 	{
 		Player the_player=new Player();
@@ -30,14 +32,21 @@ public class Player
 		the_player.money=GalacticStrategyConstants.DEFAULT_MONEY;
 		the_player.metal=GalacticStrategyConstants.DEFAULT_METAL;
 		the_player.ready=false;
+		the_player.ships=new HashSet<Ship>();
+		the_player.known_systems = new HashSet<GSystem>();
+		the_player.known_satellites = new HashSet<Satellite>();
 		return the_player;
 	}
 	
+	//used if the name of the player is already known to the program
 	public Player(String nm)
 	{
 		name = nm;
 		money=GalacticStrategyConstants.DEFAULT_MONEY;
 		metal=GalacticStrategyConstants.DEFAULT_METAL;
+		ships = new HashSet<Ship>();
+		known_systems = new HashSet<GSystem>();
+		known_satellites = new HashSet<Satellite>();
 		ready=false;
 	}
 	

@@ -25,5 +25,5 @@ public abstract class Facility implements Targetable
 	}
 	
 	public HashSet<Targetter> getAggressors(){return aggressors;}
-	public void newTime(long t){}
+	public void updateStatus(long t){}
 }

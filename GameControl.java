@@ -795,7 +795,7 @@ public class GameControl
 		
 		public void run()
 		{
-			//updateGame(); //BOOKMARK!
+			updateGame();
 			//System.out.println("update!!" + Long.toString(TC.getTime()));
 		}
 	}
@@ -824,18 +824,19 @@ public class GameControl
 				{
 					for(Facility f : ((Planet)sat).facilities)
 					{
-						f.newTime(time_elapsed);
+						f.updateStatus(time_elapsed);
 					}
 					for(Satellite sat2 : ((Planet)sat).satellites)
 					{
 						if(sat2 instanceof Moon)
 						{
 							for(Facility f : ((Moon)sat2).facilities)
-								f.newTime(time_elapsed);
+								f.updateStatus(time_elapsed);
 						}
 					}
 				}
 			}
+			
 		}
 		
 		//draw everything
