@@ -17,6 +17,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.ComponentEvent;
 
 import javax.swing.*;
+
 import java.awt.FlowLayout;
 import java.awt.BorderLayout;
 
@@ -28,7 +29,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	
 	JFrame frame;
 	JPanel panel,topbar;
-	JLabel time,resource;	
+	JLabel time,metal,gold;	
 	JButton menubutton;
 	GameMenu menu;
 	JTabbedPane tabbedPane;
@@ -37,6 +38,10 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	JPanel theinterface;
 	
 	GameControl GC;
+	
+	Player player=GC.players[GC.player_id];
+	HashSet<GSystem> known_sys=player.known_systems;
+	HashSet<Satellite> known_sate=player.known_satellites;	
 	
 	GalacticMapPainter GalaxyPanel;
 	double gal_scale; //the scale which the galaxy is painted at.
@@ -71,9 +76,9 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		
 		//create topbar
 		topbar=new JPanel(new GridBagLayout());
-		//create resource		
-		resource=new JLabel(indentation+"Resource: 0");
-	//	resource.setSize(600, 200);
+		//create gold		
+		gold=new JLabel(indentation+"Gold: 0");
+	//	resource.setSize(600, 200);		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx =0.4;
 		c.weighty=0; 
@@ -82,8 +87,20 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		//c.gridwidth=2;
 		c.anchor=GridBagConstraints.NORTH;
 		c.gridheight=1;
-		topbar.add(resource,c);
+		topbar.add(gold,c);
 						
+		//create metal
+
+		metal=new JLabel(indentation+"metal: 0");
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx =0.4;
+		c.weighty=0; 
+		c.gridx = 5;
+		c.gridy = 0;
+		c.anchor=GridBagConstraints.NORTH;
+		c.gridheight=1;
+		topbar.add(metal,c);
+		
 		//create time
 		time=new JLabel("Time: 0");
 	//	time.setSize(600, 200);
@@ -127,11 +144,23 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		//create the tabbed pane
 		tabbedPane = new JTabbedPane();		
 		//tabbedPane.setSize(200, 700);
-		Component pane1 = makeTextPanel("System");
+		JScrollPane pane1 =(JScrollPane) makeTextPanel("System");		
+		for (GSystem system : known_sate)
+		{
+			JLabel label=new JLabel(.name);
+			pane1.add(label);
+		}		
 		tabbedPane.addTab("System", pane1);
 		tabbedPane.setSelectedIndex(0);
-		Component pane2 = makeTextPanel("Planets");
+		JScrollPane pane2 = (JScrollPane) makeTextPanel("Planets");
+		for (Satellite satellite: known_sate)
+		{
+			JLabel label=new JLabel(satellite.name);
+			pane2.add(label);
+		}		
+		
 		tabbedPane.addTab("Planets", pane2);
+		
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor=GridBagConstraints.EAST;
 		c.weightx =0.2;
@@ -157,13 +186,15 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		
 		//create the chat and information log
 		log=new JTextArea("log");
+		JScrollPane scrollPane = new JScrollPane(log);
+//		scrollPane.setPreferredSize(new Dimension(450, 110));		
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor=GridBagConstraints.SOUTHEAST;
 		c.weightx =0.2;
 		c.weighty=0.2;
 		c.gridx = 15;
 		c.gridy = 2;   
-		panel.add(log,c);
+		panel.add(scrollPane,c);
 		
 		//create the stat and order panel
 		stat_and_order=new JPanel();
