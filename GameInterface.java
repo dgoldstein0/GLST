@@ -39,10 +39,6 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	
 	GameControl GC;
 	
-	Player player=GC.players[GC.player_id];
-	HashSet<GSystem> known_sys=player.known_systems;
-	HashSet<Satellite> known_sate=player.known_satellites;	
-	
 	GalacticMapPainter GalaxyPanel;
 	double gal_scale; //the scale which the galaxy is painted at.
 	HashSet<GSystem> selected_sys; //stores a set of currently selected systems - that is, a set of one item.  This is necessary because multiple selection is possible in GDFrame
@@ -53,6 +49,9 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	double sys_scale;
 	double sys_center_x;
 	double sys_center_y;
+	
+	JPanel system_list;
+	JPanel satellites_list;
 	
 	boolean mode; //Galaxy=true, system=false.  reflected by isGalaxyDisplayed and isSystemDisplayed
 	boolean graphics_started; //used to indicate whether graphics have been started yet - that is, whether the Galaxy has been drawn yet.
@@ -142,22 +141,24 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 
 		
 		//create the tabbed pane
-		tabbedPane = new JTabbedPane();		
+		tabbedPane = new JTabbedPane();
 		//tabbedPane.setSize(200, 700);
-		JScrollPane pane1 =(JScrollPane) makeTextPanel("System");		
-		for (GSystem system :known_sys)
+		system_list = makeTextPanel("System");
+		JScrollPane pane1 = new JScrollPane(system_list);		
+		/*for (GSystem system :known_sys)
 		{
 			JLabel label=new JLabel(system.name);
 			pane1.add(label);
-		}		
+		}*/
 		tabbedPane.addTab("System", pane1);
 		tabbedPane.setSelectedIndex(0);
-		JScrollPane pane2 = (JScrollPane) makeTextPanel("Planets");
-		for (Satellite satellite: known_sate)
+		satellites_list = makeTextPanel("Planets");
+		JScrollPane pane2 = new JScrollPane(satellites_list);
+		/*for (Satellite satellite: known_sate)
 		{
 			JLabel label=new JLabel(satellite.name);
 			pane2.add(label);
-		}		
+		}*/		
 		
 		tabbedPane.addTab("Planets", pane2);
 		
@@ -223,7 +224,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	}	
 	
 	//for the tabbed pane
-    protected Component makeTextPanel (String text) 
+    protected JPanel makeTextPanel (String text) 
     {
         JPanel apanel = new JPanel(false);
         JLabel filler = new JLabel(text);
