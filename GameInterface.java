@@ -145,9 +145,9 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		tabbedPane = new JTabbedPane();		
 		//tabbedPane.setSize(200, 700);
 		JScrollPane pane1 =(JScrollPane) makeTextPanel("System");		
-		for (GSystem system : known_sate)
+		for (GSystem system :known_sys)
 		{
-			JLabel label=new JLabel(.name);
+			JLabel label=new JLabel(system.name);
 			pane1.add(label);
 		}		
 		tabbedPane.addTab("System", pane1);
