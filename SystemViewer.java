@@ -84,7 +84,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	public SystemViewer(JFrame frame, GSystem sys)
 	{
-		super(frame,"System Viewer",true);
+		super(frame, "System Viewer", false);
 		setResizable(false);
 		
 		this.frame=frame;
@@ -200,7 +200,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			center_y=painter.getHeight()/2;
 			drawSystem();}});
 		
-		setVisible(true);//since systemviewer is modal, nothing can come after here.
+		setVisible(true);
 	}
 	
 	public void actionPerformed(ActionEvent e)

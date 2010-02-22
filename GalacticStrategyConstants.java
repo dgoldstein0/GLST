@@ -10,7 +10,7 @@ public class GalacticStrategyConstants
 	//******************************************PHYSICS TO PROGRAM CONVERSIONS*******************************************//
 	
 	//Used in orbit
-	static double PERIOD_CONSTANT =10000; //equiv to 2pi/sqrt(G), where G is the "gravity constant" of the game.
+	static double PERIOD_CONSTANT =100000; //equiv to 2pi/sqrt(G), where G is the "gravity constant" of the game.
 	
 	//*******************************DEFAULTS USED IN Galaxy Designer********************************************************//
 	

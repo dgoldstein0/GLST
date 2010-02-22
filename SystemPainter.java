@@ -25,7 +25,7 @@ public class SystemPainter extends JPanel
 	double center_x;
 	double center_y;
 	
-	boolean display_back=false;
+	boolean game_mode=false;
 	Image return_arrow;
 	
 	static int arrow_size = 25;
@@ -50,7 +50,11 @@ public class SystemPainter extends JPanel
 		
 		if(selected instanceof Satellite) {
 			g.setColor(Color.YELLOW);
-			g.drawOval(drawX(((Satellite)selected).absoluteInitX()-((StellarObject)selected).size/2)-2, drawY(((Satellite)selected).absoluteInitY()-((StellarObject)selected).size/2)-2, (int)(((StellarObject)selected).size*scale)+4, (int)(((StellarObject)selected).size*scale)+4);
+			if(game_mode){
+				g.drawOval(drawX(((Satellite)selected).absoluteCurX()-((StellarObject)selected).size/2)-2, drawY(((Satellite)selected).absoluteCurY()-((StellarObject)selected).size/2)-2, (int)(((StellarObject)selected).size*scale)+4, (int)(((StellarObject)selected).size*scale)+4);
+			} else {
+				g.drawOval(drawX(((Satellite)selected).absoluteInitX()-((StellarObject)selected).size/2)-2, drawY(((Satellite)selected).absoluteInitY()-((StellarObject)selected).size/2)-2, (int)(((StellarObject)selected).size*scale)+4, (int)(((StellarObject)selected).size*scale)+4);
+			}
 		} else if(selected instanceof Star) {
 			//select a star
 			g.setColor(Color.YELLOW);
@@ -128,7 +132,7 @@ public class SystemPainter extends JPanel
 		g.drawLine(drawX(center_x-5),drawY(center_y),drawX(center_x+5),drawY(center_y));
 		g.drawLine(drawX(center_x),drawY(center_y-5),drawX(center_x),drawY(center_y+5));
 		
-		if(display_back)
+		if(game_mode)
 			g.drawImage(return_arrow, getWidth()-arrow_size, 0, arrow_size, arrow_size, this);
 	}
 	
@@ -163,7 +167,7 @@ public class SystemPainter extends JPanel
 		center_x=centerx;
 		center_y=centery;
 		scale=sc;
-		display_back = back;
+		game_mode = back;
 		repaint();
 	}
 	

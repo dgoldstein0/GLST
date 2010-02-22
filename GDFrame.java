@@ -102,6 +102,9 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	HashSet<GSystem> possibly_sel_desel_sys;//systems caught in an alt-drag or shift_drag
 	UndoRedoStack undostack; //this object handles the undo/redo functionality of the application
 	
+	SystemViewer sysview;
+	Boolean enable;
+	
 	public static void main(String[] args)
 	{
 		SwingUtilities.invokeLater(new GDFrame());
@@ -111,6 +114,8 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	{
 		JFrame.setDefaultLookAndFeelDecorated(true);
 		JDialog.setDefaultLookAndFeelDecorated(true);
+		
+		enable=true;
 		
 		frame=new JFrame("Galaxy Designer");
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -415,17 +420,18 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		else if (e.getSource() == rand_name_satellites_item)
 			randomizeSatelliteNames();
 		else if (e.getSource() == set_start_loc_item)
-			;//BOOKMARK!  Must be fixed!
+			enterStartLocationMode();
 		else if (e.getSource()==t_add)
 			addSystemOnClick();
 		else if (e.getSource()==c_add)
 			addSystem(c_x,c_y);
-		else if (e.getSource()==c_edit || e.getSource()==t_edit)
+		else if ((e.getSource()==c_edit || e.getSource()==t_edit)&& enable)
 		{
 			//note that this can only happen when selected_systems has only 1 element
 			for(GSystem sys : selected_systems)
-				new SystemViewer(frame, sys);
-			setUndoPoint();
+				sysview = new SystemViewer(frame, sys);
+			sysview.addWindowListener(this);
+			enable=false;
 		}
 		else if (e.getSource()==c_delete || e.getSource()==t_delete)
 			deleteSystem();
@@ -975,14 +981,15 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			}
 		
 			maybeShowContextMenu(e);
-			if(e.getButton()==MouseEvent.BUTTON1 && e.getClickCount()==2 && selected_systems instanceof HashSet) //ignore double right click, and double left click when no systems are selected
+			if(e.getButton()==MouseEvent.BUTTON1 && e.getClickCount()==2 && selected_systems instanceof HashSet && enable) //ignore double right click, and double left click when no systems are selected
 			{
 				if(selected_systems.size()==1) //double click only opens a system when only 1 system is selected.  Happens when alt/shift not held
 				{
 					//open system
 					for(GSystem sys : selected_systems)
-						new SystemViewer(frame, sys);
-					setUndoPoint();
+						sysview = new SystemViewer(frame, sys);
+					sysview.addWindowListener(this);
+					enable=false;
 				}
 			}
 		}
@@ -1036,7 +1043,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	//start drag-and-move system code
 	public void mouseDragged(MouseEvent e)
-	{		
+	{
 		if(!wait_to_add_sys && map instanceof Galaxy)
 		{
 			if(selected_systems instanceof HashSet && drag_start)
@@ -1229,8 +1236,8 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	private void addSystem(int x, int y)
 	{
 		GSystem new_sys = new GSystem(x,y,null,new HashSet<Satellite>(),null,Integer.parseInt(t_nav.getValue().toString()));
-		if(!(map.systems instanceof HashSet))
-			map.systems = new HashSet<GSystem>();
+		/*if(!(map.systems instanceof HashSet)) //***this is unnecessary now since Galaxy creates the HashSet in the Galaxy constructor
+			map.systems = new HashSet<GSystem>();*/
 		map.systems.add(new_sys);
 		
 		selected_systems = new HashSet<GSystem>();
@@ -1248,12 +1255,14 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private void deleteSystem()
 	{
-		map.systems.removeAll(selected_systems);
-		selected_systems=null;
-		drawGalaxy();
-		
-		noSystemSelected();
-		setUndoPoint();
+		if(enable) {
+			map.systems.removeAll(selected_systems);
+			selected_systems=null;
+			drawGalaxy();
+			
+			noSystemSelected();
+			setUndoPoint();
+		}
 	}
 	
 	Action delete_action = new AbstractAction()
@@ -1361,6 +1370,11 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		n.showMessage("Limit = "+ Integer.toString(panel.max_dist_shown));
 	}
 	
+	private void enterStartLocationMode(){
+		//launch new dialog to keep track of selections
+		new startLocationsDialog(this, frame);
+	}
+	
 	private void help()
 	{
 		JDialog helper=new JDialog(frame, "Galaxy Designer Help", true);
@@ -1446,7 +1460,12 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	//window listener used to check if you want to save your file when frame's X is clicked
 	public void windowClosing(WindowEvent e)
 	{
-		exitProgram();
+		if(e.getSource() == frame)
+			exitProgram();
+		else  { //source is sysview
+			setUndoPoint();
+			enable=true;
+		}
 	}
 	
 	public void windowActivated(WindowEvent e){}

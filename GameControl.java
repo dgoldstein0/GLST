@@ -263,6 +263,14 @@ public class GameControl
 		readThread = new Thread(new EventReader());
 		readThread.start();
 		
+		//start everyone in assigned locations
+		for(int i=0; i<map.start_locations.size(); i++)
+		{
+			Planet p = map.start_locations.get(i);
+			p.setOwner(players[i]);
+			p.facilities.add(new Base());
+		}
+		
 		//start game graphics...
 		GI.drawGalaxy();
 		
@@ -317,11 +325,17 @@ public class GameControl
 			
 			TC = new TimeControl(0);
 			
+			Planet p = map.start_locations.get(player_id);
+			p.setOwner(players[player_id]);
+			p.facilities.add(new Base());
+			
 			//display the Galaxy
 			GI.drawGalaxy();
 			
 			//set game to update itself
 			TC.startConstIntervalTask(new Updater(),5);
+		} else {
+			startupDialog();
 		}
 	}
 	
@@ -843,6 +857,7 @@ public class GameControl
 		}
 		
 		//draw everything
+		GI.time.setText("Time: " + Long.toString(time_elapsed/1000));
 		GI.redraw();
 	}
 }
