@@ -263,6 +263,10 @@ public class GameControl
 		readThread = new Thread(new EventReader());
 		readThread.start();
 		
+		//set up systems for the game
+		for(GSystem sys : map.systems)
+			sys.setUpForGame();
+		
 		//start everyone in assigned locations
 		for(int i=0; i<map.start_locations.size(); i++)
 		{
@@ -325,6 +329,11 @@ public class GameControl
 			
 			TC = new TimeControl(0);
 			
+			//set up systems for the game
+			for(GSystem sys : map.systems)
+				sys.setUpForGame();
+			
+			//start the player in assigned location
 			Planet p = map.start_locations.get(player_id);
 			p.setOwner(players[player_id]);
 			p.facilities.add(new Base());
@@ -801,7 +810,7 @@ public class GameControl
 		endConnection();
 	}
 	
-	//***************************************************************************These next few methods deal with in game updating
+	//***************************************************************************These next few methods deal with in-game updating
 	
 	private class Updater extends TimerTask
 	{

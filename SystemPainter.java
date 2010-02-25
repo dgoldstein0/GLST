@@ -87,14 +87,17 @@ public class SystemPainter extends JPanel
 				{
 					//draw object
 					drawOrbit(orbiting, g);
-					g.setColor(Color.WHITE);
+					if(orbiting instanceof Planet && ((Planet)orbiting).getOwner() instanceof Player)
+						g.setColor(((Planet)orbiting).getOwner().getColor());
+					else
+						g.setColor(Color.WHITE);
 					g.fillOval(drawX(orbiting.absoluteCurX()-(orbiting.size/2)), drawY(orbiting.absoluteCurY()-(orbiting.size/2)), (int)(orbiting.size*scale), (int)(orbiting.size*scale));
 					
 					if(orbiting.name.length() == 0) {
 						g.setColor(Color.YELLOW);
 						g.drawString("Unnamed", drawX(orbiting.absoluteCurX())+3, drawY(orbiting.absoluteCurY())+m.getHeight());
 					} else {
-						g.setColor(Color.GREEN);
+						//use the color previously determined.  This should work off of the owner's color or WHITE if there is no owner
 						g.drawString(orbiting.name, drawX(orbiting.absoluteCurX())+3, drawY(orbiting.absoluteCurY())+m.getHeight());
 					}
 					
@@ -105,14 +108,16 @@ public class SystemPainter extends JPanel
 						for(Satellite sat : planet_sats)
 						{
 							drawOrbit(sat, g);
-							g.setColor(Color.GRAY);
+							if(orbiting instanceof Moon && ((Moon)orbiting).getOwner() instanceof Player)
+								g.setColor(((Moon)orbiting).getOwner().getColor());
+							else
+								g.setColor(Color.WHITE);
 							g.fillOval(drawX(sat.absoluteCurX()-sat.size/2), drawY(sat.absoluteCurY()-sat.size/2), (int)(sat.size*scale), (int)(sat.size*scale));
 							
 							if(sat.name.length() == 0) {
 								g.setColor(Color.YELLOW);
 								g.drawString("Unnamed", drawX(sat.absoluteCurX())+3, drawY(sat.absoluteCurY())+m.getHeight());
 							} else {
-								g.setColor(Color.GREEN);
 								g.drawString(sat.name, drawX(sat.absoluteCurX())+3, drawY(sat.absoluteCurY())+m.getHeight());
 							}
 						}

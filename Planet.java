@@ -6,11 +6,9 @@ public class Planet extends Satellite
 	HashSet<Satellite> satellites;
 	HashSet<Facility> facilities;
 	Player owner;
-	GSystem system;
 	
-	public Planet(GSystem sys, String nm, long pop, int sz, double m, byte habitable)
+	public Planet(String nm, long pop, int sz, double m, byte habitable)
 	{
-		system=sys;
 		name=nm;
 		population=pop;
 		size=sz;
@@ -32,5 +30,12 @@ public class Planet extends Satellite
 	public HashSet<Facility> getFacilities(){return facilities;}
 	public void setFacilities(HashSet<Facility> fac){facilities=fac;}
 	public Player getOwner(){return owner;}
-	public void setOwner(Player p){owner=p;}
+	
+	public void setOwner(Player p)
+	{
+		if(owner instanceof Player)
+			((GSystem)orbit.boss).decreaseClaim(owner);
+		owner=p;
+		((GSystem)orbit.boss).increaseClaim(p);
+	}
 }

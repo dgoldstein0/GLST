@@ -2,6 +2,13 @@ import java.util.*;
 
 public class GSystem implements Positioning
 {
+	final static int NO_OWNER= -2;
+	final static int OWNER_CONFLICTED = -1;
+	
+	//indicates which player is in control - from the current player's perspective
+	int owner_id; //-2 is none, -1 is conflicted, otherwise corresponds to player id's
+	int[] player_claims; //the elements of this array keep track of how many claims - planets or ships - each player owns in the system
+	
 	HashSet<Satellite> orbiting_objects;
 	HashSet<Star> stars;
 	Fleet[] fleets; //indices = player id's
@@ -17,6 +24,8 @@ public class GSystem implements Positioning
 	int x_adj;
 	int y_adj;
 	
+
+	
 	public GSystem(int x, int y, String nm, HashSet<Satellite> orbiting, HashSet<Star> stars, int nav)
 	{
 		name=nm;
@@ -26,20 +35,54 @@ public class GSystem implements Positioning
 		this.y=y;
 		navigability=nav;
 		fleets = new Fleet[GalacticStrategyConstants.MAX_PLAYERS];
+		owner_id = NO_OWNER;
 	}
 	
-	//this seems to not work right.  I don't know why.  so it is being replaced by massSum
-	/*public HashSet<Double> getMassSet()
+	public void setUpForGame()
 	{
-		HashSet<Double> mass_set = new HashSet<Double>();
-		if(stars instanceof HashSet)
+		//set up ownership
+		player_claims = new int[GalacticStrategyConstants.MAX_PLAYERS];
+		for(int i=0; i<GalacticStrategyConstants.MAX_PLAYERS; i++) //player_claims and fleets both have GalacticStrategyConstants.MAX_PLAYERS as their length
 		{
-			for(Star st : stars)
-				mass_set.add(st.getMass());
+			player_claims[i]=0;
+			fleets[i] = new Fleet(this);
 		}
-		
-		return mass_set;
-	}*/
+	}
+	
+	public void increaseClaim(Player p)
+	{
+		player_claims[p.getId()]++;
+		if(owner_id >= 0 && owner_id != p.getId()) //if there is an owner of the system, and the increaser is not the owner, now conflicted
+			owner_id = OWNER_CONFLICTED;
+		else if(owner_id == NO_OWNER)
+			owner_id = p.getId();
+	}
+	
+	public void decreaseClaim(Player p)
+	{
+		player_claims[p.getId()]--;
+		if(player_claims[p.getId()]==0 && owner_id == OWNER_CONFLICTED)
+		{
+			int claimers=0;
+			int claimer_id=-2;
+			for(int i=0; i<player_claims.length; i++)
+			{
+				if(player_claims[i] > 0)
+				{
+					claimers++;
+					claimer_id=i;
+				}
+			}
+			
+			if(claimers == 1)
+				owner_id = claimer_id;
+			//else - still conflicted, so no change
+		}
+		else if(player_claims[p.getId()]==0) //decreasing claim in a non-conflicted system to 0 -> no owner
+		{
+			owner_id = NO_OWNER;
+		}
+	}
 	
 	public double massSum()
 	{
@@ -53,7 +96,7 @@ public class GSystem implements Positioning
 	}
 	
 	//methods required for save/load
-	public GSystem(){}
+	public GSystem(){owner_id = NO_OWNER;}
 	public HashSet<Satellite> getorbiting_objects(){return orbiting_objects;}
 	public void setOrbiting_objects(HashSet<Satellite> s){orbiting_objects=s;}
 	public String getName(){return name;}
@@ -68,6 +111,8 @@ public class GSystem implements Positioning
 	public void setNavigability(int nav){navigability=nav;}
 	public Fleet[] getFleets(){return fleets;}
 	public void setFleets(Fleet[] f){fleets=f;}
+	public int getOwner_id(){return owner_id;}
+	public void setOwner_id(int id){owner_id=id;}
 	
 	public int getWidth(){return width;}
 	public void setWidth(int w){width=w;}

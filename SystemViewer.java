@@ -655,7 +655,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		for(Satellite sat : sats)
 			new_sats.add(sat);
 		
-		Planet theplanet = new Planet(system, "", (long)0, DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, (byte)0);
+		Planet theplanet = new Planet("", (long)0, DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, (byte)0);
 		theplanet.orbit = new Orbit((Satellite)theplanet, (Positioning)system, x, y, x, y, 1);
 		new_sats.add(theplanet);
 		system.setOrbiting_objects(new_sats);

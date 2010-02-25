@@ -13,9 +13,9 @@ public class Player
 	boolean ready;
 	HashSet<Ship> ships;
 	
-	//used for exploration.  Only the computer
+	//used for exploration.  specific to each player
 	HashSet<GSystem> known_systems; //if you know a system, you know the stars in it.
-	HashSet<Satellite> known_satellites;	
+	HashSet<Satellite> known_satellites;
 	
 	//this constructor prompts for the user to name the player himself
 	public static Player createPlayer() throws CancelException

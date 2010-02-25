@@ -208,13 +208,14 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		stat_and_order.setBorder(BorderFactory.createLineBorder(Color.RED));
 		panel.add(stat_and_order,c);	
 	
-		setupGraphics();
 		selected_sys = new HashSet<GSystem>();
 	
 		frame.pack();
 		
 		//set up game control
 		GC = new GameControl(this);
+		
+		setupGraphics();
 		
 		//set up in-game menu for later display
 		menu=new GameMenu(GC, frame);
@@ -245,7 +246,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	private void setupGraphics()
 	{
 		//sets up GalacticMapPainter, SystemPainter
-		GalaxyPanel = new GalacticMapPainter();
+		GalaxyPanel = new GalacticMapPainter(GC);
 		SystemPanel = new SystemPainter(false);
 		graphics_started=false;
 	}
