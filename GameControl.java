@@ -272,7 +272,7 @@ public class GameControl
 		{
 			Planet p = map.start_locations.get(i);
 			p.setOwner(players[i]);
-			p.facilities.add(new Base());
+			p.facilities.add(new Base(0));
 		}
 		
 		//start game graphics...
@@ -336,7 +336,7 @@ public class GameControl
 			//start the player in assigned location
 			Planet p = map.start_locations.get(player_id);
 			p.setOwner(players[player_id]);
-			p.facilities.add(new Base());
+			p.facilities.add(new Base(0));
 			
 			//display the Galaxy
 			GI.drawGalaxy();

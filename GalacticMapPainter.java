@@ -52,7 +52,6 @@ public class GalacticMapPainter extends JPanel
 		
 		if(map instanceof Galaxy && map.systems instanceof HashSet)
 		{
-			g.setColor(Color.WHITE);
 			for(GSystem sys : map.systems)
 			{
 				if(sys.navigability>=nav_level || display_unnavigable)
@@ -118,7 +117,14 @@ public class GalacticMapPainter extends JPanel
 					else if(disp_names)
 					{
 						if(sys.name instanceof String) {
-							g.setColor(Color.GREEN);
+							if(sys.navigability < nav_level)
+								g.setColor(Color.GRAY);
+							else if(sys.owner_id == GSystem.NO_OWNER)
+								g.setColor(Color.WHITE);
+							else if(sys.owner_id == GSystem.OWNER_CONFLICTED)
+								g.setColor(Color.ORANGE);
+							else
+								g.setColor(GC.players[sys.owner_id].getColor());
 							g.drawString(sys.name, scaleNum(sys.x+3), scaleNum(sys.y)+m.getHeight());
 						} else {
 							g.setColor(Color.YELLOW);

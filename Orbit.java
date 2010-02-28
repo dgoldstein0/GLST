@@ -76,7 +76,12 @@ public class Orbit
 		
 		double rot_angle;
 		if(focus2.getX() != 0)
-			rot_angle=Math.atan(focus2.getY()/focus2.getX()); //when this was negated, it was the source of the incorrect start position bug.  The inverted y measurements results in an implicit negative sign, so the added negative screwed stuff up
+		{
+			if(focus2.getX() < 0)
+				rot_angle=Math.atan(focus2.getY()/focus2.getX()); //when this was negated, it was the source of the incorrect start position bug.  The inverted y measurements results in an implicit negative sign, so the added negative screwed stuff up
+			else
+				rot_angle=Math.PI+Math.atan(focus2.getY()/focus2.getX());
+		}
 		else if(focus2.getY()>0)
 			rot_angle = -Math.PI/2.0d;
 		else if(focus2.getY()<0)
@@ -147,7 +152,12 @@ public class Orbit
 		
 		double rot_angle;
 		if(focus2.getX() != 0)
-			rot_angle=-Math.atan(focus2.getY()/focus2.getX());
+		{
+			if(focus2.getX() < 0)
+				rot_angle=-Math.atan(focus2.getY()/focus2.getX());
+			else
+				rot_angle= Math.PI-Math.atan(focus2.getY()/focus2.getX());
+		}
 		else if(focus2.getY()>0)
 			rot_angle = Math.PI/2;
 		else if(focus2.getY()<0)

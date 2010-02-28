@@ -1,11 +1,13 @@
 
 public class Base extends Facility{
 	
-	int soldier;
+	float soldier;
+	double last_time;
 	
-	public Base()
+	public Base(double t)
 	{
 		damage=0;
+		last_time = t;
 		soldier=GalacticStrategyConstants.initial_soldier;
 		endurance=GalacticStrategyConstants.initial_base_endu;
 	}
@@ -24,7 +26,7 @@ public class Base extends Facility{
 	
 	public void attackedByTroops(Ship enemy) 
 	{
-		double probability=(double) (enemy.getSoldier())/(soldier+enemy.getSoldier());
+		double probability=(double) (enemy.getSoldier())/(getSoldier()+enemy.getSoldier());
 		double p=Math.random();
 		if (p<probability)
 			taken(enemy.getOwner());
@@ -35,4 +37,6 @@ public class Base extends Facility{
 		location.facilities.remove(this);
 		location.setOwner(null);
 	}
+	
+	public int getSoldier(){return (int)Math.floor(soldier);}
 }
