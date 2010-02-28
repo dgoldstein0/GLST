@@ -5,6 +5,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -33,10 +34,15 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	JButton menubutton;
 	GameMenu menu;
 	JTabbedPane tabbedPane;
+	JScrollPane pane1;
+	JScrollPane pane2;
+	boolean labels_made=false; //check if the labels have been made 
 	JTextArea log;
 	JPanel stat_and_order;
 	JPanel theinterface;
 	
+	HashSet<GSystem> known_sys; //known systems for this player
+	HashSet<Satellite> known_sate;   //known satellite for this player
 	GameControl GC;
 	
 	GalacticMapPainter GalaxyPanel;
@@ -90,7 +96,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 						
 		//create metal
 
-		metal=new JLabel(indentation+"metal: 0");
+		metal=new JLabel(indentation+"Metal: 0");
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx =0.4;
 		c.weighty=0; 
@@ -143,23 +149,17 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		//create the tabbed pane
 		tabbedPane = new JTabbedPane();
 		//tabbedPane.setSize(200, 700);
-		system_list = makeTextPanel("System");
-		JScrollPane pane1 = new JScrollPane(system_list);		
-		/*for (GSystem system :known_sys)
-		{
-			JLabel label=new JLabel(system.name);
-			pane1.add(label);
-		}*/
+		system_list = new JPanel();//makeTextPanel("System");
+		system_list.setLayout(new FlowLayout());
+		pane1 = new JScrollPane(system_list);		
+		pane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		tabbedPane.addTab("System", pane1);
 		tabbedPane.setSelectedIndex(0);
-		satellites_list = makeTextPanel("Planets");
-		JScrollPane pane2 = new JScrollPane(satellites_list);
-		/*for (Satellite satellite: known_sate)
-		{
-			JLabel label=new JLabel(satellite.name);
-			pane2.add(label);
-		}*/		
+		satellites_list = new JPanel();//makeTextPanel("Planets");
+		satellites_list.setLayout(new FlowLayout());
 		
+		pane2 = new JScrollPane(satellites_list);		
+		pane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		tabbedPane.addTab("Planets", pane2);
 		
 		c.fill = GridBagConstraints.BOTH;
@@ -225,7 +225,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	}	
 	
 	//for the tabbed pane
-    protected JPanel makeTextPanel (String text) 
+    /*protected JPanel makeTextPanel (String text) 
     {
         JPanel apanel = new JPanel(false);
         JLabel filler = new JLabel(text);
@@ -233,7 +233,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
         apanel.setLayout(new GridLayout(1, 1));
         apanel.add(filler);
         return apanel;
-    }
+    }*/
     
     
 	
@@ -429,6 +429,30 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		}
 		//if nothing found
 		selected_in_sys = null;
+	}
+	
+	public void update()
+	{		
+		if (!labels_made)
+		{
+			System.out.println("made");
+			known_sys=GC.map.systems;//GC.players[GC.player_id].known_systems;
+			known_sate=GC.players[GC.player_id].known_satellites;		
+			labels_made=true;
+		}
+		for (GSystem system :known_sys)
+		{
+			SystemLabel label=new SystemLabel(system);
+			system_list.add(label);			
+		}				
+		
+		for (Satellite satellite: known_sate)
+		{
+			SatelliteLabel label=new SatelliteLabel(satellite);
+			satellites_list.add(label);			
+		}
+		frame.setVisible(true);
+		//pane2.setVisible(true);
 	}
 	
 	private double sysScreenToDataX(int x)

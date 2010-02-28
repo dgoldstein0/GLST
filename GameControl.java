@@ -861,11 +861,11 @@ public class GameControl
 					}
 				}
 			}
-			
-			
+
 		}
 		
-		//draw everything
+		//draw everything		
+		GI.update();
 		GI.time.setText("Time: " + Long.toString(time_elapsed/1000));
 		GI.redraw();
 	}
