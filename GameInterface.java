@@ -452,7 +452,6 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			satellites_list.add(label);			
 		}
 		frame.setVisible(true);
-		//pane2.setVisible(true);
 	}
 	
 	private double sysScreenToDataX(int x)
