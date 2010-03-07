@@ -1,10 +1,7 @@
 import java.util.*;
 
-public class Moon extends Satellite
+public class Moon extends OwnableSatellite
 {
-	HashSet<Facility> facilities;
-	Player owner;
-	
 	public Moon(double m, String nm, int sz)
 	{
 		this.mass=m;
@@ -14,8 +11,12 @@ public class Moon extends Satellite
 	}
 	
 	public Moon(){facilities = new HashSet<Facility>();}
-	public HashSet<Facility> getFacilities(){return facilities;}
-	public void setFacilities(HashSet<Facility> fac){facilities=fac;}
-	public Player getOwner(){return owner;}
-	public void setOwner(Player p){owner=p;}
+	
+	public void setOwner(Player p)
+	{
+		if(owner instanceof Player)
+			((GSystem)((Planet)orbit.boss).orbit.boss).decreaseClaim(owner);
+		owner=p;
+		((GSystem)((Planet)orbit.boss).orbit.boss).increaseClaim(p);
+	}
 }

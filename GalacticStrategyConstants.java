@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Toolkit;
 
 public class GalacticStrategyConstants
 {
@@ -73,25 +74,50 @@ public class GalacticStrategyConstants
 	
 	static Color[] DEFAULT_COLORS = {Color.GREEN, Color.RED, Color.YELLOW, Color.CYAN, Color.ORANGE, Color.MAGENTA, Color.PINK, Color.BLUE};
 	
+	//default build times and costs for facilities
+	
+	final static long MINE_BUILD_TIME = 20000;
+	final static long BASE_BUILD_TIME = 25000;
+	final static long SHIPYARD_BUILD_TIME = 20000;
+	
+	final static int MINE_MONEY_COST = 200;
+	final static int MINE_METAL_COST = 0;
+	final static int BASE_MONEY_COST = 500;
+	final static int BASE_METAL_COST = 500;
+	final static int SHIPYARD_MONEY_COST = 300;
+	final static int SHIPYARD_METAL_COST = 200;
+	
 	//Used by Mine
-	static int DEFAULT_MINING_RATE=10;
+	static double DEFAULT_MINING_RATE=.002; //metal per mine per millisecond
 	//Used by Player
 	static long DEFAULT_MONEY=1000;
 	static long DEFAULT_METAL=1000;
 	
+	//loads the images for each ship type
+	public static void ImageLoader() //GameControl calls this method when it is instantiated
+	{
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		for(int i=0; i<sTypes.length; i++)
+		{
+			sTypes[i].setImg(tk.getImage(sTypes[i].getImg_loc()));
+		}
+	}
+	
 	//setup for ship types
 	final static int JUNK=0;
-	final static ShipType[] sTypes={new ShipType("Junk",20,100,10,200)};
+	final static ShipType[] sTypes={new ShipType("Junk", 20, 100, 20, 20, 200, "images/junk.png")};
 	
 	//Used by Shipyard
 	static final int queue_capa=10;//the capacity of a shipyard's queue
 	
 	//Defaults for Bases
-	final static int initial_soldier=1000;
+	final static int initial_soldier=100;
+	final static int default_max_soldier=500;
+	final static float soldier_production_rate = .005f; //solders per millisecond.  corresponds to 5 soldiers per second
 	final static int initial_base_endu=500;
 	final static int initial_shipyard_endu = 200;
 	final static int initial_mine_endu = 150;
-	final static int solider_upgraderate=1000;
+	final static int max_soldier_upgraderate=100;
 	final static int endu_upgraderate=100;
 	
 	//***************************************************************GENERAL DATA*******************************************//

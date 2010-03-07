@@ -1,6 +1,7 @@
 import java.awt.*;
 import javax.swing.*;
 import java.util.*;
+import java.awt.geom.AffineTransform;
 
 public class SystemPainter extends JPanel
 {
@@ -121,6 +122,25 @@ public class SystemPainter extends JPanel
 								g.drawString(sat.name, drawX(sat.absoluteCurX())+3, drawY(sat.absoluteCurY())+m.getHeight());
 							}
 						}
+					}
+				}
+			}
+			
+			Graphics2D g2 = (Graphics2D) g;
+			
+			//draw all ships
+			for(int i=0; i<system.fleets.length; i++)
+			{
+				if(system.fleets[i] instanceof Fleet)
+				{
+					for(Ship s : system.fleets[i].ships)
+					{
+						//draw ship s
+						AffineTransform t = new AffineTransform();
+						t.setToTranslation(drawX(s.getPos_x()-s.type.img.getWidth(this)),drawY(s.getPos_y()-s.type.img.getHeight(this)));
+						t.setToRotation(s.vel_x, s.vel_y, s.type.img.getWidth(this)/2, s.type.img.getHeight(this)/2);
+						
+						g2.drawImage(s.type.img, t, this);
 					}
 				}
 			}

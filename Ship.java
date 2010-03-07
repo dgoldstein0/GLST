@@ -4,7 +4,7 @@ public class Ship extends Targetter implements Targetable
 {
 	Player owner;
 	
-	int type;
+	ShipType type;
 	String name;
 	
 	int energy;
@@ -14,31 +14,38 @@ public class Ship extends Targetter implements Targetable
 	int damage;
 	
 	GSystem location;
-	int pos_x; //pos_x and pos_y indicate where in the system the ship is located
-	int pos_y;
+	double pos_x; //pos_x and pos_y indicate where in the system the ship is located
+	double pos_y;
+	
+	double vel_x;
+	double vel_y;
 	
 	int soldier;
 	
 	HashSet<Targetter> aggressors;
 	
-	public Ship(String nm, int type)
+	public Ship(String nm, ShipType t)
 	{
 		name = nm;
-		this.type = type;
-		energy = GalacticStrategyConstants.sTypes[type].max_energy;
+		type = t;
+		energy = t.max_energy;
 		max_energy = energy;
-		hull_strength = GalacticStrategyConstants.sTypes[type].hull;
-		soldier=GalacticStrategyConstants.sTypes[type].soldier_capacity;//assume ships are fully loaded when built
+		hull_strength = t.hull;
+		soldier=t.soldier_capacity;//assume ships are fully loaded when built
 		damage=0;
 		aggressors = new HashSet<Targetter>();
 	}
 	
-	public void assemble(Shipyard builder)
+	public void assemble(Shipyard builder, long t)
 	{
+		//the time dependence of this function needs to be established
 		owner=builder.location.owner;
-		pos_x = builder.assemble_x;
-		pos_y = builder.assemble_y;
+		pos_x = builder.default_x + builder.location.absoluteCurX();
+		pos_y = builder.default_y + builder.location.absoluteCurY();
+		vel_x=builder.location.orbit.getAbsVelX();
+		vel_y=builder.location.orbit.getAbsVelY();
 		location.fleets[owner.getId()].add(this);
+		orderToMove(t, builder.assemble_x, builder.assemble_y); //this call does not go via the game Event handling system.  all computers should issue these orders on their own.
 	}
 	
 	public void addDamage(int d)
@@ -48,17 +55,25 @@ public class Ship extends Targetter implements Targetable
 			destroyed();
 	}
 	
+	public void orderToMove(long t, double x, double y)
+	{
+		
+	}
+	
 	public void destroyed()
 	{
 		location.fleets[owner.getId()].remove(this);
 	}
 	
+	//ship physics
+	
+	
 	public HashSet<Targetter> getAggressors(){return aggressors;}
 	
 	//methods required for save/load
 	public Ship(){}
-	public int getType(){return type;}
-	public void setType(int tp){type=tp;}
+	public ShipType getType(){return type;}
+	public void setType(ShipType tp){type=tp;}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 	public int getEnergy(){return energy;}
@@ -69,8 +84,10 @@ public class Ship extends Targetter implements Targetable
 	public void setHull_strength(int hs){hull_strength=hs;}
 	public int getDamage(){return damage;}
 	public void setDamage(int d){damage=d;}
-	public void setX(int x){pos_x=x;}
-	public void setY(int y){pos_y=y;}
+	public double getPos_x(){return pos_x;}
+	public double getPos_y(){return pos_y;}
+	public void setPos_x(double x){pos_x=x;}
+	public void setPos_y(double y){pos_y=y;}
 	public Player getOwner() {return owner;}
 	public int getSoldier() {return soldier;}
 }

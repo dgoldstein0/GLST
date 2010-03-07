@@ -30,7 +30,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	
 	JFrame frame;
 	JPanel panel,topbar;
-	JLabel time,metal,gold;	
+	JLabel time,metal,money;	
 	JButton menubutton;
 	GameMenu menu;
 	JTabbedPane tabbedPane;
@@ -59,6 +59,13 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	JPanel system_list;
 	JPanel satellites_list;
 	
+	int sat_or_ship_disp;
+		static final int SAT_PANEL_DISP = 0;
+		static final int SHIP_PANEL_DISP=1;
+		static final int NO_PANEL_DISP = -1;
+	PlanetMoonCommandPanel SatellitePanel;
+	ShipCommandPanel ShipPanel;
+	
 	boolean mode; //Galaxy=true, system=false.  reflected by isGalaxyDisplayed and isSystemDisplayed
 	boolean graphics_started; //used to indicate whether graphics have been started yet - that is, whether the Galaxy has been drawn yet.
 	
@@ -81,8 +88,8 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		
 		//create topbar
 		topbar=new JPanel(new GridBagLayout());
-		//create gold		
-		gold=new JLabel(indentation+"Gold: 0");
+		//create money	
+		money=new JLabel(indentation+"Money: 0");
 	//	resource.setSize(600, 200);		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx =0.4;
@@ -92,7 +99,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		//c.gridwidth=2;
 		c.anchor=GridBagConstraints.NORTH;
 		c.gridheight=1;
-		topbar.add(gold,c);
+		topbar.add(money,c);
 						
 		//create metal
 
@@ -164,7 +171,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor=GridBagConstraints.EAST;
-		c.weightx =0.2;
+		c.weightx =0;
 		c.weighty=0.8;
 		c.gridwidth=5;
 		c.gridx = 15;
@@ -188,17 +195,17 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		//create the chat and information log
 		log=new JTextArea("log");
 		JScrollPane scrollPane = new JScrollPane(log);
-//		scrollPane.setPreferredSize(new Dimension(450, 110));		
+		scrollPane.setPreferredSize(new Dimension(200, 140));		
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor=GridBagConstraints.SOUTHEAST;
-		c.weightx =0.2;
-		c.weighty=0.2;
+		c.weightx =0; //was .2
+		c.weighty=0;//was .2
 		c.gridx = 15;
 		c.gridy = 2;   
 		panel.add(scrollPane,c);
 		
 		//create the stat and order panel
-		stat_and_order=new JPanel();
+		stat_and_order=new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		c.fill=GridBagConstraints.BOTH;
 		c.anchor=GridBagConstraints.SOUTHWEST;
 		c.weighty=0;
@@ -248,7 +255,12 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		//sets up GalacticMapPainter, SystemPainter
 		GalaxyPanel = new GalacticMapPainter(GC);
 		SystemPanel = new SystemPainter(false);
+		
+		SatellitePanel = new PlanetMoonCommandPanel(GC);
+		ShipPanel = new ShipCommandPanel();
+		
 		graphics_started=false;
+		sat_or_ship_disp = NO_PANEL_DISP;
 	}
 	
 	public void drawGalaxy()
@@ -261,6 +273,9 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			theinterface.add(GalaxyPanel); //automatically adds to center
 			mode=true;
 			graphics_started=true;
+			
+			selected_in_sys=null;
+			displayNoPanel();
 		}
 		gal_scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
 		GalaxyPanel.paintGalaxy(GC.map, selected_sys, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, gal_scale);
@@ -268,7 +283,8 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	}
 	
 	
-	//before calling this function, sys and selected_in_sys should be specified.  the latter may be null.
+	//before calling this function, sys should be specified
+	//note that this function makes selected_in_sys null if it is used to switch from the galaxy to a system
 	public void drawSystem()
 	{
 		System.out.println("Draw System!");
@@ -300,6 +316,45 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			{
 				SystemPanel.paintSystem(sys, selected_in_sys, sys_center_x, sys_center_y, sys_scale, true);
 			}
+		}
+	}
+	
+	public void displaySatellitePanel(Satellite s)
+	{
+		SatellitePanel.setSat(s);
+		
+		if(sat_or_ship_disp != SAT_PANEL_DISP)
+		{
+			stat_and_order.removeAll();
+			stat_and_order.add(SatellitePanel);
+			sat_or_ship_disp = SAT_PANEL_DISP;
+		}
+		
+		frame.setVisible(true);
+	}
+	
+	public void displayShipPanel(Ship s)
+	{
+		if(sat_or_ship_disp != SHIP_PANEL_DISP)
+		{
+			stat_and_order.removeAll();
+			stat_and_order.add(ShipPanel);
+			sat_or_ship_disp = SHIP_PANEL_DISP;
+		}
+		
+		ShipPanel.setShip(s);
+		
+		frame.setVisible(true);
+	}
+	
+	public void displayNoPanel()
+	{
+		if(sat_or_ship_disp != NO_PANEL_DISP)
+		{
+			stat_and_order.removeAll();
+			stat_and_order.repaint();
+			sat_or_ship_disp = NO_PANEL_DISP;
+			frame.setVisible(true);
 		}
 	}
 	
@@ -396,6 +451,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 				if(st.x-st.size/2 <= x && x <= st.x+st.size/2 && st.y-st.size/2 <= y && y <= st.y+st.size/2)
 				{
 					selected_in_sys = st;
+					displayNoPanel();
 					return;
 				}
 			}
@@ -410,6 +466,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 				if(orbiting.absoluteCurX()-orbiting.size/2 <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 && orbiting.absoluteCurY()-orbiting.size/2 <= y && y <= orbiting.absoluteCurY() + orbiting.size/2)
 				{
 					selected_in_sys=orbiting;
+					displaySatellitePanel(orbiting);
 					return;
 				}
 				
@@ -421,6 +478,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 						if(sat.absoluteCurX()-OBJ_TOL <= x && x <= sat.absoluteCurX()+OBJ_TOL && sat.absoluteCurY()-OBJ_TOL <= y && y <= sat.absoluteCurY()+OBJ_TOL)
 						{
 							selected_in_sys=sat;
+							displaySatellitePanel(sat);
 							return;
 						}
 					}
@@ -429,6 +487,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		}
 		//if nothing found
 		selected_in_sys = null;
+		displayNoPanel();
 	}
 	
 	public void update()

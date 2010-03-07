@@ -4,7 +4,7 @@ public abstract class Facility implements Targetable
 {
 	private static int cost_to_build;
 	private static int time_to_build;
-	Planet location;
+	OwnableSatellite location;
 	HashSet<Targetter> aggressors;
 	int endurance;
 	int damage;
@@ -25,5 +25,5 @@ public abstract class Facility implements Targetable
 	}
 	
 	public HashSet<Targetter> getAggressors(){return aggressors;}
-	public void updateStatus(long t){}
+	public abstract void updateStatus(long t);
 }

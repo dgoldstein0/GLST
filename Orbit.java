@@ -15,6 +15,9 @@ public class Orbit
 	
 	double cur_x;
 	double cur_y;
+	double vel_x;
+	double vel_y;
+	
 	double period;
 	double time_offset;
 	int direction; //1=clockwise, -1=counterclockwise - use constants CLOCKWISE and COUNTERCLOCKWISE
@@ -87,7 +90,7 @@ public class Orbit
 		else if(focus2.getY()<0)
 			rot_angle = Math.PI/2.0d;
 		else
-			rot_angle=0; //doesn't matter, perfect circle
+			rot_angle=0; //doesn't matter, the orbit is a perfect circle
 		
 		double shift_x = init_x-focus2.getX()/2.0d;
 		double shift_y = init_y-focus2.getY()/2.0d;
@@ -106,6 +109,9 @@ public class Orbit
 	
 	public double absoluteInitX(){return init_x + boss.absoluteInitX();}
 	public double absoluteInitY(){return init_y + boss.absoluteInitY();}
+	
+	public double getAbsVelX(){return vel_x + boss.getAbsVelX();}
+	public double getAbsVelY(){return vel_y + boss.getAbsVelY();}
 	
 	public synchronized void move(double time)
 	{		
@@ -126,29 +132,14 @@ public class Orbit
 		}
 		while(Math.abs(theta2-c/a*Math.sin(theta2) - 2*Math.PI*frac_time)>.00000000001 || Math.abs(theta1-theta2)>.00000000001);
 		
-		double needs_rot_x = a*Math.cos(theta2);
+		double cos_theta = Math.cos(theta2);
+		double sin_theta = Math.sin(theta2);
 		
-		//redo this algorithm to simplify calculations - perhaps this original formula didn't even work...
-		/*double phi;
-		if(needs_rot_x != 0)
-		{
-			phi=Math.atan(b/a*Math.tan(theta2));
-			if(needs_rot_x < 0)
-				phi += Math.PI;
-		}
-		else
-			phi=theta2;
-		
-		double needs_rot_y = Math.sqrt((1-b*b/(a*a))*Math.pow(needs_rot_x,2.0d)+b*b)*Math.sin(phi);*/
-
-		double needs_rot_y=0; //this will be overwritten
-		if(needs_rot_x != 0)		
-			needs_rot_y = needs_rot_x*b/a*Math.tan(theta2);
-		else if(theta2 == Math.PI/2)
-			needs_rot_y = b;
-		else if(theta2 == 3*Math.PI/2)
-			needs_rot_y=-b;
-
+		double dtheta_dt = 2*Math.PI/(period*(1-c/a*cos_theta)); //the derivative of theta with respect to time
+		double needs_rot_x = a*cos_theta;
+		double needs_rot_y = b*sin_theta;
+		double dneeds_rot_x_dt = -a*dtheta_dt*sin_theta; //the derivative of needs_rot_x with respect to time
+		double dneeds_rot_y_dt = b*dtheta_dt*cos_theta; //the derivative of needs_rot_y with respect to time
 		
 		double rot_angle;
 		if(focus2.getX() != 0)
@@ -168,8 +159,11 @@ public class Orbit
 		double needs_shift_x = needs_rot_x*Math.cos(rot_angle) + needs_rot_y*Math.sin(rot_angle);
 		double needs_shift_y = -needs_rot_x*Math.sin(rot_angle) + needs_rot_y*Math.cos(rot_angle);
 		
-		cur_x=(int)(needs_shift_x+focus2.getX()/2); //shift by focus2x/2?
-		cur_y=(int)(needs_shift_y+focus2.getY()/2); //shift by focus2y/2?
+		vel_x = dneeds_rot_x_dt*Math.cos(rot_angle) + dneeds_rot_y_dt*Math.sin(rot_angle);
+		vel_y = -dneeds_rot_x_dt*Math.sin(rot_angle) + dneeds_rot_y_dt*Math.cos(rot_angle);
+		
+		cur_x=needs_shift_x+focus2.getX()/2; //shift by focus2x/2?
+		cur_y=needs_shift_y+focus2.getY()/2; //shift by focus2y/2?
 	}
 	
 	//methods required for save/load

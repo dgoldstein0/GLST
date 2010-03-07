@@ -123,4 +123,6 @@ public class GSystem implements Positioning
 	public double absoluteCurY(){return ((double)getHeight())/2;}
 	public double absoluteInitX(){return ((double)getWidth())/2;}
 	public double absoluteInitY(){return ((double)getHeight())/2;}
+	public double getAbsVelX(){return 0.0;}
+	public double getAbsVelY(){return 0.0;}
 }

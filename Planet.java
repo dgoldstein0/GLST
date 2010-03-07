@@ -1,35 +1,35 @@
 import java.util.*;
 
-public class Planet extends Satellite
+public class Planet extends OwnableSatellite
 {
-	long population;
 	HashSet<Satellite> satellites;
-	HashSet<Facility> facilities;
-	Player owner;
 	
-	public Planet(String nm, long pop, int sz, double m, byte habitable)
+	public Planet(String nm, double init_pop, double pop_cap, int sz, double m, double growth_rate)
 	{
 		name=nm;
-		population=pop;
+		
+		//set up population numbers
+		initial_pop=init_pop;
+		pop_capacity = pop_cap;
+		population=(long)init_pop;
+		pop_growth_rate = growth_rate;
+		
 		size=sz;
 		mass=m;
-		habitability=habitable;
+		
 		satellites=new HashSet<Satellite>();
 		facilities=new HashSet<Facility>();
 	}
 	
-	public void popChange()
-	{
-		
-	}
-	
 	//methods required for load/save
-	public Planet(){facilities = new HashSet<Facility>();}
+	public Planet(){
+		facilities = new HashSet<Facility>();
+		initial_pop = 100;
+		pop_capacity = 10000;
+		pop_growth_rate = .000005;
+	}
 	public HashSet<Satellite> getSatellites(){return satellites;}
 	public void setSatellites(HashSet<Satellite> sat){satellites=sat;}
-	public HashSet<Facility> getFacilities(){return facilities;}
-	public void setFacilities(HashSet<Facility> fac){facilities=fac;}
-	public Player getOwner(){return owner;}
 	
 	public void setOwner(Player p)
 	{

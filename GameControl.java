@@ -47,11 +47,12 @@ public class GameControl
 	public GameControl(GameInterface gi)
 	{
 		GI = gi;
+		GalacticStrategyConstants.ImageLoader();
 		players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
 		map=new Galaxy();
 	}
 	
-	public GameControl(){}
+	public GameControl(){GalacticStrategyConstants.ImageLoader();}
 		
 	public Player createThePlayer() throws CancelException
 	{
@@ -846,6 +847,8 @@ public class GameControl
 				sat.orbit.move(time_elapsed);
 				if(sat instanceof Planet)
 				{
+					players[player_id].changeMoney(((Planet)sat).updatePopAndTax(time_elapsed));
+					((Planet)sat).updateConstruction(time_elapsed);
 					for(Facility f : ((Planet)sat).facilities)
 					{
 						f.updateStatus(time_elapsed);
@@ -855,6 +858,8 @@ public class GameControl
 						sat2.orbit.move(time_elapsed);
 						if(sat2 instanceof Moon)
 						{
+							players[player_id].changeMoney(((Moon)sat2).updatePopAndTax(time_elapsed));
+							((Moon)sat2).updateConstruction(time_elapsed);
 							for(Facility f : ((Moon)sat2).facilities)
 								f.updateStatus(time_elapsed);
 						}
@@ -864,9 +869,13 @@ public class GameControl
 
 		}
 		
-		//draw everything		
-		GI.update();
+		//GI.update();
+		
+		if(GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP)
+			GI.SatellitePanel.update(time_elapsed);
 		GI.time.setText("Time: " + Long.toString(time_elapsed/1000));
+		GI.metal.setText("Metal: "+Long.toString(new Double(players[player_id].metal).longValue()));
+		GI.money.setText(GI.indentation + "Money: "+Long.toString(new Double(players[player_id].money).longValue()));
 		GI.redraw();
 	}
 }

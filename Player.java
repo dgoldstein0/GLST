@@ -6,8 +6,12 @@ import java.util.HashSet;
 public class Player
 {
 	String name;
-	long money;
-	long metal;
+	
+	Object metal_lock = new Object();
+	Object money_lock = new Object();
+	double money;
+	double metal;
+	
 	Color color;
 	int id; //id is used to identify players.  These are assigned by the host of the game.
 	boolean ready;
@@ -62,14 +66,42 @@ public class Player
 		color=c;
 	}
 	
+	//return true = successfully changed, return false = player doesn't have enough money.
+	public boolean changeMoney(double m)
+	{
+		boolean ret=false;
+		synchronized(money_lock){
+			if(money+m >= 0)
+			{
+				money += m;
+				ret=true;
+			}
+		}
+		return ret;
+	}
+	
+	//return true = successfully changed, return false = player doesn't have enough money.
+	public boolean changeMetal(double m)
+	{
+		boolean ret=false;
+		synchronized(metal_lock){
+			if(metal + m >= 0)
+			{
+				metal += m;
+				ret=true;
+			}
+		}
+		return ret;
+	}
+	
 	//methods necessary for saving/loading
 	public Player(){}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
-	public long getMoney(){return money;}
-	public void setMoney(long m){money=m;}
-	public long getMetal(){return metal;}
-	public void setMetal(long m){metal=m;}
+	public double getMoney(){return money;}
+	public void setMoney(double m){money=m;}
+	public double getMetal(){return metal;}
+	public void setMetal(double m){metal=m;}
 	public int getId(){return id;}
 	public void setId(int x){id=x;}
 	public boolean getReady(){return ready;}
