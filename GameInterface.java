@@ -157,13 +157,13 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		tabbedPane = new JTabbedPane();
 		//tabbedPane.setSize(200, 700);
 		system_list = new JPanel();//makeTextPanel("System");
-		system_list.setLayout(new FlowLayout());
+		system_list.setLayout(new BoxLayout(system_list,BoxLayout.Y_AXIS));
 		pane1 = new JScrollPane(system_list);		
 		pane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		tabbedPane.addTab("System", pane1);
 		tabbedPane.setSelectedIndex(0);
 		satellites_list = new JPanel();//makeTextPanel("Planets");
-		satellites_list.setLayout(new FlowLayout());
+		satellites_list.setLayout(new BoxLayout(satellites_list,BoxLayout.Y_AXIS));
 		
 		pane2 = new JScrollPane(satellites_list);		
 		pane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -490,25 +490,21 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		displayNoPanel();
 	}
 	
-	public void update()
+	public void update()      					//subject to change
 	{		
 		if (!labels_made)
 		{
 			System.out.println("made");
 			known_sys=GC.map.systems;//GC.players[GC.player_id].known_systems;
 			known_sate=GC.players[GC.player_id].known_satellites;		
-			labels_made=true;
-		}
-		for (GSystem system :known_sys)
-		{
-			SystemLabel label=new SystemLabel(system);
-			system_list.add(label);			
-		}				
+			labels_made=true;									
+			system_list.removeAll();		
+			for (GSystem system :known_sys)
+			{
+				SystemLabel label=new SystemLabel(system,this);
+				system_list.add(label);			
+			}
 		
-		for (Satellite satellite: known_sate)
-		{
-			SatelliteLabel label=new SatelliteLabel(satellite);
-			satellites_list.add(label);			
 		}
 		frame.setVisible(true);
 	}
