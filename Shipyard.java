@@ -38,14 +38,25 @@ public class Shipyard extends Facility{
 	public void updateStatus(long t)
 	{
 		if(manufac_queue.size() != 0)
-			time_on_current_ship += t-last_time;
-		if(time_on_current_ship >= manufac_queue.get(0).type.time_to_build)
 		{
-			time_on_current_ship -= manufac_queue.get(0).type.time_to_build;
-			produce(t-time_on_current_ship);
-			if(manufac_queue.size() == 0)
-				time_on_current_ship = 0;
+			time_on_current_ship += t-last_time;
+			if(time_on_current_ship >= manufac_queue.get(0).type.time_to_build)
+			{
+				time_on_current_ship -= manufac_queue.get(0).type.time_to_build;
+				produce(t-time_on_current_ship);
+				if(manufac_queue.size() == 0)
+					time_on_current_ship = 0;
+			}
+			last_time=t;
 		}
-		t=last_time;
 	}
+	
+	public double percentComplete()
+	{
+		return ((double)time_on_current_ship)/((double)manufac_queue.get(0).type.time_to_build);
+	}
+	
+	public int getType(){return Facility.SHIPYARD;}
+	public String getImgLoc(){return "images/shipyard.gif";}
+	public String getName(){return "Shipyard";}
 }

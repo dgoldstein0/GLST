@@ -1,9 +1,11 @@
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.GridLayout;
+import java.util.HashSet;
 
 public class GameMenu extends JDialog implements ActionListener
 {
@@ -61,15 +63,34 @@ public class GameMenu extends JDialog implements ActionListener
 	public void actionPerformed(ActionEvent e)
 	{
 		if(e.getSource() == pause)
-			;
+			JOptionPane.showMessageDialog(this, "this hasn't been implemented yet.", "Error", JOptionPane.ERROR_MESSAGE);
 		else if(e.getSource() == save)
-			;
+			JOptionPane.showMessageDialog(this, "this hasn't been implemented yet.", "Error", JOptionPane.ERROR_MESSAGE);
 		else if(e.getSource() == settings)
-			;
+			JOptionPane.showMessageDialog(this, "this hasn't been implemented yet.", "Error", JOptionPane.ERROR_MESSAGE);
 		else if(e.getSource() == quit_game)
-			;
+		{
+			GC.endAllThreads();
+			GC.players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
+			setVisible(false); //hide the menu
+			//destroy the graphics.
+			GC.GI.graphics_started=false;
+			GC.GI.sat_or_ship_disp = GameInterface.NO_PANEL_DISP;
+			GC.GI.theinterface.removeAll(); //removes the system/galaxy display
+			GC.GI.stat_and_order.removeAll();
+			GC.GI.satellites_list.removeAll();
+			GC.GI.system_list.removeAll();
+			GC.GI.selected_sys = new HashSet<GSystem>();
+			GC.GI.selected_in_sys = null;
+			frame.setVisible(true);
+			GC.startupDialog();
+		}
 		else if(e.getSource() == exit)
-			;
+		{
+			//this kills the program
+			GC.endAllThreads();
+			frame.dispose();
+		}
 		else if(e.getSource() == resume_game)
 			setVisible(false);
 	}

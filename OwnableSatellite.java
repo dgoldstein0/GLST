@@ -1,16 +1,12 @@
-import java.util.HashSet;
+import java.util.ArrayList;
 
 public abstract class OwnableSatellite extends Satellite
 {
-	HashSet<Facility> facilities;
+	ArrayList<Facility> facilities;
 	Player owner;
 	
 	//for building facilities
-	int bldg_in_progress;
-		final static int NO_BLDG=0;
-		final static int BASE=1;
-		final static int MINE=2;
-		final static int SHIPYARD=3;
+	int bldg_in_progress; //uses the constants specified in Facility
 	long time_finish;
 	long time_start;
 	
@@ -47,26 +43,36 @@ public abstract class OwnableSatellite extends Satellite
 		return new_taxes;
 	}
 	
-	public void updateConstruction(long t)
+	public void updateConstruction(GameInterface GI, long t)
 	{
-		if(bldg_in_progress != NO_BLDG)
+		if(bldg_in_progress != Facility.NO_BLDG)
 		{
 			if(t >= time_finish) //if build is finished...
 			{
+				Facility new_fac;
 				switch(bldg_in_progress)
 				{
-					case BASE:
-						facilities.add(new Base(time_finish));
+					case Facility.BASE:
+						new_fac = new Base(time_finish);
 						break;
-					case MINE:
-						facilities.add(new Mine(this, time_finish));
+					case Facility.MINE:
+						new_fac = new Mine(this, time_finish);
 						break;
-					case SHIPYARD:
-						facilities.add(new Shipyard(this, time_finish));
+					case Facility.SHIPYARD:
+						new_fac = new Shipyard(this, time_finish);
 						break;
+					default:
+						System.out.println("updateConstruction does not support this facility type!  ending construction and returning.");
+						bldg_in_progress = Facility.NO_BLDG;
+						return;
 				}
+				facilities.add(new_fac);
 				
-				bldg_in_progress = NO_BLDG;
+				//notify interface
+				if(GI.SatellitePanel.the_sat == this)
+					GI.SatellitePanel.displayFacility(new_fac);
+				
+				bldg_in_progress = Facility.NO_BLDG;
 			}
 		}
 	}
@@ -77,48 +83,62 @@ public abstract class OwnableSatellite extends Satellite
 		return ((double)(t-time_start))/((double)(time_finish-time_start));
 	}
 	
-	public void scheduleConstruction(int bldg_type, long build_time, long start_time)
+	//return value is true if the building will be built, and false if the player does not have enough money/metal to build it
+	public boolean scheduleConstruction(int bldg_type, long start_time)
 	{
 		bldg_in_progress = bldg_type;
 		time_start = start_time;
-		time_finish = start_time+build_time;
-	
+		
+		long build_time;
 		int met, mon; //metal and money costs
 		//this switch deteremines the cost of the building.
 		switch(bldg_type)
 		{
-			case BASE:
+			case Facility.BASE:
 				met=GalacticStrategyConstants.BASE_METAL_COST;
 				mon=GalacticStrategyConstants.BASE_MONEY_COST;
+				build_time = GalacticStrategyConstants.BASE_BUILD_TIME;
 				break;
-			case MINE:
+			case Facility.MINE:
 				met = GalacticStrategyConstants.MINE_METAL_COST;
 				mon = GalacticStrategyConstants.MINE_MONEY_COST;
+				build_time = GalacticStrategyConstants.MINE_BUILD_TIME;
 				break;
-			case SHIPYARD:
+			case Facility.SHIPYARD:
 				met=GalacticStrategyConstants.SHIPYARD_METAL_COST;
 				mon=GalacticStrategyConstants.SHIPYARD_MONEY_COST;
+				build_time = GalacticStrategyConstants.SHIPYARD_BUILD_TIME;
 				break;
 			default:
 				System.out.println("facility not recognized by schedule construction.  terminating construction.");
-				bldg_in_progress=NO_BLDG;
-				return;
+				cancelConstruction();
+				return false;
 		}
+		time_finish = start_time+build_time;
 		synchronized(owner.metal_lock){
 			synchronized(owner.money_lock){
 				if(owner.metal >= met && owner.money >= mon)
 				{
 					owner.metal -= met;
 					owner.money -= mon;
+					return true;
 				}
 				else
-					bldg_in_progress=NO_BLDG;
+				{
+					cancelConstruction();
+					return false;
+				}
 			}
 		}
 	}
 	
-	public HashSet<Facility> getFacilities(){return facilities;}
-	public void setFacilities(HashSet<Facility> fac){facilities=fac;}
+	public void cancelConstruction()
+	{
+		bldg_in_progress=Facility.NO_BLDG;
+	}
+	
+	public ArrayList<Facility> getFacilities(){return facilities;}
+	public void setFacilities(ArrayList<Facility> fac){facilities=fac;}
 	public Player getOwner(){return owner;}
 	public abstract void setOwner(Player p); //this must be overriden by implementing classes, because it is responsible for notifying the GSystem of an owner change
 	public long getPopulation(){return population;}

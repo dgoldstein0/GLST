@@ -7,10 +7,10 @@ public class Moon extends OwnableSatellite
 		this.mass=m;
 		this.name=nm;
 		this.size=sz;
-		facilities = new HashSet<Facility>();
+		facilities = new ArrayList<Facility>();
 	}
 	
-	public Moon(){facilities = new HashSet<Facility>();}
+	public Moon(){facilities = new ArrayList<Facility>();}
 	
 	public void setOwner(Player p)
 	{

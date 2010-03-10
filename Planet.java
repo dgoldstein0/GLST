@@ -18,12 +18,12 @@ public class Planet extends OwnableSatellite
 		mass=m;
 		
 		satellites=new HashSet<Satellite>();
-		facilities=new HashSet<Facility>();
+		facilities=new ArrayList<Facility>();
 	}
 	
 	//methods required for load/save
 	public Planet(){
-		facilities = new HashSet<Facility>();
+		facilities = new ArrayList<Facility>();
 		initial_pop = 100;
 		pop_capacity = 10000;
 		pop_growth_rate = .000005;

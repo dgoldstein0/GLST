@@ -3,9 +3,9 @@ public class Base extends Facility{
 	
 	float soldier;
 	int max_soldier;
-	double last_time;
+	long last_time;
 	
-	public Base(double t)
+	public Base(long t)
 	{
 		damage=0;
 		last_time = t;
@@ -47,5 +47,16 @@ public class Base extends Facility{
 		location.setOwner(null);
 	}
 	
-	public int getSoldier(){return (int)Math.floor(soldier);}
+	public int getSoldierInt(){return (int)Math.floor(soldier);}
+	
+	public float getSoldier(){return soldier;}
+	public void setSoldier(float s){soldier=s;}
+	public long getLast_time(){return last_time;}
+	public void setLast_time(long t){last_time=t;}
+	public int getMax_soldier(){return max_soldier;}
+	public void setMax_soldier(int s){max_soldier=s;}
+	
+	public int getType(){return Facility.BASE;}
+	public String getImgLoc(){return "images/Base.gif";}
+	public String getName(){return "Base";}
 }

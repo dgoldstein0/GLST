@@ -2,15 +2,15 @@ import java.util.HashSet;
 
 public abstract class Facility implements Targetable
 {
-	private static int cost_to_build;
-	private static int time_to_build;
+	final static int NO_BLDG=0;
+	final static int BASE = 1;
+	final static int MINE=2;
+	final static int SHIPYARD=3;
+	
 	OwnableSatellite location;
 	HashSet<Targetter> aggressors;
 	int endurance;
 	int damage;
-	
-	public static int getCost_to_build(){return cost_to_build;}
-	public static int getTime_to_build(){return time_to_build;}
 	
 	public void addDamage(int d)
 	{
@@ -26,4 +26,12 @@ public abstract class Facility implements Targetable
 	
 	public HashSet<Targetter> getAggressors(){return aggressors;}
 	public abstract void updateStatus(long t);
+	public abstract String getName();
+	public abstract int getType();
+	public abstract String getImgLoc();
+	
+	public int getDamage(){return damage;}
+	public void setDamage(int d){damage=d;}
+	public int getEndurance(){return endurance;}
+	public void setEndurance(int e){endurance=e;}
 }

@@ -25,7 +25,6 @@ public class GameControl
 	int player_id;
 	Player[] players;
 	Galaxy map;
-	volatile boolean game_started;
 
 	GameControl GC = this;
 	GameInterface GI;
@@ -273,7 +272,7 @@ public class GameControl
 		{
 			Planet p = map.start_locations.get(i);
 			p.setOwner(players[i]);
-			p.facilities.add(new Base(0));
+			p.facilities.add(new Base((long)0));
 		}
 		
 		//start game graphics...
@@ -337,7 +336,7 @@ public class GameControl
 			//start the player in assigned location
 			Planet p = map.start_locations.get(player_id);
 			p.setOwner(players[player_id]);
-			p.facilities.add(new Base(0));
+			p.facilities.add(new Base((long)0));
 			
 			//display the Galaxy
 			GI.drawGalaxy();
@@ -848,7 +847,7 @@ public class GameControl
 				if(sat instanceof Planet)
 				{
 					players[player_id].changeMoney(((Planet)sat).updatePopAndTax(time_elapsed));
-					((Planet)sat).updateConstruction(time_elapsed);
+					((Planet)sat).updateConstruction(GI, time_elapsed);
 					for(Facility f : ((Planet)sat).facilities)
 					{
 						f.updateStatus(time_elapsed);
@@ -859,7 +858,7 @@ public class GameControl
 						if(sat2 instanceof Moon)
 						{
 							players[player_id].changeMoney(((Moon)sat2).updatePopAndTax(time_elapsed));
-							((Moon)sat2).updateConstruction(time_elapsed);
+							((Moon)sat2).updateConstruction(GI, time_elapsed);
 							for(Facility f : ((Moon)sat2).facilities)
 								f.updateStatus(time_elapsed);
 						}
@@ -869,7 +868,7 @@ public class GameControl
 
 		}
 		
-		//GI.update();
+		GI.update();
 		
 		if(GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP)
 			GI.SatellitePanel.update(time_elapsed);

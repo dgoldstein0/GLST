@@ -26,4 +26,8 @@ public class Mine extends Facility{
 			last_time = t;
 		}
 	}
+	
+	public int getType(){return Facility.MINE;}
+	public String getImgLoc(){return "images/mine.gif";}
+	public String getName(){return "Mine";}
 }
