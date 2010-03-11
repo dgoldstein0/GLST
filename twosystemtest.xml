@@ -111,6 +111,19 @@
              <void property="name"> 
               <string>Nickjames</string> 
              </void> 
+	   <void property="facilities">
+	     <object class="java.util.ArrayList">
+			<void method="add">
+				<object class="Mine">
+					<void property="location"><object idref="Planet2" /></void>
+					<void property="mining_rate"><double>.005</double></void>
+					<void property="last_time"><long>0</long></void>
+					<void property="damage"><int>0</int></void>
+					<void property="endurance"><int>100</int></void>
+				</object>
+			</void>
+	     </object>
+	   </void>
              <void property="orbit"> 
               <object id="Orbit2" class="Orbit"> 
                <void property="a"> 

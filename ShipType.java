@@ -5,18 +5,20 @@ public class ShipType
 	String name;
 	int max_energy;
 	int hull;
-	int cost;
+	int money_cost;
+	int metal_cost;
 	int soldier_capacity;
 	int time_to_build;
 	String img_loc;
 	Image img;
 	
-	public ShipType(String name, int mfuel, int hull, int cost, int time_to_build, int capacity, String i)
+	public ShipType(String name, int mfuel, int hull, int money, int metal, int time_to_build, int capacity, String i)
 	{
 		this.name=name;
 		max_energy=mfuel;
 		this.hull=hull;
-		this.cost=cost;
+		metal_cost = metal;
+		money_cost = money;
 		this.time_to_build=time_to_build;
 		this.soldier_capacity=capacity;
 		img_loc = i;

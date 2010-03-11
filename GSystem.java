@@ -38,14 +38,14 @@ public class GSystem implements Positioning
 		owner_id = NO_OWNER;
 	}
 	
-	public void setUpForGame()
+	public void setUpForGame(GameControl GC)
 	{
 		//set up ownership
 		player_claims = new int[GalacticStrategyConstants.MAX_PLAYERS];
 		for(int i=0; i<GalacticStrategyConstants.MAX_PLAYERS; i++) //player_claims and fleets both have GalacticStrategyConstants.MAX_PLAYERS as their length
 		{
 			player_claims[i]=0;
-			fleets[i] = new Fleet(this);
+			fleets[i] = new Fleet(this, GC.players[i]);
 		}
 	}
 	

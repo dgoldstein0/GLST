@@ -49,9 +49,14 @@ public class GameControl
 		GalacticStrategyConstants.ImageLoader();
 		players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
 		map=new Galaxy();
+		Shipyard.GC = this;
 	}
 	
-	public GameControl(){GalacticStrategyConstants.ImageLoader();}
+	public GameControl()
+	{
+		GalacticStrategyConstants.ImageLoader();
+		Shipyard.GC = this;
+	}
 		
 	public Player createThePlayer() throws CancelException
 	{
@@ -265,7 +270,7 @@ public class GameControl
 		
 		//set up systems for the game
 		for(GSystem sys : map.systems)
-			sys.setUpForGame();
+			sys.setUpForGame(this);
 		
 		//start everyone in assigned locations
 		for(int i=0; i<map.start_locations.size(); i++)
@@ -331,7 +336,7 @@ public class GameControl
 			
 			//set up systems for the game
 			for(GSystem sys : map.systems)
-				sys.setUpForGame();
+				sys.setUpForGame(this);
 			
 			//start the player in assigned location
 			Planet p = map.start_locations.get(player_id);
@@ -843,7 +848,7 @@ public class GameControl
 		{
 			for(Satellite sat : sys.orbiting_objects)
 			{
-				sat.orbit.move(time_elapsed);
+				
 				if(sat instanceof Planet)
 				{
 					players[player_id].changeMoney(((Planet)sat).updatePopAndTax(time_elapsed));
@@ -854,7 +859,6 @@ public class GameControl
 					}
 					for(Satellite sat2 : ((Planet)sat).satellites)
 					{
-						sat2.orbit.move(time_elapsed);
 						if(sat2 instanceof Moon)
 						{
 							players[player_id].changeMoney(((Moon)sat2).updatePopAndTax(time_elapsed));
@@ -862,14 +866,40 @@ public class GameControl
 							for(Facility f : ((Moon)sat2).facilities)
 								f.updateStatus(time_elapsed);
 						}
+						sat2.orbit.move(time_elapsed);
 					}
 				}
+				sat.orbit.move(time_elapsed);
 			}
-
+			
+			for(int i=0; i<sys.fleets.length; i++)
+			{
+				for(Ship s : sys.fleets[i].ships)
+				{
+					s.move(time_elapsed);
+				}
+			}
 		}
 		
-		GI.update();
+		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));
+	}
+	
+	public class InterfaceUpdater implements Runnable
+	{
+		long time;
 		
+		public InterfaceUpdater(long t){time=t;}
+		
+		public void run()
+		{
+			updateInterface(time);
+		}
+	}
+	
+	public void updateInterface(long time_elapsed)
+	{
+		GI.update();
+			
 		if(GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP)
 			GI.SatellitePanel.update(time_elapsed);
 		GI.time.setText("Time: " + Long.toString(time_elapsed/1000));

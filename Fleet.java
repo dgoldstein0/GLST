@@ -6,10 +6,11 @@ public class Fleet
 	Player owner;
 	GSystem location;
 	
-	public Fleet(GSystem loc)
+	public Fleet(GSystem loc, Player o)
 	{
 		ships = new HashSet<Ship>();
 		location = loc;
+		owner = o;
 	}
 	
 	//methods required for load/save

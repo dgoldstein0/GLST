@@ -1,3 +1,4 @@
+
 import java.util.HashSet;
 
 public abstract class Facility implements Targetable
@@ -11,6 +12,8 @@ public abstract class Facility implements Targetable
 	HashSet<Targetter> aggressors;
 	int endurance;
 	int damage;
+	
+	long last_time;//the last time it was updated
 	
 	public void addDamage(int d)
 	{
@@ -34,4 +37,6 @@ public abstract class Facility implements Targetable
 	public void setDamage(int d){damage=d;}
 	public int getEndurance(){return endurance;}
 	public void setEndurance(int e){endurance=e;}
+	public OwnableSatellite getLocation(){return location;}
+	public void setLocation(OwnableSatellite s){location=s;}
 }

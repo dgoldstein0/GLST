@@ -3,7 +3,6 @@ public class Base extends Facility{
 	
 	float soldier;
 	int max_soldier;
-	long last_time;
 	
 	public Base(long t)
 	{

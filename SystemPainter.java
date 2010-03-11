@@ -135,12 +135,16 @@ public class SystemPainter extends JPanel
 				{
 					for(Ship s : system.fleets[i].ships)
 					{
-						//draw ship s
-						AffineTransform t = new AffineTransform();
-						t.setToTranslation(drawX(s.getPos_x()-s.type.img.getWidth(this)),drawY(s.getPos_y()-s.type.img.getHeight(this)));
-						t.setToRotation(s.vel_x, s.vel_y, s.type.img.getWidth(this)/2, s.type.img.getHeight(this)/2);
+						// Get the current transform
+						AffineTransform saveAT = g2.getTransform();
 						
-						g2.drawImage(s.type.img, t, this);
+						//draw ship s
+						g2.rotate(s.direction2+Math.PI/2, drawX(s.getPos_x2()),drawY(s.getPos_y2()));
+						
+						g2.drawImage(s.type.img, drawX(s.getPos_x2()-s.type.img.getWidth(this)/2), drawY(s.getPos_y2()-s.type.img.getHeight(this)/2), this);
+						
+						// Restore original transform
+						g2.setTransform(saveAT);
 					}
 				}
 			}

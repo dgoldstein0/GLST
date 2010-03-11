@@ -354,6 +354,13 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			stat_and_order.removeAll();
 			stat_and_order.repaint();
 			sat_or_ship_disp = NO_PANEL_DISP;
+			SatellitePanel.state=-1; //this is necessary to remove the bug
+				//that when a facility finishes being built, and the player has nothing in the system selected,
+				//and then selects a planet with no facilities, the newly built facility appears in the interface
+				//as if it belongs to the selected planet, although the facility is not part of that planet's (or moon's)
+				//facilities ArrayList.  setting this boolean to false ensures that displayFacility in PlanetMoonCommandPanel
+				//does not try to add the new facility to the class' facilities_panel.
+			
 			frame.setVisible(true);
 		}
 	}
