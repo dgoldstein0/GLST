@@ -49,22 +49,6 @@ public class SystemPainter extends JPanel
 			g.drawOval(drawX((getWidth()-100)/2),drawY((getHeight()-100)/2),(int)(100*scale),(int)(100*scale));
 		}
 		
-		if(selected instanceof Satellite) {
-			g.setColor(Color.YELLOW);
-			if(game_mode){
-				g.drawOval(drawX(((Satellite)selected).absoluteCurX()-((StellarObject)selected).size/2)-2, drawY(((Satellite)selected).absoluteCurY()-((StellarObject)selected).size/2)-2, (int)(((StellarObject)selected).size*scale)+4, (int)(((StellarObject)selected).size*scale)+4);
-			} else {
-				g.drawOval(drawX(((Satellite)selected).absoluteInitX()-((StellarObject)selected).size/2)-2, drawY(((Satellite)selected).absoluteInitY()-((StellarObject)selected).size/2)-2, (int)(((StellarObject)selected).size*scale)+4, (int)(((StellarObject)selected).size*scale)+4);
-			}
-		} else if(selected instanceof Star) {
-			//select a star
-			g.setColor(Color.YELLOW);
-			g.drawOval(drawX(((Star)selected).x-((StellarObject)selected).size/2), drawY(((Star)selected).y-((StellarObject)selected).size/2), (int)(((StellarObject)selected).size*scale), (int)(((StellarObject)selected).size*scale));
-		} else if(selected instanceof Focus) {
-			g.setColor(Color.YELLOW);
-			g.drawOval(drawX(((Focus)selected).getX()+(((Focus)selected).owner.boss.absoluteCurX()))-2, drawY(((Focus)selected).getY()+(((Focus)selected).owner.boss.absoluteCurY()))-2, 5,5);
-		}
-		
 		if(system instanceof GSystem)
 		{
 			//draw stars
@@ -79,7 +63,7 @@ public class SystemPainter extends JPanel
 			}
 			
 			//draw orbiting objects
-			if(system.orbiting_objects instanceof HashSet)
+			if(system.orbiting_objects instanceof ArrayList)
 			{
 				g.setFont(g.getFont().deriveFont(Font.BOLD,12.0f));
 				FontMetrics m=g.getFontMetrics(g.getFont());
@@ -109,8 +93,8 @@ public class SystemPainter extends JPanel
 						for(Satellite sat : planet_sats)
 						{
 							drawOrbit(sat, g);
-							if(orbiting instanceof Moon && ((Moon)orbiting).getOwner() instanceof Player)
-								g.setColor(((Moon)orbiting).getOwner().getColor());
+							if(sat instanceof Moon && ((Moon)sat).getOwner() instanceof Player)
+								g.setColor(((Moon)sat).getOwner().getColor());
 							else
 								g.setColor(Color.WHITE);
 							g.fillOval(drawX(sat.absoluteCurX()-sat.size/2), drawY(sat.absoluteCurY()-sat.size/2), (int)(sat.size*scale), (int)(sat.size*scale));
@@ -140,15 +124,44 @@ public class SystemPainter extends JPanel
 						AffineTransform saveAT = g2.getTransform();
 						
 						//draw ship s
-						g2.rotate(s.direction2+Math.PI/2, drawX(s.getPos_x2()),drawY(s.getPos_y2()));
+						g2.rotate(s.direction+Math.PI/2, drawX(s.getPos_x()),drawY(s.getPos_y()));
 						
-						g2.drawImage(s.type.img, drawX(s.getPos_x2()-s.type.img.getWidth(this)/2), drawY(s.getPos_y2()-s.type.img.getHeight(this)/2), this);
+						g2.drawImage(s.type.img, drawX(s.getPos_x()-s.type.default_scale*s.type.img.getWidth(this)/2), drawY(s.getPos_y()-s.type.default_scale*s.type.img.getHeight(this)/2), (int)(s.type.default_scale*s.type.img.getWidth(this)*scale), (int)(s.type.default_scale*scale*s.type.img.getHeight(this)), this);
+						g2.setColor(system.fleets[i].owner.getColor());
+						g2.drawRect(drawX(s.getPos_x())-3, drawY(s.getPos_y())-3,6,6);
 						
 						// Restore original transform
 						g2.setTransform(saveAT);
 					}
 				}
 			}
+			
+			g.setColor(Color.WHITE);
+			if(system.name instanceof String)
+				g.drawString(system.name + " System", 10, 20);
+		}
+		
+		if(selected instanceof Satellite) {
+			g.setColor(Color.YELLOW);
+			if(game_mode){
+				g.drawOval(drawX(((Satellite)selected).absoluteCurX()-((StellarObject)selected).size/2)-2, drawY(((Satellite)selected).absoluteCurY()-((StellarObject)selected).size/2)-2, (int)(((StellarObject)selected).size*scale)+4, (int)(((StellarObject)selected).size*scale)+4);
+			} else {
+				g.drawOval(drawX(((Satellite)selected).absoluteInitX()-((StellarObject)selected).size/2)-2, drawY(((Satellite)selected).absoluteInitY()-((StellarObject)selected).size/2)-2, (int)(((StellarObject)selected).size*scale)+4, (int)(((StellarObject)selected).size*scale)+4);
+			}
+		} else if(selected instanceof Star) {
+			//select a star
+			g.setColor(Color.YELLOW);
+			g.drawOval(drawX(((Star)selected).x-((StellarObject)selected).size/2), drawY(((Star)selected).y-((StellarObject)selected).size/2), (int)(((StellarObject)selected).size*scale), (int)(((StellarObject)selected).size*scale));
+		} else if(selected instanceof Focus) {
+			g.setColor(Color.YELLOW);
+			g.drawOval(drawX(((Focus)selected).getX()+(((Focus)selected).owner.boss.absoluteCurX()))-2, drawY(((Focus)selected).getY()+(((Focus)selected).owner.boss.absoluteCurY()))-2, 5,5);
+		} else if(selected instanceof Ship) {
+			g.setColor(Color.YELLOW);
+			double dim = Math.max(((Ship)selected).type.width, ((Ship)selected).type.height)*((Ship)selected).type.default_scale;
+			g.drawOval(drawX(((Ship)selected).pos_x - dim/2.0), drawY(((Ship)selected).pos_y - dim/2.0), (int)(dim*scale), (int)(dim*scale));
+			g.setColor(Color.RED);
+			g.drawLine(drawX(((Ship)selected).dest_x_coord)-3, drawY(((Ship)selected).dest_y_coord), drawX(((Ship)selected).dest_x_coord)+3, drawY(((Ship)selected).dest_y_coord));
+			g.drawLine(drawX(((Ship)selected).dest_x_coord), drawY(((Ship)selected).dest_y_coord)-3, drawX(((Ship)selected).dest_x_coord), drawY(((Ship)selected).dest_y_coord)+3);
 		}
 		
 		if(ghost_obj==GHOST_OBJ)
@@ -164,9 +177,6 @@ public class SystemPainter extends JPanel
 		
 		if(game_mode)
 			g.drawImage(return_arrow, getWidth()-arrow_size, 0, arrow_size, arrow_size, this);
-		
-		g.setColor(Color.WHITE);
-		g.drawString(system.name + " System", 10, 20);
 	}
 	
 	public void paintSystem(GSystem system, Selectable selected, boolean view, double centerx, double centery, double sc)

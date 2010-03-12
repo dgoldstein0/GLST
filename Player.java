@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Player
@@ -20,8 +21,8 @@ public class Player
 	HashSet<Ship> ships;
 	
 	//used for exploration.  specific to each player
-	HashSet<GSystem> known_systems; //if you know a system, you know the stars in it.
-	HashSet<Satellite> known_satellites;
+	ArrayList<GSystem> known_systems; //if you know a system, you know the stars in it.
+	ArrayList<Satellite> known_satellites;
 	
 	//this constructor prompts for the user to name the player himself
 	public static Player createPlayer() throws CancelException
@@ -39,8 +40,8 @@ public class Player
 		the_player.metal=GalacticStrategyConstants.DEFAULT_METAL;
 		the_player.ready=false;
 		the_player.ships=new HashSet<Ship>();
-		the_player.known_systems = new HashSet<GSystem>();
-		the_player.known_satellites = new HashSet<Satellite>();
+		the_player.known_systems = new ArrayList<GSystem>();
+		the_player.known_satellites = new ArrayList<Satellite>();
 		the_player.cur_ship_id = -1;
 		return the_player;
 	}
@@ -53,8 +54,8 @@ public class Player
 		money=GalacticStrategyConstants.DEFAULT_MONEY;
 		metal=GalacticStrategyConstants.DEFAULT_METAL;
 		ships = new HashSet<Ship>();
-		known_systems = new HashSet<GSystem>();
-		known_satellites = new HashSet<Satellite>();
+		known_systems = new ArrayList<GSystem>();
+		known_satellites = new ArrayList<Satellite>();
 		ready=false;
 	}
 	

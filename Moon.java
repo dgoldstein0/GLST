@@ -2,8 +2,9 @@ import java.util.*;
 
 public class Moon extends OwnableSatellite
 {
-	public Moon(double m, String nm, int sz)
+	public Moon(int i, double m, String nm, int sz)
 	{
+		id=i;
 		this.mass=m;
 		this.name=nm;
 		this.size=sz;

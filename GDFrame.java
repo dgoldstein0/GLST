@@ -1100,7 +1100,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				
 				possibly_sel_desel_sys=new HashSet<GSystem>();
 				
-				if(map.systems instanceof HashSet)
+				if(map.systems instanceof ArrayList)
 				{
 					for(GSystem sys : map.systems)
 					{
@@ -1151,7 +1151,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private GSystem locateSystem(int x_pos, int y_pos) throws NoSystemLocatedException
 	{
-		if(map instanceof Galaxy && map.systems instanceof HashSet)
+		if(map instanceof Galaxy && map.systems instanceof ArrayList)
 		{
 			for(GSystem sys : map.systems)
 			{
@@ -1235,7 +1235,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private void addSystem(int x, int y)
 	{
-		GSystem new_sys = new GSystem(x,y,null,new HashSet<Satellite>(),null,Integer.parseInt(t_nav.getValue().toString()));
+		GSystem new_sys = new GSystem(map.systems.size(),x,y,null,new ArrayList<Satellite>(),null,Integer.parseInt(t_nav.getValue().toString()));
 		/*if(!(map.systems instanceof HashSet)) //***this is unnecessary now since Galaxy creates the HashSet in the Galaxy constructor
 			map.systems = new HashSet<GSystem>();*/
 		map.systems.add(new_sys);

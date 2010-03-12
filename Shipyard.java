@@ -26,6 +26,7 @@ public class Shipyard extends Facility{
 	
 	public boolean addToQueue(Ship ship, long t)
 	{
+		boolean ret;
 		int met = ship.type.metal_cost;
 		int mon = ship.type.money_cost;
 		
@@ -43,12 +44,13 @@ public class Shipyard extends Facility{
 							last_time=t;
 					}
 					
-					return true;
+					ret=true;
 				}
 				else
-					return false;
+					ret=false;
 			}
 		}
+		return ret;
 	}
 	
 	public void removeFromQueue(Ship ship, long t)

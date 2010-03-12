@@ -4,9 +4,10 @@ public class Planet extends OwnableSatellite
 {
 	HashSet<Satellite> satellites;
 	
-	public Planet(String nm, double init_pop, double pop_cap, int sz, double m, double growth_rate)
+	public Planet(int i, String nm, double init_pop, double pop_cap, int sz, double m, double growth_rate)
 	{
 		name=nm;
+		id=i;
 		
 		//set up population numbers
 		initial_pop=init_pop;

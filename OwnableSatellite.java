@@ -3,6 +3,7 @@ import javax.swing.SwingUtilities;
 
 public abstract class OwnableSatellite extends Satellite
 {
+	Object facilities_lock = new Object();
 	ArrayList<Facility> facilities;
 	Player owner;
 	
@@ -87,12 +88,15 @@ public abstract class OwnableSatellite extends Satellite
 		
 		public void run() //this must run on the swing thread because we want to avoid running PlanetMoonCommandPanel.setSat() and this at the same time, because that can result in the same facility being displayed twice
 		{
-			facilities.add(new_fac);
-			
-			//notify interface
-			if(GI.SatellitePanel.the_sat.equals(new_fac.location))
+			synchronized(facilities_lock)
 			{
-				GI.SatellitePanel.displayFacility(new_fac);
+				facilities.add(new_fac);
+				
+				//notify interface
+				if(GI.SatellitePanel.the_sat.equals(new_fac.location))
+				{
+					GI.SatellitePanel.displayFacility(new_fac);
+				}
 			}
 		}
 	}
@@ -140,7 +144,9 @@ public abstract class OwnableSatellite extends Satellite
 				if(owner.metal >= met && owner.money >= mon)
 				{
 					owner.metal -= met;
-					owner.money -= mon;
+					owner.money -= mon; 
+					//notify all players ***
+					
 					return true;
 				}
 				else
@@ -160,9 +166,12 @@ public abstract class OwnableSatellite extends Satellite
 	public void setOwner(Player p, long time)
 	{
 		setOwner(p);
-		for(Facility f : facilities)
+		synchronized(facilities_lock)
 		{
-			f.last_time = time; //makes it so that facilities do nothing when possessed by noone.  That is, they lie idle instead of stockpiling production.
+			for(Facility f : facilities)
+			{
+				f.last_time = time; //makes it so that facilities do nothing when possessed by noone.  That is, they lie idle instead of stockpiling production.
+			}
 		}
 	}
 	

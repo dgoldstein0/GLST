@@ -1,6 +1,6 @@
 import java.util.HashSet;
 
-public class Ship extends Targetter implements Targetable
+public class Ship extends Targetter implements Targetable, Selectable
 {
 	static final int data_capacity=50;
 	
@@ -18,19 +18,26 @@ public class Ship extends Targetter implements Targetable
 	
 	GSystem location;
 	
+	Destination destination;
+	//save in case SystemPainter wants to paint crosshairs
+	double dest_x_coord;
+	double dest_y_coord;
+	
 	double pos_x; //pos_x and pos_y indicate where in the system the ship is located
 	double pos_y;
 	double direction;
 	double speed;
 	long time;
+	
 	ShipDataSaver ship_data[];
 	int index;  //for the data array
 	
 	double max_speed = .04; //px per millisecond
-	double max_angular_vel = .001;//radians per milli
+	double max_angular_vel = .0005;//radians per milli
+	double max_accel = .000005; //px per millisecond per millisecond
 	double closing_radius = 20;
 	
-	int soldier;
+	float soldier;
 	
 	HashSet<Targetter> aggressors;
 	
@@ -45,7 +52,7 @@ public class Ship extends Targetter implements Targetable
 		soldier=t.soldier_capacity;//assume ships are fully loaded when built
 		damage=0;
 		aggressors = new HashSet<Targetter>();
-		ship_data=new ShipDataSaver[data_capacity];	
+		ship_data=new ShipDataSaver[data_capacity];
 		index=0;
 	}
 	
@@ -82,7 +89,9 @@ public class Ship extends Targetter implements Targetable
 	
 	public void orderToMove(long t, double x, double y)
 	{
-		
+		destination = new DestinationPoint(x,y);
+		dest_x_coord = x;
+		dest_y_coord = y;
 	}
 	
 	public void destroyed()
@@ -92,29 +101,43 @@ public class Ship extends Targetter implements Targetable
 	
 	//ship physics
 	static long time_granularity = 20;
+	static double delta = .5d;
 	
 	public void move(long t)
 	{
 		while(time < t)
-		{			
-		
+		{
 			//change position
-			
+			time += time_granularity;
 			pos_x += speed*time_granularity*Math.cos(direction);
 			pos_y += speed*time_granularity*Math.sin(direction);
 			
-			//change speed
-			speed = Math.min(max_speed, Math.hypot(destinationX()-pos_x, destinationY()-pos_y)/closing_radius*max_speed);
-			
-			//change direction
-			double dest_vec_x = destinationX() - pos_x;
-			double dest_vec_y = destinationY() - pos_y;
-			double desired_change = Math.atan2(dest_vec_y, dest_vec_x)-direction;
-			if(desired_change > Math.PI)
-				desired_change -= 2*Math.PI;
-			else if(desired_change < -Math.PI)
-				desired_change += 2*Math.PI;
-			direction += Math.min(desired_change, Math.abs(desired_change)*max_angular_vel*time_granularity);
+			if(Math.abs(pos_x - destinationX()) < delta && Math.abs(pos_y - destinationY()) < delta)
+			{
+				pos_x = destinationX();
+				pos_y = destinationY();
+				speed = 0.0d;
+			}
+			else
+			{
+				//change direction
+				double dest_vec_x = destinationX() - pos_x;
+				double dest_vec_y = destinationY() - pos_y;
+				double desired_change = Math.atan2(dest_vec_y, dest_vec_x)-direction;
+				if(desired_change > Math.PI)
+					desired_change -= 2*Math.PI;
+				else if(desired_change < -Math.PI)
+					desired_change += 2*Math.PI;
+				
+				//change speed
+				speed = Math.max(Math.min(max_speed*Math.cos(desired_change), Math.hypot(destinationX()-pos_x, destinationY()-pos_y) * Math.cos(desired_change)/closing_radius*max_speed),0.0);
+				
+				double actual_chng = Math.min(Math.abs(desired_change), Math.abs(max_angular_vel*time_granularity));
+				if(desired_change > 0)
+					direction += actual_chng;
+				else
+					direction -= actual_chng;
+			}
 			
 			//save data
 			saveData();
@@ -123,6 +146,7 @@ public class Ship extends Targetter implements Targetable
 	
 	public void saveData()
 	{
+		ship_data[index] = new ShipDataSaver();
 		ship_data[index].dir=direction;
 		ship_data[index].px=pos_x;
 		ship_data[index].py=pos_y;
@@ -160,15 +184,19 @@ public class Ship extends Targetter implements Targetable
 	
 	private double destinationX()
 	{
-		return 800;
+		dest_x_coord = destination.getXCoord(time);
+		return dest_x_coord;
 	}
 	
 	private double destinationY()
 	{
-		return 0;
+		dest_y_coord = destination.getYCoord(time);
+		return dest_y_coord;
 	}
 	
 	public HashSet<Targetter> getAggressors(){return aggressors;}
+	
+	public int getSoldierInt(){return (int)Math.floor(soldier);}
 	
 	//methods required for save/load
 	public Ship(){}
@@ -189,7 +217,7 @@ public class Ship extends Targetter implements Targetable
 	public void setPos_x(double x){pos_x=x;}
 	public void setPos_y(double y){pos_y=y;}
 	public Player getOwner() {return owner;}
-	public int getSoldier() {return soldier;}
+	public float getSoldier() {return soldier;}
 	public void setId(int i){id=i;}
 	public int getId(){return id;}
 }

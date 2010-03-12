@@ -51,13 +51,14 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	
 	
 	SystemPainter SystemPanel;
-	GSystem sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
-	Selectable selected_in_sys;
 	GSystem sys,prev_sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
-	Selectable selected_in_sys, pre_selected;
+	Selectable selected_in_sys, prev_selected;
 	double sys_scale;
 	double sys_center_x;
 	double sys_center_y;
+	int system_state;
+		final static int NORMAL=0;
+		final static int SELECT_DESTINATION=1;
 	
 	JPanel system_list;
 	JPanel satellites_list;
@@ -69,8 +70,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	PlanetMoonCommandPanel SatellitePanel;
 	ShipCommandPanel ShipPanel;
 	
-	boolean mode; //Galaxy=true, system=false.  reflected by isGalaxyDisplayed and isSystemDisplayed
-	boolean mode,prev_mode; //Galaxy=true, system=false.  reflected by isGalaxyDisplayed and isSystemDisplayed
+	boolean mode, prev_mode; //Galaxy=true, system=false.  reflected by isGalaxyDisplayed and isSystemDisplayed
 	boolean graphics_started; //used to indicate whether graphics have been started yet - that is, whether the Galaxy has been drawn yet.
 	
 	final String indentation="     ";
@@ -226,6 +226,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		//set up game control
 		GC = new GameControl(this);
 		
+		system_state = NORMAL;
 		setupGraphics();
 		
 		//set up in-game menu for later display
@@ -261,7 +262,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		SystemPanel = new SystemPainter(false);
 		
 		SatellitePanel = new PlanetMoonCommandPanel(GC);
-		ShipPanel = new ShipCommandPanel();
+		ShipPanel = new ShipCommandPanel(this);
 		
 		graphics_started=false;
 		sat_or_ship_disp = NO_PANEL_DISP;
@@ -331,6 +332,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		if(sat_or_ship_disp != SAT_PANEL_DISP)
 		{
 			stat_and_order.removeAll();
+			stat_and_order.repaint();
 			stat_and_order.add(SatellitePanel);
 			sat_or_ship_disp = SAT_PANEL_DISP;
 		}
@@ -343,6 +345,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		if(sat_or_ship_disp != SHIP_PANEL_DISP)
 		{
 			stat_and_order.removeAll();
+			stat_and_order.repaint();
 			stat_and_order.add(ShipPanel);
 			sat_or_ship_disp = SHIP_PANEL_DISP;
 		}
@@ -368,6 +371,11 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			
 			frame.setVisible(true);
 		}
+	}
+	
+	public void switchSystemToDestinationMode()
+	{
+		system_state = SELECT_DESTINATION;
 	}
 	
 	public boolean isGalaxyDisplayed(){return mode;}
@@ -425,9 +433,21 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 					drawGalaxy();
 				else
 				{
-					//look for object to select
-					selectInSystemAt(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
-					redraw();
+					if(system_state == NORMAL && e.getButton() == MouseEvent.BUTTON1)
+					{
+						//look for object to select
+						selectInSystemAt(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
+						redraw();
+					}
+					else if(system_state == SELECT_DESTINATION)
+					{
+						setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
+						system_state = NORMAL;
+					}
+					else if(selected_in_sys instanceof Ship && e.getButton() == MouseEvent.BUTTON3)
+					{
+						setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
+					}
 				}
 			}
 		}
@@ -470,7 +490,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		}
 		
 		//search orbiting planets/objects
-		if(sys.orbiting_objects instanceof Set)
+		if(sys.orbiting_objects instanceof ArrayList)
 		{
 			for(Satellite orbiting : sys.orbiting_objects)
 			{
@@ -497,9 +517,64 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 				}
 			}
 		}
+		
+		for(int i=0; i<sys.fleets.length; i++)
+		{
+			for(Integer j : sys.fleets[i].ships.keySet())
+			{
+				Ship s = sys.fleets[i].ships.get(j);
+				
+				if(s.pos_x-2*OBJ_TOL <= x && x <= s.pos_x+2*OBJ_TOL && s.pos_y-2*OBJ_TOL <= y && y <= s.pos_y+2*OBJ_TOL)
+				{
+					System.out.println("ship selected!");
+					selected_in_sys = s;
+					displayShipPanel(s);
+					return;
+				}
+			}
+		}
+		
 		//if nothing found
 		selected_in_sys = null;
 		displayNoPanel();
+	}
+	
+	private void setDestination(double x, double y)
+	{
+		Destination dest = new DestinationPoint(x,y);
+		
+		//1st search out satellites
+		
+		final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/sys_scale; //tolerance
+		
+		//search orbiting planets/objects
+		if(sys.orbiting_objects instanceof ArrayList)
+		{
+			for(Satellite orbiting : sys.orbiting_objects)
+			{
+				//search for satellites...
+				if(orbiting.absoluteCurX()-orbiting.size/2 <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 && orbiting.absoluteCurY()-orbiting.size/2 <= y && y <= orbiting.absoluteCurY() + orbiting.size/2)
+				{
+					dest = orbiting;
+					break;
+				}
+				
+				if(orbiting instanceof Planet && ((Planet)(orbiting)).satellites instanceof Set)
+				{
+					Planet cur_planet=(Planet)orbiting;
+					for(Satellite sat : cur_planet.satellites)
+					{
+						if(sat.absoluteCurX()-OBJ_TOL <= x && x <= sat.absoluteCurX()+OBJ_TOL && sat.absoluteCurY()-OBJ_TOL <= y && y <= sat.absoluteCurY()+OBJ_TOL)
+						{
+							dest=sat;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		ShipPanel.the_ship.destination = dest;
 	}
 	
 	public void update()      					//subject to change

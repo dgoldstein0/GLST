@@ -87,6 +87,8 @@ public class GalacticStrategyConstants
 	final static int SHIPYARD_MONEY_COST = 300;
 	final static int SHIPYARD_METAL_COST = 200;
 	
+	final static double LANDING_RANGE = 10.0d; //the max distance at which ships can get/send troops to planets
+	
 	//Used by Mine
 	static double DEFAULT_MINING_RATE=.002; //metal per mine per millisecond
 	//Used by Player
@@ -100,12 +102,15 @@ public class GalacticStrategyConstants
 		for(int i=0; i<sTypes.length; i++)
 		{
 			sTypes[i].setImg(tk.getImage(sTypes[i].getImg_loc()));
+			ImageSizer sizer = new ImageSizer(i);
+			sTypes[i].width = sTypes[i].img.getWidth(sizer);
+			sTypes[i].height = sTypes[i].img.getHeight(sizer);
 		}
 	}
 	
 	//setup for ship types
 	final static int JUNK=0;
-	final static ShipType[] sTypes={new ShipType("Junk", 20, 100, 100, 100, 10000, 200, "images/junk.png")};
+	final static ShipType[] sTypes={new ShipType("Junk", 20, 100, 100, 100, 10000, 200, .30d, "images/junk.png")};
 	
 	//Used by Shipyard
 	static final int queue_capa=10;//the capacity of a shipyard's queue

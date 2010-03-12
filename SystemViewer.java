@@ -322,7 +322,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private void TimeUpdater(long time)
 	{
-		if(system.orbiting_objects instanceof HashSet)
+		if(system.orbiting_objects instanceof ArrayList)
 		{
 			for(Satellite sat : system.orbiting_objects)
 			{
@@ -393,7 +393,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		}
 		
 		//search orbiting planets/objects
-		if(system.orbiting_objects instanceof Set)
+		if(system.orbiting_objects instanceof ArrayList)
 		{
 			for(Satellite orbiting : system.orbiting_objects)
 			{
@@ -626,7 +626,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private void recalculateOrbits()
 	{
-		if(system.orbiting_objects instanceof HashSet)
+		if(system.orbiting_objects instanceof ArrayList)
 		{
 			for(Satellite sat: system.orbiting_objects)
 			{
@@ -646,19 +646,10 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	}
 	
 	private void addPlanet(int x, int y)
-	{
-		HashSet<Satellite> sats = system.getorbiting_objects();
-		HashSet<Satellite> new_sats=new HashSet<Satellite>();
-		if(!(sats instanceof HashSet))
-			sats=new HashSet<Satellite>();
-		
-		for(Satellite sat : sats)
-			new_sats.add(sat);
-		
-		Planet theplanet = new Planet("", 100.0, 10000.0, DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, .000005);
+	{		
+		Planet theplanet = new Planet(system.orbiting_objects.size(), "", 100.0, 10000.0, DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, .000005);
 		theplanet.orbit = new Orbit((Satellite)theplanet, (Positioning)system, x, y, x, y, 1);
-		new_sats.add(theplanet);
-		system.setOrbiting_objects(new_sats);
+		system.orbiting_objects.add(theplanet);
 		
 		selected_obj = theplanet;
 		wait_to_add = ADD_FOCUS;
@@ -667,7 +658,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private void addMoon(int x, int y)
 	{
-		Moon themoon = new Moon(DEFAULT_MOON_MASS, "", DEFAULT_MOON_SIZE);
+		Moon themoon = new Moon(((Planet)selected_obj).satellites.size(), DEFAULT_MOON_MASS, "", DEFAULT_MOON_SIZE);
 		themoon.orbit = new Orbit((Satellite)themoon, (Positioning)selected_obj,x,y,x,y,1);
 		((Planet)selected_obj).satellites.add(themoon);
 		

@@ -77,11 +77,18 @@ public class GameMenu extends JDialog implements ActionListener
 			GC.GI.graphics_started=false;
 			GC.GI.sat_or_ship_disp = GameInterface.NO_PANEL_DISP;
 			GC.GI.theinterface.removeAll(); //removes the system/galaxy display
+			GC.GI.theinterface.repaint();
 			GC.GI.stat_and_order.removeAll();
+			GC.GI.stat_and_order.repaint();
 			GC.GI.satellites_list.removeAll();
+			GC.GI.satellites_list.repaint();
 			GC.GI.system_list.removeAll();
+			GC.GI.system_list.repaint();
 			GC.GI.selected_sys = new HashSet<GSystem>();
 			GC.GI.selected_in_sys = null;
+			GC.GI.labels_made=false;
+			GC.GI.prev_sys=null;
+			GC.GI.prev_selected=null;
 			frame.setVisible(true);
 			GC.startupDialog();
 		}

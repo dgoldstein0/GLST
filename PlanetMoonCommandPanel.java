@@ -30,6 +30,8 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	JProgressBar progress_bar;
 	boolean need_to_reset;
 	
+	boolean no_base_mode;
+	
 	int state;
 		final static int FACILITIES_DISPLAYED = 0;
 		final static int SHIP_QUEUE_DISPLAYED = 1;
@@ -86,6 +88,8 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 		stats_panel=new JPanel();
 		BoxLayout stats_layout = new BoxLayout(stats_panel, BoxLayout.Y_AXIS);
 		stats_panel.setLayout(stats_layout);
+		
+		no_base_mode = false;
 	}
 	
 	public void setSat(Satellite s)
@@ -138,28 +142,16 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 				
 				//if you are the owner, commands!
 				if(((OwnableSatellite)s).getOwner().getId() == GC.player_id)
-				{
-					progress_bar = new JProgressBar(0,1000);
-					stats_panel.add(progress_bar);
-					
-					//set the status of the buttons
-					if(((OwnableSatellite)the_sat).bldg_in_progress == Facility.NO_BLDG)
-					{
-						build.setEnabled(true);
-						cancel.setEnabled(false);
-					}
-					else
-					{
-						build.setEnabled(false);
-						cancel.setEnabled(true);
-					}
-					
-					setUpFacilityBuildPanel();
+				{					
+					setUpFacilityBuilding();
 				}
 			}
 			
-			for(Facility f : ((OwnableSatellite)s).facilities)
-				displayFacility(f);
+			synchronized(((OwnableSatellite)s).facilities_lock)
+			{
+				for(Facility f : ((OwnableSatellite)s).facilities)
+					displayFacility(f);
+			}
 		}
 		
 		add(stats_panel);
@@ -173,8 +165,23 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 		stats_panel.add(pop);
 	}
 	
-	private void setUpFacilityBuildPanel()
+	private void setUpFacilityBuilding()
 	{
+		progress_bar = new JProgressBar(0,1000);
+		stats_panel.add(progress_bar);
+		
+		//set the status of the buttons
+		if(((OwnableSatellite)the_sat).bldg_in_progress == Facility.NO_BLDG)
+		{
+			build.setEnabled(true);
+			cancel.setEnabled(false);
+		}
+		else
+		{
+			build.setEnabled(false);
+			cancel.setEnabled(true);
+		}
+		
 		JPanel button_strip = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		button_strip.add(build);
 		button_strip.add(cancel);
@@ -207,6 +214,17 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 			
 			for(FacilityStatusUpdater updater : facility_updaters)
 				updater.updateFacility();
+			
+			boolean no_base_seen=true;
+			synchronized(((OwnableSatellite)the_sat).facilities_lock)
+			{
+				for(Facility f : ((OwnableSatellite)the_sat).facilities)
+				{
+					if(f instanceof Base)
+						no_base_seen=false;
+				}
+			}
+			no_base_mode=no_base_seen;
 		}
 	}
 	
@@ -346,9 +364,13 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	
 	private void facilityChoices()
 	{
-		choices_panel.add(base_icon);
-		choices_panel.add(shipyard_icon);
-		choices_panel.add(mine_icon);
+		if(no_base_mode)
+			choices_panel.add(base_icon);
+		else
+		{
+			choices_panel.add(shipyard_icon);
+			choices_panel.add(mine_icon);
+		}
 	}
 	
 	public void displayQueue()
@@ -495,7 +517,15 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	public void mouseClicked(MouseEvent e)
 	{
 		if(e.getSource()==base_icon)
+		{
 			executeBuild(Facility.BASE);
+			if(need_to_reset)
+			{
+				//by building a base, you take over the planet.
+				((OwnableSatellite)the_sat).setOwner(GC.players[GC.player_id]);
+				cancel.setEnabled(false);
+			}
+		}
 		else if(e.getSource() == mine_icon)
 			executeBuild(Facility.MINE);
 		else if(e.getSource() == shipyard_icon)

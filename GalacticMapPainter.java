@@ -50,7 +50,7 @@ public class GalacticMapPainter extends JPanel
 		super.paintComponent(g);
 		setBackground(Color.BLACK);
 		
-		if(map instanceof Galaxy && map.systems instanceof HashSet)
+		if(map instanceof Galaxy && map.systems instanceof ArrayList)
 		{
 			for(GSystem sys : map.systems)
 			{

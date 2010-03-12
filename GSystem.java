@@ -13,6 +13,8 @@ public class GSystem implements Positioning
 	HashSet<Star> stars;
 	Fleet[] fleets; //indices = player id's
 	String name;
+	int id;
+	
 	int x;
 	int y;
 	int navigability;
@@ -26,8 +28,9 @@ public class GSystem implements Positioning
 	
 
 	
-	public GSystem(int x, int y, String nm, ArrayList<Satellite> orbiting, HashSet<Star> stars, int nav)
+	public GSystem(int i, int x, int y, String nm, ArrayList<Satellite> orbiting, HashSet<Star> stars, int nav)
 	{
+		id=i;
 		name=nm;
 		orbiting_objects=orbiting;
 		this.stars=stars;
@@ -125,4 +128,7 @@ public class GSystem implements Positioning
 	public double absoluteInitY(){return ((double)getHeight())/2;}
 	public double getAbsVelX(){return 0.0;}
 	public double getAbsVelY(){return 0.0;}
+	
+	public void setId(int i){id=i;}
+	public int getId(){return id;}
 }

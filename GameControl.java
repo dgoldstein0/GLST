@@ -853,9 +853,12 @@ public class GameControl
 				{
 					players[player_id].changeMoney(((Planet)sat).updatePopAndTax(time_elapsed));
 					((Planet)sat).updateConstruction(GI, time_elapsed);
-					for(Facility f : ((Planet)sat).facilities)
+					synchronized(((OwnableSatellite)sat).facilities_lock)
 					{
-						f.updateStatus(time_elapsed);
+						for(Facility f : ((Planet)sat).facilities)
+						{
+							f.updateStatus(time_elapsed);
+						}
 					}
 					for(Satellite sat2 : ((Planet)sat).satellites)
 					{
@@ -863,8 +866,11 @@ public class GameControl
 						{
 							players[player_id].changeMoney(((Moon)sat2).updatePopAndTax(time_elapsed));
 							((Moon)sat2).updateConstruction(GI, time_elapsed);
-							for(Facility f : ((Moon)sat2).facilities)
-								f.updateStatus(time_elapsed);
+							synchronized(((Moon)sat2).facilities_lock)
+							{
+								for(Facility f : ((Moon)sat2).facilities)
+									f.updateStatus(time_elapsed);
+							}
 						}
 						sat2.orbit.move(time_elapsed);
 					}
@@ -874,21 +880,20 @@ public class GameControl
 			
 			for(int i=0; i<sys.fleets.length; i++)
 			{
-				for(Ship s : sys.fleets[i].ships)
+				for(Integer j : sys.fleets[i].ships.keySet())
 				{
-					s.move(time_elapsed);
+					sys.fleets[i].ships.get(j).move(time_elapsed);
 				}
 			}
 		}
 		
-<<<<<<< .mine		GI.update();
-=======		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));
+		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));
 	}
 	
 	public class InterfaceUpdater implements Runnable
 	{
 		long time;
->>>>>>> .theirs		
+		
 		public InterfaceUpdater(long t){time=t;}
 		
 		public void run()
@@ -903,6 +908,8 @@ public class GameControl
 			
 		if(GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP)
 			GI.SatellitePanel.update(time_elapsed);
+		else if(GI.sat_or_ship_disp == GameInterface.SHIP_PANEL_DISP)
+			GI.ShipPanel.update();
 		GI.time.setText("Time: " + Long.toString(time_elapsed/1000));
 		GI.metal.setText("Metal: "+Long.toString(new Double(players[player_id].metal).longValue()));
 		GI.money.setText(GI.indentation + "Money: "+Long.toString(new Double(players[player_id].money).longValue()));

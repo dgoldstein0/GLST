@@ -12,7 +12,11 @@ public class ShipType
 	String img_loc;
 	Image img;
 	
-	public ShipType(String name, int mfuel, int hull, int money, int metal, int time_to_build, int capacity, String i)
+	double default_scale;
+	int width;
+	int height;
+	
+	public ShipType(String name, int mfuel, int hull, int money, int metal, int time_to_build, int capacity, double sc, String i)
 	{
 		this.name=name;
 		max_energy=mfuel;
@@ -21,6 +25,7 @@ public class ShipType
 		money_cost = money;
 		this.time_to_build=time_to_build;
 		this.soldier_capacity=capacity;
+		default_scale=sc;
 		img_loc = i;
 	}
 	
