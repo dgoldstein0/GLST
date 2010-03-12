@@ -18,10 +18,14 @@ public class ShipBuilder implements MouseListener
 	
 	public void mouseClicked(MouseEvent e)
 	{
-		yard.addToQueue(new Ship(type.name, type), GC.TC.getTime());
-		panel.build_ship.setEnabled(true);
-		panel.cancel_build_ship.setEnabled(false);
-		panel.displayQueue();
+		if(yard.addToQueue(new Ship(type.name, type, GC.players[GC.player_id].nextShipId()), GC.TC.getTime()))
+		{
+			panel.build_ship.setEnabled(true);
+			panel.cancel_build_ship.setEnabled(false);
+			panel.displayQueue();
+		}
+		else
+			SoundManager.playSound("sound/doot doot.wav");
 	}
 	
 	public void mouseEntered(MouseEvent e){}

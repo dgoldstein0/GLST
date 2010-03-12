@@ -1,21 +1,21 @@
-import java.util.HashSet;
+import java.util.Hashtable;
 
 public class Fleet
 {
-	HashSet<Ship> ships;
+	Hashtable<Integer, Ship> ships;
 	Player owner;
 	GSystem location;
 	
 	public Fleet(GSystem loc, Player o)
 	{
-		ships = new HashSet<Ship>();
+		ships = new Hashtable<Integer, Ship>();
 		location = loc;
 		owner = o;
 	}
 	
 	//methods required for load/save
-	public HashSet<Ship> getShips(){return ships;}
-	public void setShips(HashSet<Ship> sh){ships=sh;}
+	public Hashtable<Integer, Ship> getShips(){return ships;}
+	public void setShips(Hashtable<Integer, Ship> sh){ships=sh;}
 	public Player getOwner(){return owner;}
 	public void setOwner(Player p){owner = p;}
 	public void setLocation(GSystem sys){location=sys;}
@@ -23,13 +23,13 @@ public class Fleet
 	
 	public void add(Ship s)
 	{
-		ships.add(s);
+		ships.put(s.getId(), s);
 		location.increaseClaim(owner);
 	}
 	
 	public void remove(Ship s)
 	{
-		ships.remove(s);
+		ships.remove(s.getId());
 		location.decreaseClaim(owner);
 	}
 }

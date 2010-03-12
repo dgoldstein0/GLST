@@ -5,6 +5,7 @@ public class Ship extends Targetter implements Targetable
 	static final int data_capacity=50;
 	
 	Player owner;
+	int id;
 	
 	ShipType type;
 	String name;
@@ -33,8 +34,9 @@ public class Ship extends Targetter implements Targetable
 	
 	HashSet<Targetter> aggressors;
 	
-	public Ship(String nm, ShipType t)
+	public Ship(String nm, ShipType t, int id)
 	{
+		this.id=id;
 		name = nm;
 		type = t;
 		energy = t.max_energy;
@@ -188,4 +190,6 @@ public class Ship extends Targetter implements Targetable
 	public void setPos_y(double y){pos_y=y;}
 	public Player getOwner() {return owner;}
 	public int getSoldier() {return soldier;}
+	public void setId(int i){id=i;}
+	public int getId(){return id;}
 }

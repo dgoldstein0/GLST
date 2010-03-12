@@ -355,29 +355,38 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	{
 		state = SHIP_QUEUE_DISPLAYED;
 		facilities_panel.removeAll();
-		for(Ship s : the_shipyard.manufac_queue)
+		synchronized(the_shipyard.queue_lock)
 		{
-			JPanel ship_panel = new JPanel();
-			GroupLayout gl = new GroupLayout(ship_panel);
-			ship_panel.setLayout(gl);
-			
-			GroupLayout.ParallelGroup glhgroup = gl.createParallelGroup();
-			GroupLayout.SequentialGroup glvgroup = gl.createSequentialGroup();
-			
-			gl.setHorizontalGroup(glhgroup);
-			gl.setVerticalGroup(glvgroup);
-			
-			JLabel name_label = new JLabel(s.type.name);
-			JLabel ship_pic = new JLabel(new ImageIcon(s.type.img));
-			
-			glhgroup.addComponent(name_label);
-			glvgroup.addComponent(name_label);
-			
-			glhgroup.addComponent(ship_pic);
-			glvgroup.addComponent(ship_pic);
-			
-			hgroup.addComponent(ship_panel);
-			vgroup.addComponent(ship_panel);
+			for(Ship s : the_shipyard.manufac_queue)
+			{
+				JPanel ship_panel = new JPanel();
+				GroupLayout gl = new GroupLayout(ship_panel);
+				ship_panel.setLayout(gl);
+				
+				GroupLayout.ParallelGroup glhgroup = gl.createParallelGroup();
+				GroupLayout.SequentialGroup glvgroup = gl.createSequentialGroup();
+				
+				gl.setHorizontalGroup(glhgroup);
+				gl.setVerticalGroup(glvgroup);
+				
+				JPanel top_panel = new JPanel();
+				JLabel name_label = new JLabel(s.type.name);
+				JButton cancel_but = new JButton("Cancel");
+				cancel_but.addActionListener(new QueueCanceller(this, the_shipyard, s));
+				top_panel.add(name_label);
+				top_panel.add(cancel_but);
+				
+				JLabel ship_pic = new JLabel(new ImageIcon(s.type.img));
+				
+				glhgroup.addComponent(top_panel);
+				glvgroup.addComponent(top_panel);
+				
+				glhgroup.addComponent(ship_pic);
+				glvgroup.addComponent(ship_pic);
+				
+				hgroup.addComponent(ship_panel);
+				vgroup.addComponent(ship_panel);
+			}
 		}
 	}
 	

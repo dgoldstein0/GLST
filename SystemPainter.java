@@ -133,8 +133,9 @@ public class SystemPainter extends JPanel
 			{
 				if(system.fleets[i] instanceof Fleet)
 				{
-					for(Ship s : system.fleets[i].ships)
+					for(Integer j : system.fleets[i].ships.keySet())
 					{
+						Ship s = system.fleets[i].ships.get(j);
 						// Get the current transform
 						AffineTransform saveAT = g2.getTransform();
 						

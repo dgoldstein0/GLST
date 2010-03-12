@@ -9,7 +9,7 @@ public class GSystem implements Positioning
 	int owner_id; //-2 is none, -1 is conflicted, otherwise corresponds to player id's
 	int[] player_claims; //the elements of this array keep track of how many claims - planets or ships - each player owns in the system
 	
-	HashSet<Satellite> orbiting_objects;
+	ArrayList<Satellite> orbiting_objects;
 	HashSet<Star> stars;
 	Fleet[] fleets; //indices = player id's
 	String name;
@@ -26,7 +26,7 @@ public class GSystem implements Positioning
 	
 
 	
-	public GSystem(int x, int y, String nm, HashSet<Satellite> orbiting, HashSet<Star> stars, int nav)
+	public GSystem(int x, int y, String nm, ArrayList<Satellite> orbiting, HashSet<Star> stars, int nav)
 	{
 		name=nm;
 		orbiting_objects=orbiting;
@@ -97,8 +97,8 @@ public class GSystem implements Positioning
 	
 	//methods required for save/load
 	public GSystem(){owner_id = NO_OWNER;}
-	public HashSet<Satellite> getorbiting_objects(){return orbiting_objects;}
-	public void setOrbiting_objects(HashSet<Satellite> s){orbiting_objects=s;}
+	public ArrayList<Satellite> getorbiting_objects(){return orbiting_objects;}
+	public void setOrbiting_objects(ArrayList<Satellite> s){orbiting_objects=s;}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 	public HashSet<Star> getStars(){return stars;}

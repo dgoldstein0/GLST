@@ -7,6 +7,8 @@ public class Player
 {
 	String name;
 	
+	int cur_ship_id;
+	
 	Object metal_lock = new Object();
 	Object money_lock = new Object();
 	double money;
@@ -39,6 +41,7 @@ public class Player
 		the_player.ships=new HashSet<Ship>();
 		the_player.known_systems = new HashSet<GSystem>();
 		the_player.known_satellites = new HashSet<Satellite>();
+		the_player.cur_ship_id = -1;
 		return the_player;
 	}
 	
@@ -46,6 +49,7 @@ public class Player
 	public Player(String nm)
 	{
 		name = nm;
+		cur_ship_id = -1;
 		money=GalacticStrategyConstants.DEFAULT_MONEY;
 		metal=GalacticStrategyConstants.DEFAULT_METAL;
 		ships = new HashSet<Ship>();
@@ -92,6 +96,12 @@ public class Player
 			}
 		}
 		return ret;
+	}
+	
+	public int nextShipId()
+	{
+		cur_ship_id ++;
+		return cur_ship_id;
 	}
 	
 	//methods necessary for saving/loading

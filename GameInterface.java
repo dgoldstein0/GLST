@@ -41,8 +41,8 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	JPanel stat_and_order;
 	JPanel theinterface;
 	
-	HashSet<GSystem> known_sys; //known systems for this player
-	HashSet<Satellite> known_sate;   //known satellite for this player
+	ArrayList<GSystem> known_sys; //known systems for this player
+	ArrayList<Satellite> known_sate;   //known satellite for this player
 	GameControl GC;
 	
 	GalacticMapPainter GalaxyPanel;

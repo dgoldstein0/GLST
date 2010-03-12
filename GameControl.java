@@ -284,7 +284,7 @@ public class GameControl
 		GI.drawGalaxy();
 		
 		//set game to update itself
-		TC.startConstIntervalTask(new Updater(),5);
+		TC.startConstIntervalTask(new Updater(),20);
 	}
 	
 	public void startGameViaThread()
@@ -347,7 +347,7 @@ public class GameControl
 			GI.drawGalaxy();
 			
 			//set game to update itself
-			TC.startConstIntervalTask(new Updater(),5);
+			TC.startConstIntervalTask(new Updater(),20);
 		} else {
 			startupDialog();
 		}
