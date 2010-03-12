@@ -49,8 +49,9 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	double gal_scale; //the scale which the galaxy is painted at.
 	HashSet<GSystem> selected_sys; //stores a set of currently selected systems - that is, a set of one item.  This is necessary because multiple selection is possible in GDFrame
 	
+	
 	SystemPainter SystemPanel;
-	GSystem sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
+	GSystem sys,prev_sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
 	Selectable selected_in_sys;
 	double sys_scale;
 	double sys_center_x;

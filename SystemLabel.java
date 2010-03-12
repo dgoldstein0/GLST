@@ -30,22 +30,32 @@ public class SystemLabel extends JLabel implements MouseListener
 				SatelliteLabel label=new SatelliteLabel(satellite);
 				the_interface.satellites_list.add(label);			
 			}			
+			the_interface.tabbedPane.setSelectedIndex(1);
+			the_interface.sys=the_sys;		
 		}
 	}
 
 	
 	public void mouseEntered(MouseEvent arg0) {
 		// TODO Auto-generated method stub		
+		the_interface.prev_sys=the_interface.sys;
 		the_interface.sys=the_sys;		
-		the_interface.drawSystem();	
-
-
+		the_interface.drawSystem();			
 	}
 
 
 	public void mouseExited(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+		the_interface.selected_in_sys=null;
+		if (the_interface.prev_sys!=null)
+		{
+			the_interface.sys=the_interface.prev_sys;
+			the_interface.drawSystem();
+		}
+		else
+		{
+			the_interface.drawGalaxy();
+		}		
 	}
 
 
@@ -60,3 +70,4 @@ public class SystemLabel extends JLabel implements MouseListener
 		
 	}
 }
+s
