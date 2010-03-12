@@ -163,6 +163,9 @@ public class SystemPainter extends JPanel
 		
 		if(game_mode)
 			g.drawImage(return_arrow, getWidth()-arrow_size, 0, arrow_size, arrow_size, this);
+		
+		g.setColor(Color.WHITE);
+		g.drawString(system.name + " System", 10, 20);
 	}
 	
 	public void paintSystem(GSystem system, Selectable selected, boolean view, double centerx, double centery, double sc)
