@@ -22,16 +22,21 @@ public class SystemLabel extends JLabel implements MouseListener
 
 	public void mouseClicked(MouseEvent arg0) {
 		// TODO Auto-generated method stub		
-		if (arg0.getClickCount()==2)
-		{
+		if (arg0.getClickCount()>=1)
+		{			
+			the_interface.prev_sys=the_sys;
+			the_interface.sys=the_sys;
 			the_interface.satellites_list.removeAll();
 			for (Satellite satellite: the_sys.orbiting_objects)
 			{
 				SatelliteLabel label=new SatelliteLabel(satellite);
 				the_interface.satellites_list.add(label);			
 			}			
-			the_interface.tabbedPane.setSelectedIndex(1);
-			the_interface.sys=the_sys;		
+			
+		}	
+		if (arg0.getClickCount()==2)
+		{
+			the_interface.tabbedPane.setSelectedIndex(1);			
 		}
 	}
 
@@ -47,7 +52,7 @@ public class SystemLabel extends JLabel implements MouseListener
 	public void mouseExited(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 		the_interface.selected_in_sys=null;
-		if (the_interface.prev_sys!=null)
+		if (!the_interface.prev_mode)
 		{
 			the_interface.sys=the_interface.prev_sys;
 			the_interface.drawSystem();
@@ -70,4 +75,3 @@ public class SystemLabel extends JLabel implements MouseListener
 		
 	}
 }
-s

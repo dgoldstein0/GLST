@@ -2,6 +2,8 @@ import java.util.HashSet;
 
 public class Ship extends Targetter implements Targetable
 {
+	static final int data_capacity=50;
+	
 	Player owner;
 	
 	ShipType type;
@@ -15,17 +17,13 @@ public class Ship extends Targetter implements Targetable
 	
 	GSystem location;
 	
-	double pos_x1; //pos_x and pos_y indicate where in the system the ship is located
-	double pos_y1;
-	double direction1;
-	double speed1;
-	long time1;
-	
-	double pos_x2;
-	double pos_y2;	
-	double direction2;
-	double speed2;
-	long time2;
+	double pos_x; //pos_x and pos_y indicate where in the system the ship is located
+	double pos_y;
+	double direction;
+	double speed;
+	long time;
+	ShipDataSaver ship_data[];
+	int index;  //for the data array
 	
 	double max_speed = .04; //px per millisecond
 	double max_angular_vel = .001;//radians per milli
@@ -45,6 +43,8 @@ public class Ship extends Targetter implements Targetable
 		soldier=t.soldier_capacity;//assume ships are fully loaded when built
 		damage=0;
 		aggressors = new HashSet<Targetter>();
+		ship_data=new ShipDataSaver[data_capacity];	
+		index=0;
 	}
 	
 	public void assemble(Shipyard builder, long t)
@@ -56,13 +56,13 @@ public class Ship extends Targetter implements Targetable
 		builder.location.orbit.move(t);
 		if(builder.location instanceof Moon)
 			((Planet)builder.location.orbit.boss).orbit.move(t);
-		pos_x2 = builder.default_x + builder.location.absoluteCurX();
-		pos_y2 = builder.default_y + builder.location.absoluteCurY();
+		pos_x = builder.default_x + builder.location.absoluteCurX();
+		pos_y = builder.default_y + builder.location.absoluteCurY();
 		double vel_x=builder.location.orbit.getAbsVelX();
 		double vel_y=builder.location.orbit.getAbsVelY();
-		direction2 = Math.atan2(vel_y, vel_x);
-		speed2 = Math.hypot(vel_x, vel_y);
-		time2=t;
+		direction = Math.atan2(vel_y, vel_x);
+		speed = Math.hypot(vel_x, vel_y);
+		time=t;
 		if(builder.location instanceof Planet)
 			location = (GSystem)builder.location.orbit.boss;
 		else //builder.location is a Moon
@@ -89,39 +89,71 @@ public class Ship extends Targetter implements Targetable
 	}
 	
 	//ship physics
-	static long time_granularity = 5;
+	static long time_granularity = 20;
 	
 	public void move(long t)
 	{
-		while(time2 < t)
-		{
-			time1=time2;
-			time2 += time_granularity;
-			
-			pos_x1 = pos_x2;
-			pos_y1 = pos_y2;
-			
-			direction1 = direction2;
-			speed1 = speed2;
-			
+		while(time < t)
+		{			
+		
 			//change position
 			
-			pos_x2 += speed1*time_granularity*Math.cos(direction1);
-			pos_y2 += speed1*time_granularity*Math.sin(direction1);
+			pos_x += speed*time_granularity*Math.cos(direction);
+			pos_y += speed*time_granularity*Math.sin(direction);
 			
 			//change speed
-			speed2 = Math.min(max_speed, Math.hypot(destinationX()-pos_x2, destinationY()-pos_y2)/closing_radius*max_speed);
+			speed = Math.min(max_speed, Math.hypot(destinationX()-pos_x, destinationY()-pos_y)/closing_radius*max_speed);
 			
 			//change direction
-			double dest_vec_x = destinationX() - pos_x2;
-			double dest_vec_y = destinationY() - pos_y2;
-			double desired_change = Math.atan2(dest_vec_y, dest_vec_x)-direction2;
+			double dest_vec_x = destinationX() - pos_x;
+			double dest_vec_y = destinationY() - pos_y;
+			double desired_change = Math.atan2(dest_vec_y, dest_vec_x)-direction;
 			if(desired_change > Math.PI)
 				desired_change -= 2*Math.PI;
 			else if(desired_change < -Math.PI)
 				desired_change += 2*Math.PI;
-			direction2 += Math.min(desired_change, Math.abs(desired_change)*max_angular_vel*time_granularity);
+			direction += Math.min(desired_change, Math.abs(desired_change)*max_angular_vel*time_granularity);
+			
+			//save data
+			saveData();
 		}
+	}
+	
+	public void saveData()
+	{
+		ship_data[index].dir=direction;
+		ship_data[index].px=pos_x;
+		ship_data[index].py=pos_y;
+		ship_data[index].t=time;
+		ship_data[index].sp=speed;
+		index++;
+		if (index>data_capacity-1)
+			index=0;
+	}
+	
+	public void loadData(long t)
+	{
+		int stepback=(int) (Math.floor((t-time)/time_granularity)+1);
+		if (stepback>50)
+		{
+			System.out.println("Error loading ship data: the delay is too long");
+		}
+		else
+		for (int i=1; i<=stepback; i++)
+		{
+			index--;
+			if (index<0)
+				index=data_capacity-1;
+		}
+		if (ship_data[index]!=null)
+		{
+			direction=ship_data[index].dir;
+			pos_x=ship_data[index].px;
+			pos_y=ship_data[index].py;
+			time=ship_data[index].t;
+			speed=ship_data[index].sp;
+		}
+		else System.out.println("Error loading ship data: data wasn't saved");	
 	}
 	
 	private double destinationX()
@@ -150,14 +182,10 @@ public class Ship extends Targetter implements Targetable
 	public void setHull_strength(int hs){hull_strength=hs;}
 	public int getDamage(){return damage;}
 	public void setDamage(int d){damage=d;}
-	public double getPos_x1(){return pos_x1;}
-	public double getPos_y1(){return pos_y1;}
-	public void setPos_x1(double x){pos_x1=x;}
-	public void setPos_y1(double y){pos_y1=y;}
-	public double getPos_x2(){return pos_x2;}
-	public double getPos_y2(){return pos_y2;}
-	public void setPos_x2(double x){pos_x2=x;}
-	public void setPos_y2(double y){pos_y2=y;}
+	public double getPos_x(){return pos_x;}
+	public double getPos_y(){return pos_y;}
+	public void setPos_x(double x){pos_x=x;}
+	public void setPos_y(double y){pos_y=y;}
 	public Player getOwner() {return owner;}
 	public int getSoldier() {return soldier;}
 }

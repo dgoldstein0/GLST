@@ -51,8 +51,10 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	
 	
 	SystemPainter SystemPanel;
-	GSystem sys,prev_sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
+	GSystem sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
 	Selectable selected_in_sys;
+	GSystem sys,prev_sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
+	Selectable selected_in_sys, pre_selected;
 	double sys_scale;
 	double sys_center_x;
 	double sys_center_y;
@@ -68,6 +70,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	ShipCommandPanel ShipPanel;
 	
 	boolean mode; //Galaxy=true, system=false.  reflected by isGalaxyDisplayed and isSystemDisplayed
+	boolean mode,prev_mode; //Galaxy=true, system=false.  reflected by isGalaxyDisplayed and isSystemDisplayed
 	boolean graphics_started; //used to indicate whether graphics have been started yet - that is, whether the Galaxy has been drawn yet.
 	
 	final String indentation="     ";
@@ -273,6 +276,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			theinterface.removeAll();
 			theinterface.add(GalaxyPanel); //automatically adds to center
 			mode=true;
+			prev_mode=true;
 			graphics_started=true;
 			
 			selected_in_sys=null;

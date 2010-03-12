@@ -881,13 +881,14 @@ public class GameControl
 			}
 		}
 		
-		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));
+<<<<<<< .mine		GI.update();
+=======		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));
 	}
 	
 	public class InterfaceUpdater implements Runnable
 	{
 		long time;
-		
+>>>>>>> .theirs		
 		public InterfaceUpdater(long t){time=t;}
 		
 		public void run()
