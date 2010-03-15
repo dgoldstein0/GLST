@@ -10,8 +10,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.event.ComponentListener;
@@ -25,7 +27,7 @@ import java.awt.BorderLayout;
 import java.util.*;
 
 
-public class GameInterface implements ActionListener, MouseMotionListener, MouseListener, WindowListener, ComponentListener
+public class GameInterface implements ActionListener, MouseMotionListener, MouseListener, WindowListener, ComponentListener, MouseWheelListener
 {
 	
 	JFrame frame;
@@ -260,6 +262,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		//sets up GalacticMapPainter, SystemPainter
 		GalaxyPanel = new GalacticMapPainter(GC);
 		SystemPanel = new SystemPainter(false);
+		SystemPanel.addMouseWheelListener(this);
 		
 		SatellitePanel = new PlanetMoonCommandPanel(GC);
 		ShipPanel = new ShipCommandPanel(this);
@@ -604,6 +607,29 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	private double sysScreenToDataY(int y)
 	{
 		return (y-theinterface.getHeight()/2)/sys_scale+sys_center_y;
+	}
+	
+	//used by systemPanel
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+		sys_scale -= ((double)e.getWheelRotation())*GalacticStrategyConstants.SCROLL_SENSITIVITY;
+		if(sys_scale < GalacticStrategyConstants.MIN_SCALE)
+			sys_scale = GalacticStrategyConstants.MIN_SCALE;
+		else if(sys_scale > GalacticStrategyConstants.MAX_SCALE)
+			sys_scale = GalacticStrategyConstants.MAX_SCALE;
+		
+		//adjust center if part of screen goes out of bounds ////BOOKMARK
+		if(sysScreenToDataX(0)<(SystemPanel.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2)
+			sys_center_x = (int)((SystemPanel.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2 + SystemPanel.getWidth()/(2*sys_scale));//this should be the value of center_x that makes screenToDataX equal to (painter.getWidth()-SYS_WIDTH)/2
+		else if(sysScreenToDataX(SystemPanel.getWidth())>(SystemPanel.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2)
+			sys_center_x = (int)((SystemPanel.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2 - SystemPanel.getWidth()/(2*sys_scale));
+		
+		if(sysScreenToDataY(0)<(SystemPanel.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2)
+			sys_center_y = (int)((SystemPanel.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2 + SystemPanel.getHeight()/(2*sys_scale));
+		else if(sysScreenToDataY(SystemPanel.getHeight())>(SystemPanel.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2)
+			sys_center_y = (int)((SystemPanel.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2 - SystemPanel.getHeight()/(2*sys_scale));
+		
+		redraw();
 	}
 
 	@Override

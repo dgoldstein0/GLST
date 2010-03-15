@@ -45,8 +45,14 @@ public class SystemPainter extends JPanel
 		setBackground(Color.BLACK);
 		
 		if(design_view) {
+			//star zone
 			g.setColor(new Color(255,255,0,100));
 			g.drawOval(drawX((getWidth()-100)/2),drawY((getHeight()-100)/2),(int)(100*scale),(int)(100*scale));
+			
+			//cross marking center of screen
+			g.setColor(Color.RED);
+			g.drawLine(drawX(center_x-5),drawY(center_y),drawX(center_x+5),drawY(center_y));
+			g.drawLine(drawX(center_x),drawY(center_y-5),drawX(center_x),drawY(center_y+5));
 		}
 		
 		if(system instanceof GSystem)
@@ -170,11 +176,6 @@ public class SystemPainter extends JPanel
 			g.drawOval(drawX(ghost_x-ghost_size/2), drawY(ghost_y-ghost_size/2), (int)(ghost_size*scale), (int)(ghost_size*scale));
 		}
 		
-		
-		g.setColor(Color.RED);
-		g.drawLine(drawX(center_x-5),drawY(center_y),drawX(center_x+5),drawY(center_y));
-		g.drawLine(drawX(center_x),drawY(center_y-5),drawX(center_x),drawY(center_y+5));
-		
 		if(game_mode)
 			g.drawImage(return_arrow, getWidth()-arrow_size, 0, arrow_size, arrow_size, this);
 	}
@@ -254,7 +255,7 @@ public class SystemPainter extends JPanel
 		int x = drawX(((Satellite)(obj)).absoluteCurX());
 		int y = drawY(((Satellite)(obj)).absoluteCurY());
 		
-		if(obj==selected)
+		if(obj==selected && !game_mode)
 		{
 			g.setColor(Color.RED);
 			g.drawOval(x,y,2,2);

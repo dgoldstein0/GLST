@@ -71,13 +71,12 @@ public class Ship extends Targetter implements Targetable, Selectable
 		double vel_y=builder.location.orbit.getAbsVelY();
 		direction = Math.atan2(vel_y, vel_x);
 		speed = Math.hypot(vel_x, vel_y);
-		time=t;
 		if(builder.location instanceof Planet)
 			location = (GSystem)builder.location.orbit.boss;
 		else //builder.location is a Moon
 			location = (GSystem) ((Planet)builder.location.orbit.boss).orbit.boss;
 		location.fleets[owner.getId()].add(this);
-		orderToMove(t, builder.assemble_x, builder.assemble_y); //this call does not go via the game Event handling system.  all computers should issue these orders on their own.
+		orderToMove(t, builder.location); //this call does not go via the game Event handling system.  all computers should issue these orders on their own.
 	}
 	
 	public void addDamage(int d)
@@ -87,11 +86,12 @@ public class Ship extends Targetter implements Targetable, Selectable
 			destroyed();
 	}
 	
-	public void orderToMove(long t, double x, double y)
+	public void orderToMove(long t, Destination d)
 	{
-		destination = new DestinationPoint(x,y);
-		dest_x_coord = x;
-		dest_y_coord = y;
+		destination = d;
+		dest_x_coord = d.getXCoord(t);
+		dest_y_coord = d.getYCoord(t);
+		time=t;
 	}
 	
 	public void destroyed()
@@ -124,6 +124,7 @@ public class Ship extends Targetter implements Targetable, Selectable
 				double dest_vec_x = destinationX() - pos_x;
 				double dest_vec_y = destinationY() - pos_y;
 				double desired_change = Math.atan2(dest_vec_y, dest_vec_x)-direction;
+
 				if(desired_change > Math.PI)
 					desired_change -= 2*Math.PI;
 				else if(desired_change < -Math.PI)
@@ -137,6 +138,11 @@ public class Ship extends Targetter implements Targetable, Selectable
 					direction += actual_chng;
 				else
 					direction -= actual_chng;
+				
+				if(direction > Math.PI)
+					direction -= 2*Math.PI;
+				else if(direction<-Math.PI)
+					direction += 2*Math.PI;
 			}
 			
 			//save data
