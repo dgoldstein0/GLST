@@ -108,7 +108,7 @@
               <long>100</long> 
              </void> 
              <void property="satellites"> 
-              <object class="java.util.HashSet"/> 
+              <object class="java.util.ArrayList"/> 
              </void> 
              <void property="size"> 
               <int>10</int> 
@@ -180,7 +180,7 @@
               <long>100</long> 
              </void> 
              <void property="satellites"> 
-              <object class="java.util.HashSet"> 
+              <object class="java.util.ArrayList"> 
                <void method="add"> 
                 <object id="Moon0" class="Moon"> 
                  <void property="mass"> 
@@ -333,7 +333,7 @@
       <long>100</long> 
      </void> 
      <void property="satellites"> 
-      <object class="java.util.HashSet"/> 
+      <object class="java.util.ArrayList"/> 
      </void> 
      <void property="size"> 
       <int>10</int> 
@@ -440,7 +440,7 @@
               <long>100</long> 
              </void> 
              <void property="satellites"> 
-              <object class="java.util.HashSet"/> 
+              <object class="java.util.ArrayList"/> 
              </void> 
              <void property="size"> 
               <int>10</int> 
@@ -512,7 +512,7 @@
               <long>100</long> 
              </void> 
              <void property="satellites"> 
-              <object class="java.util.HashSet"/> 
+              <object class="java.util.ArrayList"/> 
              </void> 
              <void property="size"> 
               <int>10</int> 
@@ -604,7 +604,7 @@
       <long>100</long> 
      </void> 
      <void property="satellites"> 
-      <object class="java.util.HashSet"/> 
+      <object class="java.util.ArrayList"/> 
      </void> 
      <void property="size"> 
       <int>10</int> 

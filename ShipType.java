@@ -15,6 +15,7 @@ public class ShipType
 	double default_scale;
 	int width;
 	int height;
+	int dim;
 	
 	public ShipType(String name, int mfuel, int hull, int money, int metal, int time_to_build, int capacity, double sc, String i)
 	{

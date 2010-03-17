@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Planet extends OwnableSatellite
 {
-	HashSet<Satellite> satellites;
+	ArrayList<Satellite> satellites;
 	
 	public Planet(int i, String nm, double init_pop, double pop_cap, int sz, double m, double growth_rate)
 	{
@@ -18,7 +18,7 @@ public class Planet extends OwnableSatellite
 		size=sz;
 		mass=m;
 		
-		satellites=new HashSet<Satellite>();
+		satellites=new ArrayList<Satellite>();
 		facilities=new ArrayList<Facility>();
 	}
 	
@@ -29,8 +29,8 @@ public class Planet extends OwnableSatellite
 		pop_capacity = 10000;
 		pop_growth_rate = .000005;
 	}
-	public HashSet<Satellite> getSatellites(){return satellites;}
-	public void setSatellites(HashSet<Satellite> sat){satellites=sat;}
+	public ArrayList<Satellite> getSatellites(){return satellites;}
+	public void setSatellites(ArrayList<Satellite> sat){satellites=sat;}
 	
 	public void setOwner(Player p)
 	{

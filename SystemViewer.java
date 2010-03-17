@@ -73,14 +73,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	double scale=GalacticStrategyConstants.DEFAULT_SCALE;
 	
 	//sets up custom cursors
-	Cursor left_arrow;
-	Cursor right_arrow;
-	Cursor up_arrow;
-	Cursor down_arrow;
-	Cursor up_right_arrow;
-	Cursor up_left_arrow;
-	Cursor down_right_arrow;
-	Cursor down_left_arrow;
+	MoveScreenCursors cursors;
 	
 	public SystemViewer(JFrame frame, GSystem sys)
 	{
@@ -182,17 +175,8 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		camera_timer = new java.util.Timer(true);
 		recenter_task = new centerMover();
 		
-		//set up custom cursor
-		Toolkit toolkit = Toolkit.getDefaultToolkit();
-		right_arrow = toolkit.createCustomCursor(toolkit.getImage("images/right_arrow.png"), new Point(30,15), "right arrow");
-		left_arrow = toolkit.createCustomCursor(toolkit.getImage("images/left_arrow.png"), new Point(0,15), "left arrow");
-		up_arrow = toolkit.createCustomCursor(toolkit.getImage("images/up_arrow.png"), new Point(15,0), "up arrow");
-		down_arrow = toolkit.createCustomCursor(toolkit.getImage("images/down_arrow.png"), new Point(15,30), "down arrow");
-		
-		up_right_arrow = toolkit.createCustomCursor(toolkit.getImage("images/up_right_arrow.png"), new Point(30,0), "up right arrow");
-		up_left_arrow = toolkit.createCustomCursor(toolkit.getImage("images/up_left_arrow.png"), new Point(0,0), "up left arrow");
-		down_right_arrow = toolkit.createCustomCursor(toolkit.getImage("images/down_right_arrow.png"), new Point(30,30), "down right arrow");
-		down_left_arrow = toolkit.createCustomCursor(toolkit.getImage("images/down_left_arrow.png"), new Point(0,30), "down left arrow");
+		//set up custom cursors
+		cursors = new MoveScreenCursors();
 		
 		//it is necessary to invoke this later because before the systemviewer is setvisible it has no height and width, which drawSystem() uses to determine the height/width of GSystem, which is then referenced in absoluteCurX/CurY/InitX/InitY to determine where the center of the system is for coordinate purposes.
 		SwingUtilities.invokeLater(new Runnable(){public void run(){
@@ -782,25 +766,25 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		//Set the cursor
 		if(move_center_x_speed > 0){
 			if(move_center_y_speed > 0)
-				painter.setCursor(down_right_arrow);
+				painter.setCursor(cursors.downRight());
 			else if(move_center_y_speed < 0)
-				painter.setCursor(up_right_arrow);
+				painter.setCursor(cursors.upRight());
 			else
-				painter.setCursor(right_arrow);
+				painter.setCursor(cursors.right());
 		}
 		else if(move_center_x_speed < 0){
 			if(move_center_y_speed > 0)
-				painter.setCursor(down_left_arrow);
+				painter.setCursor(cursors.downLeft());
 			else if(move_center_y_speed < 0)
-				painter.setCursor(up_left_arrow);
+				painter.setCursor(cursors.upLeft());
 			else
-				painter.setCursor(left_arrow);
+				painter.setCursor(cursors.left());
 		}
 		else{ //if move_center_x_speed equals 0
 			if(move_center_y_speed > 0)
-				painter.setCursor(down_arrow);
+				painter.setCursor(cursors.down());
 			else if(move_center_y_speed < 0)
-				painter.setCursor(up_arrow);
+				painter.setCursor(cursors.up());
 			else
 				painter.setCursor(Cursor.getDefaultCursor());
 		}

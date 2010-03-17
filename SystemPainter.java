@@ -93,9 +93,9 @@ public class SystemPainter extends JPanel
 					}
 					
 					//draw objects orbiting planets					
-					if(orbiting instanceof Planet && ((Planet)orbiting).satellites instanceof HashSet)
+					if(orbiting instanceof Planet && ((Planet)orbiting).satellites instanceof ArrayList)
 					{
-						HashSet<Satellite> planet_sats = ((Planet)orbiting).satellites;
+						ArrayList<Satellite> planet_sats = ((Planet)orbiting).satellites;
 						for(Satellite sat : planet_sats)
 						{
 							drawOrbit(sat, g);
@@ -163,11 +163,11 @@ public class SystemPainter extends JPanel
 			g.drawOval(drawX(((Focus)selected).getX()+(((Focus)selected).owner.boss.absoluteCurX()))-2, drawY(((Focus)selected).getY()+(((Focus)selected).owner.boss.absoluteCurY()))-2, 5,5);
 		} else if(selected instanceof Ship) {
 			g.setColor(Color.YELLOW);
-			double dim = Math.max(((Ship)selected).type.width, ((Ship)selected).type.height)*((Ship)selected).type.default_scale;
-			g.drawOval(drawX(((Ship)selected).pos_x - dim/2.0), drawY(((Ship)selected).pos_y - dim/2.0), (int)(dim*scale), (int)(dim*scale));
+			Ship s = (Ship)selected;
+			g.drawOval(drawX(s.pos_x - s.type.dim*s.type.default_scale/2.0), drawY(s.pos_y - s.type.dim*s.type.default_scale/2.0), (int)(s.type.dim*s.type.default_scale*scale), (int)(s.type.dim*s.type.default_scale*scale));
 			g.setColor(Color.RED);
-			g.drawLine(drawX(((Ship)selected).dest_x_coord)-3, drawY(((Ship)selected).dest_y_coord), drawX(((Ship)selected).dest_x_coord)+3, drawY(((Ship)selected).dest_y_coord));
-			g.drawLine(drawX(((Ship)selected).dest_x_coord), drawY(((Ship)selected).dest_y_coord)-3, drawX(((Ship)selected).dest_x_coord), drawY(((Ship)selected).dest_y_coord)+3);
+			g.drawLine(drawX(s.dest_x_coord)-3, drawY(s.dest_y_coord), drawX(s.dest_x_coord)+3, drawY(s.dest_y_coord));
+			g.drawLine(drawX(s.dest_x_coord), drawY(s.dest_y_coord)-3, drawX(s.dest_x_coord), drawY(s.dest_y_coord)+3);
 		}
 		
 		if(ghost_obj==GHOST_OBJ)

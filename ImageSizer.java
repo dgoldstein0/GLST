@@ -27,6 +27,11 @@ public class ImageSizer implements ImageObserver
 			got_height = true;
 		}
 		
+		if(got_width && got_height)
+		{
+			GalacticStrategyConstants.sTypes[index].dim = Math.max(GalacticStrategyConstants.sTypes[index].width, GalacticStrategyConstants.sTypes[index].height);
+		}
+		
 		return !(got_width && got_height);
 	}
 }

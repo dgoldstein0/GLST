@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -58,9 +59,19 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	double sys_scale;
 	double sys_center_x;
 	double sys_center_y;
+	double move_center_x_speed = 0; //left is negqtive, right is positive
+	double move_center_y_speed = 0; //up is negative, down is positive
+	MoveScreenCursors cursors;
+	int recenter_delay;
+	long last_time_recentered;
+	
 	int system_state;
 		final static int NORMAL=0;
 		final static int SELECT_DESTINATION=1;
+		
+	static int EDGE_BOUND=GalacticStrategyConstants.EDGE_BOUND; //this is the distance from the edge of the system, in pixels, at which the system will start to be scrolled
+	static int SYS_WIDTH=GalacticStrategyConstants.SYS_WIDTH; //the allowed width of a system
+	static int SYS_HEIGHT=GalacticStrategyConstants.SYS_HEIGHT; //the allowed height of a system
 	
 	JPanel system_list;
 	JPanel satellites_list;
@@ -196,6 +207,8 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		c.gridy = 1;    
 		theinterface.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 		theinterface.addMouseListener(this);
+		theinterface.addMouseMotionListener(this);
+		theinterface.addMouseWheelListener(this);
 		panel.add(theinterface,c);
 		
 		//create the chat and information log
@@ -233,6 +246,8 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		
 		//set up in-game menu for later display
 		menu=new GameMenu(GC, frame);
+		//set up cursors for later use
+		cursors = new MoveScreenCursors();
 		
 		frame.setVisible(true);	
 		GC.startupDialog();
@@ -262,7 +277,6 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		//sets up GalacticMapPainter, SystemPainter
 		GalaxyPanel = new GalacticMapPainter(GC);
 		SystemPanel = new SystemPainter(false);
-		SystemPanel.addMouseWheelListener(this);
 		
 		SatellitePanel = new PlanetMoonCommandPanel(GC);
 		ShipPanel = new ShipCommandPanel(this);
@@ -283,6 +297,8 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			prev_mode=true;
 			graphics_started=true;
 			
+			//make sure to change cursor back to normal
+			theinterface.setCursor(Cursor.getDefaultCursor());
 			selected_in_sys=null;
 			displayNoPanel();
 		}
@@ -397,9 +413,58 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	}
 
 	@Override
-	public void mouseMoved(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	public void mouseMoved(MouseEvent e)
+	{
+		if(isSystemDisplayed())
+		{
+			boolean previously_moving = true;
+			if(move_center_x_speed==0.0 && move_center_y_speed==0.0)
+				previously_moving = false;
+			
+			//sets the speed for camera motion
+			if(EDGE_BOUND<e.getX() && e.getX()<theinterface.getWidth()-EDGE_BOUND)
+				move_center_x_speed=0.0;
+			else if(e.getX()>theinterface.getWidth()-EDGE_BOUND && e.getX()<=theinterface.getWidth())
+				move_center_x_speed=1.0/sys_scale;
+			else if(e.getX()< EDGE_BOUND && e.getX() >=0)
+				move_center_x_speed=-1.0/sys_scale;
+
+			if(EDGE_BOUND<e.getY() && e.getY()<theinterface.getHeight()-EDGE_BOUND)
+				move_center_y_speed=0.0;
+			else if(e.getY()>theinterface.getHeight()-EDGE_BOUND && e.getY()<=theinterface.getHeight())
+				move_center_y_speed=1.0/sys_scale;
+			else if(e.getY()< EDGE_BOUND && e.getY() >=0)
+				move_center_y_speed=-1.0/sys_scale;
+			
+			else if(!previously_moving)
+				recenter_delay=500; //the delay which to wait before moving the screen
+			
+			//Set the cursor
+			if(move_center_x_speed > 0.0){
+				if(move_center_y_speed > 0.0)
+					theinterface.setCursor(cursors.downRight());
+				else if(move_center_y_speed < 0.0)
+					theinterface.setCursor(cursors.upRight());
+				else
+					theinterface.setCursor(cursors.right());
+			}
+			else if(move_center_x_speed < 0.0){
+				if(move_center_y_speed > 0.0)
+					theinterface.setCursor(cursors.downLeft());
+				else if(move_center_y_speed < 0.0)
+					theinterface.setCursor(cursors.upLeft());
+				else
+					theinterface.setCursor(cursors.left());
+			}
+			else{ //if move_center_x_speed equals 0
+				if(move_center_y_speed > 0.0)
+					theinterface.setCursor(cursors.down());
+				else if(move_center_y_speed < 0.0)
+					theinterface.setCursor(cursors.up());
+				else
+					theinterface.setCursor(Cursor.getDefaultCursor());
+			}
+		}
 	}
 
 	@Override
@@ -416,8 +481,11 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 
 	@Override
 	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+		if(isSystemDisplayed())
+		{
+			move_center_x_speed=0;
+			move_center_y_speed=0;
+		}
 	}
 
 	public void mousePressed(MouseEvent e) {
@@ -498,19 +566,19 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			for(Satellite orbiting : sys.orbiting_objects)
 			{
 				//search for satellites...
-				if(orbiting.absoluteCurX()-orbiting.size/2 <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 && orbiting.absoluteCurY()-orbiting.size/2 <= y && y <= orbiting.absoluteCurY() + orbiting.size/2)
+				if(orbiting.absoluteCurX()-orbiting.size/2 -OBJ_TOL <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 + OBJ_TOL && orbiting.absoluteCurY()-orbiting.size/2-OBJ_TOL <= y && y <= orbiting.absoluteCurY() + orbiting.size/2+OBJ_TOL)
 				{
 					selected_in_sys=orbiting;
 					displaySatellitePanel(orbiting);
 					return;
 				}
 				
-				if(orbiting instanceof Planet && ((Planet)(orbiting)).satellites instanceof Set)
+				if(orbiting instanceof Planet && ((Planet)(orbiting)).satellites instanceof ArrayList)
 				{
 					Planet cur_planet=(Planet)orbiting;
 					for(Satellite sat : cur_planet.satellites)
 					{
-						if(sat.absoluteCurX()-OBJ_TOL <= x && x <= sat.absoluteCurX()+OBJ_TOL && sat.absoluteCurY()-OBJ_TOL <= y && y <= sat.absoluteCurY()+OBJ_TOL)
+						if(sat.absoluteCurX()-sat.size/2 -OBJ_TOL <= x && x <= sat.absoluteCurX()+sat.size/2+OBJ_TOL && sat.absoluteCurY()-sat.size/2-OBJ_TOL <= y && y <= sat.absoluteCurY()+sat.size/2+OBJ_TOL)
 						{
 							selected_in_sys=sat;
 							displaySatellitePanel(sat);
@@ -527,7 +595,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			{
 				Ship s = sys.fleets[i].ships.get(j);
 				
-				if(s.pos_x-2*OBJ_TOL <= x && x <= s.pos_x+2*OBJ_TOL && s.pos_y-2*OBJ_TOL <= y && y <= s.pos_y+2*OBJ_TOL)
+				if(s.pos_x-OBJ_TOL-s.type.dim*s.type.default_scale/2*sys_scale <= x && x <= s.pos_x+OBJ_TOL+s.type.dim*s.type.default_scale/2 && s.pos_y-OBJ_TOL-s.type.dim*s.type.default_scale/2 <= y && y <= s.pos_y+OBJ_TOL+s.type.dim*s.type.default_scale/2)
 				{
 					System.out.println("ship selected!");
 					selected_in_sys = s;
@@ -556,18 +624,18 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			for(Satellite orbiting : sys.orbiting_objects)
 			{
 				//search for satellites...
-				if(orbiting.absoluteCurX()-orbiting.size/2 <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 && orbiting.absoluteCurY()-orbiting.size/2 <= y && y <= orbiting.absoluteCurY() + orbiting.size/2)
+				if(orbiting.absoluteCurX()-orbiting.size/2 -OBJ_TOL <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 + OBJ_TOL && orbiting.absoluteCurY()-orbiting.size/2-OBJ_TOL <= y && y <= orbiting.absoluteCurY() + orbiting.size/2+OBJ_TOL)
 				{
 					dest = orbiting;
 					break;
 				}
 				
-				if(orbiting instanceof Planet && ((Planet)(orbiting)).satellites instanceof Set)
+				if(orbiting instanceof Planet && ((Planet)(orbiting)).satellites instanceof ArrayList)
 				{
 					Planet cur_planet=(Planet)orbiting;
 					for(Satellite sat : cur_planet.satellites)
 					{
-						if(sat.absoluteCurX()-OBJ_TOL <= x && x <= sat.absoluteCurX()+OBJ_TOL && sat.absoluteCurY()-OBJ_TOL <= y && y <= sat.absoluteCurY()+OBJ_TOL)
+						if(sat.absoluteCurX()-sat.size/2 -OBJ_TOL <= x && x <= sat.absoluteCurX()+sat.size/2+OBJ_TOL && sat.absoluteCurY()-sat.size/2-OBJ_TOL <= y && y <= sat.absoluteCurY()+sat.size/2+OBJ_TOL)
 						{
 							dest=sat;
 							break;
@@ -596,7 +664,37 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			}
 		
 		}
+		moveCenter();
 		frame.setVisible(true);
+	}
+	
+	private void moveCenter()
+	{
+		long cur_time = GC.TC.getTime();
+		double old_center_x = sys_center_x;
+		double old_center_y = sys_center_y;
+		if(recenter_delay == 0)
+		{
+			sys_center_x += move_center_x_speed*(cur_time-last_time_recentered);
+			sys_center_y += move_center_y_speed*(cur_time-last_time_recentered);
+		}
+		else
+		{
+			recenter_delay -= cur_time-last_time_recentered;
+			if(recenter_delay < 0)
+			{
+				sys_center_x -= move_center_x_speed*recenter_delay;
+				sys_center_y -= move_center_y_speed*recenter_delay;
+				recenter_delay=0;
+			}
+		}
+		last_time_recentered = cur_time;
+		
+		if(sysScreenToDataX(0)<(theinterface.getWidth()-SYS_WIDTH)/2 || sysScreenToDataX(theinterface.getWidth())>(theinterface.getWidth()+SYS_WIDTH)/2)
+			sys_center_x = old_center_x;
+		
+		if(sysScreenToDataY(0)<(theinterface.getHeight()-SYS_HEIGHT)/2 || sysScreenToDataY(theinterface.getHeight())>(theinterface.getHeight()+SYS_HEIGHT)/2)
+			sys_center_y = old_center_y;
 	}
 	
 	private double sysScreenToDataX(int x)
@@ -612,24 +710,27 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	//used by systemPanel
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
-		sys_scale -= ((double)e.getWheelRotation())*GalacticStrategyConstants.SCROLL_SENSITIVITY;
-		if(sys_scale < GalacticStrategyConstants.MIN_SCALE)
-			sys_scale = GalacticStrategyConstants.MIN_SCALE;
-		else if(sys_scale > GalacticStrategyConstants.MAX_SCALE)
-			sys_scale = GalacticStrategyConstants.MAX_SCALE;
-		
-		//adjust center if part of screen goes out of bounds ////BOOKMARK
-		if(sysScreenToDataX(0)<(SystemPanel.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2)
-			sys_center_x = (int)((SystemPanel.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2 + SystemPanel.getWidth()/(2*sys_scale));//this should be the value of center_x that makes screenToDataX equal to (painter.getWidth()-SYS_WIDTH)/2
-		else if(sysScreenToDataX(SystemPanel.getWidth())>(SystemPanel.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2)
-			sys_center_x = (int)((SystemPanel.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2 - SystemPanel.getWidth()/(2*sys_scale));
-		
-		if(sysScreenToDataY(0)<(SystemPanel.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2)
-			sys_center_y = (int)((SystemPanel.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2 + SystemPanel.getHeight()/(2*sys_scale));
-		else if(sysScreenToDataY(SystemPanel.getHeight())>(SystemPanel.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2)
-			sys_center_y = (int)((SystemPanel.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2 - SystemPanel.getHeight()/(2*sys_scale));
-		
-		redraw();
+		if(isSystemDisplayed())
+		{
+			sys_scale -= ((double)e.getWheelRotation())*GalacticStrategyConstants.SCROLL_SENSITIVITY;
+			if(sys_scale < GalacticStrategyConstants.MIN_SCALE)
+				sys_scale = GalacticStrategyConstants.MIN_SCALE;
+			else if(sys_scale > GalacticStrategyConstants.MAX_SCALE)
+				sys_scale = GalacticStrategyConstants.MAX_SCALE;
+			
+			//adjust center if part of screen goes out of bounds ////BOOKMARK
+			if(sysScreenToDataX(0)<(theinterface.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2)
+				sys_center_x = (int)((theinterface.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2 + theinterface.getWidth()/(2*sys_scale));//this should be the value of center_x that makes screenToDataX equal to (SystemPanel.getWidth()-SYS_WIDTH)/2
+			else if(sysScreenToDataX(theinterface.getWidth())>(theinterface.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2)
+				sys_center_x = (int)((theinterface.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2 - theinterface.getWidth()/(2*sys_scale));
+			
+			if(sysScreenToDataY(0)<(theinterface.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2)
+				sys_center_y = (int)((theinterface.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2 + theinterface.getHeight()/(2*sys_scale));
+			else if(sysScreenToDataY(theinterface.getHeight())>(theinterface.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2)
+				sys_center_y = (int)((theinterface.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2 - theinterface.getHeight()/(2*sys_scale));
+			
+			redraw();
+		}
 	}
 
 	@Override
