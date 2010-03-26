@@ -11,8 +11,6 @@ public class Shipyard extends Facility{
 	double default_x = 0;	//default coords to create the new ship, then order it to move to assemble point
 	double default_y = 0;
 	
-	static GameControl GC;
-	
 	long time_on_current_ship;
 	
 	public Shipyard(OwnableSatellite loc, long t) {		
@@ -105,10 +103,10 @@ public class Shipyard extends Facility{
 						produce(t-time_on_current_ship);
 						
 						//update the queue display... if it is being displayed.
-						if(location.owner.getId() == GC.player_id && GC.GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP
-							&& GC.GI.SatellitePanel.the_sat.equals(location) && GC.GI.SatellitePanel.state == PlanetMoonCommandPanel.SHIP_QUEUE_DISPLAYED
-							&& GC.GI.SatellitePanel.the_shipyard == this)
-							GC.GI.SatellitePanel.displayQueue();
+						if(location.owner.getId() == GameInterface.GC.player_id && GameInterface.GC.GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP
+							&& GameInterface.GC.GI.SatellitePanel.the_sat.equals(location) && GameInterface.GC.GI.SatellitePanel.state == PlanetMoonCommandPanel.SHIP_QUEUE_DISPLAYED
+							&& GameInterface.GC.GI.SatellitePanel.the_shipyard == this)
+							GameInterface.GC.GI.SatellitePanel.displayQueue();
 						
 						if(manufac_queue.size() == 0)
 							time_on_current_ship = 0;

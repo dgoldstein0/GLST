@@ -13,4 +13,10 @@ public class ResearchBuilding extends Facility{
 	{
 		o.research();
 	}
+	
+	public void updateStatus(long t){}
+	
+	public String getImgLoc(){return "images/researchbldg.gif";}
+	public int getType(){return Facility.RESEARCH_BUILDING;}
+	public String getName(){return "Research Building";}
 }

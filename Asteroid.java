@@ -7,4 +7,6 @@ public class Asteroid extends Satellite
 	}
 	
 	public Asteroid(){}
+	
+	public String imageLoc(){return "images/asteroid.jpg";}
 }

@@ -10,4 +10,12 @@ public class DestinationPoint implements Destination
 	
 	public double getXCoord(long t){return x;}
 	public double getYCoord(long t){return y;}
+	
+	public String imageLoc(){return "images/destinationpoint.jpg";}
+	public String getName(){return "Point";}
+	
+	public double getX(){return x;}
+	public void setX(double a){x=a;}
+	public double getY(){return y;}
+	public void setY(double b){y=b;}
 }

@@ -40,16 +40,11 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	
 	HashSet<FacilityStatusUpdater> facility_updaters;
 	
-	GameControl GC;
-	
-	public PlanetMoonCommandPanel(GameControl gc)
+	public PlanetMoonCommandPanel()
 	{
 		super();
 		BoxLayout layout = new BoxLayout(this, BoxLayout.X_AXIS);
 		setLayout(layout);
-		
-		//set up a pointer back to the main game data
-		GC=gc;
 		
 		build=new JButton("Build Facility...");
 		build.addActionListener(this);
@@ -101,6 +96,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 		removeAll();
 		stats_panel.removeAll();
 		facilities_panel.removeAll();
+		facilities_panel.repaint();
 		
 		JPanel pic_panel = new JPanel();
 		BoxLayout pic_layout = new BoxLayout(pic_panel, BoxLayout.Y_AXIS);
@@ -114,11 +110,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 		name_panel.add(name_label);
 		pic_panel.add(name_panel);
 		
-		ImageIcon pic;
-		if(s instanceof Planet)
-			pic = new ImageIcon("images/planet.jpg");
-		else
-			pic = new ImageIcon("images/moon.jpg");
+		ImageIcon pic = new ImageIcon(s.imageLoc());
 		JLabel icon_label = new JLabel(pic);
 		icon_label.setAlignmentX(JPanel.RIGHT_ALIGNMENT);
 		pic_panel.add(icon_label);
@@ -141,7 +133,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 				name_panel.setBackground(((OwnableSatellite)s).getOwner().getColor());
 				
 				//if you are the owner, commands!
-				if(((OwnableSatellite)s).getOwner().getId() == GC.player_id)
+				if(((OwnableSatellite)s).getOwner().getId() == GameInterface.GC.player_id)
 				{					
 					setUpFacilityBuilding();
 				}
@@ -262,6 +254,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 				case Facility.SHIPYARD:
 					//display objects in Queue and progress bar
 					JProgressBar manufac_bar = new JProgressBar(0,100);
+					manufac_bar.setMaximumSize(new Dimension(120, 20));
 					manufac_bar.setStringPainted(true);
 					the_panel.add(manufac_bar);
 					updater = new ShipyardStatusUpdater(health_bar, manufac_bar, (Shipyard)f);
@@ -419,7 +412,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 		for(int i=0; i < GalacticStrategyConstants.sTypes.length; i++)
 		{
 			JPanel ship_panel = new JPanel();
-			ship_panel.addMouseListener(new ShipBuilder(the_shipyard, GalacticStrategyConstants.sTypes[i],this,GC));
+			ship_panel.addMouseListener(new ShipBuilder(the_shipyard, GalacticStrategyConstants.sTypes[i],ship_panel,this));
 			GroupLayout gl = new GroupLayout(ship_panel);
 			ship_panel.setLayout(gl);
 			
@@ -453,7 +446,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	
 	private void executeBuild(int facility_id)
 	{
-		need_to_reset = ((OwnableSatellite)the_sat).scheduleConstruction(facility_id, GC.TC.getTime());
+		need_to_reset = ((OwnableSatellite)the_sat).scheduleConstruction(facility_id, GameInterface.GC.TC.getTime());
 		//need_to_reset indicates if the construction was successfully started, and the interface will later need to be set back to its original state when the building is finished
 		if(need_to_reset)
 		{
@@ -502,11 +495,11 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	public void mouseEntered(MouseEvent e)
 	{
 		if(e.getSource() == base_icon)
-			cost_label.setText(Integer.toString(GalacticStrategyConstants.BASE_MONEY_COST) + " money, " + Integer.toString(GalacticStrategyConstants.BASE_METAL_COST) + " metal");
+			cost_label.setText("Base: " + Integer.toString(GalacticStrategyConstants.BASE_MONEY_COST) + " money, " + Integer.toString(GalacticStrategyConstants.BASE_METAL_COST) + " metal");
 		else if(e.getSource() == mine_icon)
-			cost_label.setText(Integer.toString(GalacticStrategyConstants.MINE_MONEY_COST) + " money, " + Integer.toString(GalacticStrategyConstants.MINE_METAL_COST) + " metal");
+			cost_label.setText("Mine: " + Integer.toString(GalacticStrategyConstants.MINE_MONEY_COST) + " money, " + Integer.toString(GalacticStrategyConstants.MINE_METAL_COST) + " metal");
 		else if(e.getSource() == shipyard_icon)
-			cost_label.setText(Integer.toString(GalacticStrategyConstants.SHIPYARD_MONEY_COST) + " money, " + Integer.toString(GalacticStrategyConstants.SHIPYARD_METAL_COST) + " metal");
+			cost_label.setText("Shipyard: " + Integer.toString(GalacticStrategyConstants.SHIPYARD_MONEY_COST) + " money, " + Integer.toString(GalacticStrategyConstants.SHIPYARD_METAL_COST) + " metal");
 	}
 	
 	public void mouseExited(MouseEvent e)
@@ -514,7 +507,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 		cost_label.setText(" ");
 	}
 	
-	public void mouseClicked(MouseEvent e)
+	public void mouseReleased(MouseEvent e)
 	{
 		if(e.getSource()==base_icon)
 		{
@@ -522,7 +515,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 			if(need_to_reset)
 			{
 				//by building a base, you take over the planet.
-				((OwnableSatellite)the_sat).setOwner(GC.players[GC.player_id]);
+				((OwnableSatellite)the_sat).setOwner(GameInterface.GC.players[GameInterface.GC.player_id]);
 				cancel.setEnabled(false);
 			}
 		}
@@ -533,5 +526,5 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	}
 	
 	public void mousePressed(MouseEvent e){}
-	public void mouseReleased(MouseEvent e){}
+	public void mouseClicked(MouseEvent e){}
 }

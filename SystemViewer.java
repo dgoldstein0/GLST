@@ -314,7 +314,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				sat.orbit.move(time);
 				if(sat instanceof Planet)
 				{
-					if(((Planet)sat).satellites instanceof HashSet)
+					if(((Planet)sat).satellites instanceof ArrayList)
 					{
 						for(Satellite sat2 : ((Planet)sat).satellites)
 						{

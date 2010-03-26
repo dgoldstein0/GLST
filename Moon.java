@@ -20,4 +20,6 @@ public class Moon extends OwnableSatellite
 		owner=p;
 		((GSystem)((Planet)orbit.boss).orbit.boss).increaseClaim(p);
 	}
+	
+	public String imageLoc(){return "images/moon.jpg";}
 }

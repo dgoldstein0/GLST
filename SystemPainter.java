@@ -82,14 +82,15 @@ public class SystemPainter extends JPanel
 						g.setColor(((Planet)orbiting).getOwner().getColor());
 					else
 						g.setColor(Color.WHITE);
-					g.fillOval(drawX(orbiting.absoluteCurX()-(orbiting.size/2)), drawY(orbiting.absoluteCurY()-(orbiting.size/2)), (int)(orbiting.size*scale), (int)(orbiting.size*scale));
+					g.fillOval(drawX(orbiting.absoluteCurX()-(orbiting.size/2.0)), drawY(orbiting.absoluteCurY()-(orbiting.size/2.0)), (int)(orbiting.size*scale), (int)(orbiting.size*scale));
 					
+					//draw name
 					if(orbiting.name.length() == 0) {
 						g.setColor(Color.YELLOW);
-						g.drawString("Unnamed", drawX(orbiting.absoluteCurX())+3, drawY(orbiting.absoluteCurY())+m.getHeight());
+						g.drawString("Unnamed", drawX(orbiting.absoluteCurX()-orbiting.size/2.0), drawY(orbiting.absoluteCurY()+orbiting.size/2.0)+m.getHeight());
 					} else {
 						//use the color previously determined.  This should work off of the owner's color or WHITE if there is no owner
-						g.drawString(orbiting.name, drawX(orbiting.absoluteCurX())+3, drawY(orbiting.absoluteCurY())+m.getHeight());
+						g.drawString(orbiting.name, drawX(orbiting.absoluteCurX()-orbiting.size/2.0), drawY(orbiting.absoluteCurY()+orbiting.size/2.0)+m.getHeight());
 					}
 					
 					//draw objects orbiting planets					
@@ -107,9 +108,9 @@ public class SystemPainter extends JPanel
 							
 							if(sat.name.length() == 0) {
 								g.setColor(Color.YELLOW);
-								g.drawString("Unnamed", drawX(sat.absoluteCurX())+3, drawY(sat.absoluteCurY())+m.getHeight());
+								g.drawString("Unnamed", drawX(sat.absoluteCurX() - sat.size/2.0), drawY(sat.absoluteCurY()+sat.size/2.0)+m.getHeight());
 							} else {
-								g.drawString(sat.name, drawX(sat.absoluteCurX())+3, drawY(sat.absoluteCurY())+m.getHeight());
+								g.drawString(sat.name, drawX(sat.absoluteCurX() - sat.size/2.0), drawY(sat.absoluteCurY()+sat.size/2.0)+m.getHeight());
 							}
 						}
 					}
@@ -130,11 +131,11 @@ public class SystemPainter extends JPanel
 						AffineTransform saveAT = g2.getTransform();
 						
 						//draw ship s
-						g2.rotate(s.direction+Math.PI/2, drawX(s.getPos_x()),drawY(s.getPos_y()));
+						g2.rotate(s.direction+Math.PI/2, drawXdoub(s.getPos_x()),drawYdoub(s.getPos_y()));
 						
 						g2.drawImage(s.type.img, drawX(s.getPos_x()-s.type.default_scale*s.type.img.getWidth(this)/2), drawY(s.getPos_y()-s.type.default_scale*s.type.img.getHeight(this)/2), (int)(s.type.default_scale*s.type.img.getWidth(this)*scale), (int)(s.type.default_scale*scale*s.type.img.getHeight(this)), this);
 						g2.setColor(system.fleets[i].owner.getColor());
-						g2.drawRect(drawX(s.getPos_x())-3, drawY(s.getPos_y())-3,6,6);
+						g2.drawRect((int)(drawXdoub(s.getPos_x())-3.0*scale), (int)(drawYdoub(s.getPos_y())-3.0*scale),(int)(6.0*scale),(int)(6.0*scale));
 						
 						// Restore original transform
 						g2.setTransform(saveAT);
@@ -233,12 +234,22 @@ public class SystemPainter extends JPanel
 	
 	public int drawX(double the_x) //the_x is pixels from upper left corner
 	{
-		return (int)((the_x-center_x)*scale+((double)getWidth())/2.0d);
+		return (int)drawXdoub(the_x);
 	}
 	
+	public double drawXdoub(double the_x) //the_x is pixels from upper left corner
+	{
+		return (the_x-center_x)*scale+((double)getWidth())/2.0d;
+	}
+
 	public int drawY(double the_y)
 	{
-		return (int)((the_y-center_y)*scale+((double)getHeight())/2.0d);
+		return (int)drawYdoub(the_y);
+	}
+	
+	public double drawYdoub(double the_y)
+	{
+		return (the_y-center_y)*scale+((double)getHeight())/2.0d;
 	}
 	
 	private void drawOrbit(Satellite obj, Graphics g)

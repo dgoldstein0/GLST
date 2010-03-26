@@ -1,35 +1,73 @@
 import java.awt.event.*;
+import java.awt.Color;
+import javax.swing.JPanel;
 
 public class ShipBuilder implements MouseListener
 {
 	Shipyard yard;
 	ShipType type;
 	PlanetMoonCommandPanel panel;
-	GameControl GC;
+	JPanel type_panel;
+	boolean click_on;
+	boolean was_clicked_on;
 	
-	public ShipBuilder(Shipyard s, ShipType t, PlanetMoonCommandPanel p, GameControl gc)
+	public ShipBuilder(Shipyard s, ShipType t, JPanel typepanel, PlanetMoonCommandPanel p)
 	{
 		yard=s;
 		type=t;
 		panel=p;
-		GC=gc;
+		type_panel=typepanel;
+		
+		type_panel.setOpaque(false);
+		type_panel.setBackground(new Color(150,150,255));
 	}
 	
 	
-	public void mouseClicked(MouseEvent e)
+	public void mouseReleased(MouseEvent e)
 	{
-		if(yard.addToQueue(new Ship(type.name, type, GC.players[GC.player_id].nextShipId()), GC.TC.getTime()))
+		if(click_on)
 		{
-			panel.build_ship.setEnabled(true);
-			panel.cancel_build_ship.setEnabled(false);
-			panel.displayQueue();
+			if(yard.addToQueue(new Ship(type.name, type, GameInterface.GC.players[GameInterface.GC.player_id].nextShipId()), GameInterface.GC.TC.getTime()))
+			{
+				if(!e.isShiftDown())
+				{
+					panel.build_ship.setEnabled(true);
+					panel.cancel_build_ship.setEnabled(false);
+					panel.displayQueue();
+				}
+			}
+			else
+				SoundManager.playSound("sound/doot doot.wav");
+			type_panel.setOpaque(false);
+			type_panel.repaint();
 		}
-		else
-			SoundManager.playSound("sound/doot doot.wav");
+		was_clicked_on=false;
 	}
 	
-	public void mouseEntered(MouseEvent e){}
-	public void mouseExited(MouseEvent e){}
-	public void mousePressed(MouseEvent e){}
-	public void mouseReleased(MouseEvent e){}
+	public void mouseEntered(MouseEvent e)
+	{
+		if(was_clicked_on)
+		{
+			type_panel.setOpaque(true);
+			type_panel.repaint();
+			click_on=true;
+		}
+	}
+	
+	public void mouseExited(MouseEvent e)
+	{
+		type_panel.setOpaque(false);
+		type_panel.repaint();
+		click_on=false;
+	}
+	
+	public void mousePressed(MouseEvent e)
+	{
+		type_panel.setOpaque(true);
+
+		type_panel.repaint();
+		click_on=true;
+		was_clicked_on=true;
+	}
+	public void mouseClicked(MouseEvent e){}
 }

@@ -1,6 +1,6 @@
 import java.util.HashSet;
 
-public class Ship extends Targetter implements Targetable, Selectable
+public class Ship extends Targetter implements Targetable, Selectable, Destination
 {
 	static final int data_capacity=50;
 	
@@ -34,8 +34,6 @@ public class Ship extends Targetter implements Targetable, Selectable
 	
 	double max_speed = .04; //px per millisecond
 	double max_angular_vel = .0005;//radians per milli
-	double max_accel = .000005; //px per millisecond per millisecond
-	double closing_radius = 20;
 	
 	float soldier;
 	
@@ -53,6 +51,8 @@ public class Ship extends Targetter implements Targetable, Selectable
 		damage=0;
 		aggressors = new HashSet<Targetter>();
 		ship_data=new ShipDataSaver[data_capacity];
+		for(int i=0; i<ship_data.length; i++)
+			ship_data[i] = new ShipDataSaver();
 		index=0;
 	}
 	
@@ -89,9 +89,9 @@ public class Ship extends Targetter implements Targetable, Selectable
 	public void orderToMove(long t, Destination d)
 	{
 		destination = d;
-		dest_x_coord = d.getXCoord(t);
-		dest_y_coord = d.getYCoord(t);
-		time=t;
+		time = (long)(Math.ceil((double)(t)/(double)(time_granularity))*time_granularity);
+		dest_x_coord = d.getXCoord(time-time_granularity);
+		dest_y_coord = d.getYCoord(time-time_granularity);
 	}
 	
 	public void destroyed()
@@ -106,53 +106,59 @@ public class Ship extends Targetter implements Targetable, Selectable
 	public void move(long t)
 	{
 		while(time < t)
+			moveIncrement();
+	}
+	
+	//moves the ship one time_granularity.  this is a separate function so that all ships updates can be stepped through 1 by 1.
+	public void moveIncrement()
+	{
+		//change position
+		pos_x += speed*time_granularity*Math.cos(direction);
+		pos_y += speed*time_granularity*Math.sin(direction);
+		
+		if(Math.abs(pos_x - destinationX()) < delta && Math.abs(pos_y - destinationY()) < delta)
 		{
-			//change position
-			time += time_granularity;
-			pos_x += speed*time_granularity*Math.cos(direction);
-			pos_y += speed*time_granularity*Math.sin(direction);
-			
-			if(Math.abs(pos_x - destinationX()) < delta && Math.abs(pos_y - destinationY()) < delta)
-			{
-				pos_x = destinationX();
-				pos_y = destinationY();
-				speed = 0.0d;
-			}
-			else
-			{
-				//change direction
-				double dest_vec_x = destinationX() - pos_x;
-				double dest_vec_y = destinationY() - pos_y;
-				double desired_change = Math.atan2(dest_vec_y, dest_vec_x)-direction;
-
-				if(desired_change > Math.PI)
-					desired_change -= 2*Math.PI;
-				else if(desired_change < -Math.PI)
-					desired_change += 2*Math.PI;
-				
-				//change speed
-				speed = Math.max(Math.min(max_speed*Math.cos(desired_change), Math.hypot(destinationX()-pos_x, destinationY()-pos_y) * Math.cos(desired_change)/closing_radius*max_speed),0.0);
-				
-				double actual_chng = Math.min(Math.abs(desired_change), Math.abs(max_angular_vel*time_granularity));
-				if(desired_change > 0)
-					direction += actual_chng;
-				else
-					direction -= actual_chng;
-				
-				if(direction > Math.PI)
-					direction -= 2*Math.PI;
-				else if(direction<-Math.PI)
-					direction += 2*Math.PI;
-			}
-			
-			//save data
-			saveData();
+			pos_x = destinationX();
+			pos_y = destinationY();
+			speed = 0.0d;
 		}
+		else
+		{
+			//change direction
+			double dest_vec_x = destinationX() - pos_x;
+			double dest_vec_y = destinationY() - pos_y;
+			double desired_change = Math.atan2(dest_vec_y, dest_vec_x)-direction;
+
+			if(desired_change > Math.PI)
+				desired_change -= 2*Math.PI;
+			else if(desired_change < -Math.PI)
+				desired_change += 2*Math.PI;
+			
+			//change speed
+			if(desired_change < Math.PI/2.0 && desired_change > -Math.PI/2.0)
+				speed = Math.min(max_speed*Math.cos(desired_change)*Math.cos(desired_change), Math.hypot(destinationX()-pos_x, destinationY()-pos_y) * Math.cos(desired_change)/GalacticStrategyConstants.LANDING_RANGE*max_speed);
+			else
+				speed = 0.0d;
+			
+			double actual_chng = Math.min(Math.abs(desired_change), Math.abs(max_angular_vel*time_granularity)); //finds the absolute value of the amount the direction changes
+			if(desired_change > 0)
+				direction += actual_chng;
+			else
+				direction -= actual_chng;
+			
+			if(direction > Math.PI)
+				direction -= 2*Math.PI;
+			else if(direction<-Math.PI)
+				direction += 2*Math.PI;
+		}
+		time += time_granularity;
+		
+		//save data
+		saveData();
 	}
 	
 	public void saveData()
 	{
-		ship_data[index] = new ShipDataSaver();
 		ship_data[index].dir=direction;
 		ship_data[index].px=pos_x;
 		ship_data[index].py=pos_y;
@@ -165,18 +171,21 @@ public class Ship extends Targetter implements Targetable, Selectable
 	
 	public void loadData(long t)
 	{
-		int stepback=(int) (Math.floor((t-time)/time_granularity)+1);
+		saveindex = index;
+		int stepback=(int) (Math.floor((time-t)/time_granularity) + 1);
+		//System.out.println("load data: t is " + Long.toString(t) + " and time is " + Long.toString(time) + ", so step back... " + Integer.toString(stepback));
 		if (stepback>50)
 		{
 			System.out.println("Error loading ship data: the delay is too long");
 		}
 		else
-		for (int i=1; i<=stepback; i++)
-		{
-			index--;
-			if (index<0)
-				index=data_capacity-1;
-		}
+			for (int i=0; i<stepback; i++)
+			{
+				index--;
+				if (index<0)
+					index=data_capacity-1;
+			}
+		
 		if (ship_data[index]!=null)
 		{
 			direction=ship_data[index].dir;
@@ -185,7 +194,14 @@ public class Ship extends Targetter implements Targetable, Selectable
 			time=ship_data[index].t;
 			speed=ship_data[index].sp;
 		}
-		else System.out.println("Error loading ship data: data wasn't saved");	
+		else System.out.println("Error loading ship data: data wasn't saved");	//CAN THIS HAPPEN?
+	}
+	
+	private int saveindex;
+	
+	private void restoreIndex()
+	{
+		index=saveindex;
 	}
 	
 	private double destinationX()
@@ -203,6 +219,57 @@ public class Ship extends Targetter implements Targetable, Selectable
 	public HashSet<Targetter> getAggressors(){return aggressors;}
 	
 	public int getSoldierInt(){return (int)Math.floor(soldier);}
+	
+	//methods to implement destination
+	public String imageLoc(){return type.getImg_loc();}
+	
+	long dest_coords_time=0; //there cannot be a call to getXCoord or getYCoord with t=0, since ships do not exist then, and if they do will not be targetting other ships
+	double dest_pos_x;
+	double dest_pos_y;
+	
+	public double getXCoord(long t)
+	{
+		if(t == dest_coords_time)
+			return dest_pos_x;
+		else
+		{			
+			updateDestData(t);
+			return dest_pos_x;
+		}
+	}
+	
+	public double getYCoord(long t)
+	{
+		if(t == dest_coords_time)
+			return dest_pos_y;
+		else
+		{
+			updateDestData(t);
+			return dest_pos_y;
+		}
+	}
+	
+	private void updateDestData(long t)
+	{
+		double temp_dir = direction;
+		double temp_x = pos_x;
+		double temp_y = pos_y;
+		long temp_t = time;
+		double temp_speed = speed;
+		
+		loadData(t);
+		//System.out.println("time is " + Long.toString(time) + " and t is " + Long.toString(t));
+		dest_pos_x = pos_x;
+		dest_pos_y = pos_y;
+		dest_coords_time = t;
+		restoreIndex();
+		
+		direction = temp_dir;
+		pos_x = temp_x;
+		pos_y = temp_y;
+		time = temp_t;
+		speed = temp_speed;
+	}
 	
 	//methods required for save/load
 	public Ship(){}

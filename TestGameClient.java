@@ -6,6 +6,6 @@ public class TestGameClient
 	{
 		GameControl GC = new GameControl();
 		GC.joinAsClient();
-		GC.startGame();
+		GC.startGameViaThread();
 	}
 }

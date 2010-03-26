@@ -26,7 +26,6 @@ public class GameControl
 	Player[] players;
 	Galaxy map;
 
-	GameControl GC = this;
 	GameInterface GI;
 	GameLobby GL;
 	GameStartupDialog GSD;
@@ -41,7 +40,8 @@ public class GameControl
 	Thread readThread; //reads data during the game
 	Thread startThread; //processes start game.   Because it can crash the interface if run on swing's event thread
 	
-	Set<Event> pending_execution = Collections.synchronizedSet(new HashSet<Event>());
+	Set<Order> pending_execution = Collections.synchronizedSet(new HashSet<Order>());
+	List<Order> executed = Collections.synchronizedList(new ArrayList<Order>());
 	
 	public GameControl(GameInterface gi)
 	{
@@ -49,13 +49,13 @@ public class GameControl
 		GalacticStrategyConstants.ImageLoader();
 		players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
 		map=new Galaxy();
-		Shipyard.GC = this;
+		GameInterface.GC = this;
 	}
 	
 	public GameControl()
 	{
 		GalacticStrategyConstants.ImageLoader();
-		Shipyard.GC = this;
+		GameInterface.GC = this;
 	}
 		
 	public Player createThePlayer() throws CancelException
@@ -79,8 +79,8 @@ public class GameControl
 	public int getNumberOfPlayers()
 	{
 		int num_players=0;
-		for(int i=0; i<GC.players.length; i++){
-			if(GC.players[i] instanceof Player)
+		for(int i=0; i<players.length; i++){
+			if(players[i] instanceof Player)
 				num_players++;
 		}
 		return num_players;
@@ -111,7 +111,7 @@ public class GameControl
 			System.out.println("lobby thread terminated");
 		} catch(InterruptedException e){
 			System.out.println("Start game has been interrupted.  Terminating...");
-			GC.endConnection();
+			endConnection();
 			return;
 		}
 		//stop the server socket.  Once the game is started, more players cannot join.
@@ -277,7 +277,9 @@ public class GameControl
 		{
 			Planet p = map.start_locations.get(i);
 			p.setOwner(players[i]);
-			p.facilities.add(new Base((long)0));
+			Base b = new Base(p, (long)0);
+			p.facilities.add(b);
+			p.the_base = b;
 		}
 		
 		//start game graphics...
@@ -289,7 +291,7 @@ public class GameControl
 	
 	public void startGameViaThread()
 	{
-		startThread = new Thread(new Runnable(){public void run(){GC.startGame();}});
+		startThread = new Thread(new Runnable(){public void run(){startGame();}});
 		startThread.start();
 	}
 	
@@ -341,7 +343,9 @@ public class GameControl
 			//start the player in assigned location
 			Planet p = map.start_locations.get(player_id);
 			p.setOwner(players[player_id]);
-			p.facilities.add(new Base((long)0));
+			Base b = new Base(p, (long)0);
+			p.facilities.add(b);
+			p.the_base = b;
 			
 			//display the Galaxy
 			GI.drawGalaxy();
@@ -452,11 +456,11 @@ public class GameControl
 						//notify other players and update the Lobby
 						SwingUtilities.invokeLater(new Runnable(){
 							public void run(){
-								GC.updateGL();
+								updateGL();
 							}
 						});
 						
-						GC.setUpLobbyUpdater(); //THIS WILL BE AN ISSUE FOR 3+ PLAYER GAMES.  ESPECIALLY IF ONLY 1 LobbyUpdater used, which checks for msgs from all.  Then we cannot let LobbyUpdater check for updates before player is done being set up
+						setUpLobbyUpdater(); //THIS WILL BE AN ISSUE FOR 3+ PLAYER GAMES.  ESPECIALLY IF ONLY 1 LobbyUpdater used, which checks for msgs from all.  Then we cannot let LobbyUpdater check for updates before player is done being set up
 						mapChosen(); //notify new player of currently chosen map - or lack thereof						
 					}
 					catch (SocketTimeoutException ste){}
@@ -557,7 +561,7 @@ public class GameControl
 			
 			//display lobby.  This order is important.  The lobby must be created before we create the updater for it, since the Host immediately fires off a message containing the current choice of map, but framed as an update
 			GL = new GameLobby(GI.frame, this);
-			GC.setUpLobbyUpdater();
+			setUpLobbyUpdater();
 		}
 		catch (UnknownHostException e)
 		{
@@ -609,9 +613,9 @@ public class GameControl
 							if(hosting){
 								int id_leaving = Integer.parseInt(split_notification[0]);
 								players[id_leaving]=null;
-								GC.updateGL();
-								GC.serverThread = new Thread(new HostRunnable());
-								GC.serverThread.start();
+								updateGL();
+								serverThread = new Thread(new HostRunnable());
+								serverThread.start();
 								return;
 							} else {
 								JOptionPane.showMessageDialog(GI.frame, "The host has left the game.", "Host Left", JOptionPane.INFORMATION_MESSAGE);
@@ -622,12 +626,12 @@ public class GameControl
 							//only the host should recieve this message
 							int id_ready = Integer.parseInt(split_notification[0]);
 							players[id_ready].ready=true;
-							GC.updateGL(); //this function takes care of enabling/disabling start button for us
+							updateGL(); //this function takes care of enabling/disabling start button for us
 						} else if(notification.indexOf(":")!= -1 && split_notification[1].equals(NOT_READY_MSG)) {
 							//only the host should recieve this message
 							int id_ready = Integer.parseInt(split_notification[0]);
 							players[id_ready].ready=false;
-							GC.updateGL(); //this function takes care of enabling/disabling start button for us
+							updateGL(); //this function takes care of enabling/disabling start button for us
 						}
 						else if(notification.indexOf(MAP_CHOSEN) != -1)
 						{
@@ -636,7 +640,7 @@ public class GameControl
 						}
 						else if(notification.equals(START_MSG))
 						{
-							GC.startGameViaThread(); //must start on a different thread because start game terminates this one.  If start game ran on this thread, it would end itself.
+							startGameViaThread(); //must start on a different thread because start game terminates this one.  If start game ran on this thread, it would end itself.
 						}
 					}
 					else
@@ -694,10 +698,10 @@ public class GameControl
 		OS = the_socket.getOutputStream();
 	}
 	
-	public void notifyAllPlayers(Event e)
+	public void notifyAllPlayers(Order o)
 	{
 		XMLEncoder2 encoder = new XMLEncoder2(OS);
-		encoder.writeObject(e);
+		encoder.writeObject(o);
 		encoder.finish();
 	}
 	
@@ -773,9 +777,9 @@ public class GameControl
 					
 					ByteArrayInputStream sr = new ByteArrayInputStream(str.toString().getBytes("UTF-8"));
 					XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(sr));
-					Event e =(Event) decoder.readObject();
+					Order o =(Order) decoder.readObject();
 					decoder.close();
-					pending_execution.add(e);
+					pending_execution.add(o);
 				}
 			}
 			catch(IOException ioe)
@@ -834,12 +838,18 @@ public class GameControl
 		
 		//start events that need to occur before time_elapsed
 		
-		for(Event e: pending_execution)
+		
+		ArrayList temp_exec = new ArrayList();
+		long min_time_exec = time_elapsed;
+		for(Order o: pending_execution)
 		{
-			if(e.scheduled_time >= time_elapsed)
+			if(o.scheduled_time <= time_elapsed)
 			{
-				e.run();
-				pending_execution.remove(e);
+				//o.run();
+				pending_execution.remove(o);
+				temp_exec.add(o);
+				if(o.scheduled_time < min_time_exec)
+					min_time_exec = o.scheduled_time;
 			}
 		}
 		

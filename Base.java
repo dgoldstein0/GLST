@@ -5,8 +5,9 @@ public class Base extends Facility{
 	float soldier;
 	int max_soldier;
 	
-	public Base(long t)
+	public Base(OwnableSatellite l, long t)
 	{
+		location = l;
 		damage=0;
 		last_time = t;
 		soldier=GalacticStrategyConstants.initial_soldier;
@@ -88,6 +89,7 @@ public class Base extends Facility{
 		{
 			location.facilities.remove(this);
 			location.setOwner(null);
+			location.the_base = null;
 		}
 	}
 	

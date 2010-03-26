@@ -7,6 +7,7 @@ public abstract class Facility implements Targetable
 	final static int BASE = 1;
 	final static int MINE=2;
 	final static int SHIPYARD=3;
+	final static int RESEARCH_BUILDING=4;
 	
 	OwnableSatellite location;
 	HashSet<Targetter> aggressors;

@@ -29,8 +29,6 @@ public class Planet extends OwnableSatellite
 		pop_capacity = 10000;
 		pop_growth_rate = .000005;
 	}
-	public ArrayList<Satellite> getSatellites(){return satellites;}
-	public void setSatellites(ArrayList<Satellite> sat){satellites=sat;}
 	
 	public void setOwner(Player p)
 	{
@@ -39,4 +37,9 @@ public class Planet extends OwnableSatellite
 		owner=p;
 		((GSystem)orbit.boss).increaseClaim(p);
 	}
+	
+	public String imageLoc(){return "images/planet.jpg";}
+	
+	public ArrayList<Satellite> getSatellites(){return satellites;}
+	public void setSatellites(ArrayList<Satellite> sat){satellites=sat;}
 }

@@ -7,6 +7,10 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Window;
+import java.awt.Point;
+import java.awt.AWTEvent;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -28,7 +32,7 @@ import java.awt.BorderLayout;
 import java.util.*;
 
 
-public class GameInterface implements ActionListener, MouseMotionListener, MouseListener, WindowListener, ComponentListener, MouseWheelListener
+public class GameInterface implements ActionListener, MouseListener, WindowListener, ComponentListener, MouseWheelListener, AWTEventListener
 {
 	
 	JFrame frame;
@@ -46,7 +50,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	
 	ArrayList<GSystem> known_sys; //known systems for this player
 	ArrayList<Satellite> known_sate;   //known satellite for this player
-	GameControl GC;
+	static GameControl GC;
 	
 	GalacticMapPainter GalaxyPanel;
 	double gal_scale; //the scale which the galaxy is painted at.
@@ -69,7 +73,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		final static int NORMAL=0;
 		final static int SELECT_DESTINATION=1;
 		
-	static int EDGE_BOUND=GalacticStrategyConstants.EDGE_BOUND; //this is the distance from the edge of the system, in pixels, at which the system will start to be scrolled
+	static int EDGE_BOUND=20; //this is the distance from the edge of the system, in pixels, at which the system will start to be scrolled
 	static int SYS_WIDTH=GalacticStrategyConstants.SYS_WIDTH; //the allowed width of a system
 	static int SYS_HEIGHT=GalacticStrategyConstants.SYS_HEIGHT; //the allowed height of a system
 	
@@ -98,6 +102,8 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		frame.setMinimumSize(new Dimension(800,600));
 		frame.addWindowListener(this);
 		frame.addComponentListener(this);
+		
+		Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.MOUSE_MOTION_EVENT_MASK);
 		
 		panel= new JPanel(new GridBagLayout());
 		GridBagConstraints c=new GridBagConstraints();
@@ -207,7 +213,6 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		c.gridy = 1;    
 		theinterface.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 		theinterface.addMouseListener(this);
-		theinterface.addMouseMotionListener(this);
 		theinterface.addMouseWheelListener(this);
 		panel.add(theinterface,c);
 		
@@ -251,20 +256,7 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		
 		frame.setVisible(true);	
 		GC.startupDialog();
-	}	
-	
-	//for the tabbed pane
-    /*protected JPanel makeTextPanel (String text) 
-    {
-        JPanel apanel = new JPanel(false);
-        JLabel filler = new JLabel(text);
-        filler.setHorizontalAlignment(JLabel.CENTER);
-        apanel.setLayout(new GridLayout(1, 1));
-        apanel.add(filler);
-        return apanel;
-    }*/
-    
-    
+	}
 	
 
 	public static void main(String[] args)
@@ -275,11 +267,11 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 	private void setupGraphics()
 	{
 		//sets up GalacticMapPainter, SystemPainter
-		GalaxyPanel = new GalacticMapPainter(GC);
+		GalaxyPanel = new GalacticMapPainter();
 		SystemPanel = new SystemPainter(false);
 		
-		SatellitePanel = new PlanetMoonCommandPanel(GC);
-		ShipPanel = new ShipCommandPanel(this);
+		SatellitePanel = new PlanetMoonCommandPanel();
+		ShipPanel = new ShipCommandPanel();
 		
 		graphics_started=false;
 		sat_or_ship_disp = NO_PANEL_DISP;
@@ -406,64 +398,98 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 		
 	}
 
-	@Override
-	public void mouseDragged(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseMoved(MouseEvent e)
+	//this is ONLY invoked by MOUSE MOTION EVENTS, and is in charge of deciding how fast to move the view of the system
+	public void eventDispatched(AWTEvent a)
 	{
+		MouseEvent e=(MouseEvent)a;
+		int x, y;
+		JComponent c;
+		
+		Point pane_pos = frame.getContentPane().getLocationOnScreen();
+		x=e.getX() - pane_pos.x;
+		y=e.getY() - pane_pos.y;
+		
+		if(e.getSource() instanceof JComponent)
+		{
+			Point corner = ((JComponent)e.getSource()).getLocationOnScreen();
+			x += corner.x;
+			y += corner.y;
+		}
+		
+		//System.out.println("x,y is " + Integer.toString(x) + "," + Integer.toString(y));
+		
 		if(isSystemDisplayed())
 		{
-			boolean previously_moving = true;
-			if(move_center_x_speed==0.0 && move_center_y_speed==0.0)
-				previously_moving = false;
+			//boolean previously_moving = true;
+			//if(move_center_x_speed==0.0 && move_center_y_speed==0.0)
+			//	previously_moving = false;
 			
 			//sets the speed for camera motion
-			if(EDGE_BOUND<e.getX() && e.getX()<theinterface.getWidth()-EDGE_BOUND)
+			if(EDGE_BOUND<x && x<frame.getContentPane().getWidth()-EDGE_BOUND)
 				move_center_x_speed=0.0;
-			else if(e.getX()>theinterface.getWidth()-EDGE_BOUND && e.getX()<=theinterface.getWidth())
-				move_center_x_speed=1.0/sys_scale;
-			else if(e.getX()< EDGE_BOUND && e.getX() >=0)
-				move_center_x_speed=-1.0/sys_scale;
+			else if(x>frame.getContentPane().getWidth()-EDGE_BOUND && x<=frame.getContentPane().getWidth())
+			{
+				if(x>frame.getContentPane().getWidth()-EDGE_BOUND/2)
+					move_center_x_speed = 1.0/sys_scale;
+				else
+					move_center_x_speed=.5/sys_scale;
+			}
+			else if(x< EDGE_BOUND && x >=0)
+			{
+				if(x< EDGE_BOUND/2)
+					move_center_x_speed = -1.0/sys_scale;
+				else
+					move_center_x_speed= -.5/sys_scale;
+			}
 
-			if(EDGE_BOUND<e.getY() && e.getY()<theinterface.getHeight()-EDGE_BOUND)
+			if(EDGE_BOUND<y && y<frame.getContentPane().getHeight()-EDGE_BOUND)
 				move_center_y_speed=0.0;
-			else if(e.getY()>theinterface.getHeight()-EDGE_BOUND && e.getY()<=theinterface.getHeight())
-				move_center_y_speed=1.0/sys_scale;
-			else if(e.getY()< EDGE_BOUND && e.getY() >=0)
-				move_center_y_speed=-1.0/sys_scale;
+			else if(y>frame.getContentPane().getHeight()-EDGE_BOUND && y<=frame.getContentPane().getHeight())
+			{
+				if(y>frame.getContentPane().getHeight()-EDGE_BOUND/2)
+					move_center_y_speed = 1.0/sys_scale;
+				else
+					move_center_y_speed = .5/sys_scale;
+			}
+			else if(y< EDGE_BOUND && y >=0)
+			{
+				if(y < EDGE_BOUND/2)
+					move_center_y_speed = -1.0/sys_scale;
+				else
+					move_center_y_speed = -.5/sys_scale;
+			}
 			
-			else if(!previously_moving)
-				recenter_delay=500; //the delay which to wait before moving the screen
+			//else if(!previously_moving)
+			//	recenter_delay=300; //the delay which to wait before moving the screen
 			
 			//Set the cursor
+			boolean move_screen = true;
 			if(move_center_x_speed > 0.0){
 				if(move_center_y_speed > 0.0)
-					theinterface.setCursor(cursors.downRight());
+					frame.getGlassPane().setCursor(cursors.downRight());
 				else if(move_center_y_speed < 0.0)
-					theinterface.setCursor(cursors.upRight());
+					frame.getGlassPane().setCursor(cursors.upRight());
 				else
-					theinterface.setCursor(cursors.right());
+					frame.getGlassPane().setCursor(cursors.right());
 			}
 			else if(move_center_x_speed < 0.0){
 				if(move_center_y_speed > 0.0)
-					theinterface.setCursor(cursors.downLeft());
+					frame.getGlassPane().setCursor(cursors.downLeft());
 				else if(move_center_y_speed < 0.0)
-					theinterface.setCursor(cursors.upLeft());
+					frame.getGlassPane().setCursor(cursors.upLeft());
 				else
-					theinterface.setCursor(cursors.left());
+					frame.getGlassPane().setCursor(cursors.left());
 			}
 			else{ //if move_center_x_speed equals 0
 				if(move_center_y_speed > 0.0)
-					theinterface.setCursor(cursors.down());
+					frame.getGlassPane().setCursor(cursors.down());
 				else if(move_center_y_speed < 0.0)
-					theinterface.setCursor(cursors.up());
+					frame.getGlassPane().setCursor(cursors.up());
 				else
-					theinterface.setCursor(Cursor.getDefaultCursor());
+					move_screen=false;
 			}
+			
+			frame.getGlassPane().setVisible(move_screen);
 		}
 	}
 
@@ -597,7 +623,6 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 				
 				if(s.pos_x-OBJ_TOL-s.type.dim*s.type.default_scale/2*sys_scale <= x && x <= s.pos_x+OBJ_TOL+s.type.dim*s.type.default_scale/2 && s.pos_y-OBJ_TOL-s.type.dim*s.type.default_scale/2 <= y && y <= s.pos_y+OBJ_TOL+s.type.dim*s.type.default_scale/2)
 				{
-					System.out.println("ship selected!");
 					selected_in_sys = s;
 					displayShipPanel(s);
 					return;
@@ -645,7 +670,22 @@ public class GameInterface implements ActionListener, MouseMotionListener, Mouse
 			}
 		}
 		
+		for(int i=0; i<sys.fleets.length; i++)
+		{
+			for(Integer j : sys.fleets[i].ships.keySet())
+			{
+				Ship s = sys.fleets[i].ships.get(j);
+				
+				if(s.pos_x-OBJ_TOL-s.type.dim*s.type.default_scale/2*sys_scale <= x && x <= s.pos_x+OBJ_TOL+s.type.dim*s.type.default_scale/2 && s.pos_y-OBJ_TOL-s.type.dim*s.type.default_scale/2 <= y && y <= s.pos_y+OBJ_TOL+s.type.dim*s.type.default_scale/2)
+				{
+					dest = s;
+					break;
+				}
+			}
+		}
+		
 		ShipPanel.the_ship.destination = dest;
+		ShipPanel.updateDestDisplay();
 	}
 	
 	public void update()      					//subject to change

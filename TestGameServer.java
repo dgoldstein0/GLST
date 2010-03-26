@@ -13,6 +13,6 @@ public class TestGameServer
 		}
 		catch(InterruptedException IE){return;}
 		
-		GC.startGame();
+		GC.startGameViaThread();
 	}
 }

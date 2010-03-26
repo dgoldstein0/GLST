@@ -24,7 +24,6 @@ public class GalacticMapPainter extends JPanel
 	int ghost_y;
 	
 	double scale;
-	GameControl GC;
 	
 	public GalacticMapPainter()
 	{
@@ -33,16 +32,6 @@ public class GalacticMapPainter extends JPanel
 		max_dist_shown=GalacticStrategyConstants.DEFAULT_DIST;
 		nav_level=GalacticStrategyConstants.DEFAULT_NAV_LEVEL;
 		scale=1.0d;
-	}
-	
-	public GalacticMapPainter(GameControl gc)
-	{
-		super(new FlowLayout(FlowLayout.LEFT));
-		drag_options=GDFrame.DRAG_NONE;
-		max_dist_shown=GalacticStrategyConstants.DEFAULT_DIST;
-		nav_level=GalacticStrategyConstants.DEFAULT_NAV_LEVEL;
-		scale=1.0d;
-		GC=gc;
 	}
 	
 	public void paintComponent(Graphics g)
@@ -63,7 +52,7 @@ public class GalacticMapPainter extends JPanel
 					else if(sys.owner_id == GSystem.OWNER_CONFLICTED)
 						g.setColor(Color.ORANGE);
 					else
-						g.setColor(GC.players[sys.owner_id].getColor());
+						g.setColor(GameInterface.GC.players[sys.owner_id].getColor());
 					g.fillOval(scaleNum(sys.x-2),scaleNum(sys.y-2),scaleNum(5),scaleNum(5));
 					if(nav_display == GDFrame.NAV_DISP_ALL)
 					{
@@ -124,7 +113,7 @@ public class GalacticMapPainter extends JPanel
 							else if(sys.owner_id == GSystem.OWNER_CONFLICTED)
 								g.setColor(Color.ORANGE);
 							else
-								g.setColor(GC.players[sys.owner_id].getColor());
+								g.setColor(GameInterface.GC.players[sys.owner_id].getColor());
 							g.drawString(sys.name, scaleNum(sys.x+3), scaleNum(sys.y)+m.getHeight());
 						} else {
 							g.setColor(Color.YELLOW);

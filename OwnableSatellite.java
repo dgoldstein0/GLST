@@ -5,6 +5,7 @@ public abstract class OwnableSatellite extends Satellite
 {
 	Object facilities_lock = new Object();
 	ArrayList<Facility> facilities;
+	Base the_base; //the base is a member of facilities.  As such, it should be governed by facilities_lock.
 	Player owner;
 	
 	//for building facilities
@@ -55,7 +56,10 @@ public abstract class OwnableSatellite extends Satellite
 				switch(bldg_in_progress)
 				{
 					case Facility.BASE:
-						new_fac = new Base(time_finish);
+						new_fac = new Base(this, time_finish);
+						synchronized(facilities_lock){
+							the_base = (Base)new_fac;
+						}
 						break;
 					case Facility.MINE:
 						new_fac = new Mine(this, time_finish);
@@ -93,7 +97,7 @@ public abstract class OwnableSatellite extends Satellite
 				facilities.add(new_fac);
 				
 				//notify interface
-				if(GI.SatellitePanel.the_sat.equals(new_fac.location))
+				if(GI.SatellitePanel.the_sat == new_fac.location)
 				{
 					GI.SatellitePanel.displayFacility(new_fac);
 				}
@@ -187,4 +191,8 @@ public abstract class OwnableSatellite extends Satellite
 	public void setPop_capacity(double p){pop_capacity=p;}
 	public double getPop_growth_rate(){return pop_growth_rate;}
 	public void setPop_growth_rate(double r){pop_growth_rate = r;}
+	public Base getThe_base(){return the_base;}
+	public void setThe_base(Base b){the_base = b;}
+	public int getBldg_in_progress(){return bldg_in_progress;}
+	public void setBldg_in_progress(int b){bldg_in_progress=b;}
 }
