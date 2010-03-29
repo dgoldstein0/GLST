@@ -45,6 +45,22 @@ public abstract class Satellite extends StellarObject implements Positioning, De
 		return y_coord;
 	}
 	
+	public double getXVel(long t)
+	{
+		if(t != last_t_gotten)
+			computeCoords(t);
+		
+		return x_vel;
+	}
+	
+	public double getYVel(long t)
+	{
+		if(t != last_t_gotten)
+			computeCoords(t);
+		
+		return y_vel;
+	}	
+	
 	public void computeCoords(long t)
 	{
 		//save current position
@@ -54,20 +70,26 @@ public abstract class Satellite extends StellarObject implements Positioning, De
 		double v_y = orbit.vel_y;
 		
 		orbit.move(t);
-		double boss_y, boss_x;
+		double boss_y, boss_x, boss_vx, boss_vy;
 		if(orbit.boss instanceof Satellite)
 		{
 			((Satellite)orbit.boss).computeCoords(t);
 			boss_y = ((Satellite)orbit.boss).getYCoord(t);
 			boss_x = ((Satellite)orbit.boss).getXCoord(t);
+			boss_vy = ((Satellite)orbit.boss).getYVel(t);
+			boss_vx = ((Satellite)orbit.boss).getXVel(t);
 		}
 		else //boss is a GSystem
 		{
 			boss_x = orbit.boss.absoluteCurX();
 			boss_y = orbit.boss.absoluteCurY();
+			boss_vx = 0.0d;
+			boss_vy = 0.0d;
 		}
 		x_coord = orbit.cur_x + boss_x;
 		y_coord = orbit.cur_y + boss_y;
+		x_vel = orbit.vel_x + boss_vx;
+		y_vel = orbit.vel_y + boss_vy;
 		
 		//restore current position
 		orbit.cur_x = x;
@@ -81,4 +103,6 @@ public abstract class Satellite extends StellarObject implements Positioning, De
 	long last_t_gotten=0;
 	double x_coord;
 	double y_coord;
+	double x_vel;
+	double y_vel;
 }

@@ -32,8 +32,9 @@ public class Ship extends Targetter implements Targetable, Selectable, Destinati
 	ShipDataSaver ship_data[];
 	int index;  //for the data array
 	
-	double max_speed = .04; //px per millisecond
-	double max_angular_vel = .0005;//radians per milli
+	double max_speed = .06; //px per millisecond
+	double max_angular_vel = .0007;//radians per milli
+	double accel_rate = .00003; // px/ms per ms
 	
 	float soldier;
 	
@@ -116,45 +117,69 @@ public class Ship extends Targetter implements Targetable, Selectable, Destinati
 		pos_x += speed*time_granularity*Math.cos(direction);
 		pos_y += speed*time_granularity*Math.sin(direction);
 		
-		if(Math.abs(pos_x - destinationX()) < delta && Math.abs(pos_y - destinationY()) < delta)
-		{
-			pos_x = destinationX();
-			pos_y = destinationY();
-			speed = 0.0d;
-		}
+		double desired_direction = calcDesiredDirection();
+		double desired_speed = calcDesiredSpeed(desired_direction);
+		
+		//change speed
+		if(desired_speed < speed)
+			speed = Math.max(Math.max(speed - accel_rate*time_granularity, desired_speed), 0.0d);
 		else
-		{
-			//change direction
-			double dest_vec_x = destinationX() - pos_x;
-			double dest_vec_y = destinationY() - pos_y;
-			double desired_change = Math.atan2(dest_vec_y, dest_vec_x)-direction;
-
-			if(desired_change > Math.PI)
-				desired_change -= 2*Math.PI;
-			else if(desired_change < -Math.PI)
-				desired_change += 2*Math.PI;
+			speed = Math.min(Math.min(speed + accel_rate*time_granularity, desired_speed), max_speed);
+		
+		//change direction
+		double actual_chng = Math.min(Math.abs(desired_direction), Math.abs(max_angular_vel*time_granularity)); //finds the absolute value of the amount the direction changes
+		if(desired_direction > 0)
+			direction += actual_chng;
+		else
+			direction -= actual_chng;
+		
+		if(direction > Math.PI)
+			direction -= 2*Math.PI;
+		else if(direction<-Math.PI)
+			direction += 2*Math.PI;
 			
-			//change speed
-			if(desired_change < Math.PI/2.0 && desired_change > -Math.PI/2.0)
-				speed = Math.min(max_speed*Math.cos(desired_change)*Math.cos(desired_change), Math.hypot(destinationX()-pos_x, destinationY()-pos_y) * Math.cos(desired_change)/GalacticStrategyConstants.LANDING_RANGE*max_speed);
-			else
-				speed = 0.0d;
-			
-			double actual_chng = Math.min(Math.abs(desired_change), Math.abs(max_angular_vel*time_granularity)); //finds the absolute value of the amount the direction changes
-			if(desired_change > 0)
-				direction += actual_chng;
-			else
-				direction -= actual_chng;
-			
-			if(direction > Math.PI)
-				direction -= 2*Math.PI;
-			else if(direction<-Math.PI)
-				direction += 2*Math.PI;
-		}
 		time += time_granularity;
 		
 		//save data
 		saveData();
+	}
+	
+	private double calcDesiredDirection()
+	{
+		double dest_vec_x = destinationX() - pos_x;
+		double dest_vec_y = destinationY() - pos_y;
+		double desired_change = Math.atan2(dest_vec_y, dest_vec_x)-direction;
+
+		if(desired_change > Math.PI)
+			desired_change -= 2*Math.PI;
+		else if(desired_change < -Math.PI)
+			desired_change += 2*Math.PI;
+		
+		return desired_change;
+	}
+	
+	private double calcDesiredSpeed(double desired_direction)
+	{
+		//if close to dest
+		double match_speed = Math.hypot(destinationVelX(),destinationVelY())*Math.cos(desired_direction)*Math.abs(Math.cos(desired_direction));
+		double time_to_chng = (speed-match_speed)/(accel_rate);
+		double time_to_dest = Math.hypot(pos_x - destinationX(),pos_y - destinationY())/speed;
+		
+		if(Math.hypot(pos_x - destinationX(),pos_y - destinationY()) < GalacticStrategyConstants.LANDING_RANGE || time_to_chng > time_to_dest)
+		{
+			//System.out.println("match speed: " + Double.toString(match_speed));
+			return match_speed;
+		}
+		else if(desired_direction < Math.PI/2.0 && desired_direction > -Math.PI/2.0) //else if destination is forward
+		{
+			//System.out.println("full speed");
+			return max_speed*Math.cos(desired_direction)*Math.cos(desired_direction);
+		}
+		else //destination is backward, stop to turn around
+		{
+			//System.out.println("stop!");
+			return 0.0d;
+		}
 	}
 	
 	public void saveData()
@@ -216,6 +241,16 @@ public class Ship extends Targetter implements Targetable, Selectable, Destinati
 		return dest_y_coord;
 	}
 	
+	private double destinationVelX()
+	{
+		return destination.getXVel(time);
+	}
+	
+	private double destinationVelY()
+	{
+		return destination.getYVel(time);
+	}
+	
 	public HashSet<Targetter> getAggressors(){return aggressors;}
 	
 	public int getSoldierInt(){return (int)Math.floor(soldier);}
@@ -226,27 +261,35 @@ public class Ship extends Targetter implements Targetable, Selectable, Destinati
 	long dest_coords_time=0; //there cannot be a call to getXCoord or getYCoord with t=0, since ships do not exist then, and if they do will not be targetting other ships
 	double dest_pos_x;
 	double dest_pos_y;
+	double dest_vel_x;
+	double dest_vel_y;
 	
 	public double getXCoord(long t)
 	{
-		if(t == dest_coords_time)
-			return dest_pos_x;
-		else
-		{			
+		if(t != dest_coords_time)		
 			updateDestData(t);
-			return dest_pos_x;
-		}
+		return dest_pos_x;
 	}
 	
 	public double getYCoord(long t)
 	{
-		if(t == dest_coords_time)
-			return dest_pos_y;
-		else
-		{
+		if(t != dest_coords_time)
 			updateDestData(t);
-			return dest_pos_y;
-		}
+		return dest_pos_y;
+	}
+	
+	public double getXVel(long t)
+	{
+		if(t != dest_coords_time)
+			updateDestData(t);
+		return dest_vel_x;
+	}
+	
+	public double getYVel(long t)
+	{
+		if(t != dest_coords_time)
+			updateDestData(t);
+		return dest_vel_y;
 	}
 	
 	private void updateDestData(long t)
@@ -261,6 +304,8 @@ public class Ship extends Targetter implements Targetable, Selectable, Destinati
 		//System.out.println("time is " + Long.toString(time) + " and t is " + Long.toString(t));
 		dest_pos_x = pos_x;
 		dest_pos_y = pos_y;
+		dest_vel_x = speed*Math.cos(direction);
+		dest_vel_y = speed*Math.sin(direction);
 		dest_coords_time = t;
 		restoreIndex();
 		

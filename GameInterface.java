@@ -405,16 +405,15 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		int x, y;
 		JComponent c;
 		
-		Point pane_pos = frame.getContentPane().getLocationOnScreen();
-		x=e.getX() - pane_pos.x;
-		y=e.getY() - pane_pos.y;
-		
+		Point corner;
 		if(e.getSource() instanceof JComponent)
-		{
-			Point corner = ((JComponent)e.getSource()).getLocationOnScreen();
-			x += corner.x;
-			y += corner.y;
-		}
+			corner = ((JComponent)e.getSource()).getLocationOnScreen();
+		else
+			corner = frame.getLocationOnScreen();
+		
+		Point pane_pos = frame.getContentPane().getLocationOnScreen();
+		x=e.getX() - pane_pos.x + corner.x;
+		y=e.getY() - pane_pos.y + corner.y;
 		
 		//System.out.println("x,y is " + Integer.toString(x) + "," + Integer.toString(y));
 		
@@ -759,20 +758,25 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				sys_scale = GalacticStrategyConstants.MAX_SCALE;
 			
 			//adjust center if part of screen goes out of bounds ////BOOKMARK
-			if(sysScreenToDataX(0)<(theinterface.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2)
-				sys_center_x = (int)((theinterface.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2 + theinterface.getWidth()/(2*sys_scale));//this should be the value of center_x that makes screenToDataX equal to (SystemPanel.getWidth()-SYS_WIDTH)/2
-			else if(sysScreenToDataX(theinterface.getWidth())>(theinterface.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2)
-				sys_center_x = (int)((theinterface.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2 - theinterface.getWidth()/(2*sys_scale));
-			
-			if(sysScreenToDataY(0)<(theinterface.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2)
-				sys_center_y = (int)((theinterface.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2 + theinterface.getHeight()/(2*sys_scale));
-			else if(sysScreenToDataY(theinterface.getHeight())>(theinterface.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2)
-				sys_center_y = (int)((theinterface.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2 - theinterface.getHeight()/(2*sys_scale));
-			
+			enforceSystemBounds();
 			redraw();
 		}
 	}
 
+	private void enforceSystemBounds()
+	{
+		//adjust sys_center_x if necessary
+		if(sysScreenToDataX(0)<(theinterface.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2)
+			sys_center_x = (int)((theinterface.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2 + theinterface.getWidth()/(2*sys_scale));//this should be the value of center_x that makes screenToDataX equal to (SystemPanel.getWidth()-SYS_WIDTH)/2
+		else if(sysScreenToDataX(theinterface.getWidth())>(theinterface.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2)
+			sys_center_x = (int)((theinterface.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2 - theinterface.getWidth()/(2*sys_scale));
+		//adjust sys_center_y if necessary
+		if(sysScreenToDataY(0)<(theinterface.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2)
+			sys_center_y = (int)((theinterface.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2 + theinterface.getHeight()/(2*sys_scale));
+		else if(sysScreenToDataY(theinterface.getHeight())>(theinterface.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2)
+			sys_center_y = (int)((theinterface.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2 - theinterface.getHeight()/(2*sys_scale));
+	}
+	
 	@Override
 	public void windowActivated(WindowEvent arg0) {
 		// TODO Auto-generated method stub
@@ -822,6 +826,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	
 	public void componentResized(ComponentEvent e)
 	{
+		enforceSystemBounds();
 		redraw();
 	}
 }

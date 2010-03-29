@@ -115,7 +115,7 @@ public class Orbit
 	
 	public synchronized void move(double time)
 	{		
-		double frac_time = (time_offset + ((double)direction)*time)/period; //ADD IN TIME!
+		double frac_time = (time_offset + ((double)direction)*time)/period;
 		frac_time=frac_time-Math.floor(frac_time);
 		
 		double theta1;
