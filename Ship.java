@@ -219,7 +219,7 @@ public class Ship extends Targetter implements Targetable, Selectable, Destinati
 			time=ship_data[index].t;
 			speed=ship_data[index].sp;
 		}
-		else System.out.println("Error loading ship data: data wasn't saved");	//CAN THIS HAPPEN?
+		else System.out.println("Error loading ship data: data wasn't saved");	//BOOKMARK
 	}
 	
 	private int saveindex;

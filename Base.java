@@ -103,6 +103,6 @@ public class Base extends Facility{
 	public void setMax_soldier(int s){max_soldier=s;}
 	
 	public int getType(){return Facility.BASE;}
-	public String getImgLoc(){return "images/Base.gif";}
+	public String imageLoc(){return "images/Base.gif";}
 	public String getName(){return "Base";}
 }

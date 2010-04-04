@@ -27,7 +27,7 @@ public class Mine extends Facility{
 	}
 	
 	public int getType(){return Facility.MINE;}
-	public String getImgLoc(){return "images/mine.gif";}
+	public String imageLoc(){return "images/mine.gif";}
 	public String getName(){return "Mine";}
 	
 	public Mine(){}

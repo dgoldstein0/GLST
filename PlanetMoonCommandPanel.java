@@ -231,7 +231,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 			the_panel.setBorder(BorderFactory.createLineBorder(Color.RED));
 			
 			the_panel.add(new JLabel(f.getName()));
-			the_panel.add(new JLabel(new ImageIcon(f.getImgLoc())));
+			the_panel.add(new JLabel(new ImageIcon(f.imageLoc())));
 			
 			JProgressBar health_bar = new JProgressBar(0, f.getEndurance());
 			health_bar.setMaximumSize(new Dimension(120,20));

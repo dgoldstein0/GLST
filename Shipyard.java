@@ -123,6 +123,6 @@ public class Shipyard extends Facility{
 	}
 	
 	public int getType(){return Facility.SHIPYARD;}
-	public String getImgLoc(){return "images/shipyard.gif";}
+	public String imageLoc(){return "images/shipyard.gif";}
 	public String getName(){return "Shipyard";}
 }

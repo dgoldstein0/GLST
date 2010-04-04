@@ -11,6 +11,7 @@ public class GSystem implements Positioning
 	
 	ArrayList<Satellite> orbiting_objects;
 	HashSet<Star> stars;
+	HashSet<Missile> missiles;
 	Fleet[] fleets; //indices = player id's
 	String name;
 	int id;

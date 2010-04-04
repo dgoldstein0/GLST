@@ -28,11 +28,16 @@ public abstract class Facility implements Targetable
 		location.facilities.remove(this);
 	}
 	
+	public double getXCoord(long t){return location.getXCoord(t);}
+	public double getYCoord(long t){return location.getYCoord(t);}
+	public double getXVel(long t){return location.getXVel(t);}
+	public double getYVel(long t){return location.getYVel(t);}
+	
 	public HashSet<Targetter> getAggressors(){return aggressors;}
 	public abstract void updateStatus(long t);
 	public abstract String getName();
 	public abstract int getType();
-	public abstract String getImgLoc();
+	public abstract String imageLoc();
 	
 	public int getDamage(){return damage;}
 	public void setDamage(int d){damage=d;}
