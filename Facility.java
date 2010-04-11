@@ -34,6 +34,7 @@ public abstract class Facility implements Targetable
 	public double getYVel(long t){return location.getYVel(t);}
 	
 	public HashSet<Targetter> getAggressors(){return aggressors;}
+	public void addAggressor(Targetter t){aggressors.add(t);}
 	public abstract void updateStatus(long t);
 	public abstract String getName();
 	public abstract int getType();

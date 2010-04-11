@@ -543,7 +543,6 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 					else if(selected_in_sys instanceof Ship && e.getButton() == MouseEvent.BUTTON3)
 					{
 						setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
-						(Ship)selected_in_sys.attacking=true;
 					}
 				}
 			}
@@ -686,6 +685,13 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		
 		ShipPanel.the_ship.destination = dest;
 		ShipPanel.updateDestDisplay();
+		
+		if(dest instanceof Ship)
+		{
+			ShipPanel.the_ship.target = (Targetable)dest;
+			((Targetable)dest).addAggressor(ShipPanel.the_ship);
+			ShipPanel.the_ship.attacking=true;
+		}
 	}
 	
 	public void update()      					//subject to change

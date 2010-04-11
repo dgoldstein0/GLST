@@ -30,6 +30,21 @@ public abstract class Flyer extends Targetter implements Targetable
 	ShipDataSaver ship_data[];
 	int index;  //for the data array
 	
+	public void SetUpFlyer(String nm, ShipType st)
+	{
+		name=nm;
+		type=st;
+		
+		damage=0;
+		hull_strength = st.hull;
+		
+		aggressors = new HashSet<Targetter>();
+		ship_data=new ShipDataSaver[data_capacity];
+		for(int i=0; i<ship_data.length; i++)
+			ship_data[i] = new ShipDataSaver();
+		index=0;
+	}
+	
 	//loading and saving data functions
 	public void saveData()
 	{
@@ -81,10 +96,11 @@ public abstract class Flyer extends Targetter implements Targetable
 	
 	//ship physics functions
 	
-	public void move(long t)
+	public boolean move(long t)
 	{
 		while(time < t)
 			moveIncrement();
+		return true;
 	}
 	
 	//moves the ship one time_granularity.  this is a separate function so that all ships updates can be stepped through 1 by 1.
@@ -206,6 +222,7 @@ public abstract class Flyer extends Targetter implements Targetable
 	
 	//for Targetable
 	public HashSet<Targetter> getAggressors(){return aggressors;}
+	public void addAggressor(Targetter t){aggressors.add(t);}
 	
 	public void addDamage(int d)
 	{
@@ -220,6 +237,10 @@ public abstract class Flyer extends Targetter implements Targetable
 	public double getPos_y(){return pos_y;}
 	public void setPos_x(double x){pos_x=x;}
 	public void setPos_y(double y){pos_y=y;}
+	public double getSpeed(){return speed;}
+	public double getDirection(){return direction;}
+	public void setSpeed(double s){speed=s;}
+	public void setDirection(double d){direction=d;}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 }

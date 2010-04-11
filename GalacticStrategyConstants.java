@@ -95,9 +95,7 @@ public class GalacticStrategyConstants
 	static long DEFAULT_MONEY=1000;
 	static long DEFAULT_METAL=1000;
 	
-	//ship attacking range
-	static final double Attacking_Range=300.0;
-	
+
 	//loads the images for each ship type
 	public static void ImageLoader() //GameControl calls this method when it is instantiated
 	{
@@ -111,10 +109,16 @@ public class GalacticStrategyConstants
 		}
 	}
 	
+	//ship attacking range
+	static final double Attacking_Range=40000.0;
+	
 	//setup for ship types
-	final static int JUNK=0;
-	final static ShipType[] sTypes={new ShipType("Junk", 20, 100, 100, 100, 10000, 200, .30d, "images/junk.png", .06, .0007, .00003)};
-	final static ShipType missile_type = new ShipType("Missile", 5, 10, 0, 0, 2000, 0, .20d, "images/missile.png", .12, .0001, .0001);
+	final static int MISSILE = 0;
+	final static int JUNK=1;
+	final static ShipType[] sTypes={new ShipType("Missile", 5, 10, 0, 0, 2000, 0, .20d, "images/missile.png", .12, .001, .0001),
+						new ShipType("Junk", 20, 100, 100, 100, 10000, 200, .30d, "images/junk.png", .06, .0007, .00003)};
+
+	final static int MISSILE_DAMAGE = 10;
 	
 	//Used by Shipyard
 	static final int queue_capa=10;//the capacity of a shipyard's queue

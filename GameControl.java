@@ -839,7 +839,7 @@ public class GameControl
 		//start events that need to occur before time_elapsed
 		
 		
-		ArrayList temp_exec = new ArrayList();
+		ArrayList<Order> temp_exec = new ArrayList<Order>();
 		long min_time_exec = time_elapsed;
 		for(Order o: pending_execution)
 		{
@@ -892,7 +892,24 @@ public class GameControl
 			{
 				for(Integer j : sys.fleets[i].ships.keySet())
 				{
-					sys.fleets[i].ships.get(j).move(time_elapsed);
+					sys.fleets[i].ships.get(j).update(time_elapsed);
+				}
+			}
+			
+			synchronized(sys.missile_lock)
+			{
+				HashSet<Missile> destroy_m = new HashSet<Missile>();
+				Set<Integer> keys = sys.missiles.keySet();
+				for(Integer k : keys)
+				{
+					boolean destroy = sys.missiles.get(k).move(time_elapsed);
+					if(destroy)
+						destroy_m.add(sys.missiles.get(k));
+				}
+				
+				for(Missile m : destroy_m)
+				{
+					m.destroyed();
 				}
 			}
 		}

@@ -14,18 +14,11 @@ public class Ship extends Flyer implements Selectable
 	public Ship(String nm, ShipType t, int id)
 	{
 		this.id=id;
-		name = nm;
-		type = t;
 		energy = t.max_energy;
 		max_energy = energy;
-		hull_strength = t.hull;
 		soldier=t.soldier_capacity;//assume ships are fully loaded when built
-		damage=0;
-		aggressors = new HashSet<Targetter>();
-		ship_data=new ShipDataSaver[data_capacity];
-		for(int i=0; i<ship_data.length; i++)
-			ship_data[i] = new ShipDataSaver();
-		index=0;
+		
+		SetUpFlyer(nm, t);
 	}
 	
 	public void assemble(Shipyard builder, long t)
@@ -61,12 +54,24 @@ public class Ship extends Flyer implements Selectable
 		//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 	}
 	
-	public void attack()
+	public void update(long t)
 	{
-		if ((attacking)&&(Math.pow(destinationX() - pos_x, 2)+Math.pow(destinationY() - pos_y, 2)<GalacticStrategyConstants.Attacking_Range))
+		move(t);
+		if(attacking)
 		{
-			Missile m=new Missile(target); 
-			location.missiles.add(m);
+			attack(t);
+		}
+	}
+	
+	public void attack(long t)
+	{
+		if (Math.pow(destinationX() - pos_x, 2)+Math.pow(destinationY() - pos_y, 2)<GalacticStrategyConstants.Attacking_Range)
+		{
+			Missile m=new Missile(this, target, t, location.missile_count); 
+			synchronized(location.missile_lock)
+			{
+				location.missiles.put(location.missile_count++, m);
+			}
 		}
 	}
 	
@@ -74,6 +79,15 @@ public class Ship extends Flyer implements Selectable
 	public void destroyed()
 	{
 		location.fleets[owner.getId()].remove(this);
+		
+		//notify aggressors
+		for(Targetter t : aggressors)
+			t.targetIsDestroyed();
+	}
+	
+	public void targetIsDestroyed()
+	{
+		attacking=false;
 	}
 	
 	public int getSoldierInt(){return (int)Math.floor(soldier);}

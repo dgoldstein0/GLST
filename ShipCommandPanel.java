@@ -21,6 +21,8 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 	JLabel dest_name;
 	JLabel dest_pic;
 	
+	JButton attack;
+	
 	public ShipCommandPanel()
 	{
 		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -161,6 +163,10 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		else if(e.getSource() == warp)
 		{
 			the_ship.attacking=false;
+		}
+		else if(e.getSource() == attack)
+		{
+			the_ship.attacking=true;
 		}
 		else if(e.getSource() == invade)
 		{

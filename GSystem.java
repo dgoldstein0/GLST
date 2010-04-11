@@ -11,7 +11,11 @@ public class GSystem implements Positioning
 	
 	ArrayList<Satellite> orbiting_objects;
 	HashSet<Star> stars;
-	HashSet<Missile> missiles;
+	
+	Object missile_lock = new Object();
+	Hashtable<Integer, Missile> missiles;
+	int missile_count=0;
+	
 	Fleet[] fleets; //indices = player id's
 	String name;
 	int id;
@@ -39,7 +43,7 @@ public class GSystem implements Positioning
 		this.y=y;
 		navigability=nav;
 		fleets = new Fleet[GalacticStrategyConstants.MAX_PLAYERS];
-		missiles = new HashSet<Missile>();
+		missiles = new Hashtable<Integer, Missile>();
 		owner_id = NO_OWNER;
 	}
 	
@@ -104,7 +108,7 @@ public class GSystem implements Positioning
 	public GSystem()
 	{
 		owner_id = NO_OWNER;
-		missiles = new HashSet<Missile>();
+		missiles = new Hashtable<Integer, Missile>();
 	}
 	
 	public ArrayList<Satellite> getorbiting_objects(){return orbiting_objects;}

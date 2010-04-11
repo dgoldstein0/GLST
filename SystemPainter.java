@@ -132,9 +132,13 @@ public class SystemPainter extends JPanel
 				}
 			}
 			
-			for(Missile m : system.missiles)
+			synchronized(system.missile_lock)
 			{
-				drawFlyer(g2,(Flyer)m,null);
+				Set<Integer> keys = system.missiles.keySet();
+				for(Integer k : keys)
+				{
+					drawFlyer(g2,(Flyer)system.missiles.get(k),null);
+				}
 			}
 			
 			g.setColor(Color.WHITE);
