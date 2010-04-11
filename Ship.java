@@ -25,8 +25,6 @@ public class Ship extends Flyer implements Selectable
 		for(int i=0; i<ship_data.length; i++)
 			ship_data[i] = new ShipDataSaver();
 		index=0;
-		
-		current_flying_AI = new TrackingAI(this);
 	}
 	
 	public void assemble(Shipyard builder, long t)
@@ -58,6 +56,8 @@ public class Ship extends Flyer implements Selectable
 		time = (long)(Math.ceil((double)(t)/(double)(time_granularity))*time_granularity);
 		dest_x_coord = d.getXCoord(time-time_granularity);
 		dest_y_coord = d.getYCoord(time-time_granularity);
+		current_flying_AI = new TrackingAI(this);
+		//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 	}
 	
 	public void destroyed()
