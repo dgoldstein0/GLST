@@ -9,6 +9,7 @@ public class Ship extends Flyer implements Selectable
 	int max_energy;
 	
 	float soldier;
+	boolean attacking;
 	
 	public Ship(String nm, ShipType t, int id)
 	{
@@ -59,6 +60,16 @@ public class Ship extends Flyer implements Selectable
 		current_flying_AI = new TrackingAI(this);
 		//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 	}
+	
+	public void attack()
+	{
+		if ((attacking)&&(Math.pow(destinationX() - pos_x, 2)+Math.pow(destinationY() - pos_y, 2)<GalacticStrategyConstants.Attacking_Range))
+		{
+			Missile m=new Missile(target); 
+			location.missiles.add(m);
+		}
+	}
+	
 	
 	public void destroyed()
 	{

@@ -95,6 +95,9 @@ public class GalacticStrategyConstants
 	static long DEFAULT_MONEY=1000;
 	static long DEFAULT_METAL=1000;
 	
+	//ship attacking range
+	static final double Attacking_Range=300.0;
+	
 	//loads the images for each ship type
 	public static void ImageLoader() //GameControl calls this method when it is instantiated
 	{

@@ -21,6 +21,7 @@ public class Missile extends Flyer
 				destroyed();
 				
 		}
+		c=collidedWithTarget();
 		if (c)
 			destroyed();
 	}
