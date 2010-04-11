@@ -110,7 +110,8 @@ public class GalacticStrategyConstants
 	
 	//setup for ship types
 	final static int JUNK=0;
-	final static ShipType[] sTypes={new ShipType("Junk", 20, 100, 100, 100, 10000, 200, .30d, "images/junk.png")};
+	final static ShipType[] sTypes={new ShipType("Junk", 20, 100, 100, 100, 10000, 200, .30d, "images/junk.png", .06, .0007, .00003)};
+	final static ShipType missile_type = new ShipType("Missile", 5, 10, 0, 0, 2000, 0, .20d, "images/missile.png", .12, .0001, .0001);
 	
 	//Used by Shipyard
 	static final int queue_capa=10;//the capacity of a shipyard's queue

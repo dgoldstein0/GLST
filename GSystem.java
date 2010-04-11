@@ -39,6 +39,7 @@ public class GSystem implements Positioning
 		this.y=y;
 		navigability=nav;
 		fleets = new Fleet[GalacticStrategyConstants.MAX_PLAYERS];
+		missiles = new HashSet<Missile>();
 		owner_id = NO_OWNER;
 	}
 	
@@ -100,7 +101,12 @@ public class GSystem implements Positioning
 	}
 	
 	//methods required for save/load
-	public GSystem(){owner_id = NO_OWNER;}
+	public GSystem()
+	{
+		owner_id = NO_OWNER;
+		missiles = new HashSet<Missile>();
+	}
+	
 	public ArrayList<Satellite> getorbiting_objects(){return orbiting_objects;}
 	public void setOrbiting_objects(ArrayList<Satellite> s){orbiting_objects=s;}
 	public String getName(){return name;}

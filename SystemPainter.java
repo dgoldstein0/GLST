@@ -126,21 +126,15 @@ public class SystemPainter extends JPanel
 				{
 					for(Integer j : system.fleets[i].ships.keySet())
 					{
-						Ship s = system.fleets[i].ships.get(j);
-						// Get the current transform
-						AffineTransform saveAT = g2.getTransform();
-						
-						//draw ship s
-						g2.rotate(s.direction+Math.PI/2, drawXdoub(s.getPos_x()),drawYdoub(s.getPos_y()));
-						
-						g2.drawImage(s.type.img, drawX(s.getPos_x()-s.type.default_scale*s.type.img.getWidth(this)/2), drawY(s.getPos_y()-s.type.default_scale*s.type.img.getHeight(this)/2), (int)(s.type.default_scale*s.type.img.getWidth(this)*scale), (int)(s.type.default_scale*scale*s.type.img.getHeight(this)), this);
-						g2.setColor(system.fleets[i].owner.getColor());
-						g2.drawRect((int)(drawXdoub(s.getPos_x())-3.0*scale), (int)(drawYdoub(s.getPos_y())-3.0*scale),(int)(6.0*scale),(int)(6.0*scale));
-						
-						// Restore original transform
-						g2.setTransform(saveAT);
+						Flyer f = (Flyer)system.fleets[i].ships.get(j);
+						drawFlyer(g2,f,system.fleets[i].owner.getColor());
 					}
 				}
+			}
+			
+			for(Missile m : system.missiles)
+			{
+				drawFlyer(g2,(Flyer)m,null);
 			}
 			
 			g.setColor(Color.WHITE);
@@ -179,6 +173,25 @@ public class SystemPainter extends JPanel
 		
 		if(game_mode)
 			g.drawImage(return_arrow, getWidth()-arrow_size, 0, arrow_size, arrow_size, this);
+	}
+	
+	private void drawFlyer(Graphics2D g2, Flyer s, Color c)
+	{
+		// Get the current transform
+		AffineTransform saveAT = g2.getTransform();
+		
+		//draw ship s
+		g2.rotate(s.direction+Math.PI/2, drawXdoub(s.getPos_x()),drawYdoub(s.getPos_y()));
+		
+		g2.drawImage(s.type.img, drawX(s.getPos_x()-s.type.default_scale*s.type.img.getWidth(this)/2), drawY(s.getPos_y()-s.type.default_scale*s.type.img.getHeight(this)/2), (int)(s.type.default_scale*s.type.img.getWidth(this)*scale), (int)(s.type.default_scale*scale*s.type.img.getHeight(this)), this);
+		if(c instanceof Color)
+		{
+			g2.setColor(c);
+			g2.drawRect((int)(drawXdoub(s.getPos_x())-3.0*scale), (int)(drawYdoub(s.getPos_y())-3.0*scale),(int)(6.0*scale),(int)(6.0*scale));
+		}
+		
+		// Restore original transform
+		g2.setTransform(saveAT);
 	}
 	
 	public void paintSystem(GSystem system, Selectable selected, boolean view, double centerx, double centery, double sc)
