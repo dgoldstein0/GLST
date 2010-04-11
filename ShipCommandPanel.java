@@ -156,13 +156,15 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		if(e.getSource() == move)
 		{
 			GameInterface.GC.GI.switchSystemToDestinationMode();
+			the_ship.attacking=false;
 		}
 		else if(e.getSource() == warp)
 		{
-			
+			the_ship.attacking=false;
 		}
 		else if(e.getSource() == invade)
 		{
+			the_ship.attacking=false;
 			if(((OwnableSatellite)the_ship.destination).getOwner() instanceof Player)
 			{
 				boolean base_seen=false;

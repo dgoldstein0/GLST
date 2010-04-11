@@ -46,7 +46,7 @@ public class SystemLabel extends JLabel implements MouseListener
 	}
 	
 	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub		
+				
 		if (the_sys!=the_interface.sys)
 		{
 			the_interface.prev_selected=the_interface.selected_in_sys;

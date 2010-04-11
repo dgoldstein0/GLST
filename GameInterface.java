@@ -543,6 +543,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 					else if(selected_in_sys instanceof Ship && e.getButton() == MouseEvent.BUTTON3)
 					{
 						setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
+						(Ship)selected_in_sys.attacking=true;
 					}
 				}
 			}
