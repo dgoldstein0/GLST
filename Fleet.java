@@ -27,9 +27,14 @@ public class Fleet
 		location.increaseClaim(owner);
 	}
 	
-	public void remove(Ship s)
+	public boolean remove(Ship s)
 	{
-		ships.remove(s.getId());
-		location.decreaseClaim(owner);
+		//this removes the ship.  remove() returns the ship if the ship was in the hashtable, so
+		//the instanceof makes sure we are not removing a ship that has already been removed before decreasing the claim
+		Boolean remove_successful = (ships.remove(s.getId()) instanceof Ship);
+		if(remove_successful)
+			location.decreaseClaim(owner);
+		
+		return remove_successful;
 	}
 }

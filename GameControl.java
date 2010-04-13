@@ -26,6 +26,8 @@ public class GameControl
 	Player[] players;
 	Galaxy map;
 
+	JFileChooser filechooser; //for single player testing
+	
 	GameInterface GI;
 	GameLobby GL;
 	GameStartupDialog GSD;
@@ -50,6 +52,9 @@ public class GameControl
 		players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
 		map=new Galaxy();
 		GameInterface.GC = this;
+		
+		filechooser = new JFileChooser();
+		filechooser.setFileFilter(new FileNameExtensionFilter("XML files only", "xml"));
 	}
 	
 	public GameControl()
@@ -309,8 +314,6 @@ public class GameControl
 		}
 		
 		//CHOOSE AND LOAD MAP
-		JFileChooser filechooser = new JFileChooser();
-		filechooser.setFileFilter(new FileNameExtensionFilter("XML files only", "xml"));
 		
 		//stolen from GameLobby.actionPreformed
 		int val = filechooser.showOpenDialog(GI.frame);
@@ -328,10 +331,13 @@ public class GameControl
 				}
 			} catch(FileNotFoundException fnfe) {
 				JOptionPane.showMessageDialog(GI.frame, "The file was not found.  Please choose another file.", "Error - File not Found", JOptionPane.ERROR_MESSAGE);
+				return;
 			} catch(ClassCastException cce) {
 				JOptionPane.showMessageDialog(GI.frame, "The file you have selected is not a map", "Class Casting Error", JOptionPane.ERROR_MESSAGE);
+				return;
 			} catch(NullPointerException npe) {
 				JOptionPane.showMessageDialog(GI.frame, "Map loading failed.  The selected file is not a valid map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
+				return;
 			}
 			
 			TC = new TimeControl(0);
@@ -902,14 +908,15 @@ public class GameControl
 				Set<Integer> keys = sys.missiles.keySet();
 				for(Integer k : keys)
 				{
-					boolean destroy = sys.missiles.get(k).move(time_elapsed);
+					Missile m = sys.missiles.get(k);
+					boolean destroy = m.move(time_elapsed);
 					if(destroy)
-						destroy_m.add(sys.missiles.get(k));
+						destroy_m.add(m);
 				}
 				
 				for(Missile m : destroy_m)
 				{
-					m.destroyed();
+					m.detonate();
 				}
 			}
 		}

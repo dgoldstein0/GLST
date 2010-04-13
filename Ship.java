@@ -36,6 +36,7 @@ public class Ship extends Flyer implements Selectable
 		double vel_y=builder.location.orbit.getAbsVelY();
 		direction = Math.atan2(vel_y, vel_x);
 		speed = Math.hypot(vel_x, vel_y);
+		saveData();
 		if(builder.location instanceof Planet)
 			location = (GSystem)builder.location.orbit.boss;
 		else //builder.location is a Moon
@@ -50,7 +51,7 @@ public class Ship extends Flyer implements Selectable
 		time = (long)(Math.ceil((double)(t)/(double)(time_granularity))*time_granularity);
 		dest_x_coord = d.getXCoord(time-time_granularity);
 		dest_y_coord = d.getYCoord(time-time_granularity);
-		current_flying_AI = new TrackingAI(this);
+		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE);
 		//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 	}
 	
@@ -78,11 +79,19 @@ public class Ship extends Flyer implements Selectable
 	
 	public void destroyed()
 	{
-		location.fleets[owner.getId()].remove(this);
-		
-		//notify aggressors
-		for(Targetter t : aggressors)
-			t.targetIsDestroyed();
+		if(location.fleets[owner.getId()].remove(this))//in case another attack has already destroyed the ship, but both call the destroyed method
+		{
+			//notify aggressors
+			for(Targetter t : aggressors)
+				t.targetIsDestroyed();
+			
+			//notify interface
+			if(this == GameInterface.GC.GI.ShipPanel.the_ship)
+			{
+				GameInterface.GC.GI.displayNoPanel();
+				GameInterface.GC.GI.selected_in_sys = null;
+			}
+		}
 	}
 	
 	public void targetIsDestroyed()

@@ -409,7 +409,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	{
 		facilities_panel.removeAll();
 		state = SHIP_CHOICES_DISPLAYED;
-		for(int i=0; i < GalacticStrategyConstants.sTypes.length; i++)
+		for(int i=1; i < GalacticStrategyConstants.sTypes.length; i++) //start at 1 since MISSILE is type 0
 		{
 			JPanel ship_panel = new JPanel();
 			ship_panel.addMouseListener(new ShipBuilder(the_shipyard, GalacticStrategyConstants.sTypes[i],ship_panel,this));

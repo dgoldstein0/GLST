@@ -1,8 +1,11 @@
 public class TrackingAI extends FlyerAI
 {
-	public TrackingAI(Flyer f)
+	double dest_tolerance; //how close we should be to destination before match speed by default
+	
+	public TrackingAI(Flyer f, double tol)
 	{
 		the_flyer = f;
+		dest_tolerance = tol;
 	}
 	
 	public double calcDesiredDirection()
@@ -26,7 +29,7 @@ public class TrackingAI extends FlyerAI
 		double time_to_chng = (the_flyer.speed-match_speed)/(the_flyer.type.accel_rate);
 		double time_to_dest = Math.hypot(the_flyer.pos_x - the_flyer.destinationX(),the_flyer.pos_y - the_flyer.destinationY())/the_flyer.speed;
 		
-		if(Math.hypot(the_flyer.pos_x - the_flyer.destinationX(),the_flyer.pos_y - the_flyer.destinationY()) < GalacticStrategyConstants.LANDING_RANGE || time_to_chng > time_to_dest)
+		if(Math.hypot(the_flyer.pos_x - the_flyer.destinationX(),the_flyer.pos_y - the_flyer.destinationY()) < dest_tolerance || time_to_chng > time_to_dest)
 		{
 			//System.out.println("match speed: " + Double.toString(match_speed));
 			return match_speed;

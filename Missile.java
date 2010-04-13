@@ -6,7 +6,6 @@ public class Missile extends Flyer
 	public Missile(Ship s, Targetable t, long time, int i)
 	{
 		target = t;
-		current_flying_AI = new TrackingAI(this);
 		id = i;
 
 		SetUpFlyer("", GalacticStrategyConstants.sTypes[GalacticStrategyConstants.MISSILE]);
@@ -19,12 +18,14 @@ public class Missile extends Flyer
 		location = s.location;
 		
 		destination=t;
+		t.addAggressor(this);
 		time = (long)(Math.ceil((double)(time)/(double)(time_granularity))*time_granularity);
 		dest_x_coord = destination.getXCoord(time-time_granularity);
 		dest_y_coord = destination.getYCoord(time-time_granularity);
-		current_flying_AI = new TrackingAI(this);
+		current_flying_AI = new TrackingAI(this, 1.0);
 		
 		this.time=time;
+		saveData();
 	}
 	
 	
@@ -53,10 +54,15 @@ public class Missile extends Flyer
 		return (Math.hypot(this.pos_x-target.getXCoord(time),this.pos_y-target.getYCoord(time))<Collide_Range);
 	}
 	
-	public void destroyed()
+	public void detonate()
 	{
 		//this function could start an explosion animation
 		target.addDamage(GalacticStrategyConstants.MISSILE_DAMAGE);
+		destroyed();
+	}
+	
+	public void destroyed()
+	{
 		synchronized(location.missile_lock)
 		{
 			location.missiles.remove(id);
@@ -65,9 +71,6 @@ public class Missile extends Flyer
 	
 	public void targetIsDestroyed()
 	{
-		synchronized(location.missile_lock)
-		{
-			location.missiles.remove(id);
-		}
+		destroyed();
 	}
 }
