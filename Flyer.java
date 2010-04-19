@@ -69,13 +69,18 @@ public abstract class Flyer extends Targetter implements Targetable
 			System.out.println("Error loading ship data: the delay is too long");
 		}
 		else
-			for (int i=0; i<stepback; i++)
+		{
+		/*	for (int i=0; i<stepback; i++)
 			{
 				index--;
 				if (index<0)
 					index=data_capacity-1;
-			}
-		
+			}*/
+			if (stepback<index)
+				index-=stepback;
+			else
+				index=data_capacity-1-(stepback-index);			
+		}
 		if (ship_data[index]!=null)
 		{
 			direction=ship_data[index].dir;

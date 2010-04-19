@@ -60,6 +60,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	SystemPainter SystemPanel;
 	GSystem sys,prev_sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
 	Selectable selected_in_sys, prev_selected;
+	double prev_scale,prev_x,prev_y;
 	double sys_scale;
 	double sys_center_x;
 	double sys_center_y;
@@ -254,6 +255,10 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		//set up cursors for later use
 		cursors = new MoveScreenCursors();
 		
+		sys_scale = 1.0d;
+		sys_center_x = theinterface.getWidth()/2;
+		sys_center_y = theinterface.getHeight()/2;
+		
 		frame.setVisible(true);	
 		GC.startupDialog();
 	}
@@ -312,9 +317,9 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			theinterface.add(SystemPanel); //automatically adds to center
 			mode=false;
 		}
-		sys_scale = 1.0d;
+/*		sys_scale = 1.0d;
 		sys_center_x = theinterface.getWidth()/2;
-		sys_center_y = theinterface.getHeight()/2;
+		sys_center_y = theinterface.getHeight()/2;*/
 		SystemPanel.paintSystem(sys, selected_in_sys, sys_center_x, sys_center_y, sys_scale, true);
 		frame.setVisible(true); //makes all components within the frame displayable.  frame.pack() does this too, but pack resizes the frame to fit all components in their preferred sizes
 	}

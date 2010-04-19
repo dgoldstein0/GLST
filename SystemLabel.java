@@ -60,6 +60,9 @@ public class SystemLabel extends JLabel implements MouseListener
 		if (!the_interface.mode)
 		{
 		the_interface.prev_sys=the_interface.sys;
+		the_interface.prev_scale=the_interface.sys_scale;
+		the_interface.prev_x=the_interface.sys_center_x;;
+		the_interface.prev_y=the_interface.sys_center_y;
 		the_interface.sys=the_sys;		
 		the_interface.drawSystem();
 		}
@@ -91,6 +94,9 @@ public class SystemLabel extends JLabel implements MouseListener
 		if (the_interface.prev_sys!=null)
 		{
 			the_interface.sys=the_interface.prev_sys;
+			the_interface.sys_scale=the_interface.prev_scale;
+			the_interface.sys_center_x=the_interface.prev_x;
+			the_interface.sys_center_y=the_interface.prev_y;
 			the_interface.drawSystem();
 		}
 		else

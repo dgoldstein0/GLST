@@ -7,6 +7,7 @@ public class Ship extends Flyer implements Selectable
 	
 	int energy;
 	int max_energy;
+	double cooldown;
 	
 	float soldier;
 	boolean attacking;
@@ -58,6 +59,7 @@ public class Ship extends Flyer implements Selectable
 	public void update(long t)
 	{
 		move(t);
+		cooldown-=time_granularity;
 		if(attacking)
 		{
 			attack(t);
@@ -66,13 +68,14 @@ public class Ship extends Flyer implements Selectable
 	
 	public void attack(long t)
 	{
-		if (Math.pow(destinationX() - pos_x, 2)+Math.pow(destinationY() - pos_y, 2)<GalacticStrategyConstants.Attacking_Range)
+		if ((Math.pow(destinationX() - pos_x, 2)+Math.pow(destinationY() - pos_y, 2)<GalacticStrategyConstants.Attacking_Range)&&(cooldown<=0))
 		{
 			Missile m=new Missile(this, target, t, location.missile_count); 
 			synchronized(location.missile_lock)
 			{
 				location.missiles.put(location.missile_count++, m);
 			}
+			cooldown=GalacticStrategyConstants.Attacking_cooldown;
 		}
 	}
 	
