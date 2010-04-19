@@ -692,10 +692,8 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		ShipPanel.updateDestDisplay();
 		
 		if(dest instanceof Ship)
-		{
-			ShipPanel.the_ship.target = (Targetable)dest;
-			((Targetable)dest).addAggressor(ShipPanel.the_ship);
-			ShipPanel.the_ship.attacking=true;
+		{			
+			ShipPanel.the_ship.orderToAttack(GameInterface.GC.TC.getTime(),(Targetable)dest);
 		}
 	}
 	

@@ -841,7 +841,7 @@ public class GameControl
 	public void updateGame()
 	{
 		long time_elapsed=TC.getTime();
-		
+		System.out.println(Long.toString(time_elapsed));
 		//start events that need to occur before time_elapsed
 		
 		

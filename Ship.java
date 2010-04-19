@@ -7,7 +7,7 @@ public class Ship extends Flyer implements Selectable
 	
 	int energy;
 	int max_energy;
-	double cooldown;
+	long nextAttackingtime;
 	
 	float soldier;
 	boolean attacking;
@@ -18,7 +18,7 @@ public class Ship extends Flyer implements Selectable
 		energy = t.max_energy;
 		max_energy = energy;
 		soldier=t.soldier_capacity;//assume ships are fully loaded when built
-		
+		nextAttackingtime=0;
 		SetUpFlyer(nm, t);
 	}
 	
@@ -58,30 +58,39 @@ public class Ship extends Flyer implements Selectable
 	
 	public void update(long t)
 	{
-		move(t);
-		cooldown-=time_granularity;
+		move(t);		
 		if(attacking)
 		{
 			attack(t);
 		}
 	}
 	
+	public void orderToAttack(long t, Targetable tgt)
+	{
+		target= tgt;
+		attacking=true;
+		target.addAggressor(this);
+		nextAttackingtime = (long)(Math.ceil((double)(t)/(double)(time_granularity))*time_granularity);
+		nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
+	}
+	
 	public void attack(long t)
 	{
-		if ((Math.pow(destinationX() - pos_x, 2)+Math.pow(destinationY() - pos_y, 2)<GalacticStrategyConstants.Attacking_Range)&&(cooldown<=0))
+		if ((Math.pow(destinationX() - pos_x, 2)+Math.pow(destinationY() - pos_y, 2)<GalacticStrategyConstants.Attacking_Range)&&(nextAttackingtime<=t))
 		{
 			Missile m=new Missile(this, target, t, location.missile_count); 
 			synchronized(location.missile_lock)
 			{
 				location.missiles.put(location.missile_count++, m);
 			}
-			cooldown+=GalacticStrategyConstants.Attacking_cooldown;
+			nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
 		}
 	}
 	
 	
 	public void destroyed()
 	{
+		System.out.println("destroyed-before");	
 		if(location.fleets[owner.getId()].remove(this))//in case another attack has already destroyed the ship, but both call the destroyed method
 		{
 			//notify aggressors
@@ -93,7 +102,8 @@ public class Ship extends Flyer implements Selectable
 			{
 				GameInterface.GC.GI.displayNoPanel();
 				GameInterface.GC.GI.selected_in_sys = null;
-			}
+			}			
+			System.out.println("destroyed-after");
 		}
 	}
 	
