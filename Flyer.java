@@ -76,11 +76,12 @@ public abstract class Flyer extends Targetter implements Targetable
 				if (index<0)
 					index=data_capacity-1;
 			}*/
-			if (stepback<index)
+			if (stepback<=index)
 				index-=stepback;
 			else
-				index=data_capacity-1-(stepback-index);			
+				index=data_capacity-(stepback-index);			
 		}
+		System.out.println(Integer.toString(index)+" "+Integer.toString(stepback));
 		if (ship_data[index]!=null)
 		{
 			direction=ship_data[index].dir;

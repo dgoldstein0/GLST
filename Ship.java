@@ -75,7 +75,7 @@ public class Ship extends Flyer implements Selectable
 			{
 				location.missiles.put(location.missile_count++, m);
 			}
-			cooldown=GalacticStrategyConstants.Attacking_cooldown;
+			cooldown+=GalacticStrategyConstants.Attacking_cooldown;
 		}
 	}
 	
@@ -100,6 +100,10 @@ public class Ship extends Flyer implements Selectable
 	public void targetIsDestroyed()
 	{
 		attacking=false;
+		if (destination==target)
+		{
+			destination=new DestinationPoint(target.getXCoord(time),target.getYCoord(time));
+		}
 	}
 	
 	public int getSoldierInt(){return (int)Math.floor(soldier);}
