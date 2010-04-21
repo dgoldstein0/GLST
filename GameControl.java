@@ -40,7 +40,7 @@ public class GameControl
 	Thread serverThread; //waits for connections
 	Thread lobbyThread; //reads data and updates the GameLobby
 	Thread readThread; //reads data during the game
-	Thread startThread; //processes start game.   Because it can crash the interface if run on swing's event thread
+	Thread startThread; //processes start game.   This is a separate Thread because it can crash the interface if run on swing's event thread
 	
 	Set<Order> pending_execution = Collections.synchronizedSet(new HashSet<Order>());
 	List<Order> executed = Collections.synchronizedList(new ArrayList<Order>());
@@ -48,18 +48,19 @@ public class GameControl
 	public GameControl(GameInterface gi)
 	{
 		GI = gi;
-		GalacticStrategyConstants.ImageLoader();
+		GalacticStrategyConstants.ImageLoader(); //preload images
 		players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
 		map=new Galaxy();
 		GameInterface.GC = this;
 		
+		//preload file chooser for singlePloyerTest map loading
 		filechooser = new JFileChooser();
 		filechooser.setFileFilter(new FileNameExtensionFilter("XML files only", "xml"));
 	}
 	
 	public GameControl()
 	{
-		GalacticStrategyConstants.ImageLoader();
+		GalacticStrategyConstants.ImageLoader(); //preload images
 		GameInterface.GC = this;
 	}
 		
@@ -119,7 +120,12 @@ public class GameControl
 			endConnection();
 			return;
 		}
-		//stop the server socket.  Once the game is started, more players cannot join.
+		
+		//BOOKMARK - This next block is commented out since it is not yet necessary.  Once one player joins
+		//the server socket closes; if the game is extended to include more than just the 2 player mode, this
+		//will be necessary.
+		
+		//stop the server socket, so that once the game is started, more players cannot join.
 		/*try{serverThread.join();}
 		catch(InterruptedException IE)
 		{
@@ -151,7 +157,7 @@ public class GameControl
 				{
 					if(!Thread.interrupted()){
 						if(reader.ready()){
-							reader.readLine();//wait for client BMM
+							reader.readLine();//wait for client
 							sendMap();
 							retry=false;
 						} else {
@@ -841,10 +847,12 @@ public class GameControl
 	public void updateGame()
 	{
 		long time_elapsed=TC.getTime();
-		System.out.println(Long.toString(time_elapsed));
+		//System.out.println(Long.toString(time_elapsed));
 		//start events that need to occur before time_elapsed
 		
-		
+		//THIS IS NOT FINISHED!  this block here is supposed to take data read in from the network, and
+		//then make the game backtrack and recompute recent gameplay so that the game reflects all the players'
+		//orders.
 		ArrayList<Order> temp_exec = new ArrayList<Order>();
 		long min_time_exec = time_elapsed;
 		for(Order o: pending_execution)
@@ -904,19 +912,11 @@ public class GameControl
 			
 			synchronized(sys.missile_lock)
 			{
-				HashSet<Missile> destroy_m = new HashSet<Missile>();
-				Set<Integer> keys = sys.missiles.keySet();
-				for(Integer k : keys)
+				for(int i=0; i<sys.missiles.size(); i++)
 				{
-					Missile m = sys.missiles.get(k);
-					boolean destroy = m.move(time_elapsed);
-					if(destroy)
-						destroy_m.add(m);
-				}
-				
-				for(Missile m : destroy_m)
-				{
-					m.detonate();
+					Missile m = sys.missiles.get(i);
+					if(m.move(time_elapsed)) //move returns true if the missile detonates
+						i--;
 				}
 			}
 		}

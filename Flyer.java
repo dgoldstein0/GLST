@@ -9,7 +9,7 @@ public abstract class Flyer extends Targetter implements Targetable
 	GSystem location;
 	String name;
 	
-	HashSet<Targetter> aggressors;
+	HashSet<Targetter> aggressors; //all the ships/ missiles targetting this
 	
 	Destination destination;
 	//save in case SystemPainter wants to paint crosshairs
@@ -70,12 +70,6 @@ public abstract class Flyer extends Targetter implements Targetable
 		}
 		else
 		{
-		/*	for (int i=0; i<stepback; i++)
-			{
-				index--;
-				if (index<0)
-					index=data_capacity-1;
-			}*/
 			if (stepback<=index)
 				index-=stepback;
 			else
@@ -90,7 +84,7 @@ public abstract class Flyer extends Targetter implements Targetable
 			time=ship_data[index].t;
 			speed=ship_data[index].sp;
 		}
-		else System.out.println("Error loading ship data: data wasn't saved");	//BOOKMARK
+		else System.out.println("Error loading ship data: data wasn't saved");	//BOOKMARK - we need a different way to detect this.  Or is this error even possible?
 	}
 	
 	private int saveindex;
@@ -106,7 +100,7 @@ public abstract class Flyer extends Targetter implements Targetable
 	{
 		while(time < t)
 			moveIncrement();
-		return true;
+		return false;
 	}
 	
 	//moves the ship one time_granularity.  this is a separate function so that all ships updates can be stepped through 1 by 1.
@@ -249,4 +243,8 @@ public abstract class Flyer extends Targetter implements Targetable
 	public void setDirection(double d){direction=d;}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
+	public int getDamage(){return damage;}
+	public void setDamage(int d){damage=d;}
+	public int getHull_strength(){return hull_strength;}
+	public void setHull_strength(int hs){hull_strength=hs;}
 }

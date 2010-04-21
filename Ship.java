@@ -52,7 +52,7 @@ public class Ship extends Flyer implements Selectable
 		time = (long)(Math.ceil((double)(t)/(double)(time_granularity))*time_granularity);
 		dest_x_coord = d.getXCoord(time-time_granularity);
 		dest_y_coord = d.getYCoord(time-time_granularity);
-		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE);
+		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, true);
 		//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 	}
 	
@@ -72,16 +72,18 @@ public class Ship extends Flyer implements Selectable
 		target.addAggressor(this);
 		nextAttackingtime = (long)(Math.ceil((double)(t)/(double)(time_granularity))*time_granularity);
 		nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
+		
+		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.Attacking_Range-5, true);
 	}
 	
 	public void attack(long t)
 	{
-		if ((Math.pow(destinationX() - pos_x, 2)+Math.pow(destinationY() - pos_y, 2)<GalacticStrategyConstants.Attacking_Range)&&(nextAttackingtime<=t))
+		if ((Math.pow(destinationX() - pos_x, 2)+Math.pow(destinationY() - pos_y, 2)<GalacticStrategyConstants.Attacking_Range_Sq)&&(nextAttackingtime<=t))
 		{
-			Missile m=new Missile(this, target, t, location.missile_count); 
+			Missile m=new Missile(this, target, t); 
 			synchronized(location.missile_lock)
 			{
-				location.missiles.put(location.missile_count++, m);
+				location.missiles.add(m);
 			}
 			nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
 		}
@@ -124,10 +126,6 @@ public class Ship extends Flyer implements Selectable
 	public void setEnergy(int f){energy=f;}
 	public int getMax_energy(){return max_energy;}
 	public void setMax_energy(int mf){max_energy=mf;}
-	public int getHull_strength(){return hull_strength;}
-	public void setHull_strength(int hs){hull_strength=hs;}
-	public int getDamage(){return damage;}
-	public void setDamage(int d){damage=d;}
 	public Player getOwner() {return owner;}
 	public float getSoldier() {return soldier;}
 	public void setId(int i){id=i;}

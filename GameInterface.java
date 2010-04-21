@@ -688,7 +688,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			}
 		}
 		
-		ShipPanel.the_ship.destination = dest;
+		ShipPanel.the_ship.orderToMove(GameInterface.GC.TC.getTime(), dest);
 		ShipPanel.updateDestDisplay();
 		
 		if(dest instanceof Ship)

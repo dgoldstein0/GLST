@@ -134,10 +134,9 @@ public class SystemPainter extends JPanel
 			
 			synchronized(system.missile_lock)
 			{
-				Set<Integer> keys = system.missiles.keySet();
-				for(Integer k : keys)
+				for(Missile m : system.missiles)
 				{
-					drawFlyer(g2,(Flyer)system.missiles.get(k),null);
+					drawFlyer(g2,(Flyer)m,null);
 				}
 			}
 			

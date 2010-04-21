@@ -26,8 +26,8 @@ public class Orbit
 	double b;
 	double c;
 	
-	Positioning boss;
-	Satellite obj;
+	Positioning boss; //the object that is the other focus of this orbit
+	Satellite obj; //the object using this orbit
 	
 	public Orbit(Satellite theobj, Positioning boss_obj, double focus2_x, double focus2_y, double init_x, double init_y, int dir)
 	{
@@ -37,7 +37,7 @@ public class Orbit
 		direction=dir;
 		this.init_x=init_x-boss.absoluteCurX();
 		this.init_y=init_y-boss.absoluteCurY();
-		focus2 = new Focus(focus2_x-boss.absoluteCurX(),focus2_y=focus2_y-boss.absoluteCurY(),this);
+		focus2 = new Focus(focus2_x-boss.absoluteCurX(),focus2_y-boss.absoluteCurY(),this);
 		
 		cur_x=init_x-boss.absoluteCurX();
 		cur_y=init_y-boss.absoluteCurY();
@@ -50,19 +50,6 @@ public class Orbit
 		a = (Math.hypot(init_x, init_y)+Math.hypot(focus2.getX()-init_x, focus2.getY()-init_y))/2.0d;
 		
 		//Calculate period.  This depends on mass.
-
-		//*****reduced mass, which I tried before, neither seems to work here nor make sense (or is implemented wrong).  Thus this code has been commented out and replaced
-		/*HashSet<Double> mass_set=boss.getMassSet();
-		mass_set.add(obj.getMass());
-		
-		double mass_prod=1;
-		double inv_sum=0;
-		for(double mass : mass_set)
-		{
-			mass_prod *= mass;
-			inv_sum += 1/mass;
-		}
-		period=PERIOD_CONSTANT*Math.sqrt(Math.pow(2*a,3.0d)/(inv_sum*mass_prod));*/
 		
 		double mass_sum=boss.massSum() + obj.getMass();		
 		period=PERIOD_CONSTANT*Math.sqrt(Math.pow(2*a, 3.0d))/mass_sum;
@@ -135,7 +122,7 @@ public class Orbit
 		double cos_theta = Math.cos(theta2);
 		double sin_theta = Math.sin(theta2);
 		
-		double dtheta_dt = 2*Math.PI/(period*(1-c/a*cos_theta)); //the derivative of theta with respect to time
+		double dtheta_dt = 2*Math.PI/(period*(1-c/a*cos_theta)); //the derivative of theta with respect to time, obtained via implicit differentiation
 		double needs_rot_x = a*cos_theta;
 		double needs_rot_y = b*sin_theta;
 		double dneeds_rot_x_dt = -a*dtheta_dt*sin_theta; //the derivative of needs_rot_x with respect to time
@@ -162,8 +149,8 @@ public class Orbit
 		vel_x = dneeds_rot_x_dt*Math.cos(rot_angle) + dneeds_rot_y_dt*Math.sin(rot_angle);
 		vel_y = -dneeds_rot_x_dt*Math.sin(rot_angle) + dneeds_rot_y_dt*Math.cos(rot_angle);
 		
-		cur_x=needs_shift_x+focus2.getX()/2; //shift by focus2x/2?
-		cur_y=needs_shift_y+focus2.getY()/2; //shift by focus2y/2?
+		cur_x=needs_shift_x+focus2.getX()/2;
+		cur_y=needs_shift_y+focus2.getY()/2;
 	}
 	
 	//methods required for save/load

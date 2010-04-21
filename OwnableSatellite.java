@@ -97,7 +97,7 @@ public abstract class OwnableSatellite extends Satellite
 				facilities.add(new_fac);
 				
 				//notify interface
-				if(GI.SatellitePanel.the_sat == new_fac.location)
+				if(GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP && GI.SatellitePanel.the_sat == new_fac.location)
 				{
 					GI.SatellitePanel.displayFacility(new_fac);
 				}

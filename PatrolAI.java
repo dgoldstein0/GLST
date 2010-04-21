@@ -38,7 +38,7 @@ public class PatrolAI extends FlyerAI
 		patrol_start_x = radial_x*radius/Math.hypot(radial_x, radial_y) + x;
 		patrol_start_y = radial_y*radius/Math.hypot(radial_x, radial_y) + y;
 		
-		tracker = new TrackingAI(f);
+		tracker = new TrackingAI(f, 5.0d);
 		f.destination = new DestinationPoint(patrol_start_x, patrol_start_y);
 		
 		patrol_start_ang = Math.atan2(radial_x,-radial_y)*dir; //using (-y,x) is the same as rotating 90 degrees clockwise

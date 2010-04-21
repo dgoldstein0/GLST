@@ -1,12 +1,10 @@
 public class Missile extends Flyer
 {
-	private final double Collide_Range=5.0;
-	int id;
-	
-	public Missile(Ship s, Targetable t, long time, int i)
+	private final double Collide_Range=10.0;
+
+	public Missile(Ship s, Targetable t, long time)
 	{
 		target = t;
-		id = i;
 
 		SetUpFlyer("", GalacticStrategyConstants.sTypes[GalacticStrategyConstants.MISSILE]);
 		
@@ -14,7 +12,7 @@ public class Missile extends Flyer
 		pos_x = s.getPos_x();
 		pos_y = s.getPos_y();
 		direction = s.getDirection();
-		speed = s.getSpeed();
+		speed = s.getSpeed() + GalacticStrategyConstants.INITIAL_MISSILE_SPEED;
 		location = s.location;
 		
 		destination=t;
@@ -22,13 +20,13 @@ public class Missile extends Flyer
 		time = (long)(Math.ceil((double)(time)/(double)(time_granularity))*time_granularity);
 		dest_x_coord = destination.getXCoord(time-time_granularity);
 		dest_y_coord = destination.getYCoord(time-time_granularity);
-		current_flying_AI = new TrackingAI(this, 1.0);
+		current_flying_AI = new TrackingAI(this, 0.0, false);
 		
 		this.time=time;
 		saveData();
 	}
 	
-	
+	//returns true when the missile detonates, false otherwise
 	public boolean move(long t)
 	{
 		boolean c=false;
@@ -38,12 +36,17 @@ public class Missile extends Flyer
 			if (!c)
 				moveIncrement();
 			else
+			{
+				detonate();
 				return true;
-				
+			}
 		}
 		c=collidedWithTarget();
 		if (c)
+		{
+			detonate();
 			return true;
+		}
 		else
 			return false;
 	}
@@ -65,7 +68,7 @@ public class Missile extends Flyer
 	{
 		synchronized(location.missile_lock)
 		{
-			location.missiles.remove(id);
+			location.missiles.remove(this);
 		}
 	}
 	
