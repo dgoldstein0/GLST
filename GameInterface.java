@@ -761,7 +761,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	{
 		if(isSystemDisplayed())
 		{
-			sys_scale -= ((double)e.getWheelRotation())*GalacticStrategyConstants.SCROLL_SENSITIVITY;
+			sys_scale *= 1.0-((double)e.getWheelRotation())*GalacticStrategyConstants.SCROLL_SENSITIVITY;
 			if(sys_scale < GalacticStrategyConstants.MIN_SCALE)
 				sys_scale = GalacticStrategyConstants.MIN_SCALE;
 			else if(sys_scale > GalacticStrategyConstants.MAX_SCALE)

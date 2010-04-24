@@ -50,9 +50,12 @@ public class Ship extends Flyer implements Selectable
 	{
 		destination = d;
 		time = (long)(Math.ceil((double)(t)/(double)(time_granularity))*time_granularity);
+		System.out.println("t is " + Long.toString(t) + " and time is " + Long.toString(time));
 		dest_x_coord = d.getXCoord(time-time_granularity);
 		dest_y_coord = d.getYCoord(time-time_granularity);
 		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, true);
+		
+		attacking = false;
 		//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 	}
 	
@@ -78,7 +81,9 @@ public class Ship extends Flyer implements Selectable
 	
 	public void attack(long t)
 	{
-		if ((Math.pow(destinationX() - pos_x, 2)+Math.pow(destinationY() - pos_y, 2)<GalacticStrategyConstants.Attacking_Range_Sq)&&(nextAttackingtime<=t))
+		double dx = destinationX() - pos_x;
+		double dy = destinationY() - pos_y;
+		if ((dx*dx+dy*dy<GalacticStrategyConstants.Attacking_Range*GalacticStrategyConstants.Attacking_Range)&&(nextAttackingtime<=t))
 		{
 			Missile m=new Missile(this, target, t); 
 			synchronized(location.missile_lock)

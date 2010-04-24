@@ -73,9 +73,9 @@ public abstract class Flyer extends Targetter implements Targetable
 			if (stepback<=index)
 				index-=stepback;
 			else
-				index=data_capacity-(stepback-index);			
+				index+=data_capacity-stepback;			
 		}
-		System.out.println(Integer.toString(index)+" "+Integer.toString(stepback));
+		//System.out.println(Integer.toString(index)+" "+Integer.toString(stepback));
 		if (ship_data[index]!=null)
 		{
 			direction=ship_data[index].dir;
@@ -162,11 +162,11 @@ public abstract class Flyer extends Targetter implements Targetable
 	//methods to implement destination
 	public String imageLoc(){return type.getImg_loc();}
 	
-	long dest_coords_time=0; //there cannot be a call to getXCoord or getYCoord with t=0, since ships do not exist then, and if they do will not be targetting other ships
-	double dest_pos_x;
-	double dest_pos_y;
-	double dest_vel_x;
-	double dest_vel_y;
+	private long dest_coords_time=0; //there cannot be a call to getXCoord or getYCoord with t=0, since ships do not exist then, and if they do will not be targetting other ships
+	private double dest_pos_x;
+	private double dest_pos_y;
+	private double dest_vel_x;
+	private double dest_vel_y;
 	
 	public double getXCoord(long t)
 	{
