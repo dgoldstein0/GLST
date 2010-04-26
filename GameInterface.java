@@ -687,13 +687,14 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				}
 			}
 		}
+		Long cur_time = GameInterface.GC.TC.getTime();
 		
-		ShipPanel.the_ship.orderToMove(GameInterface.GC.TC.getTime(), dest);
+		ShipPanel.the_ship.orderToMove(cur_time, dest);
 		ShipPanel.updateDestDisplay();
 		
 		if(dest instanceof Ship)
 		{			
-			ShipPanel.the_ship.orderToAttack(GameInterface.GC.TC.getTime(),(Targetable)dest);
+			ShipPanel.the_ship.orderToAttack(cur_time,(Targetable)dest);
 		}
 	}
 	

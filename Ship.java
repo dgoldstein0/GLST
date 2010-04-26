@@ -37,20 +37,20 @@ public class Ship extends Flyer implements Selectable
 		double vel_y=builder.location.orbit.getAbsVelY();
 		direction = Math.atan2(vel_y, vel_x);
 		speed = Math.hypot(vel_x, vel_y);
-		saveData();
+		
 		if(builder.location instanceof Planet)
 			location = (GSystem)builder.location.orbit.boss;
 		else //builder.location is a Moon
 			location = (GSystem) ((Planet)builder.location.orbit.boss).orbit.boss;
 		location.fleets[owner.getId()].add(this);
-		orderToMove(t, builder.location); //this call does not go via the game Event handling system.  all computers should issue these orders on their own.
+		orderToMove(t, builder.location); //this call does not go via the game Order handling system.  all computers should issue these orders on their own.
 	}
 	
 	public void orderToMove(long t, Destination d)
 	{
 		destination = d;
-		time = (long)(Math.ceil((double)(t)/(double)(time_granularity))*time_granularity);
-		System.out.println("t is " + Long.toString(t) + " and time is " + Long.toString(time));
+		advanceTime(t);
+		//System.out.println(Integer.toString(id) + " orderToMove: t is " + Long.toString(t) + " and time is " + Long.toString(time));
 		dest_x_coord = d.getXCoord(time-time_granularity);
 		dest_y_coord = d.getYCoord(time-time_granularity);
 		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, true);
@@ -59,21 +59,34 @@ public class Ship extends Flyer implements Selectable
 		//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 	}
 	
-	public void update(long t)
+	//updates the ship to time t - moving and attacking.  return value is ignored
+	public boolean update(long t)
 	{
-		move(t);		
-		if(attacking)
+		while(time < t)
 		{
-			attack(t);
+			moveIncrement();		
+			if(attacking)
+			{
+				attack(t);
+			}
+			time += time_granularity;
+		
+			//save data
+			saveData();
 		}
+		return false;
 	}
 	
 	public void orderToAttack(long t, Targetable tgt)
 	{
+		//System.out.println(Integer.toString(id) + "orderToAttack: t is " + Long.toString(t));
+		
 		target= tgt;
+		destination = tgt;
 		attacking=true;
 		target.addAggressor(this);
-		nextAttackingtime = (long)(Math.ceil((double)(t)/(double)(time_granularity))*time_granularity);
+		advanceTime(t);
+		nextAttackingtime = time;
 		nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
 		
 		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.Attacking_Range-5, true);
@@ -85,7 +98,7 @@ public class Ship extends Flyer implements Selectable
 		double dy = destinationY() - pos_y;
 		if ((dx*dx+dy*dy<GalacticStrategyConstants.Attacking_Range*GalacticStrategyConstants.Attacking_Range)&&(nextAttackingtime<=t))
 		{
-			Missile m=new Missile(this, target, t); 
+			Missile m=new Missile(this, target, time+time_granularity); 
 			synchronized(location.missile_lock)
 			{
 				location.missiles.add(m);
@@ -102,7 +115,7 @@ public class Ship extends Flyer implements Selectable
 		{
 			//notify aggressors
 			for(Targetter t : aggressors)
-				t.targetIsDestroyed();
+				t.targetIsDestroyed(time);
 			
 			//notify interface
 			if(this == GameInterface.GC.GI.ShipPanel.the_ship)
@@ -114,12 +127,12 @@ public class Ship extends Flyer implements Selectable
 		}
 	}
 	
-	public void targetIsDestroyed()
+	public void targetIsDestroyed(long t)
 	{
 		attacking=false;
 		if (destination==target)
 		{
-			destination=new DestinationPoint(target.getXCoord(time),target.getYCoord(time));
+			destination=new DestinationPoint(target.getXCoord(t),target.getYCoord(t));
 		}
 	}
 	

@@ -847,7 +847,7 @@ public class GameControl
 	public void updateGame()
 	{
 		long time_elapsed=TC.getTime();
-		//System.out.println(Long.toString(time_elapsed));
+		//System.out.println("Updating to time_elapsed=" + Long.toString(time_elapsed));
 		//start events that need to occur before time_elapsed
 		
 		//THIS IS NOT FINISHED!  this block here is supposed to take data read in from the network, and
@@ -915,7 +915,7 @@ public class GameControl
 				for(int i=0; i<sys.missiles.size(); i++)
 				{
 					Missile m = sys.missiles.get(i);
-					if(m.move(time_elapsed)) //move returns true if the missile detonates
+					if(m.update(time_elapsed)) //move returns true if the missile detonates
 						i--;
 				}
 			}

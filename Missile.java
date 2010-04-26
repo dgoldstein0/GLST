@@ -27,14 +27,18 @@ public class Missile extends Flyer
 	}
 	
 	//returns true when the missile detonates, false otherwise
-	public boolean move(long t)
+	public boolean update(long t)
 	{
 		boolean c=false;
 		while (time < t)
 		{
 			c=collidedWithTarget();
 			if (!c)
+			{
 				moveIncrement();
+				time += time_granularity;
+				saveData();
+			}
 			else
 			{
 				detonate();
@@ -72,7 +76,7 @@ public class Missile extends Flyer
 		}
 	}
 	
-	public void targetIsDestroyed()
+	public void targetIsDestroyed(long t)
 	{
 		destroyed();
 	}

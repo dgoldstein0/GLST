@@ -24,7 +24,7 @@ public abstract class Flyer extends Targetter implements Targetable
 	double pos_y;
 	double direction;
 	double speed;
-	long time;
+	protected long time;
 	FlyerAI current_flying_AI;
 	
 	ShipDataSaver ship_data[];
@@ -45,9 +45,20 @@ public abstract class Flyer extends Targetter implements Targetable
 		index=0;
 	}
 	
+	protected void advanceTime(long t)
+	{
+		long prev_time = time;
+		time = (long)(Math.ceil((double)(t)/(double)(time_granularity))*time_granularity);
+		if(time != prev_time)//otherwise, data already got saved 
+			saveData();
+	}
+	
 	//loading and saving data functions
 	public void saveData()
 	{
+		//if(this instanceof Ship)
+		//	System.out.println(Integer.toString(((Ship)this).id) + " saving time " + Long.toString(time) + " at index " + Integer.toString(index));
+		
 		ship_data[index].dir=direction;
 		ship_data[index].px=pos_x;
 		ship_data[index].py=pos_y;
@@ -96,15 +107,10 @@ public abstract class Flyer extends Targetter implements Targetable
 	
 	//ship physics functions
 	
-	public boolean move(long t)
-	{
-		while(time < t)
-			moveIncrement();
-		return false;
-	}
+	public abstract boolean update(long t);
 	
 	//moves the ship one time_granularity.  this is a separate function so that all ships updates can be stepped through 1 by 1.
-	public void moveIncrement()
+	protected void moveIncrement()
 	{
 		//change position
 		pos_x += speed*time_granularity*Math.cos(direction);
@@ -130,11 +136,6 @@ public abstract class Flyer extends Targetter implements Targetable
 			direction -= 2*Math.PI;
 		else if(direction<-Math.PI)
 			direction += 2*Math.PI;
-			
-		time += time_granularity;
-		
-		//save data
-		saveData();
 	}
 	
 	public double destinationX()
@@ -205,7 +206,7 @@ public abstract class Flyer extends Targetter implements Targetable
 		double temp_speed = speed;
 		
 		loadData(t);
-		//System.out.println("time is " + Long.toString(time) + " and t is " + Long.toString(t));
+		//System.out.println("TIME is " + Long.toString(time) + " and t is " + Long.toString(t));
 		dest_pos_x = pos_x;
 		dest_pos_y = pos_y;
 		dest_vel_x = speed*Math.cos(direction);
