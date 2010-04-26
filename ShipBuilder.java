@@ -32,7 +32,6 @@ public class ShipBuilder implements MouseListener
 				if(!e.isShiftDown())
 				{
 					panel.build_ship.setEnabled(true);
-					panel.cancel_build_ship.setEnabled(false);
 					panel.displayQueue();
 				}
 			}

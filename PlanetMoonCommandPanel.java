@@ -23,8 +23,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	
 	Shipyard the_shipyard;
 	JButton build_ship;
-	JButton cancel_build_ship; //this button allows the user to go from the selection of a ship to build back to the view of the queue without building a ship or unselecting the planet/moon
-	JButton back_to_facilities;
+	JButton cancel_build_ship; //this button allows the user to go from the selection of a ship to build back to the view of the queue without building a ship or unselecting the planet/moon.  It also serves to go from the view of the shipyard to the view of the facilities
 	
 	//for facility-building progress
 	JProgressBar progress_bar;
@@ -316,13 +315,10 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 		build_ship.addActionListener(this);
 		button_panel.add(build_ship);
 		
-		cancel_build_ship = new JButton("Cancel");
+		cancel_build_ship = new JButton("Back");
 		cancel_build_ship.addActionListener(this);
 		button_panel.add(cancel_build_ship);
 		
-		back_to_facilities = new JButton("Back");
-		back_to_facilities.addActionListener(this);
-		button_panel.add(back_to_facilities);
 		
 		//put the attributs and buttons into one panel side by side
 		JPanel attr_and_buttons = new JPanel();
@@ -344,9 +340,6 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 		
 		//show queue
 		displayQueue();
-		
-		//by default, nothing to cancel.
-		cancel_build_ship.setEnabled(false);
 		
 		JProgressBar manufac_bar = new JProgressBar(0,100);
 		manufac_bar.setStringPainted(true);
@@ -472,23 +465,20 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 			build.setEnabled(true);
 			cancel.setEnabled(false);
 		}
-		else if(e.getSource() == back_to_facilities)
-		{
-			setSat(the_sat);
-		}
 		else if(e.getSource() == build_ship)
 		{
 			build_ship.setEnabled(false);
-			cancel_build_ship.setEnabled(true);
-			
 			displayShipTypes();
 		}
 		else if(e.getSource() == cancel_build_ship)
 		{
-			build_ship.setEnabled(true);
-			cancel_build_ship.setEnabled(false);
-			
-			displayQueue();
+			if(state == SHIP_CHOICES_DISPLAYED)
+			{
+				build_ship.setEnabled(true);
+				displayQueue();
+			}
+			else
+				setSat(the_sat);
 		}
 	}
 	

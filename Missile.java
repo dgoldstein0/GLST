@@ -20,7 +20,7 @@ public class Missile extends Flyer
 		time = (long)(Math.ceil((double)(time)/(double)(time_granularity))*time_granularity);
 		dest_x_coord = destination.getXCoord(time-time_granularity);
 		dest_y_coord = destination.getYCoord(time-time_granularity);
-		current_flying_AI = new TrackingAI(this, 0.0, false);
+		current_flying_AI = new TrackingAI(this, 0.0, TrackingAI.NO_SLOWDOWN);
 		
 		this.time=time;
 		saveData();

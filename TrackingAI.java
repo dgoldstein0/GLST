@@ -1,19 +1,22 @@
 public class TrackingAI extends FlyerAI
 {
 	double dest_tolerance; //how close we should be to destination before match speed by default
-	boolean match_speed; //if the AI should try to match the speed of its destination or not
+	int in_range_behavior; //if the AI should try to match the speed of its destination or not
+		static final int NO_SLOWDOWN = 0;
+		static final int MATCH_SPEED=1;
+		static final int STOP=2;
 	
 	/*f is a reference to the Flyer (ship or missile) using this AI to direct is flight
 	tol is the distance at which the Flyer is "close enough" to its destination and should just match its speed
 	ms is whether the Flyer should try to match its destination's speed or not*/
-		//for following an object closely, like a planet, use low tol and ms=true
+		//for following an object closely, like a planet, use low tol and ms=MATCH_SPEED
 		//for attacking / following at a distance, use high tol and ms=true
-		//missiles use ms=false, so they don't try to match their target's manuevers but rather will plow right into their targets
-	public TrackingAI(Flyer f, double tol, boolean ms)
+		//missiles use ms=NO_SLOWDOWN, so they don't try to match their target's manuevers but rather will plow right into their targets
+	public TrackingAI(Flyer f, double tol, int ms)
 	{
 		the_flyer = f;
 		dest_tolerance = tol;
-		match_speed = ms;
+		in_range_behavior = ms;
 	}
 	
 	/*returns the angle through which the ship must rotate to be directly facing its destination*/
@@ -47,13 +50,19 @@ public class TrackingAI extends FlyerAI
 		//The "if" here asks: should the Flyer should try to slow down to stop/match speed of destination AND...
 			//is the flyer close enough to its destination that we can say it is there already? OR
 			//(heuristic) is the time needed to match speed greater than time to arrival if travelling at constant speed (same as v^2 > a*d if the destination is not moving) 
-		if(match_speed && 
-			(Math.hypot(the_flyer.pos_x - the_flyer.destinationX(),the_flyer.pos_y - the_flyer.destinationY()) < dest_tolerance
+		if(in_range_behavior != NO_SLOWDOWN && (Math.hypot(the_flyer.pos_x - the_flyer.destinationX(),the_flyer.pos_y - the_flyer.destinationY()) < dest_tolerance
 			|| time_to_chng > time_to_dest))
 		{
-			return speed_to_match;
+			switch(in_range_behavior)
+			{
+				case MATCH_SPEED:
+					return speed_to_match;
+				case STOP:
+					return 0.0;
+			}
 		}
-		else if(desired_direction < Math.PI/2.0 && desired_direction > -Math.PI/2.0) //else if destination is forward
+		
+		if(desired_direction < Math.PI/2.0 && desired_direction > -Math.PI/2.0) //else if destination is forward
 		{
 			//go a portion of the max speed - cosines used to slow ship when it isn't going straight
 			return the_flyer.type.max_speed*Math.cos(desired_direction)*Math.cos(desired_direction);

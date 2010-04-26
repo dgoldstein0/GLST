@@ -53,7 +53,7 @@ public class Ship extends Flyer implements Selectable
 		//System.out.println(Integer.toString(id) + " orderToMove: t is " + Long.toString(t) + " and time is " + Long.toString(time));
 		dest_x_coord = d.getXCoord(time-time_granularity);
 		dest_y_coord = d.getYCoord(time-time_granularity);
-		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, true);
+		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
 		
 		attacking = false;
 		//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
@@ -89,7 +89,7 @@ public class Ship extends Flyer implements Selectable
 		nextAttackingtime = time;
 		nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
 		
-		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.Attacking_Range-5, true);
+		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.Attacking_Range-5, TrackingAI.STOP);
 	}
 	
 	public void attack(long t)
