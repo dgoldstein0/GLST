@@ -103,7 +103,7 @@ public class Ship extends Flyer implements Selectable
 			{
 				location.missiles.add(m);
 			}
-			nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
+			nextAttackingtime= time+GalacticStrategyConstants.Attacking_cooldown;
 		}
 	}
 	

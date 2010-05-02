@@ -112,7 +112,7 @@ public class GalacticStrategyConstants
 	//ship attacking range
 	static final double Attacking_Range_Sq=40000.0;
 	static final double Attacking_Range=200.0;
-	static final double Attacking_cooldown=1200;
+	static final long Attacking_cooldown=1200;
 	
 	//setup for ship types
 	final static int MISSILE = 0;
