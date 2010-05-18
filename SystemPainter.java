@@ -69,12 +69,12 @@ public class SystemPainter extends JPanel
 			}
 			
 			//draw orbiting objects
-			if(system.orbiting_objects instanceof ArrayList)
+			if(system.orbiting instanceof ArrayList)
 			{
 				g.setFont(g.getFont().deriveFont(Font.BOLD,12.0f));
 				FontMetrics m=g.getFontMetrics(g.getFont());
 				
-				for(Satellite orbiting : system.orbiting_objects)
+				for(Satellite orbiting : system.orbiting)
 				{
 					//draw object
 					drawOrbit(orbiting, g);
@@ -94,9 +94,9 @@ public class SystemPainter extends JPanel
 					}
 					
 					//draw objects orbiting planets					
-					if(orbiting instanceof Planet && ((Planet)orbiting).satellites instanceof ArrayList)
+					if(orbiting instanceof Planet && ((Planet)orbiting).orbiting instanceof ArrayList)
 					{
-						ArrayList<Satellite> planet_sats = ((Planet)orbiting).satellites;
+						ArrayList<Satellite> planet_sats = ((Planet)orbiting).orbiting;
 						for(Satellite sat : planet_sats)
 						{
 							drawOrbit(sat, g);
@@ -134,9 +134,9 @@ public class SystemPainter extends JPanel
 			
 			synchronized(system.missile_lock)
 			{
-				for(Missile m : system.missiles)
+				for(Integer i : system.missiles.keySet())
 				{
-					drawFlyer(g2,(Flyer)m,null);
+					drawFlyer(g2,(Flyer)system.missiles.get(i),null);
 				}
 			}
 			

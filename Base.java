@@ -7,11 +7,8 @@ public class Base extends Facility{
 	
 	public Base(OwnableSatellite l, long t)
 	{
-		location = l;
-		damage=0;
-		last_time = t;
+		super(l, t, GalacticStrategyConstants.initial_base_endu);
 		soldier=GalacticStrategyConstants.initial_soldier;
-		endurance=GalacticStrategyConstants.initial_base_endu;
 		max_soldier = GalacticStrategyConstants.default_max_soldier;
 	}
 	

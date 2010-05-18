@@ -38,7 +38,7 @@
          <void property="navigability"> 
           <int>10</int> 
          </void> 
-         <void property="orbiting_objects"> 
+         <void property="orbiting"> 
           <object class="java.util.ArrayList"> 
            <void method="add"> 
             <object idref="Planet0"/> 
@@ -107,7 +107,7 @@
              <void property="population"> 
               <long>100</long> 
              </void> 
-             <void property="satellites"> 
+             <void property="orbiting"> 
               <object class="java.util.ArrayList"/> 
              </void> 
              <void property="size"> 
@@ -179,7 +179,7 @@
              <void property="population"> 
               <long>100</long> 
              </void> 
-             <void property="satellites"> 
+             <void property="orbiting"> 
               <object class="java.util.ArrayList"> 
                <void method="add"> 
                 <object id="Moon0" class="Moon"> 
@@ -332,7 +332,7 @@
      <void property="population"> 
       <long>100</long> 
      </void> 
-     <void property="satellites"> 
+     <void property="orbiting"> 
       <object class="java.util.ArrayList"/> 
      </void> 
      <void property="size"> 
@@ -370,7 +370,7 @@
          <void property="navigability"> 
           <int>10</int> 
          </void> 
-         <void property="orbiting_objects"> 
+         <void property="orbiting"> 
           <object class="java.util.ArrayList"> 
            <void method="add"> 
             <object idref="Planet3"/> 
@@ -439,7 +439,7 @@
              <void property="population"> 
               <long>100</long> 
              </void> 
-             <void property="satellites"> 
+             <void property="orbiting"> 
               <object class="java.util.ArrayList"/> 
              </void> 
              <void property="size"> 
@@ -511,7 +511,7 @@
              <void property="population"> 
               <long>100</long> 
              </void> 
-             <void property="satellites"> 
+             <void property="orbiting"> 
               <object class="java.util.ArrayList"/> 
              </void> 
              <void property="size"> 
@@ -603,7 +603,7 @@
      <void property="population"> 
       <long>100</long> 
      </void> 
-     <void property="satellites"> 
+     <void property="orbiting"> 
       <object class="java.util.ArrayList"/> 
      </void> 
      <void property="size"> 

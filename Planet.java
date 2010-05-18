@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Planet extends OwnableSatellite
 {
-	ArrayList<Satellite> satellites;
+	ArrayList<Satellite> orbiting;
 	
 	public Planet(int i, String nm, double init_pop, double pop_cap, int sz, double m, double growth_rate)
 	{
@@ -18,13 +18,13 @@ public class Planet extends OwnableSatellite
 		size=sz;
 		mass=m;
 		
-		satellites=new ArrayList<Satellite>();
-		facilities=new ArrayList<Facility>();
+		orbiting=new ArrayList<Satellite>();
+		facilities=new Hashtable<Integer, Facility>();
 	}
 	
 	//methods required for load/save
 	public Planet(){
-		facilities = new ArrayList<Facility>();
+		super();
 		initial_pop = 100;
 		pop_capacity = 10000;
 		pop_growth_rate = .000005;
@@ -40,6 +40,6 @@ public class Planet extends OwnableSatellite
 	
 	public String imageLoc(){return "images/planet.jpg";}
 	
-	public ArrayList<Satellite> getSatellites(){return satellites;}
-	public void setSatellites(ArrayList<Satellite> sat){satellites=sat;}
+	public ArrayList<Satellite> getOrbiting(){return orbiting;}
+	public void setOrbiting(ArrayList<Satellite> o){orbiting=o;}
 }

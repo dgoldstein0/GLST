@@ -3,7 +3,6 @@ import java.util.HashSet;
 public class Ship extends Flyer implements Selectable
 {
 	Player owner;
-	int id;
 	
 	int energy;
 	int max_energy;
@@ -14,13 +13,15 @@ public class Ship extends Flyer implements Selectable
 	
 	public Ship(String nm, ShipType t, int id)
 	{
+		super(nm,t);
 		this.id=id;
 		energy = t.max_energy;
 		max_energy = energy;
 		soldier=t.soldier_capacity;//assume ships are fully loaded when built
 		nextAttackingtime=0;
-		SetUpFlyer(nm, t);
 	}
+	
+	public DestDescriber describer(){return new ShipDescriber(owner, this);}
 	
 	public void assemble(Shipyard builder, long t)
 	{
@@ -46,35 +47,38 @@ public class Ship extends Flyer implements Selectable
 		orderToMove(t, builder.location); //this call does not go via the game Order handling system.  all computers should issue these orders on their own.
 	}
 	
+	//updates the ship an increment towards time t - moving and attacking.  return value is ignored
+	public boolean update(long t)
+	{
+		/*this if statement is necessary incase game is updated too slow.  For instance, update last to 60, then
+		an order is given which advances the ship to 80., but the next time all are updated to is 100, we want the
+		ship ordered to move to only be updated once and not twice*/
+		if(time <= t)
+		{
+			moveIncrement();
+			if(attacking)
+			{
+				attack(time);
+			}
+			time += GalacticStrategyConstants.TIME_GRANULARITY;
+			
+			//save data
+			saveData();
+		}
+		return false;
+	}
+	
 	public void orderToMove(long t, Destination d)
 	{
 		destination = d;
 		advanceTime(t);
 		//System.out.println(Integer.toString(id) + " orderToMove: t is " + Long.toString(t) + " and time is " + Long.toString(time));
-		dest_x_coord = d.getXCoord(time-time_granularity);
-		dest_y_coord = d.getYCoord(time-time_granularity);
+		dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+		dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
 		
 		attacking = false;
 		//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
-	}
-	
-	//updates the ship to time t - moving and attacking.  return value is ignored
-	public boolean update(long t)
-	{
-		while(time < t)
-		{
-			moveIncrement();		
-			if(attacking)
-			{
-				attack(t);
-			}
-			time += time_granularity;
-		
-			//save data
-			saveData();
-		}
-		return false;
 	}
 	
 	public void orderToAttack(long t, Targetable tgt)
@@ -98,10 +102,10 @@ public class Ship extends Flyer implements Selectable
 		double dy = destinationY() - pos_y;
 		if ((dx*dx+dy*dy<GalacticStrategyConstants.Attacking_Range*GalacticStrategyConstants.Attacking_Range)&&(nextAttackingtime<=t))
 		{
-			Missile m=new Missile(this, target, time+time_granularity); 
+			Missile m=new Missile(this, target, time+GalacticStrategyConstants.TIME_GRANULARITY); 
 			synchronized(location.missile_lock)
 			{
-				location.missiles.add(m);
+				location.missiles.put(m.id,m);
 			}
 			nextAttackingtime= time+GalacticStrategyConstants.Attacking_cooldown;
 		}

@@ -3,11 +3,11 @@ import java.util.HashSet;
 public abstract class Flyer extends Targetter implements Targetable
 {
 	final static int data_capacity=50;
-	final static long time_granularity = 20;
 	
 	ShipType type;
 	GSystem location;
 	String name;
+	int id;
 	
 	HashSet<Targetter> aggressors; //all the ships/ missiles targetting this
 	
@@ -30,7 +30,7 @@ public abstract class Flyer extends Targetter implements Targetable
 	ShipDataSaver ship_data[];
 	int index;  //for the data array
 	
-	public void SetUpFlyer(String nm, ShipType st)
+	public Flyer(String nm, ShipType st)
 	{
 		name=nm;
 		type=st;
@@ -45,10 +45,12 @@ public abstract class Flyer extends Targetter implements Targetable
 		index=0;
 	}
 	
+	public Flyer(){}
+	
 	protected void advanceTime(long t)
 	{
 		long prev_time = time;
-		time = (long)(Math.ceil((double)(t)/(double)(time_granularity))*time_granularity);
+		time = (long)(Math.ceil((double)(t)/(double)(GalacticStrategyConstants.TIME_GRANULARITY))*GalacticStrategyConstants.TIME_GRANULARITY);
 		if(time != prev_time)//otherwise, data already got saved 
 			saveData();
 	}
@@ -73,7 +75,7 @@ public abstract class Flyer extends Targetter implements Targetable
 	public void loadData(long t)
 	{
 		saveindex = index;
-		int stepback=(int) (Math.floor((time-t)/time_granularity) + 1);
+		int stepback=(int) (Math.floor((time-t)/GalacticStrategyConstants.TIME_GRANULARITY) + 1);
 		//System.out.println("load data: t is " + Long.toString(t) + " and time is " + Long.toString(time) + ", so step back... " + Integer.toString(stepback));
 		if (stepback>50)
 		{
@@ -107,27 +109,25 @@ public abstract class Flyer extends Targetter implements Targetable
 	
 	//ship physics functions
 	
-	public abstract boolean update(long t);
-	
 	//moves the ship one time_granularity.  this is a separate function so that all ships updates can be stepped through 1 by 1.
 	protected void moveIncrement()
 	{
 		//change position
-		pos_x += speed*time_granularity*Math.cos(direction);
-		pos_y += speed*time_granularity*Math.sin(direction);
+		pos_x += speed*GalacticStrategyConstants.TIME_GRANULARITY*Math.cos(direction);
+		pos_y += speed*GalacticStrategyConstants.TIME_GRANULARITY*Math.sin(direction);
 		
-		double desired_direction = current_flying_AI.calcDesiredDirection();
-		double desired_speed = current_flying_AI.calcDesiredSpeed(desired_direction);
+		double desired_direction_chng = current_flying_AI.calcDesiredDirection();
+		double desired_speed = current_flying_AI.calcDesiredSpeed(desired_direction_chng);
 		
 		//change speed
 		if(desired_speed < speed)
-			speed = Math.max(Math.max(speed - type.accel_rate*time_granularity, desired_speed), 0.0d);
+			speed = Math.max(Math.max(speed - type.accel_rate*GalacticStrategyConstants.TIME_GRANULARITY, desired_speed), 0.0d);
 		else
-			speed = Math.min(Math.min(speed + type.accel_rate*time_granularity, desired_speed), type.max_speed);
+			speed = Math.min(Math.min(speed + type.accel_rate*GalacticStrategyConstants.TIME_GRANULARITY, desired_speed), type.max_speed);
 		
 		//change direction
-		double actual_chng = Math.min(Math.abs(desired_direction), Math.abs(type.max_angular_vel*time_granularity)); //finds the absolute value of the amount the direction changes
-		if(desired_direction > 0)
+		double actual_chng = Math.min(Math.abs(desired_direction_chng), Math.abs(type.max_angular_vel*GalacticStrategyConstants.TIME_GRANULARITY)); //finds the absolute value of the amount the direction changes
+		if(desired_direction_chng > 0)
 			direction += actual_chng;
 		else
 			direction -= actual_chng;
@@ -224,6 +224,7 @@ public abstract class Flyer extends Targetter implements Targetable
 	//for Targetable
 	public HashSet<Targetter> getAggressors(){return aggressors;}
 	public void addAggressor(Targetter t){aggressors.add(t);}
+	public void removeAggressor(Targetter t){aggressors.remove(t);}
 	
 	public void addDamage(int d)
 	{
@@ -248,4 +249,6 @@ public abstract class Flyer extends Targetter implements Targetable
 	public void setDamage(int d){damage=d;}
 	public int getHull_strength(){return hull_strength;}
 	public void setHull_strength(int hs){hull_strength=hs;}
+	public int getId(){return id;}
+	public void setId(int i){id=i;}
 }

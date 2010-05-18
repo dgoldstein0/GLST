@@ -13,13 +13,10 @@ public class Shipyard extends Facility{
 	
 	long time_on_current_ship;
 	
-	public Shipyard(OwnableSatellite loc, long t) {		
+	public Shipyard(OwnableSatellite loc, long t) {
+		super(loc, t, GalacticStrategyConstants.initial_shipyard_endu);
 		manufac_queue=new ArrayList<Ship>(GalacticStrategyConstants.queue_capa);
-		location = loc;
-		damage=0;
-		endurance = GalacticStrategyConstants.initial_shipyard_endu;
 		time_on_current_ship = 0;
-		last_time = t;
 	}
 	
 	public boolean addToQueue(Ship ship, long t)

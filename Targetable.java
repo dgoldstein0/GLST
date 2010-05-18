@@ -6,4 +6,5 @@ public interface Targetable extends Destination
 	public abstract void destroyed();
 	public abstract HashSet<Targetter> getAggressors();
 	public abstract void addAggressor(Targetter t);
+	public abstract void removeAggressor(Targetter t);
 }

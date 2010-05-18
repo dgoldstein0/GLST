@@ -8,6 +8,9 @@ public class GalacticStrategyConstants
 	//For instance, GDFrame has DRAG_NONE, DRAG_DIST, and DRAG_RANGE, which tells the interface if ranges or distances should be drawn during drags.
 	//In particular, these values are for the different states of drag_options
 	
+	//time_granularity is the amount of time, in ms, between updates of the game.  Used as a time increment in ship physics.
+	final static long TIME_GRANULARITY = 20; //20ms -> 50 fps
+	
 	//******************************************PHYSICS TO PROGRAM CONVERSIONS*******************************************//
 	
 	//Used in orbit
@@ -131,8 +134,9 @@ public class GalacticStrategyConstants
 	final static int default_max_soldier=500;
 	final static float soldier_production_rate = .005f; //solders per millisecond.  corresponds to 5 soldiers per second
 	final static int initial_base_endu=500;
-	final static int initial_shipyard_endu = 200;
+	final static int initial_shipyard_endu = 250;
 	final static int initial_mine_endu = 150;
+	final static int initial_research_building_endu = 200;
 	final static int max_soldier_upgraderate=100;
 	final static int endu_upgraderate=100;
 	

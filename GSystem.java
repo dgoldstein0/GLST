@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class GSystem implements Positioning
+public class GSystem implements Orbitable
 {
 	final static int NO_OWNER= -2;
 	final static int OWNER_CONFLICTED = -1;
@@ -8,12 +8,13 @@ public class GSystem implements Positioning
 	//indicates which player is in control - from the current player's perspective
 	int owner_id; //-2 is none, -1 is conflicted, otherwise corresponds to player id's
 	int[] player_claims; //the elements of this array keep track of how many claims - planets or ships - each player owns in the system
+	int next_missile_id;
 	
-	ArrayList<Satellite> orbiting_objects;
+	ArrayList<Satellite> orbiting;
 	HashSet<Star> stars;
 	
 	Object missile_lock = new Object();
-	ArrayList<Missile> missiles;
+	Hashtable<Integer, Missile> missiles;
 	
 	Fleet[] fleets; //indices = player id's
 	String name;
@@ -36,15 +37,18 @@ public class GSystem implements Positioning
 	{
 		id=i;
 		name=nm;
-		orbiting_objects=orbiting;
+		this.orbiting=orbiting;
 		this.stars=stars;
 		this.x=x;
 		this.y=y;
 		navigability=nav;
 		fleets = new Fleet[GalacticStrategyConstants.MAX_PLAYERS];
-		missiles = new ArrayList<Missile>();
+		missiles = new Hashtable<Integer, Missile>();
 		owner_id = NO_OWNER;
+		next_missile_id=0;
 	}
+	
+	public DestDescriber describer(){return new GSystemDescriber(this);}
 	
 	public void setUpForGame(GameControl GC)
 	{
@@ -107,11 +111,11 @@ public class GSystem implements Positioning
 	public GSystem()
 	{
 		owner_id = NO_OWNER;
-		missiles = new ArrayList<Missile>();
+		missiles = new Hashtable<Integer, Missile>();
 	}
 	
-	public ArrayList<Satellite> getorbiting_objects(){return orbiting_objects;}
-	public void setOrbiting_objects(ArrayList<Satellite> s){orbiting_objects=s;}
+	public ArrayList<Satellite> getOrbiting(){return orbiting;}
+	public void setOrbiting(ArrayList<Satellite> s){orbiting=s;}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 	public HashSet<Star> getStars(){return stars;}
@@ -124,8 +128,12 @@ public class GSystem implements Positioning
 	public void setNavigability(int nav){navigability=nav;}
 	public Fleet[] getFleets(){return fleets;}
 	public void setFleets(Fleet[] f){fleets=f;}
+	public Hashtable<Integer, Missile> getMissiles(){return missiles;}
+	public void setMissiles(Hashtable<Integer, Missile> m){missiles=m;}
 	public int getOwner_id(){return owner_id;}
 	public void setOwner_id(int id){owner_id=id;}
+	public int getNext_missile_id(){return next_missile_id;}
+	public void setNext_missile_id(int n){next_missile_id=n;}
 	
 	public int getWidth(){return width;}
 	public void setWidth(int w){width=w;}

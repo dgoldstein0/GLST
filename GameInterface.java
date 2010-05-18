@@ -591,9 +591,9 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		}
 		
 		//search orbiting planets/objects
-		if(sys.orbiting_objects instanceof ArrayList)
+		if(sys.orbiting instanceof ArrayList)
 		{
-			for(Satellite orbiting : sys.orbiting_objects)
+			for(Satellite orbiting : sys.orbiting)
 			{
 				//search for satellites...
 				if(orbiting.absoluteCurX()-orbiting.size/2 -OBJ_TOL <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 + OBJ_TOL && orbiting.absoluteCurY()-orbiting.size/2-OBJ_TOL <= y && y <= orbiting.absoluteCurY() + orbiting.size/2+OBJ_TOL)
@@ -603,10 +603,10 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 					return;
 				}
 				
-				if(orbiting instanceof Planet && ((Planet)(orbiting)).satellites instanceof ArrayList)
+				if(orbiting instanceof Planet && ((Planet)(orbiting)).orbiting instanceof ArrayList)
 				{
 					Planet cur_planet=(Planet)orbiting;
-					for(Satellite sat : cur_planet.satellites)
+					for(Satellite sat : cur_planet.orbiting)
 					{
 						if(sat.absoluteCurX()-sat.size/2 -OBJ_TOL <= x && x <= sat.absoluteCurX()+sat.size/2+OBJ_TOL && sat.absoluteCurY()-sat.size/2-OBJ_TOL <= y && y <= sat.absoluteCurY()+sat.size/2+OBJ_TOL)
 						{
@@ -648,25 +648,25 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/sys_scale; //tolerance
 		
 		//search orbiting planets/objects
-		if(sys.orbiting_objects instanceof ArrayList)
+		if(sys.orbiting instanceof ArrayList)
 		{
-			for(Satellite orbiting : sys.orbiting_objects)
+			for(Satellite sat : sys.orbiting)
 			{
 				//search for satellites...
-				if(orbiting.absoluteCurX()-orbiting.size/2 -OBJ_TOL <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 + OBJ_TOL && orbiting.absoluteCurY()-orbiting.size/2-OBJ_TOL <= y && y <= orbiting.absoluteCurY() + orbiting.size/2+OBJ_TOL)
+				if(sat.absoluteCurX()-sat.size/2 -OBJ_TOL <= x && x <= sat.absoluteCurX()+sat.size/2 + OBJ_TOL && sat.absoluteCurY()-sat.size/2-OBJ_TOL <= y && y <= sat.absoluteCurY() + sat.size/2+OBJ_TOL)
 				{
-					dest = orbiting;
+					dest = sat;
 					break;
 				}
 				
-				if(orbiting instanceof Planet && ((Planet)(orbiting)).satellites instanceof ArrayList)
+				if(sat instanceof Planet && ((Planet)(sat)).orbiting instanceof ArrayList)
 				{
-					Planet cur_planet=(Planet)orbiting;
-					for(Satellite sat : cur_planet.satellites)
+					Planet cur_planet=(Planet)sat;
+					for(Satellite sat2 : cur_planet.orbiting)
 					{
-						if(sat.absoluteCurX()-sat.size/2 -OBJ_TOL <= x && x <= sat.absoluteCurX()+sat.size/2+OBJ_TOL && sat.absoluteCurY()-sat.size/2-OBJ_TOL <= y && y <= sat.absoluteCurY()+sat.size/2+OBJ_TOL)
+						if(sat2.absoluteCurX()-sat2.size/2 -OBJ_TOL <= x && x <= sat2.absoluteCurX()+sat2.size/2+OBJ_TOL && sat2.absoluteCurY()-sat2.size/2-OBJ_TOL <= y && y <= sat2.absoluteCurY()+sat2.size/2+OBJ_TOL)
 						{
-							dest=sat;
+							dest=sat2;
 							break;
 						}
 					}

@@ -1,6 +1,6 @@
 import java.util.*;
 
-interface Positioning
+interface Positioning extends Describable
 {
 	public abstract double absoluteCurX();
 	public abstract double absoluteCurY();

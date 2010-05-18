@@ -858,7 +858,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		int i, choice;
 		Random generator= new Random(System.nanoTime());
 		for(GSystem sys : map.systems){
-			for(Satellite sat : sys.orbiting_objects)
+			for(Satellite sat : sys.orbiting)
 			{
 				if(sat.name.length() == 0)
 				{
@@ -876,7 +876,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				
 				if(sat instanceof Planet)
 				{
-					for(Satellite sat2 : ((Planet)sat).satellites)
+					for(Satellite sat2 : ((Planet)sat).orbiting)
 					{
 						if(sat2.name.length() == 0)
 						{

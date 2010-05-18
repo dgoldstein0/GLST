@@ -5,11 +5,8 @@ public class Mine extends Facility{
 	
 	public Mine(OwnableSatellite loc, long t)
 	{
+		super(loc,t, GalacticStrategyConstants.initial_mine_endu);
 		mining_rate=GalacticStrategyConstants.DEFAULT_MINING_RATE;
-		damage=0;
-		endurance = GalacticStrategyConstants.initial_mine_endu;
-		last_time = t;
-		location=loc;
 	}
 
 	public void setMiningrate(int r)             //possibly upgrade mining speed through research

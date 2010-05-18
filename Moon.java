@@ -4,14 +4,14 @@ public class Moon extends OwnableSatellite
 {
 	public Moon(int i, double m, String nm, int sz)
 	{
+		super();
 		id=i;
 		this.mass=m;
 		this.name=nm;
 		this.size=sz;
-		facilities = new ArrayList<Facility>();
 	}
 	
-	public Moon(){facilities = new ArrayList<Facility>();}
+	public Moon(){super();}
 	
 	public void setOwner(Player p)
 	{

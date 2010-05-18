@@ -289,7 +289,7 @@ public class GameControl
 			Planet p = map.start_locations.get(i);
 			p.setOwner(players[i]);
 			Base b = new Base(p, (long)0);
-			p.facilities.add(b);
+			p.facilities.put(b.id,b);
 			p.the_base = b;
 		}
 		
@@ -297,7 +297,7 @@ public class GameControl
 		GI.drawGalaxy();
 		
 		//set game to update itself
-		TC.startConstIntervalTask(new Updater(),20);
+		TC.startConstIntervalTask(new Updater(),(int)GalacticStrategyConstants.TIME_GRANULARITY);
 	}
 	
 	public void startGameViaThread()
@@ -356,7 +356,7 @@ public class GameControl
 			Planet p = map.start_locations.get(player_id);
 			p.setOwner(players[player_id]);
 			Base b = new Base(p, (long)0);
-			p.facilities.add(b);
+			p.facilities.put(b.id,b);
 			p.the_base = b;
 			
 			//display the Galaxy
@@ -847,6 +847,7 @@ public class GameControl
 	public void updateGame()
 	{
 		long time_elapsed=TC.getTime();
+		long update_to=TC.getLast_time_updated();
 		//System.out.println("Updating to time_elapsed=" + Long.toString(time_elapsed));
 		//start events that need to occur before time_elapsed
 		
@@ -870,7 +871,7 @@ public class GameControl
 		//update all data
 		for(GSystem sys : map.systems)
 		{
-			for(Satellite sat : sys.orbiting_objects)
+			for(Satellite sat : sys.orbiting)
 			{
 				
 				if(sat instanceof Planet)
@@ -879,12 +880,12 @@ public class GameControl
 					((Planet)sat).updateConstruction(GI, time_elapsed);
 					synchronized(((OwnableSatellite)sat).facilities_lock)
 					{
-						for(Facility f : ((Planet)sat).facilities)
+						for(Integer i: ((Planet)sat).facilities.keySet())
 						{
-							f.updateStatus(time_elapsed);
+							((Planet)sat).facilities.get(i).updateStatus(time_elapsed);
 						}
 					}
-					for(Satellite sat2 : ((Planet)sat).satellites)
+					for(Satellite sat2 : ((Planet)sat).orbiting)
 					{
 						if(sat2 instanceof Moon)
 						{
@@ -892,8 +893,8 @@ public class GameControl
 							((Moon)sat2).updateConstruction(GI, time_elapsed);
 							synchronized(((Moon)sat2).facilities_lock)
 							{
-								for(Facility f : ((Moon)sat2).facilities)
-									f.updateStatus(time_elapsed);
+								for(Integer i : ((Moon)sat2).facilities.keySet())
+									((Moon)sat2).facilities.get(i).updateStatus(time_elapsed);
 							}
 						}
 						sat2.orbit.move(time_elapsed);
@@ -902,24 +903,28 @@ public class GameControl
 				sat.orbit.move(time_elapsed);
 			}
 			
-			for(int i=0; i<sys.fleets.length; i++)
+			for(update_to = TC.getLast_time_updated(); update_to < time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
 			{
-				for(Integer j : sys.fleets[i].ships.keySet())
+				for(int i=0; i<sys.fleets.length; i++)
 				{
-					sys.fleets[i].ships.get(j).update(time_elapsed);
+					for(Integer j : sys.fleets[i].ships.keySet())
+					{
+						sys.fleets[i].ships.get(j).update(update_to);
+					}
 				}
-			}
-			
-			synchronized(sys.missile_lock)
-			{
-				for(int i=0; i<sys.missiles.size(); i++)
+				
+				synchronized(sys.missile_lock)
 				{
-					Missile m = sys.missiles.get(i);
-					if(m.update(time_elapsed)) //move returns true if the missile detonates
-						i--;
+					Iterator<Integer> missile_iteration = sys.missiles.keySet().iterator();
+					for(int i; missile_iteration.hasNext();)
+					{
+						i=missile_iteration.next();
+						sys.missiles.get(i).update(update_to, missile_iteration); //returns true if the missile detonates
+					}
 				}
 			}
 		}
+		TC.setLast_time_updated(update_to);
 		
 		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));
 	}

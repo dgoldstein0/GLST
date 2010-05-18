@@ -3,6 +3,7 @@ import java.util.*;
 public class TimeControl
 {
 	long time_elapsed; //can support over 292 years
+	long last_time_updated;
 	long start_time;
 	Timer timer;
 	TimerTask task;
@@ -11,6 +12,7 @@ public class TimeControl
 	{
 		resetTime(offset);
 		timer=new java.util.Timer(true);
+		last_time_updated = 0l;
 	}
 	
 	public void resetTime(int offset)
@@ -46,4 +48,6 @@ public class TimeControl
 	
 	public long gettime_elapsed(){return time_elapsed;}
 	public void settime_elapsed(long t){time_elapsed=t;}
+	public long getLast_time_updated(){return last_time_updated;}
+	public void setLast_time_updated(long t){last_time_updated=t;}
 }

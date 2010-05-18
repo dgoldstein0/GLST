@@ -10,11 +10,26 @@ public abstract class Facility implements Targetable
 	final static int RESEARCH_BUILDING=4;
 	
 	OwnableSatellite location;
+	int id;
+	
 	HashSet<Targetter> aggressors;
 	int endurance;
 	int damage;
 	
 	long last_time;//the last time it was updated
+	
+	public Facility(OwnableSatellite l, long t, int endu)
+	{
+		location=l;
+		
+		id=l.next_facility_id;
+		l.next_facility_id++;
+		
+		last_time=t;
+		
+		endurance=endu;
+		damage=0;
+	}
 	
 	public void addDamage(int d)
 	{
@@ -28,6 +43,13 @@ public abstract class Facility implements Targetable
 		location.facilities.remove(this);
 	}
 	
+	public DestDescriber describer()
+	{
+		return new FacilityDescriber(this);
+	}
+	
+	public Facility(){}
+	
 	public double getXCoord(long t){return location.getXCoord(t);}
 	public double getYCoord(long t){return location.getYCoord(t);}
 	public double getXVel(long t){return location.getXVel(t);}
@@ -35,6 +57,7 @@ public abstract class Facility implements Targetable
 	
 	public HashSet<Targetter> getAggressors(){return aggressors;}
 	public void addAggressor(Targetter t){aggressors.add(t);}
+	public void removeAggressor(Targetter t){aggressors.remove(t);}
 	public abstract void updateStatus(long t);
 	public abstract String getName();
 	public abstract int getType();
@@ -46,4 +69,7 @@ public abstract class Facility implements Targetable
 	public void setEndurance(int e){endurance=e;}
 	public OwnableSatellite getLocation(){return location;}
 	public void setLocation(OwnableSatellite s){location=s;}
+	
+	public int getId(){return id;}
+	public void setId(int i){id=i;}
 }

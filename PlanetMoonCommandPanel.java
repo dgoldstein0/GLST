@@ -140,8 +140,8 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 			
 			synchronized(((OwnableSatellite)s).facilities_lock)
 			{
-				for(Facility f : ((OwnableSatellite)s).facilities)
-					displayFacility(f);
+				for(Integer i : ((OwnableSatellite)s).facilities.keySet())
+					displayFacility(((OwnableSatellite)s).facilities.get(i));
 			}
 		}
 		
@@ -209,9 +209,9 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 			boolean no_base_seen=true;
 			synchronized(((OwnableSatellite)the_sat).facilities_lock)
 			{
-				for(Facility f : ((OwnableSatellite)the_sat).facilities)
+				for(Integer i : ((OwnableSatellite)the_sat).facilities.keySet())
 				{
-					if(f instanceof Base)
+					if(((OwnableSatellite)the_sat).facilities.get(i) instanceof Base)
 						no_base_seen=false;
 				}
 			}

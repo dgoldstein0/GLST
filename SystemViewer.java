@@ -306,17 +306,17 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private void TimeUpdater(long time)
 	{
-		if(system.orbiting_objects instanceof ArrayList)
+		if(system.orbiting instanceof ArrayList)
 		{
-			for(Satellite sat : system.orbiting_objects)
+			for(Satellite sat : system.orbiting)
 			{
 				//update orbit of sat
 				sat.orbit.move(time);
 				if(sat instanceof Planet)
 				{
-					if(((Planet)sat).satellites instanceof ArrayList)
+					if(((Planet)sat).orbiting instanceof ArrayList)
 					{
-						for(Satellite sat2 : ((Planet)sat).satellites)
+						for(Satellite sat2 : ((Planet)sat).orbiting)
 						{
 							//update orbit of sat2
 							sat2.orbit.move(time);
@@ -360,7 +360,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private void locateObj(int x, int y) throws NoObjectLocatedException
 	{
-		//search for stars, then orbiting objects and their satellites
+		//search for stars, then orbiting objects and their orbiting
 		final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/scale; //tolerance
 		
 		if(system.stars instanceof HashSet)
@@ -377,21 +377,21 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		}
 		
 		//search orbiting planets/objects
-		if(system.orbiting_objects instanceof ArrayList)
+		if(system.orbiting instanceof ArrayList)
 		{
-			for(Satellite orbiting : system.orbiting_objects)
+			for(Satellite orbiting : system.orbiting)
 			{
-				//search for satellites...
+				//search for orbiting...
 				if(orbiting.absoluteCurX()-orbiting.size/2 <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 && orbiting.absoluteCurY()-orbiting.size/2 <= y && y <= orbiting.absoluteCurY() + orbiting.size/2)
 				{
 					selected_obj=orbiting;
 					return;
 				}
 				
-				if(orbiting instanceof Planet && ((Planet)(orbiting)).satellites instanceof Set)
+				if(orbiting instanceof Planet && ((Planet)(orbiting)).orbiting instanceof Set)
 				{
 					Planet cur_planet=(Planet)orbiting;
-					for(Satellite sat : cur_planet.satellites)
+					for(Satellite sat : cur_planet.orbiting)
 					{
 						if(sat.absoluteCurX()-OBJ_TOL <= x && x <= sat.absoluteCurX()+OBJ_TOL && sat.absoluteCurY()-OBJ_TOL <= y && y <= sat.absoluteCurY()+OBJ_TOL)
 						{
@@ -610,9 +610,9 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private void recalculateOrbits()
 	{
-		if(system.orbiting_objects instanceof ArrayList)
+		if(system.orbiting instanceof ArrayList)
 		{
-			for(Satellite sat: system.orbiting_objects)
+			for(Satellite sat: system.orbiting)
 			{
 				sat.orbit.calculateOrbit();
 			}
@@ -631,9 +631,9 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private void addPlanet(int x, int y)
 	{		
-		Planet theplanet = new Planet(system.orbiting_objects.size(), "", 100.0, 10000.0, DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, .000005);
+		Planet theplanet = new Planet(system.orbiting.size(), "", 100.0, 10000.0, DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, .000005);
 		theplanet.orbit = new Orbit((Satellite)theplanet, (Positioning)system, x, y, x, y, 1);
-		system.orbiting_objects.add(theplanet);
+		system.orbiting.add(theplanet);
 		
 		selected_obj = theplanet;
 		wait_to_add = ADD_FOCUS;
@@ -642,9 +642,9 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private void addMoon(int x, int y)
 	{
-		Moon themoon = new Moon(((Planet)selected_obj).satellites.size(), DEFAULT_MOON_MASS, "", DEFAULT_MOON_SIZE);
+		Moon themoon = new Moon(((Planet)selected_obj).orbiting.size(), DEFAULT_MOON_MASS, "", DEFAULT_MOON_SIZE);
 		themoon.orbit = new Orbit((Satellite)themoon, (Positioning)selected_obj,x,y,x,y,1);
-		((Planet)selected_obj).satellites.add(themoon);
+		((Planet)selected_obj).orbiting.add(themoon);
 		
 		selected_obj=themoon;
 		wait_to_add=ADD_FOCUS;
@@ -809,30 +809,30 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		{
 			if(selected_obj instanceof Planet || selected_obj instanceof Asteroid)
 			{
-				for(Satellite orbiting : system.orbiting_objects)
+				for(Satellite orbiting : system.orbiting)
 				{
 					if(selected_obj == orbiting)
 					{
-						system.orbiting_objects.remove(orbiting);
+						system.orbiting.remove(orbiting);
 						break;
 					}
 				}
 			}
 			else //search for moons and stations
 			{
-				for(Satellite orbiting : system.orbiting_objects)
+				for(Satellite orbiting : system.orbiting)
 				{
 					if(orbiting instanceof Planet && (selected_obj instanceof Moon))
 					{
 						Planet cur_planet=(Planet)orbiting;
-						for(Satellite sat : cur_planet.satellites)
+						for(Satellite sat : cur_planet.orbiting)
 						{
 							if(selected_obj == sat)
-								cur_planet.satellites.remove(sat);
+								cur_planet.orbiting.remove(sat);
 						}
 					}
 					else if(orbiting == selected_obj)
-						system.orbiting_objects.remove(orbiting);
+						system.orbiting.remove(orbiting);
 				}
 			}
 		}

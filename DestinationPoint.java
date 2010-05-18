@@ -1,4 +1,4 @@
-public class DestinationPoint implements Destination
+public class DestinationPoint implements Destination, DestDescriber
 {
 	double x,y;
 	
@@ -7,6 +7,9 @@ public class DestinationPoint implements Destination
 		this.x=x;
 		this.y=y;
 	}
+	
+	public Destination retrieveDestination(Galaxy g){return this;}
+	public DestDescriber describer(){return this;}
 	
 	public double getXCoord(long t){return x;}
 	public double getYCoord(long t){return y;}

@@ -11,6 +11,8 @@ public abstract class Satellite extends StellarObject implements Positioning, De
 		return mass;
 	}
 	
+	public DestDescriber describer(){return new SatelliteDescriber(this);}
+	
 	public Orbit getOrbit(){return orbit;}
 	public void setOrbit(Orbit o){orbit=o;}
 

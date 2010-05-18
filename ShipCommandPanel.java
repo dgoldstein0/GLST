@@ -176,11 +176,11 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 				boolean base_seen=false;
 				synchronized(((OwnableSatellite)the_ship.destination).facilities_lock)
 				{
-					for(Facility f : ((OwnableSatellite)the_ship.destination).facilities)
+					for(Integer i: ((OwnableSatellite)the_ship.destination).facilities.keySet())
 					{
-						if(f instanceof Base) //there should only be one base on the planet
+						if(((OwnableSatellite)the_ship.destination).facilities.get(i) instanceof Base) //there should only be one base on the planet
 						{
-							((Base)f).attackedByTroops(GameInterface.GC.TC.getTime(), the_ship);
+							((Base)((OwnableSatellite)the_ship.destination).facilities.get(i)).attackedByTroops(GameInterface.GC.TC.getTime(), the_ship);
 							base_seen=true;
 						}
 					}

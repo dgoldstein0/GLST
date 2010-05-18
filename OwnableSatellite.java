@@ -1,10 +1,10 @@
-import java.util.ArrayList;
+import java.util.Hashtable;
 import javax.swing.SwingUtilities;
 
 public abstract class OwnableSatellite extends Satellite
 {
 	Object facilities_lock = new Object();
-	ArrayList<Facility> facilities;
+	Hashtable<Integer, Facility> facilities;
 	Base the_base; //the base is a member of facilities.  As such, it should be governed by facilities_lock.
 	Player owner;
 	
@@ -12,6 +12,7 @@ public abstract class OwnableSatellite extends Satellite
 	int bldg_in_progress; //uses the constants specified in Facility
 	long time_finish;
 	long time_start;
+	int next_facility_id;
 	
 	//for population model
 	long population; //current population
@@ -23,6 +24,12 @@ public abstract class OwnableSatellite extends Satellite
 	long last_tax_time=0;
 	final static int TAX_INTERVAL = 3000; //in milliseconds.  so taxes are compounded every three seconds.
 	final static double TAX_PER_PERSON = .03; //money per person per tax interval
+	
+	public OwnableSatellite()
+	{
+		next_facility_id=0;
+		facilities = new Hashtable<Integer, Facility>();
+	}
 	
 	//this is called when calculating taxes.
 	private void updatePop(long t)
@@ -94,7 +101,7 @@ public abstract class OwnableSatellite extends Satellite
 		{
 			synchronized(facilities_lock)
 			{
-				facilities.add(new_fac);
+				facilities.put(new_fac.id,new_fac);
 				
 				//notify interface
 				if(GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP && GI.SatellitePanel.the_sat == new_fac.location)
@@ -172,15 +179,15 @@ public abstract class OwnableSatellite extends Satellite
 		setOwner(p);
 		synchronized(facilities_lock)
 		{
-			for(Facility f : facilities)
+			for(Integer i: facilities.keySet())
 			{
-				f.last_time = time; //makes it so that facilities do nothing when possessed by noone.  That is, they lie idle instead of stockpiling production.
+				facilities.get(i).last_time = time; //makes it so that facilities do nothing when possessed by noone.  That is, they lie idle instead of stockpiling production.
 			}
 		}
 	}
 	
-	public ArrayList<Facility> getFacilities(){return facilities;}
-	public void setFacilities(ArrayList<Facility> fac){facilities=fac;}
+	public Hashtable<Integer, Facility> getFacilities(){return facilities;}
+	public void setFacilities(Hashtable<Integer, Facility> fac){facilities=fac;}
 	public Player getOwner(){return owner;}
 	public abstract void setOwner(Player p); //this must be overriden by implementing classes, because it is responsible for notifying the GSystem of an owner change
 	public long getPopulation(){return population;}
@@ -195,4 +202,7 @@ public abstract class OwnableSatellite extends Satellite
 	public void setThe_base(Base b){the_base = b;}
 	public int getBldg_in_progress(){return bldg_in_progress;}
 	public void setBldg_in_progress(int b){bldg_in_progress=b;}
+	
+	public int getNext_facility_id(){return next_facility_id;}
+	public void setNext_facility_id(int n){next_facility_id=n;}
 }

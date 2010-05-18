@@ -1,12 +1,16 @@
+import java.util.*;
+
 public class Missile extends Flyer
 {
 	private final double Collide_Range=10.0;
 
 	public Missile(Ship s, Targetable t, long time)
 	{
+		super("", GalacticStrategyConstants.sTypes[GalacticStrategyConstants.MISSILE]);
 		target = t;
-
-		SetUpFlyer("", GalacticStrategyConstants.sTypes[GalacticStrategyConstants.MISSILE]);
+		location = s.location;
+		id=location.next_missile_id;
+		location.next_missile_id++;
 		
 		//set up physics
 		pos_x = s.getPos_x();
@@ -17,62 +21,68 @@ public class Missile extends Flyer
 		
 		destination=t;
 		t.addAggressor(this);
-		time = (long)(Math.ceil((double)(time)/(double)(time_granularity))*time_granularity);
-		dest_x_coord = destination.getXCoord(time-time_granularity);
-		dest_y_coord = destination.getYCoord(time-time_granularity);
+		time = (long)(Math.ceil((double)(time)/(double)(GalacticStrategyConstants.TIME_GRANULARITY))*GalacticStrategyConstants.TIME_GRANULARITY);
+		dest_x_coord = destination.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+		dest_y_coord = destination.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		current_flying_AI = new TrackingAI(this, 0.0, TrackingAI.NO_SLOWDOWN);
 		
 		this.time=time;
 		saveData();
 	}
 	
+	public DestDescriber describer()
+	{
+		return new MissileDescriber(this);
+	}
+	
 	//returns true when the missile detonates, false otherwise
-	public boolean update(long t)
+	public boolean update(long t, Iterator<Integer> iteration)
 	{
 		boolean c=false;
-		while (time < t)
+		if (time <= t)
 		{
-			c=collidedWithTarget();
-			if (!c)
+			moveIncrement();
+			time += GalacticStrategyConstants.TIME_GRANULARITY;
+			saveData();
+			
+			if (collidedWithTarget())
 			{
-				moveIncrement();
-				time += time_granularity;
-				saveData();
-			}
-			else
-			{
-				detonate();
+				detonate(iteration);
 				return true;
 			}
+			else
+				return false;
 		}
-		c=collidedWithTarget();
-		if (c)
-		{
-			detonate();
-			return true;
-		}
-		else
-			return false;
+		return false;
 	}
 	
 	public boolean collidedWithTarget()
 	{
 		//can use current x/y coords for ships because ship positions are updated first
-		return (Math.hypot(this.pos_x-target.getXCoord(time),this.pos_y-target.getYCoord(time))<Collide_Range);
+		double x_dif=this.pos_x-target.getXCoord(time);
+		double y_dif=this.pos_y-target.getYCoord(time);
+		return (x_dif*x_dif+y_dif*y_dif<Collide_Range*Collide_Range);
 	}
 	
-	public void detonate()
+	public void detonate(Iterator<Integer> iteration)
 	{
-		//this function could start an explosion animation
+		//this function could start an explosion animation instead
+		iteration.remove();
+		target.removeAggressor(this);
+		
+		//addDamage is called last to avoid a ConcurrentModificationException.  If the additional damage
+		//destroys the target, then this kicks off an iteration through the remaining aggressors.  The missiles,
+		//right now, destroyed() themselved when notified that their targetIsDestroyed(long).  because iteration.remove
+		//is called, without removeAggressor(this), this addDamage call would cause the program to try to remove the
+		//element from the missiles hashtable a second time - even though the iteration is using that element at the moment.
 		target.addDamage(GalacticStrategyConstants.MISSILE_DAMAGE);
-		destroyed();
 	}
 	
 	public void destroyed()
 	{
 		synchronized(location.missile_lock)
 		{
-			location.missiles.remove(this);
+			location.missiles.remove(id); //must call remove with the Key and not the Value
 		}
 	}
 	
