@@ -1,11 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.util.*;
 
 public class GalacticMapPainter extends JPanel
 {
 	Galaxy map;
 	HashSet<GSystem> selected;
+	ArrayList<Ship> ships_in_transit;
 	int drag_options;
 	int max_dist_shown;
 	int nav_level;
@@ -39,7 +41,7 @@ public class GalacticMapPainter extends JPanel
 		super.paintComponent(g);
 		setBackground(Color.BLACK);
 		
-		if(map instanceof Galaxy && map.systems instanceof ArrayList)
+		if(map != null && map.systems != null)
 		{
 			for(GSystem sys : map.systems)
 			{
@@ -62,7 +64,7 @@ public class GalacticMapPainter extends JPanel
 						g.drawString(Integer.toString(sys.navigability), scaleNum(sys.x+3), scaleNum(sys.y)+m.getHeight());
 					}
 					
-					if(selected instanceof HashSet)
+					if(selected != null)
 					{
 						for(GSystem sel_sys : selected)
 						{
@@ -131,6 +133,29 @@ public class GalacticMapPainter extends JPanel
 					g.drawOval(scaleNum(sel_sys.x-max_dist_shown),scaleNum(sel_sys.y-max_dist_shown),scaleNum(2*max_dist_shown),scaleNum(2*max_dist_shown));
 				}
 			}
+			
+			if(ships_in_transit != null)
+			{
+				Graphics2D g2 = (Graphics2D)g;
+				for(Ship s : ships_in_transit)
+				{
+					g2.setColor(s.owner.getColor());
+					
+					//set up coordinates of equilateral triangle
+					double side = 10.0;
+					double h = side/2.0*Math.sqrt(3);
+					int[] xcoords = {(int)(-side/2.0), (int)(side/2.0), 0};
+					int[] ycoords = {(int)(-h/3.0),(int)(-h/3.0),(int)(2.0/3.0*h)};
+					
+					// Get the current transform
+					AffineTransform saveAT = g2.getTransform();
+					
+					//draw ship s
+					g2.rotate(s.exit_direction, s.getPos_x(),s.getPos_y());
+					g2.drawPolygon(xcoords, ycoords,3);
+					g2.setTransform(saveAT);
+				}
+			}
 		}
 		
 		if(select_box)
@@ -148,7 +173,7 @@ public class GalacticMapPainter extends JPanel
 		g.drawRect(0,0,scaleNum(GalacticStrategyConstants.GALAXY_WIDTH), scaleNum(GalacticStrategyConstants.GALAXY_HEIGHT));
 	}
 	
-	public void paintGalaxy(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, double sc)
+	public void paintGalaxy(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, ArrayList<Ship> transit, double sc)
 	{
 		this.map=map;
 		this.selected=selected;
@@ -157,6 +182,7 @@ public class GalacticMapPainter extends JPanel
 		nav_level=nav;
 		nav_display=disp_nav;
 		display_unnavigable=unnav;
+		ships_in_transit = transit;
 		
 		if(!(selected instanceof HashSet))
 			drag_options=GDFrame.DRAG_NONE;
@@ -168,7 +194,7 @@ public class GalacticMapPainter extends JPanel
 		repaint();
 	}
 	
-	public void paintSelect(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, int x1, int y1, int x2, int y2, double sc)
+	public void paintSelect(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, ArrayList<Ship> transit, int x1, int y1, int x2, int y2, double sc)
 	{
 		this.map=map;
 		this.selected=selected;
@@ -176,6 +202,7 @@ public class GalacticMapPainter extends JPanel
 		nav_level=nav;
 		nav_display=disp_nav;
 		display_unnavigable=unnav;
+		ships_in_transit = transit;
 		
 		select_box_x1=x1;
 		select_box_y1=y1;
@@ -191,7 +218,7 @@ public class GalacticMapPainter extends JPanel
 		repaint();
 	}
 	
-	public void paintGhostSystem(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, int ghost_x, int ghost_y, double sc)
+	public void paintGhostSystem(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, ArrayList<Ship> transit, int ghost_x, int ghost_y, double sc)
 	{
 		this.map=map;
 		this.selected=selected;
@@ -199,6 +226,7 @@ public class GalacticMapPainter extends JPanel
 		nav_level=nav;
 		nav_display=disp_nav;
 		display_unnavigable=unnav;
+		ships_in_transit = transit;
 		
 		ghost_system=true;
 		this.ghost_x=ghost_x;

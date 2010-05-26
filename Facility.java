@@ -2,13 +2,7 @@
 import java.util.HashSet;
 
 public abstract class Facility implements Targetable
-{
-	final static int NO_BLDG=0;
-	final static int BASE = 1;
-	final static int MINE=2;
-	final static int SHIPYARD=3;
-	final static int RESEARCH_BUILDING=4;
-	
+{	
 	OwnableSatellite location;
 	int id;
 	
@@ -60,7 +54,7 @@ public abstract class Facility implements Targetable
 	public void removeAggressor(Targetter t){aggressors.remove(t);}
 	public abstract void updateStatus(long t);
 	public abstract String getName();
-	public abstract int getType();
+	public abstract FacilityType getType();
 	public abstract String imageLoc();
 	
 	public int getDamage(){return damage;}

@@ -11,6 +11,9 @@ public class Focus implements Selectable
 		owner=o;
 	}
 	
+	public int getSelectType(){return Selectable.FOCUS;}
+	public String generateName(){return "Focus of " + owner.obj.generateName();}
+	
 	public Focus(){}
 	public double getX(){return x;}
 	public double getY(){return y;}

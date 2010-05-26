@@ -1,6 +1,5 @@
 public class Star extends StellarObject
 {
-	String name; //should be a greek letter, such as Alpha, Beta, Gamma, Delta, etc.
 	int color;
 	GSystem owner;
 	
@@ -18,6 +17,7 @@ public class Star extends StellarObject
 		owner=o;
 	}
 	
+	//for Selectable, implemented by StellarObject
 	public String generateName()
 	{
 		if(name != "")
@@ -26,10 +26,10 @@ public class Star extends StellarObject
 			return owner.name;
 	}
 	
+	public int getSelectType(){return Selectable.STAR;}
+	
 	//save/loading methods
 	public Star(){}
-	public String getName(){return name;}
-	public void setName(String nm){name=nm;}
 	public GSystem getOwner(){return owner;}
 	public void setOwner(GSystem o){owner=o;}
 	public int getColor(){return color;}

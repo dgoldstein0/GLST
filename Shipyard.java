@@ -119,7 +119,7 @@ public class Shipyard extends Facility{
 		return ((double)time_on_current_ship)/((double)manufac_queue.get(0).type.time_to_build);
 	}
 	
-	public int getType(){return Facility.SHIPYARD;}
+	public FacilityType getType(){return FacilityType.SHIPYARD;}
 	public String imageLoc(){return "images/shipyard.gif";}
 	public String getName(){return "Shipyard";}
 }

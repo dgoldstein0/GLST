@@ -1,11 +1,15 @@
 public abstract class StellarObject implements Selectable
 {
-	int size;
+	double size;
 	double mass;
+	String name;
 	
 	public StellarObject(){}
-	public int getSize(){return size;}
-	public void setSize(int sz){size=sz;}
+	public double getSize(){return size;}
+	public void setSize(double sz){size=sz;}
+	public void setSize(int sz){size = (double)sz;} //for back-compatibility
 	public double getMass(){return mass;}
 	public void setMass(double d){mass=d;}
+	public String getName(){return name;}
+	public void setName(String nm){name=nm;}
 }

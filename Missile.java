@@ -90,4 +90,9 @@ public class Missile extends Flyer
 	{
 		destroyed();
 	}
+	
+	public void targetHasWarped(long t)
+	{
+		destroyed();
+	}
 }

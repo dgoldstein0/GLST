@@ -21,8 +21,10 @@ public class ShipType
 	double max_speed; //px per millisecond
 	double max_angular_vel;//radians per milli
 	double accel_rate; // px/ms per ms
+	double warp_accel;
+	double warp_speed; //px/ms in Galaxy
 	
-	public ShipType(String name, int mfuel, int hull, int money, int metal, int time_to_build, int capacity, double sc, String i, double m_speed, double m_ang_vel, double accel)
+	public ShipType(String name, int mfuel, int hull, int money, int metal, int time_to_build, int capacity, double sc, String i, double m_speed, double m_ang_vel, double accel, double waccel, double wspeed)
 	{
 		this.name=name;
 		max_energy=mfuel;
@@ -37,6 +39,8 @@ public class ShipType
 		max_speed = m_speed;
 		max_angular_vel = m_ang_vel;
 		accel_rate = accel;
+		warp_accel = waccel;
+		warp_speed = wspeed;
 	}
 	
 	public void setImg(Image i){img=i;}

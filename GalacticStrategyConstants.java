@@ -77,18 +77,7 @@ public class GalacticStrategyConstants
 	
 	static Color[] DEFAULT_COLORS = {Color.GREEN, Color.RED, Color.YELLOW, Color.CYAN, Color.ORANGE, Color.MAGENTA, Color.PINK, Color.BLUE};
 	
-	//default build times and costs for facilities
-	
-	final static long MINE_BUILD_TIME = 20000;
-	final static long BASE_BUILD_TIME = 25000;
-	final static long SHIPYARD_BUILD_TIME = 20000;
-	
-	final static int MINE_MONEY_COST = 200;
-	final static int MINE_METAL_COST = 0;
-	final static int BASE_MONEY_COST = 500;
-	final static int BASE_METAL_COST = 500;
-	final static int SHIPYARD_MONEY_COST = 300;
-	final static int SHIPYARD_METAL_COST = 200;
+	//default build times and costs for facilities configurable in FacilityType
 	
 	final static double LANDING_RANGE = 10.0d; //the max distance at which ships can get/send troops to planets
 	
@@ -116,12 +105,13 @@ public class GalacticStrategyConstants
 	static final double Attacking_Range_Sq=40000.0;
 	static final double Attacking_Range=200.0;
 	static final long Attacking_cooldown=1200;
+	static final double WARP_EXIT_SPEED = 1.5; //px/ms
 	
 	//setup for ship types
 	final static int MISSILE = 0;
 	final static int JUNK=1;
-	final static ShipType[] sTypes={new ShipType("Missile", 5, 10, 0, 0, 2000, 0, .20d, "images/missile.png", .15, .0015, .0001),
-						new ShipType("Junk", 20, 100, 100, 100, 10000, 200, .30d, "images/junk.png", .06, .0007, .00003)};
+	final static ShipType[] sTypes={new ShipType("Missile", 5, 10, 0, 0, 2000, 0, .20d, "images/missile.png", .15, .0015, .0001, 0.0, 0.0),
+						new ShipType("Junk", 20, 100, 100, 100, 10000, 200, .30d, "images/junk.png", .06, .0007, .00003, .0003, .0008)};
 
 	final static int MISSILE_DAMAGE = 10;
 	final static double INITIAL_MISSILE_SPEED = .04;

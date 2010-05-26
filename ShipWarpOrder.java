@@ -1,16 +1,16 @@
-public class ShipMoveOrder extends Order
+public class ShipWarpOrder extends Order
 {
 	Ship the_ship;
-	Destination the_dest;
+	GSystem the_dest;
 	
 	ShipDescriber ship_desc;
 	DestDescriber dest_desc;
 	
-	public ShipMoveOrder(Player p, Ship s, long t, Destination d)
+	public ShipWarpOrder(Player p, Ship s, long t, GSystem sys)
 	{
 		mode = Order.ORIGIN;
 		ship_desc=new ShipDescriber(p,s);
-		dest_desc=d.describer();
+		dest_desc=sys.describer();
 		scheduled_time=t;
 	}
 	
@@ -19,13 +19,13 @@ public class ShipMoveOrder extends Order
 		if(mode==Order.NETWORK)
 		{
 			the_ship = (Ship)ship_desc.retrieveDestination(g);
-			the_dest=(Destination)dest_desc.retrieveDestination(g);
+			the_dest=(GSystem)dest_desc.retrieveDestination(g);
 		}
 		
-		the_ship.orderToMove(scheduled_time, the_dest);
+		the_ship.orderToWarp(scheduled_time, the_dest);
 	}
 	
-	public ShipMoveOrder(){mode=Order.NETWORK;}
+	public ShipWarpOrder(){mode=Order.NETWORK;}
 	public ShipDescriber getShip_desc(){return ship_desc;}
 	public void setShip_desc(ShipDescriber sd){ship_desc=sd;}
 	public DestDescriber getDest_desc(){return dest_desc;}

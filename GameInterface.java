@@ -48,6 +48,8 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	JPanel stat_and_order;
 	JPanel theinterface;
 	
+	JPopupMenu select_menu;
+	
 	ArrayList<GSystem> known_sys; //known systems for this player
 	ArrayList<Satellite> known_sate;   //known satellite for this player
 	static GameControl GC;
@@ -255,6 +257,9 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		//set up cursors for later use
 		cursors = new MoveScreenCursors();
 		
+		//set up select_menu for later use
+		select_menu = new JPopupMenu();
+		
 		sys_scale = 1.0d;
 		sys_center_x = theinterface.getWidth()/2;
 		sys_center_y = theinterface.getHeight()/2;
@@ -300,7 +305,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			displayNoPanel();
 		}
 		gal_scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
-		GalaxyPanel.paintGalaxy(GC.map, selected_sys, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, gal_scale);
+		GalaxyPanel.paintGalaxy(GC.map, selected_sys, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, GC.players[GC.player_id].ships_in_transit, gal_scale);
 		frame.setVisible(true); //makes all components within the frame displayable.  frame.pack() does this too, but pack resizes the frame to fit all components in their preferred sizes
 	}
 	
@@ -332,7 +337,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			{
 				gal_scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
 				//System.out.println(Double.toString(gal_scale));
-				GalaxyPanel.paintGalaxy(GC.map, selected_sys, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, gal_scale);
+				GalaxyPanel.paintGalaxy(GC.map, selected_sys, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, GC.players[GC.player_id].ships_in_transit, gal_scale);
 			}
 			else //before getting to here, sys and selected_in_sys should be specified.  the latter may be null.
 			{
@@ -537,7 +542,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 					if(system_state == NORMAL && e.getButton() == MouseEvent.BUTTON1)
 					{
 						//look for object to select
-						selectInSystemAt(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
+						selectInSystemAt(e.getX(), e.getY());
 						redraw();
 					}
 					else if(system_state == SELECT_DESTINATION)
@@ -572,9 +577,13 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		selected_sys.clear();
 	}
 	
-	private void selectInSystemAt(double x, double y)
+	private void selectInSystemAt(int mouse_x, int mouse_y)
 	{
 		final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/sys_scale; //tolerance
+		double x = sysScreenToDataX(mouse_x);
+		double y = sysScreenToDataY(mouse_y);
+		
+		ArrayList<Selectable> select_items = new ArrayList<Selectable>();
 		
 		if(sys.stars instanceof HashSet)
 		{
@@ -583,9 +592,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				//search for star...
 				if(st.x-st.size/2 <= x && x <= st.x+st.size/2 && st.y-st.size/2 <= y && y <= st.y+st.size/2)
 				{
-					selected_in_sys = st;
-					displayNoPanel();
-					return;
+					select_items.add(st);
 				}
 			}
 		}
@@ -598,9 +605,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				//search for satellites...
 				if(orbiting.absoluteCurX()-orbiting.size/2 -OBJ_TOL <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 + OBJ_TOL && orbiting.absoluteCurY()-orbiting.size/2-OBJ_TOL <= y && y <= orbiting.absoluteCurY() + orbiting.size/2+OBJ_TOL)
 				{
-					selected_in_sys=orbiting;
-					displaySatellitePanel(orbiting);
-					return;
+					select_items.add(orbiting);
 				}
 				
 				if(orbiting instanceof Planet && ((Planet)(orbiting)).orbiting instanceof ArrayList)
@@ -610,9 +615,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 					{
 						if(sat.absoluteCurX()-sat.size/2 -OBJ_TOL <= x && x <= sat.absoluteCurX()+sat.size/2+OBJ_TOL && sat.absoluteCurY()-sat.size/2-OBJ_TOL <= y && y <= sat.absoluteCurY()+sat.size/2+OBJ_TOL)
 						{
-							selected_in_sys=sat;
-							displaySatellitePanel(sat);
-							return;
+							select_items.add(sat);
 						}
 					}
 				}
@@ -627,16 +630,54 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				
 				if(s.pos_x-OBJ_TOL-s.type.dim*s.type.default_scale/2*sys_scale <= x && x <= s.pos_x+OBJ_TOL+s.type.dim*s.type.default_scale/2 && s.pos_y-OBJ_TOL-s.type.dim*s.type.default_scale/2 <= y && y <= s.pos_y+OBJ_TOL+s.type.dim*s.type.default_scale/2)
 				{
-					selected_in_sys = s;
-					displayShipPanel(s);
-					return;
+					select_items.add(s);
 				}
 			}
 		}
 		
 		//if nothing found
-		selected_in_sys = null;
-		displayNoPanel();
+		if(select_items.size() > 1)
+			buildSelectContextMenu(select_items, mouse_x, mouse_y);
+		else if(select_items.size()==1)
+			selectObjInSystem(select_items.get(0));
+		else
+		{
+			selected_in_sys = null;
+			displayNoPanel();
+		}
+	}
+	
+	public void selectObjInSystem(Selectable s)
+	{
+		selected_in_sys = s;
+		switch(s.getSelectType())
+		{
+			case Selectable.STAR:
+				displayNoPanel();
+				break;
+			case Selectable.SATELLITE:
+				displaySatellitePanel((Satellite)s);
+				break;
+			case Selectable.SHIP:
+				displayShipPanel((Ship)s);
+				break;
+			default:
+				System.out.println("selection unsupported by selectObjInSystem!!");
+				break;
+		}
+	}
+	
+	public void buildSelectContextMenu(ArrayList<Selectable> select_which, int x, int y)
+	{
+		select_menu.removeAll();
+		for(Selectable s : select_which)
+		{
+			SelectableMenuItem menu_item = new SelectableMenuItem(s);
+			menu_item.addActionListener(menu_item);
+			select_menu.add(menu_item);
+		}
+		
+		select_menu.show(theinterface,x,y);
 	}
 	
 	private void setDestination(double x, double y)

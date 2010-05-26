@@ -7,4 +7,5 @@ public abstract class Targetter
 	public void setTarget(Targetable s){target = s;}
 	
 	public abstract void targetIsDestroyed(long time);
+	public abstract void targetHasWarped(long time);
 }

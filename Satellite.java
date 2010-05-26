@@ -3,7 +3,6 @@ import java.util.*;
 public abstract class Satellite extends StellarObject implements Positioning, Destination
 {
 	Orbit orbit;
-	String name;
 	int id;
 	
 	public double massSum()
@@ -15,9 +14,10 @@ public abstract class Satellite extends StellarObject implements Positioning, De
 	
 	public Orbit getOrbit(){return orbit;}
 	public void setOrbit(Orbit o){orbit=o;}
-
-	public String getName(){return name;}
-	public void setName(String nm){name=nm;}
+	
+	//for Selectable, which is implemented by StellarObject
+	public String generateName(){return getName();}
+	public int getSelectType(){return Selectable.SATELLITE;}
 	
 	public double absoluteCurX(){return orbit.absoluteCurX();}
 	public double absoluteCurY(){return orbit.absoluteCurY();}

@@ -896,7 +896,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			{
 			}
 			
-			JSlider resizer = new JSlider(JSlider.HORIZONTAL, minimumObjectSize((StellarObject)selected_obj),maximumObjectSize((StellarObject)selected_obj), ((StellarObject)selected_obj).size);
+			JSlider resizer = new JSlider(JSlider.HORIZONTAL, minimumObjectSize((StellarObject)selected_obj),maximumObjectSize((StellarObject)selected_obj), (int)((StellarObject)selected_obj).size);
 			resizer.setMajorTickSpacing(GalacticStrategyConstants.MAJOR_TICKS_FOR_OBJECT_SIZE);
 			resizer.setMinorTickSpacing(GalacticStrategyConstants.MINOR_TICKS_FOR_OBJECT_SIZE);
 			resizer.setPaintTicks(true);

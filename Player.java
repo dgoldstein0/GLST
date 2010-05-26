@@ -18,7 +18,7 @@ public class Player
 	Color color;
 	int id; //id is used to identify players.  These are assigned by the host of the game.
 	boolean ready;
-	HashSet<Ship> ships;
+	ArrayList<Ship> ships_in_transit;
 	
 	//used for exploration.  specific to each player
 	ArrayList<GSystem> known_systems; //if you know a system, you know the stars in it.
@@ -39,7 +39,7 @@ public class Player
 		the_player.money=GalacticStrategyConstants.DEFAULT_MONEY;
 		the_player.metal=GalacticStrategyConstants.DEFAULT_METAL;
 		the_player.ready=false;
-		the_player.ships=new HashSet<Ship>();
+		the_player.ships_in_transit=new ArrayList<Ship>();
 		the_player.known_systems = new ArrayList<GSystem>();
 		the_player.known_satellites = new ArrayList<Satellite>();
 		the_player.cur_ship_id = -1;
@@ -53,7 +53,7 @@ public class Player
 		cur_ship_id = -1;
 		money=GalacticStrategyConstants.DEFAULT_MONEY;
 		metal=GalacticStrategyConstants.DEFAULT_METAL;
-		ships = new HashSet<Ship>();
+		ships_in_transit = new ArrayList<Ship>();
 		known_systems = new ArrayList<GSystem>();
 		known_satellites = new ArrayList<Satellite>();
 		ready=false;
@@ -117,4 +117,6 @@ public class Player
 	public void setId(int x){id=x;}
 	public boolean getReady(){return ready;}
 	public void setReady(boolean r){ready=r;}
+	public ArrayList<Ship> getShips_in_transit(){return ships_in_transit;}
+	public void setShips_in_transit(ArrayList<Ship> s){ships_in_transit=s;}
 }

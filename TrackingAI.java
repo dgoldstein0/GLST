@@ -20,7 +20,7 @@ public class TrackingAI extends FlyerAI
 	}
 	
 	/*returns the angle through which the ship must rotate to be directly facing its destination*/
-	public double calcDesiredDirection()
+	public double calcDesiredDirectionChng()
 	{
 		double dest_vec_x = the_flyer.destinationX() - the_flyer.pos_x;
 		double dest_vec_y = the_flyer.destinationY() - the_flyer.pos_y;

@@ -116,7 +116,7 @@ public abstract class Flyer extends Targetter implements Targetable
 		pos_x += speed*GalacticStrategyConstants.TIME_GRANULARITY*Math.cos(direction);
 		pos_y += speed*GalacticStrategyConstants.TIME_GRANULARITY*Math.sin(direction);
 		
-		double desired_direction_chng = current_flying_AI.calcDesiredDirection();
+		double desired_direction_chng = current_flying_AI.calcDesiredDirectionChng();
 		double desired_speed = current_flying_AI.calcDesiredSpeed(desired_direction_chng);
 		
 		//change speed

@@ -9,7 +9,7 @@ public abstract class OwnableSatellite extends Satellite
 	Player owner;
 	
 	//for building facilities
-	int bldg_in_progress; //uses the constants specified in Facility
+	FacilityType bldg_in_progress; //uses the constants specified in Facility
 	long time_finish;
 	long time_start;
 	int next_facility_id;
@@ -29,6 +29,7 @@ public abstract class OwnableSatellite extends Satellite
 	{
 		next_facility_id=0;
 		facilities = new Hashtable<Integer, Facility>();
+		bldg_in_progress = FacilityType.NO_BLDG;
 	}
 	
 	//this is called when calculating taxes.
@@ -55,33 +56,33 @@ public abstract class OwnableSatellite extends Satellite
 	
 	public void updateConstruction(GameInterface GI, long t)
 	{
-		if(bldg_in_progress != Facility.NO_BLDG)
+		if(bldg_in_progress != FacilityType.NO_BLDG)
 		{
 			if(t >= time_finish) //if build is finished...
 			{
 				Facility new_fac;
 				switch(bldg_in_progress)
 				{
-					case Facility.BASE:
+					case BASE:
 						new_fac = new Base(this, time_finish);
 						synchronized(facilities_lock){
 							the_base = (Base)new_fac;
 						}
 						break;
-					case Facility.MINE:
+					case MINE:
 						new_fac = new Mine(this, time_finish);
 						break;
-					case Facility.SHIPYARD:
+					case SHIPYARD:
 						new_fac = new Shipyard(this, time_finish);
 						break;
 					default:
 						System.out.println("updateConstruction does not support this facility type!  ending construction and returning.");
-						bldg_in_progress = Facility.NO_BLDG;
+						bldg_in_progress = FacilityType.NO_BLDG;
 						return;
 				}
 				SwingUtilities.invokeLater(new FacilityAdder(new_fac, GI));
 				
-				bldg_in_progress = Facility.NO_BLDG;
+				bldg_in_progress = FacilityType.NO_BLDG;
 			}
 		}
 	}
@@ -119,37 +120,16 @@ public abstract class OwnableSatellite extends Satellite
 	}
 	
 	//return value is true if the building will be built, and false if the player does not have enough money/metal to build it
-	public boolean scheduleConstruction(int bldg_type, long start_time)
+	public boolean scheduleConstruction(FacilityType bldg_type, long start_time)
 	{
 		bldg_in_progress = bldg_type;
 		time_start = start_time;
 		
-		long build_time;
-		int met, mon; //metal and money costs
-		//this switch deteremines the cost of the building.
-		switch(bldg_type)
-		{
-			case Facility.BASE:
-				met=GalacticStrategyConstants.BASE_METAL_COST;
-				mon=GalacticStrategyConstants.BASE_MONEY_COST;
-				build_time = GalacticStrategyConstants.BASE_BUILD_TIME;
-				break;
-			case Facility.MINE:
-				met = GalacticStrategyConstants.MINE_METAL_COST;
-				mon = GalacticStrategyConstants.MINE_MONEY_COST;
-				build_time = GalacticStrategyConstants.MINE_BUILD_TIME;
-				break;
-			case Facility.SHIPYARD:
-				met=GalacticStrategyConstants.SHIPYARD_METAL_COST;
-				mon=GalacticStrategyConstants.SHIPYARD_MONEY_COST;
-				build_time = GalacticStrategyConstants.SHIPYARD_BUILD_TIME;
-				break;
-			default:
-				System.out.println("facility not recognized by schedule construction.  terminating construction.");
-				cancelConstruction();
-				return false;
-		}
+		long build_time = bldg_type.build_time;
+		int met = bldg_type.metal_cost, mon=bldg_type.money_cost; //metal and money costs
+		
 		time_finish = start_time+build_time;
+		
 		synchronized(owner.metal_lock){
 			synchronized(owner.money_lock){
 				if(owner.metal >= met && owner.money >= mon)
@@ -171,7 +151,7 @@ public abstract class OwnableSatellite extends Satellite
 	
 	public void cancelConstruction()
 	{
-		bldg_in_progress=Facility.NO_BLDG;
+		bldg_in_progress=FacilityType.NO_BLDG;
 	}
 	
 	public void setOwner(Player p, long time)
@@ -181,7 +161,8 @@ public abstract class OwnableSatellite extends Satellite
 		{
 			for(Integer i: facilities.keySet())
 			{
-				facilities.get(i).last_time = time; //makes it so that facilities do nothing when possessed by noone.  That is, they lie idle instead of stockpiling production.
+				facilities.get(i).last_time = time; //makes it so that facilities do nothing when possessed by no one.
+										//That is, they lie idle instead of stockpiling production.
 			}
 		}
 	}
@@ -200,8 +181,8 @@ public abstract class OwnableSatellite extends Satellite
 	public void setPop_growth_rate(double r){pop_growth_rate = r;}
 	public Base getThe_base(){return the_base;}
 	public void setThe_base(Base b){the_base = b;}
-	public int getBldg_in_progress(){return bldg_in_progress;}
-	public void setBldg_in_progress(int b){bldg_in_progress=b;}
+	public FacilityType getBldg_in_progress(){return bldg_in_progress;}
+	public void setBldg_in_progress(FacilityType b){bldg_in_progress=b;}
 	
 	public int getNext_facility_id(){return next_facility_id;}
 	public void setNext_facility_id(int n){next_facility_id=n;}
