@@ -139,19 +139,23 @@ public class GalacticMapPainter extends JPanel
 				Graphics2D g2 = (Graphics2D)g;
 				for(Ship s : ships_in_transit)
 				{
+					//System.out.println("ship in transit!");
 					g2.setColor(s.owner.getColor());
 					
 					//set up coordinates of equilateral triangle
 					double side = 10.0;
 					double h = side/2.0*Math.sqrt(3);
-					int[] xcoords = {(int)(-side/2.0), (int)(side/2.0), 0};
-					int[] ycoords = {(int)(-h/3.0),(int)(-h/3.0),(int)(2.0/3.0*h)};
+					int scale_x = scaleNum(s.getPos_x());
+					int scale_y = scaleNum(s.getPos_y());
+					
+					int[] xcoords = {(int)(-side/2.0) + scale_x, (int)(side/2.0) + scale_x, scale_x};
+					int[] ycoords = {(int)(-h/3.0) + scale_y,(int)(-h/3.0)+scale_y,(int)(2.0/3.0*h)+scale_y};
 					
 					// Get the current transform
 					AffineTransform saveAT = g2.getTransform();
 					
 					//draw ship s
-					g2.rotate(s.exit_direction, s.getPos_x(),s.getPos_y());
+					g2.rotate(s.exit_direction-Math.PI/2, scale_x, scale_y);
 					g2.drawPolygon(xcoords, ycoords,3);
 					g2.setTransform(saveAT);
 				}
@@ -245,5 +249,10 @@ public class GalacticMapPainter extends JPanel
 	private int scaleNum(int x)
 	{
 		return (int)(((double)x)*scale);
+	}
+	
+	private int scaleNum(double x)
+	{
+		return (int)(x*scale);
 	}
 }

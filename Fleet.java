@@ -5,6 +5,7 @@ public class Fleet
 	Hashtable<Integer, Ship> ships;
 	Player owner;
 	GSystem location;
+	Object lock = new Object();
 	
 	public Fleet(GSystem loc, Player o)
 	{
@@ -23,7 +24,10 @@ public class Fleet
 	
 	public void add(Ship s)
 	{
-		ships.put(s.getId(), s);
+		synchronized(lock)
+		{
+			ships.put(s.getId(), s);
+		}
 		location.increaseClaim(owner);
 	}
 	
@@ -31,7 +35,11 @@ public class Fleet
 	{
 		//this removes the ship.  remove() returns the ship if the ship was in the hashtable, so
 		//the instanceof makes sure we are not removing a ship that has already been removed before decreasing the claim
-		Boolean remove_successful = (ships.remove(s.getId()) instanceof Ship);
+		Boolean remove_successful;
+		synchronized(lock)
+		{
+			remove_successful = (ships.remove(s.getId()) instanceof Ship);
+		}
 		if(remove_successful)
 			location.decreaseClaim(owner);
 		

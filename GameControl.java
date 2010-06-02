@@ -868,7 +868,22 @@ public class GameControl
 			}
 		}
 		
-		//update all data
+		//update all intersystem data
+		for(int i=0; i<players.length; i++)
+		{
+			if(players[i] != null)
+			{
+				Iterator<Ship> ship_it = players[i].ships_in_transit.iterator();
+				Ship s;
+				while(ship_it.hasNext())
+				{
+					s=ship_it.next();
+					s.moveDuringWarp(time_elapsed, ship_it); //the iterator is passed so that moveDuringWarp can remove the ship from the iteration, and by doing so from ships_in_transit
+				}
+			}
+		}
+		
+		//update data in all systems
 		for(GSystem sys : map.systems)
 		{
 			for(Satellite sat : sys.orbiting)
@@ -907,9 +922,12 @@ public class GameControl
 			{
 				for(int i=0; i<sys.fleets.length; i++)
 				{
-					for(Integer j : sys.fleets[i].ships.keySet())
+					synchronized(sys.fleets[i].lock)
 					{
-						sys.fleets[i].ships.get(j).update(update_to);
+						for(Integer j : sys.fleets[i].ships.keySet())
+						{
+							sys.fleets[i].ships.get(j).update(update_to);
+						}
 					}
 				}
 				

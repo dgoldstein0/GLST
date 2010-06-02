@@ -58,6 +58,10 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	double gal_scale; //the scale which the galaxy is painted at.
 	HashSet<GSystem> selected_sys; //stores a set of currently selected systems - that is, a set of one item.  This is necessary because multiple selection is possible in GDFrame
 	
+	int galaxy_state;
+		static final int GAL_NORMAL=0;
+		static final int CHOOSE_WARP_DEST=1;
+	
 	
 	SystemPainter SystemPanel;
 	GSystem sys,prev_sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
@@ -73,7 +77,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	long last_time_recentered;
 	
 	int system_state;
-		final static int NORMAL=0;
+		final static int SYS_NORMAL=0;
 		final static int SELECT_DESTINATION=1;
 		
 	static int EDGE_BOUND=20; //this is the distance from the edge of the system, in pixels, at which the system will start to be scrolled
@@ -249,7 +253,8 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		//set up game control
 		GC = new GameControl(this);
 		
-		system_state = NORMAL;
+		system_state = SYS_NORMAL;
+		galaxy_state = GAL_NORMAL;
 		setupGraphics();
 		
 		//set up in-game menu for later display
@@ -300,12 +305,15 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			graphics_started=true;
 			
 			//make sure to change cursor back to normal
-			theinterface.setCursor(Cursor.getDefaultCursor());
-			selected_in_sys=null;
-			displayNoPanel();
+			if(galaxy_state == GAL_NORMAL)
+			{
+				theinterface.setCursor(Cursor.getDefaultCursor());
+				selected_in_sys=null;
+				displayNoPanel();
+			}
 		}
 		gal_scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
-		GalaxyPanel.paintGalaxy(GC.map, selected_sys, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, GC.players[GC.player_id].ships_in_transit, gal_scale);
+		GalaxyPanel.paintGalaxy(GC.map, selected_sys, (galaxy_state== GAL_NORMAL) ? GDFrame.DRAG_NONE : GDFrame.DRAG_RANGE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, GC.players[GC.player_id].ships_in_transit, gal_scale);
 		frame.setVisible(true); //makes all components within the frame displayable.  frame.pack() does this too, but pack resizes the frame to fit all components in their preferred sizes
 	}
 	
@@ -337,7 +345,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			{
 				gal_scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
 				//System.out.println(Double.toString(gal_scale));
-				GalaxyPanel.paintGalaxy(GC.map, selected_sys, GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, GC.players[GC.player_id].ships_in_transit, gal_scale);
+				GalaxyPanel.paintGalaxy(GC.map, selected_sys, (galaxy_state== GAL_NORMAL) ? GDFrame.DRAG_NONE : GDFrame.DRAG_RANGE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, GC.players[GC.player_id].ships_in_transit, gal_scale);
 			}
 			else //before getting to here, sys and selected_in_sys should be specified.  the latter may be null.
 			{
@@ -528,18 +536,46 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 
 	public void mouseReleased(MouseEvent e) {
 		if(graphics_started) {
-			if(isGalaxyDisplayed()){
-				selectSystemAt(((double)e.getX())/gal_scale, ((double)e.getY())/gal_scale);
-				if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2 && sys instanceof GSystem)
-					drawSystem();
-				else
-					redraw();
-			} else { //system is displayed
+			if(isGalaxyDisplayed())
+			{
+				switch(galaxy_state)
+				{
+					case GAL_NORMAL:
+						selectSystemAt(((double)e.getX())/gal_scale, ((double)e.getY())/gal_scale);
+						if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2 && sys instanceof GSystem)
+							drawSystem();
+						else
+							redraw();
+						break;
+					case CHOOSE_WARP_DEST:
+						GSystem the_sys = findSystemAt(((double)e.getX())/gal_scale, ((double)e.getY())/gal_scale);
+						if(the_sys != null)
+						{
+							int x_dif = the_sys.x-sys.x;
+							int y_dif = the_sys.y-sys.y;
+							int range = ShipPanel.the_ship.warpRange();
+							
+							if(x_dif*x_dif + y_dif*y_dif <= range*range)
+							{
+								//set this as the ship's warp destination
+								ShipPanel.the_ship.orderToWarp(GC.TC.getTime(), the_sys);
+								drawSystem();
+								galaxy_state=GAL_NORMAL;
+							}
+						}
+						break;
+					default:
+						System.out.println("galaxy state " + Integer.toString(galaxy_state) +" not supported in GameInterface.mouseReleased :(");
+						break;
+				}
+			}
+			else
+			{ //system is displayed
 				if(e.getX() >= theinterface.getWidth() - SystemPainter.arrow_size && e.getY() <= SystemPainter.arrow_size)
 					drawGalaxy();
 				else
 				{
-					if(system_state == NORMAL && e.getButton() == MouseEvent.BUTTON1)
+					if(system_state == SYS_NORMAL && e.getButton() == MouseEvent.BUTTON1)
 					{
 						//look for object to select
 						selectInSystemAt(e.getX(), e.getY());
@@ -548,7 +584,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 					else if(system_state == SELECT_DESTINATION)
 					{
 						setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
-						system_state = NORMAL;
+						system_state = SYS_NORMAL;
 					}
 					else if(selected_in_sys instanceof Ship && e.getButton() == MouseEvent.BUTTON3)
 					{
@@ -559,22 +595,22 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		}
 	}
 	
-	private void selectSystemAt(double x, double y)
+	private void selectSystemAt(double x, double y) //arguments specified in Galaxy coordinates, not screen coordinates
+	{
+		sys=findSystemAt(x,y);
+		selected_sys.clear(); //deselect all
+		if(sys != null)
+			selected_sys.add(sys); //if found system, add it to the selection
+	}
+	
+	private GSystem findSystemAt(double x, double y) //arguments specified in Galaxy coordinates, not screen coordinates
 	{
 		for(GSystem the_sys : GC.map.systems) //BOOKMARK - this should search through GC.players[GC.player_id].known_systems
 		{
 			if(Math.hypot(the_sys.x - x, the_sys.y-y) <= GalacticStrategyConstants.SELECTION_TOLERANCE)
-			{
-				sys=the_sys;
-				selected_sys.clear();
-				selected_sys.add(sys);
-				return;
-			}
+				return the_sys;
 		}
-		
-		//if no system found, make sure to deselect
-		sys=null;
-		selected_sys.clear();
+		return null; //no system found
 	}
 	
 	private void selectInSystemAt(int mouse_x, int mouse_y)
@@ -781,6 +817,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		}
 		last_time_recentered = cur_time;
 		
+		//enforce bounds
 		if(sysScreenToDataX(0)<(theinterface.getWidth()-SYS_WIDTH)/2 || sysScreenToDataX(theinterface.getWidth())>(theinterface.getWidth()+SYS_WIDTH)/2)
 			sys_center_x = old_center_x;
 		

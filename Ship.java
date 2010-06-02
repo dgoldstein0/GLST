@@ -1,8 +1,9 @@
 import java.util.HashSet;
+import java.util.Iterator;
 
 public class Ship extends Flyer implements Selectable
 {
-	final static double ESCAPE_DIST = 400.0;
+	final static double ESCAPE_DIST = 300.0;
 	
 	Player owner;
 	
@@ -15,8 +16,9 @@ public class Ship extends Flyer implements Selectable
 		final static int MOVING =0;
 		final static int ATTACKING =1;
 		final static int TRAVEL_TO_WARP=2;
-		final static int IN_WARP=3;
-		final static int EXIT_WARP=4;
+		final static int ENTER_WARP=3;
+		final static int IN_WARP=4;
+		final static int EXIT_WARP=5;
 	
 	//used for warping
 	GSystem warp_destination;
@@ -78,9 +80,18 @@ public class Ship extends Flyer implements Selectable
 					break;
 				case TRAVEL_TO_WARP:
 					if(clearToWarp())
+					{
+						System.out.println("clear to warp!");
+						mode=ENTER_WARP;
+						current_flying_AI = new SpeedUpAI(this);
+					}
+					break;
+				case ENTER_WARP:
+					if(fastEnoughToWarp())
 						engageWarpDrive();
 					break;
 				case EXIT_WARP:
+					System.out.println(Double.toString(speed));
 					if(speed <= type.max_speed)
 						mode=MOVING;
 					break;
@@ -94,14 +105,19 @@ public class Ship extends Flyer implements Selectable
 	}
 	
 	//this function is NOT incremental, i.e. it is only called once during updateGame() - before the updateGame function cycles through the systems
-	public void moveDuringWarp(long t)
+	//this function returns true if the ship exits warp, false otherwise.
+	public boolean moveDuringWarp(long t, Iterator<Ship> ship_it)
 	{
+		//System.out.println("move during warp");
 		if(mode==IN_WARP)
 		{
+			//System.out.println("...warping...");
 			if(t >= arrival_time)
 			{
-				disengageWarpDrive();
+				//System.out.println("arriving...")
+				disengageWarpDrive(ship_it);
 				advanceTime(arrival_time); //takes care of saving data and advancing time for us
+				return true;
 			}
 			else
 			{
@@ -109,13 +125,33 @@ public class Ship extends Flyer implements Selectable
 				pos_x += dist_moved*exit_vec_x;
 				pos_y += dist_moved*exit_vec_y;
 				time=t;
+				return false;
 			}
 		}
+		return false;
+	}
+	
+	private boolean fastEnoughToWarp()
+	{
+		return (speed >= GalacticStrategyConstants.WARP_EXIT_SPEED);
+	}
+	
+	protected double getAccel()
+	{
+		if(mode==ENTER_WARP || mode== EXIT_WARP)
+			return type.warp_accel;
+		else
+			return type.accel_rate;
+	}
+	
+	protected boolean enforceSpeedCap()
+	{
+		return (mode != ENTER_WARP); //only enforce if mode is NOT enter warp, i.e. ships can go superspeed when warping
 	}
 	
 	public void orderToMove(long t, Destination d)
 	{
-		if(mode != EXIT_WARP && mode != IN_WARP) //to ensure if the interface tries to issue an order, it can't
+		if(mode != EXIT_WARP && mode != IN_WARP && mode != ENTER_WARP) //to ensure if the interface tries to issue an order, it can't
 		{
 			destination = d;
 			advanceTime(t);
@@ -131,7 +167,7 @@ public class Ship extends Flyer implements Selectable
 	
 	public void orderToAttack(long t, Targetable tgt)
 	{
-		if(mode != EXIT_WARP && mode != IN_WARP)
+		if(mode != EXIT_WARP && mode != IN_WARP && mode != ENTER_WARP)
 		{
 			//System.out.println(Integer.toString(id) + "orderToAttack: t is " + Long.toString(t));
 			
@@ -149,9 +185,10 @@ public class Ship extends Flyer implements Selectable
 	
 	public void orderToWarp(long t, GSystem sys)
 	{
-		if(mode != EXIT_WARP && mode != IN_WARP)
+		if(mode != EXIT_WARP && mode != IN_WARP && mode != ENTER_WARP)
 		{
-			//NEED TO IMPLEMENT
+			//NEED TO WORK ON
+			mode=TRAVEL_TO_WARP;
 			advanceTime(t);
 			warp_destination=sys;
 			
@@ -164,15 +201,18 @@ public class Ship extends Flyer implements Selectable
 			exit_vec_x /= exit_vec_len;
 			exit_vec_y /= exit_vec_len;
 			
-			exit_direction = Math.atan2(exit_vec_x, exit_vec_y);
+			exit_direction = Math.atan2(exit_vec_y, exit_vec_x);
 			
 			current_flying_AI = new WarpAI(this);
 		}
 	}
 	
+	public int warpRange(){return type.warp_range;}
+	
 	private void engageWarpDrive()
 	{
 		//This function works very much like the destroyed() function
+		System.out.println("Engaging warp drive....");
 		
 		//remove from listing in system
 		location.fleets[owner.getId()].remove(this); 
@@ -192,24 +232,27 @@ public class Ship extends Flyer implements Selectable
 		pos_x=location.x;
 		pos_y=location.y;
 		arrival_time = time+(long)(exit_vec_len/type.warp_speed);
+		System.out.println("arrival time is " + Long.toString(arrival_time));
 		
+		mode=IN_WARP;
 		owner.ships_in_transit.add(this);
 	}
 	
-	private void disengageWarpDrive()
+	private void disengageWarpDrive(Iterator<Ship> ship_it)
 	{
+		System.out.println("Disengaging warp drive");
 		location=warp_destination;
 		
 		//rewrite physics values
-		pos_x=-exit_vec_x*1.5*ESCAPE_DIST + location.absoluteCurX();
-		pos_y=-exit_vec_y*1.5*ESCAPE_DIST + location.absoluteCurY();
+		pos_x=-exit_vec_x*ESCAPE_DIST + location.absoluteCurX();
+		pos_y=-exit_vec_y*ESCAPE_DIST + location.absoluteCurY();
 		speed = GalacticStrategyConstants.WARP_EXIT_SPEED;
 		direction = exit_direction; //should already be true, but just in case
 		
 		mode=EXIT_WARP;
 		current_flying_AI = new StopAI();
 		
-		owner.ships_in_transit.remove(this);
+		ship_it.remove();//owner.ships_in_transit.remove(this);
 		location.fleets[owner.getId()].add(this);
 	}
 	
@@ -219,7 +262,8 @@ public class Ship extends Flyer implements Selectable
 				to the exit vector is longer than the escape distance
 		OR	3) the length of the vector from the center of the system is greater than the
 				escape distance AND the angle between this and the exit vector is
-				greater than 90 degrees.
+				less than 90 degrees. (remember - radial vec points from center to ship,
+				not other way around)
 	*/
 	
 	private boolean clearToWarp()
@@ -233,10 +277,10 @@ public class Ship extends Flyer implements Selectable
 		if(radial_vec_x*radial_vec_x + radial_vec_y*radial_vec_y > ESCAPE_DIST*ESCAPE_DIST)
 		{
 			double dot_product = radial_vec_x*exit_vec_x + radial_vec_y*exit_vec_y;
-			if(dot_product < 0)
-				//the dot product of the radial vector and the exit vector is negative
-				//means the cosine of the angle between the vectors is negative and thus the
-				//angle between them is greater than 90 degrees
+			if(dot_product > 0)
+				//the dot product of the radial vector and the exit vector is positive
+				//means the cosine of the angle between the vectors is positive and thus the
+				//angle between them is less than 90 degrees
 				return true;
 			else //check the component of the radial vector perpendicular to the exit vector.  It is
 				//a precondition that the radial vector is longer than the ESCAPE_DIST for one of its

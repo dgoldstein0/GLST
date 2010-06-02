@@ -119,11 +119,18 @@ public abstract class Flyer extends Targetter implements Targetable
 		double desired_direction_chng = current_flying_AI.calcDesiredDirectionChng();
 		double desired_speed = current_flying_AI.calcDesiredSpeed(desired_direction_chng);
 		
+		double accel = getAccel();
+		
 		//change speed
 		if(desired_speed < speed)
-			speed = Math.max(Math.max(speed - type.accel_rate*GalacticStrategyConstants.TIME_GRANULARITY, desired_speed), 0.0d);
+			speed = Math.max(Math.max(speed - accel*GalacticStrategyConstants.TIME_GRANULARITY, desired_speed), 0.0d);
 		else
-			speed = Math.min(Math.min(speed + type.accel_rate*GalacticStrategyConstants.TIME_GRANULARITY, desired_speed), type.max_speed);
+		{
+			if(enforceSpeedCap()) //false allows ships to exceed their speed limitations
+				speed = Math.min(Math.min(speed + accel*GalacticStrategyConstants.TIME_GRANULARITY, desired_speed), type.max_speed);
+			else
+				speed = Math.min(speed + accel*GalacticStrategyConstants.TIME_GRANULARITY, desired_speed);
+		}
 		
 		//change direction
 		double actual_chng = Math.min(Math.abs(desired_direction_chng), Math.abs(type.max_angular_vel*GalacticStrategyConstants.TIME_GRANULARITY)); //finds the absolute value of the amount the direction changes
@@ -136,6 +143,13 @@ public abstract class Flyer extends Targetter implements Targetable
 			direction -= 2*Math.PI;
 		else if(direction<-Math.PI)
 			direction += 2*Math.PI;
+	}
+	
+	protected boolean enforceSpeedCap(){return true;} //overriding this function allows ships to speed up to warp.  note that if it were Private it would not be overrideable
+	
+	protected double getAccel()
+	{
+		return type.accel_rate;
 	}
 	
 	public double destinationX()

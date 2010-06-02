@@ -105,14 +105,15 @@ public class GalacticStrategyConstants
 	static final double Attacking_Range_Sq=40000.0;
 	static final double Attacking_Range=200.0;
 	static final long Attacking_cooldown=1200;
-	static final double WARP_EXIT_SPEED = 1.5; //px/ms
+	static final double WARP_EXIT_SPEED = .75; //px/ms
 	
 	//setup for ship types
 	final static int MISSILE = 0;
 	final static int JUNK=1;
-	final static ShipType[] sTypes={new ShipType("Missile", 5, 10, 0, 0, 2000, 0, .20d, "images/missile.png", .15, .0015, .0001, 0.0, 0.0),
-						new ShipType("Junk", 20, 100, 100, 100, 10000, 200, .30d, "images/junk.png", .06, .0007, .00003, .0003, .0008)};
-
+										//name	fuel	hull	money	metal	time to build	troops	default scale	image				max speed	max ang. vel.	max accel	warp accel	warp speed	warp range
+	final static ShipType[] sTypes={	new ShipType("Missile",	5,	10,	0,	0,	2000,		0,	.20d,		"images/missile.png",	.15,		.0015,	.0001,	0.0,		0.0,		0),
+							new ShipType("Junk",		20,	100,	100,	100,	10000,	200,	.30d,		"images/junk.png",	.06,		.0007,	.00003,	.0005,	.0016,	100)};
+	
 	final static int MISSILE_DAMAGE = 10;
 	final static double INITIAL_MISSILE_SPEED = .04;
 	
