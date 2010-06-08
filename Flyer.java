@@ -116,7 +116,26 @@ public abstract class Flyer extends Targetter implements Targetable
 		pos_x += speed*GalacticStrategyConstants.TIME_GRANULARITY*Math.cos(direction);
 		pos_y += speed*GalacticStrategyConstants.TIME_GRANULARITY*Math.sin(direction);
 		
-		double desired_direction_chng = current_flying_AI.calcDesiredDirectionChng();
+		double desired_direction_chng;
+
+		switch(current_flying_AI.directionType())
+		{
+			case FlyerAI.ABS_DIRECTION:
+				desired_direction_chng = current_flying_AI.calcDesiredDirection() - direction;
+				if(desired_direction_chng > Math.PI)
+					desired_direction_chng -= 2.0*Math.PI;
+				else if(desired_direction_chng < -Math.PI)
+					desired_direction_chng += 2.0*Math.PI;
+				break;
+			case FlyerAI.REL_DIRECTION:
+				desired_direction_chng = current_flying_AI.calcDesiredDirection();
+				break;
+			default:
+				System.out.println("directionType not supported by Flyer.moveIncrement");
+				return; //to avoid that desired_direction_chng might not be initialized.
+				//break;
+		}
+		
 		double desired_speed = current_flying_AI.calcDesiredSpeed(desired_direction_chng);
 		
 		double accel = getAccel();

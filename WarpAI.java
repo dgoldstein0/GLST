@@ -7,9 +7,14 @@ public class WarpAI extends FlyerAI
 		the_flyer=f;
 	}
 	
-	public double calcDesiredDirectionChng()
+	public double calcDesiredDirection()
 	{
-		return ((Ship)the_flyer).exit_direction-the_flyer.direction;
+		return ((Ship)the_flyer).exit_direction;
+	}
+	
+	public int directionType()
+	{
+		return FlyerAI.ABS_DIRECTION;
 	}
 	
 	public double calcDesiredSpeed(double angle_chng)

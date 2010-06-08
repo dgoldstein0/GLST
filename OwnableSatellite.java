@@ -9,7 +9,7 @@ public abstract class OwnableSatellite extends Satellite
 	Player owner;
 	
 	//for building facilities
-	FacilityType bldg_in_progress; //uses the constants specified in Facility
+	private FacilityType bldg_in_progress; //uses the constants specified in Facility
 	long time_finish;
 	long time_start;
 	int next_facility_id;

@@ -1,15 +1,15 @@
 public class SpeedUpAI extends FlyerAI
 {
-	Flyer the_flyer;
+	public SpeedUpAI(){}
 	
-	public SpeedUpAI(Flyer f)
-	{
-		the_flyer=f;
-	}
-	
-	public double calcDesiredDirectionChng()
+	public double calcDesiredDirection()
 	{
 		return 0.0;
+	}
+	
+	public int directionType()
+	{
+		return FlyerAI.REL_DIRECTION;
 	}
 	
 	public double calcDesiredSpeed(double dir_chng)

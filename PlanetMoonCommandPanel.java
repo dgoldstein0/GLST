@@ -23,7 +23,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	
 	//for facility-building progress
 	JProgressBar progress_bar;
-	boolean need_to_reset;
+	private boolean need_to_reset;
 	
 	boolean no_base_mode;
 	
@@ -114,11 +114,6 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 			//cancel any half-started build.
 			choices_panel.removeAll();
 			
-			//set the buttons to reflect building/not building
-			boolean is_building = (((OwnableSatellite)the_sat).bldg_in_progress != FacilityType.NO_BLDG);
-			build.setEnabled(!is_building);
-			cancel.setEnabled(is_building);
-			
 			addPopulation();
 			
 			if(((OwnableSatellite)s).getOwner() instanceof Player)
@@ -156,17 +151,11 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 		progress_bar = new JProgressBar(0,1000);
 		stats_panel.add(progress_bar);
 		
-		//set the status of the buttons
-		if(((OwnableSatellite)the_sat).bldg_in_progress == FacilityType.NO_BLDG)
-		{
-			build.setEnabled(true);
-			cancel.setEnabled(false);
-		}
-		else
-		{
-			build.setEnabled(false);
-			cancel.setEnabled(true);
-		}
+		//set the buttons to reflect building/not building
+		boolean is_building = (((OwnableSatellite)the_sat).getBldg_in_progress() != FacilityType.NO_BLDG);
+		build.setEnabled(!is_building);
+		cancel.setEnabled(is_building);
+		need_to_reset=is_building;
 		
 		JPanel button_strip = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		button_strip.add(build);
@@ -185,9 +174,10 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 			pop.setText("Population: " + ((OwnableSatellite)the_sat).getPopulation());
 			
 			//if building in progress, update progress
-			if(((OwnableSatellite)the_sat).bldg_in_progress != FacilityType.NO_BLDG)
+			if(((OwnableSatellite)the_sat).getBldg_in_progress() != FacilityType.NO_BLDG)
 			{
 				double prog = ((OwnableSatellite)the_sat).constructionProgress(t);
+				//System.out.println("PMCPanel update to progress " + Double.toString(prog));
 				progress_bar.setValue((int)(1000.0*prog));
 			}
 			else if(need_to_reset)

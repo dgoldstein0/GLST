@@ -83,7 +83,7 @@ public class Ship extends Flyer implements Selectable
 					{
 						System.out.println("clear to warp!");
 						mode=ENTER_WARP;
-						current_flying_AI = new SpeedUpAI(this);
+						current_flying_AI = new SpeedUpAI();
 					}
 					break;
 				case ENTER_WARP:
@@ -91,7 +91,6 @@ public class Ship extends Flyer implements Selectable
 						engageWarpDrive();
 					break;
 				case EXIT_WARP:
-					System.out.println(Double.toString(speed));
 					if(speed <= type.max_speed)
 						mode=MOVING;
 					break;
