@@ -1,5 +1,3 @@
-import java.io.IOException;
-
 public class TestGameClient
 {
 	public static void main(String[] args)

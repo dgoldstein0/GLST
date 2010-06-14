@@ -1,5 +1,3 @@
-import java.util.*;
-
 public abstract class Satellite extends StellarObject implements Positioning, Destination
 {
 	Orbit orbit;

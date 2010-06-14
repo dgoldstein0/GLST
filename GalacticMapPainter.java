@@ -89,7 +89,7 @@ public class GalacticMapPainter extends JPanel
 				}
 			}
 			
-			if(selected instanceof HashSet)
+			if(selected != null)
 			{
 				for(GSystem sys : selected)
 				{
@@ -188,7 +188,7 @@ public class GalacticMapPainter extends JPanel
 		display_unnavigable=unnav;
 		ships_in_transit = transit;
 		
-		if(!(selected instanceof HashSet))
+		if(selected == null)
 			drag_options=GDFrame.DRAG_NONE;
 		else
 			drag_options=options;
@@ -236,7 +236,7 @@ public class GalacticMapPainter extends JPanel
 		this.ghost_x=ghost_x;
 		this.ghost_y=ghost_y;
 		
-		if(!(selected instanceof HashSet))
+		if(selected == null)
 			drag_options=GDFrame.DRAG_NONE;
 		else
 			drag_options=options;

@@ -1,5 +1,3 @@
-import java.util.*;
-
 public class Moon extends OwnableSatellite
 {
 	public Moon(int i, double m, String nm, int sz)

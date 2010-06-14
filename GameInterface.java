@@ -1,23 +1,17 @@
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.LayoutManager;
-import java.awt.Window;
 import java.awt.Point;
 import java.awt.AWTEvent;
 import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -421,7 +415,6 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	{
 		MouseEvent e=(MouseEvent)a;
 		int x, y;
-		JComponent c;
 		
 		Point corner;
 		if(e.getSource() instanceof JComponent)
@@ -621,7 +614,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		
 		ArrayList<Selectable> select_items = new ArrayList<Selectable>();
 		
-		if(sys.stars instanceof HashSet)
+		if(sys.stars != null)
 		{
 			for(Star st : sys.stars)
 			{
@@ -634,7 +627,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		}
 		
 		//search orbiting planets/objects
-		if(sys.orbiting instanceof ArrayList)
+		if(sys.orbiting != null)
 		{
 			for(Satellite orbiting : sys.orbiting)
 			{
@@ -644,7 +637,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 					select_items.add(orbiting);
 				}
 				
-				if(orbiting instanceof Planet && ((Planet)(orbiting)).orbiting instanceof ArrayList)
+				if(orbiting instanceof Planet && ((Planet)(orbiting)).orbiting != null)
 				{
 					Planet cur_planet=(Planet)orbiting;
 					for(Satellite sat : cur_planet.orbiting)
@@ -725,7 +718,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/sys_scale; //tolerance
 		
 		//search orbiting planets/objects
-		if(sys.orbiting instanceof ArrayList)
+		if(sys.orbiting != null)
 		{
 			for(Satellite sat : sys.orbiting)
 			{
@@ -736,7 +729,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 					break;
 				}
 				
-				if(sat instanceof Planet && ((Planet)(sat)).orbiting instanceof ArrayList)
+				if(sat instanceof Planet && ((Planet)(sat)).orbiting != null)
 				{
 					Planet cur_planet=(Planet)sat;
 					for(Satellite sat2 : cur_planet.orbiting)

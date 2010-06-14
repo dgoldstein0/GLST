@@ -99,7 +99,6 @@ public class GSystem implements Orbitable
 	public double massSum()
 	{
 		double sum=0;
-		if(stars instanceof HashSet)
 		{
 			for(Star st : stars)
 				sum += st.getMass();

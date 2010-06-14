@@ -1,4 +1,3 @@
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import java.util.*;
@@ -393,7 +392,7 @@ public class GameControl
 	
 	public class HostRunnable implements Runnable
 	{
-		public void HostRunnable()
+		public HostRunnable()
 		{
 		}
 		
@@ -735,7 +734,7 @@ public class GameControl
 		
 		ByteArrayInputStream sr = new ByteArrayInputStream(str.toString().getBytes("UTF-8"));
 		XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(sr));
-		Galaxy map =(Galaxy) decoder.readObject();
+		map =(Galaxy) decoder.readObject();
 		decoder.close();
 		
 		if(SAVE)

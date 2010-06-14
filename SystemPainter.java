@@ -61,7 +61,7 @@ public class SystemPainter extends JPanel
 		if(system instanceof GSystem)
 		{
 			//draw stars
-			if(system.stars instanceof HashSet)
+			if(system.stars != null)
 			{
 				for(Star st : system.stars)
 				{
@@ -72,7 +72,7 @@ public class SystemPainter extends JPanel
 			}
 			
 			//draw orbiting objects
-			if(system.orbiting instanceof ArrayList)
+			if(system.orbiting != null)
 			{
 				g2.setFont(g2.getFont().deriveFont(Font.BOLD,12.0f));
 				FontMetrics m=g2.getFontMetrics(g2.getFont());
@@ -97,7 +97,7 @@ public class SystemPainter extends JPanel
 					}
 					
 					//draw objects orbiting planets					
-					if(orbiting instanceof Planet && ((Planet)orbiting).orbiting instanceof ArrayList)
+					if(orbiting instanceof Planet && ((Planet)orbiting).orbiting != null)
 					{
 						ArrayList<Satellite> planet_sats = ((Planet)orbiting).orbiting;
 						for(Satellite sat : planet_sats)
@@ -302,7 +302,7 @@ public class SystemPainter extends JPanel
 		}
 		
 		double a = ((Satellite)obj).orbit.a*scale;
-		double c = ((Satellite)obj).orbit.c*scale;
+		//double c = ((Satellite)obj).orbit.c*scale;
 		double b = ((Satellite)obj).orbit.b*scale;
 		
 		double theta;

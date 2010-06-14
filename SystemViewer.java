@@ -306,7 +306,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private void TimeUpdater(long time)
 	{
-		if(system.orbiting instanceof ArrayList)
+		if(system.orbiting != null)
 		{
 			for(Satellite sat : system.orbiting)
 			{
@@ -314,7 +314,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				sat.orbit.move(time);
 				if(sat instanceof Planet)
 				{
-					if(((Planet)sat).orbiting instanceof ArrayList)
+					if(((Planet)sat).orbiting != null)
 					{
 						for(Satellite sat2 : ((Planet)sat).orbiting)
 						{
@@ -363,7 +363,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		//search for stars, then orbiting objects and their orbiting
 		final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/scale; //tolerance
 		
-		if(system.stars instanceof HashSet)
+		if(system.stars != null)
 		{
 			for(Star st : system.stars)
 			{
@@ -377,7 +377,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		}
 		
 		//search orbiting planets/objects
-		if(system.orbiting instanceof ArrayList)
+		if(system.orbiting != null)
 		{
 			for(Satellite orbiting : system.orbiting)
 			{
@@ -388,7 +388,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 					return;
 				}
 				
-				if(orbiting instanceof Planet && ((Planet)(orbiting)).orbiting instanceof Set)
+				if(orbiting instanceof Planet && ((Planet)(orbiting)).orbiting != null)
 				{
 					Planet cur_planet=(Planet)orbiting;
 					for(Satellite sat : cur_planet.orbiting)
@@ -594,7 +594,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		boolean success = locationStarSuitable(x, y);
 		if(success)
 		{
-			if (!(system.stars instanceof HashSet))
+			if (system.stars == null)
 				system.stars=new HashSet<Star>();
 			Star new_star = new Star("", DEFAULT_STAR_SIZE, DEFAULT_STAR_MASS, GalacticStrategyConstants.COLOR_NULL, x, y, system);
 			system.stars.add(new_star);
@@ -610,7 +610,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private void recalculateOrbits()
 	{
-		if(system.orbiting instanceof ArrayList)
+		if(system.orbiting != null)
 		{
 			for(Satellite sat: system.orbiting)
 			{

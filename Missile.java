@@ -38,7 +38,6 @@ public class Missile extends Flyer
 	//returns true when the missile detonates, false otherwise
 	public boolean update(long t, Iterator<Integer> iteration)
 	{
-		boolean c=false;
 		if (time <= t)
 		{
 			moveIncrement();

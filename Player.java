@@ -1,8 +1,6 @@
 import javax.swing.*;
-import java.awt.event.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 public class Player
 {

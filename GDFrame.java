@@ -753,6 +753,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	public void keyPressed(KeyEvent e){}
 	public void keyTyped(KeyEvent e){}
 	
+	@SuppressWarnings("unchecked")
 	public void keyReleased(KeyEvent e)
 	{
 		//System.out.println("KEY!!!");
@@ -904,7 +905,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			//look for a system as a potential point for a user to start a drag
 			GSystem sys=locateSystem(e.getX(),e.getY());
 			
-			if(selected_systems instanceof HashSet)//prepare for potential drag
+			if(selected_systems != null)//prepare for potential drag
 			{
 				boolean match=false;
 				//multiple system dragging set up
@@ -981,7 +982,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			}
 		
 			maybeShowContextMenu(e);
-			if(e.getButton()==MouseEvent.BUTTON1 && e.getClickCount()==2 && selected_systems instanceof HashSet && enable) //ignore double right click, and double left click when no systems are selected
+			if(e.getButton()==MouseEvent.BUTTON1 && e.getClickCount()==2 && selected_systems != null && enable) //ignore double right click, and double left click when no systems are selected
 			{
 				if(selected_systems.size()==1) //double click only opens a system when only 1 system is selected.  Happens when alt/shift not held
 				{
@@ -997,7 +998,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		{
 			drag_end=false;
 			drawGalaxy();
-			if(selected_systems instanceof HashSet && selected_systems.size()!=0)
+			if(selected_systems != null && selected_systems.size()!=0)
 				setUndoPoint(); //the drag is captured and undoable
 		}
 		
@@ -1007,7 +1008,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			wait_to_add_sys=false;
 		}
 		
-		if(possibly_sel_desel_sys instanceof HashSet)
+		if(possibly_sel_desel_sys != null)
 		{
 			selected_systems = combineSelection();
 			possibly_sel_desel_sys=null;
@@ -1046,7 +1047,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	{
 		if(!wait_to_add_sys && map instanceof Galaxy)
 		{
-			if(selected_systems instanceof HashSet && drag_start)
+			if(selected_systems != null && drag_start)
 			{
 				boolean modified=false;
 				//checks to make sure that no systems in a multi-system drag a moved outside the map area
@@ -1100,7 +1101,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				
 				possibly_sel_desel_sys=new HashSet<GSystem>();
 				
-				if(map.systems instanceof ArrayList)
+				if(map.systems != null)
 				{
 					for(GSystem sys : map.systems)
 					{
@@ -1113,7 +1114,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				panel.paintSelect(map, combineSelection(), drag_options, current_nav_level, nav_display, display_unnavigable, null, x1, y1, x2, y2, 1.0d);
 				drag_end=true;
 				
-				if(selected_systems instanceof HashSet && selected_systems.size() != 0)
+				if(selected_systems != null && selected_systems.size() != 0)
 					systemIsSelected();
 				else
 					selected_systems=null;
@@ -1125,7 +1126,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	private HashSet<GSystem> combineSelection()
 	{
 		HashSet<GSystem> draw_as_sel_sys=new HashSet<GSystem>();
-		if((shift_down_on_click || alt_down_on_click) && selected_systems instanceof HashSet)
+		if((shift_down_on_click || alt_down_on_click) && selected_systems != null)
 			draw_as_sel_sys.addAll(selected_systems);
 		
 		if(alt_down_on_click)
@@ -1151,7 +1152,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private GSystem locateSystem(int x_pos, int y_pos) throws NoSystemLocatedException
 	{
-		if(map instanceof Galaxy && map.systems instanceof ArrayList)
+		if(map instanceof Galaxy && map.systems != null)
 		{
 			for(GSystem sys : map.systems)
 			{
@@ -1170,7 +1171,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	{
 		//shift will allow the use to select multiple systems. shift-clicking a selected system deselects it.
 		if(button==MouseEvent.BUTTON1){
-			if((shift_down_on_click||alt_down_on_click) && selected_systems instanceof HashSet)
+			if((shift_down_on_click||alt_down_on_click) && selected_systems != null)
 			{
 				if(!selected_systems.contains(sys))
 					selected_systems.add(sys);
@@ -1200,7 +1201,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		{
 			//determine if system is selected.  if not, it will become the only selected system.  if it is, do nothing here.
 			boolean match=false;
-			if(selected_systems instanceof HashSet)
+			if(selected_systems != null)
 				match=selected_systems.contains(sys);
 				
 			if(!match)
@@ -1267,9 +1268,11 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	Action delete_action = new AbstractAction()
 	{
+		static final long serialVersionUID=123; //I have no clue what this is used for, something to do with Serializable
+		
 		public void actionPerformed(ActionEvent e)
 		{
-			if(selected_systems instanceof HashSet)
+			if(selected_systems != null)
 				deleteSystem();
 		}
 	};
@@ -1312,7 +1315,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		{
 			panel.max_dist_shown=(int)((JSlider)e.getSource()).getValue();
 			displayLimit();
-			if(selected_systems instanceof HashSet)
+			if(selected_systems != null)
 				drawGalaxy();
 		}
 		else if(e.getSource()==n_slide)
@@ -1344,7 +1347,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		else if(e.getSource()==t_nav)
 		{
 			int set_nav_to = Integer.valueOf(((JSpinner)e.getSource()).getValue().toString());
-			if(selected_systems instanceof HashSet)
+			if(selected_systems != null)
 			{
 				for(GSystem sys : selected_systems)
 					sys.navigability = set_nav_to;

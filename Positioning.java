@@ -1,5 +1,3 @@
-import java.util.*;
-
 interface Positioning extends Describable
 {
 	public abstract double absoluteCurX();

@@ -1,4 +1,3 @@
-import java.beans.XMLEncoder;
 import java.beans.XMLDecoder;
 import java.io.*;
 import java.net.ServerSocket;

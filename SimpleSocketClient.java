@@ -1,9 +1,7 @@
 import java.beans.*;
 import java.io.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.net.InetAddress;
 import java.net.Socket;
-import javax.swing.*;
 
 public class SimpleSocketClient
 {
@@ -63,10 +61,7 @@ public class SimpleSocketClient
 				System.out.println("failure");
 			System.out.println(Long.toString(tc.getTime()));
 			*/
-			Thread t = new Thread();
-			t.start();
-			t.sleep(10000);
-			t.join();
+			Thread.sleep(10000);
 			
 			OS.close();
 			encoder.close();
