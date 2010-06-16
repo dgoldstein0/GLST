@@ -7,6 +7,12 @@ public class Missile extends Flyer
 	public Missile(Ship s, Targetable t, long time)
 	{
 		super("", GalacticStrategyConstants.sTypes[GalacticStrategyConstants.MISSILE]);
+		
+		//set up ship_data array, as per the subclass' responsibility
+		ship_data=new FlyerDataSaver[data_capacity];
+		for(int i=0; i<ship_data.length; i++)
+			ship_data[i] = new FlyerDataSaver();
+		
 		target = t;
 		location = s.location;
 		id=location.next_missile_id;
@@ -27,7 +33,7 @@ public class Missile extends Flyer
 		current_flying_AI = new TrackingAI(this, 0.0, TrackingAI.NO_SLOWDOWN);
 		
 		this.time=time;
-		saveData();
+		saveData(ALL_DATA);
 	}
 	
 	public DestDescriber describer()
@@ -42,7 +48,7 @@ public class Missile extends Flyer
 		{
 			moveIncrement();
 			time += GalacticStrategyConstants.TIME_GRANULARITY;
-			saveData();
+			saveData(ALL_DATA);
 			
 			if (collidedWithTarget())
 			{

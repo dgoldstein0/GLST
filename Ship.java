@@ -30,6 +30,11 @@ public class Ship extends Flyer implements Selectable
 	public Ship(String nm, ShipType t, int id)
 	{
 		super(nm,t);
+		
+		ship_data=new ShipDataSaver[data_capacity];
+		for(int i=0; i<ship_data.length; i++)
+			ship_data[i] = new ShipDataSaver();
+		
 		this.id=id;
 		energy = t.max_energy;
 		max_energy = energy;
@@ -64,7 +69,7 @@ public class Ship extends Flyer implements Selectable
 	}
 	
 	//updates the ship an increment towards time t - moving and attacking.  return value is ignored
-	public boolean update(long t)
+	public boolean update(long t, Iterator<Integer> ship_iteration)
 	{
 		/*this if statement is necessary incase game is updated too slow.  For instance, update last to 60, then
 		an order is given which advances the ship to 80., but the next time all are updated to is 100, we want the
@@ -87,7 +92,7 @@ public class Ship extends Flyer implements Selectable
 					break;
 				case ENTER_WARP:
 					if(fastEnoughToWarp())
-						engageWarpDrive();
+						engageWarpDrive(ship_iteration);
 					break;
 				case EXIT_WARP:
 					if(speed <= type.max_speed)
@@ -97,7 +102,7 @@ public class Ship extends Flyer implements Selectable
 			time += GalacticStrategyConstants.TIME_GRANULARITY;
 			
 			//save data
-			saveData();
+			saveData(ALL_DATA);
 		}
 		return false;
 	}
@@ -207,13 +212,14 @@ public class Ship extends Flyer implements Selectable
 	
 	public int warpRange(){return type.warp_range;}
 	
-	private void engageWarpDrive()
+	private void engageWarpDrive(Iterator<Integer> ship_iteration)
 	{
 		//This function works very much like the destroyed() function
 		System.out.println("Engaging warp drive....");
 		
 		//remove from listing in system
-		location.fleets[owner.getId()].remove(this); 
+		ship_iteration.remove(); //remove via the iterator to avoid ConcurrentModificationException
+		//location.fleets[owner.getId()].remove(this);
 		
 		//notify aggressors
 		for(Targetter t : aggressors)

@@ -923,9 +923,11 @@ public class GameControl
 				{
 					synchronized(sys.fleets[i].lock)
 					{
-						for(Integer j : sys.fleets[i].ships.keySet())
+						Iterator<Integer> ship_iteration = sys.fleets[i].ships.keySet().iterator();
+						for(int j; ship_iteration.hasNext();)
 						{
-							sys.fleets[i].ships.get(j).update(update_to);
+							j=ship_iteration.next();
+							sys.fleets[i].ships.get(j).update(update_to, ship_iteration);
 						}
 					}
 				}
