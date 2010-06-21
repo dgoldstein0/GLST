@@ -1,9 +1,7 @@
 import java.util.HashSet;
 
-public abstract class Flyer extends Targetter implements Targetable
+public abstract class Flyer extends Targetter implements Targetable, Saveable
 {
-	final static int data_capacity=50;
-	
 	//these two constants are used by loadData for its second argument, to
 	//instruct it whether or not to call loadMoreData from the FlyerDataSaver (or subclass thereof)
 	//which it finds
@@ -22,8 +20,7 @@ public abstract class Flyer extends Targetter implements Targetable
 	double dest_x_coord;
 	double dest_y_coord;
 	
-	//for Targetable	
-	int hull_strength;
+	//for Targetable
 	int damage;
 	
 	double pos_x; //pos_x and pos_y indicate where in the system the ship is located
@@ -33,22 +30,20 @@ public abstract class Flyer extends Targetter implements Targetable
 	protected long time;
 	FlyerAI current_flying_AI;
 	
-	FlyerDataSaver ship_data[];
-	int index;  //for the data array
+	FlyerDataSaverControl<?> data_control;
 	
+	public void handleDataNotSaved(){removeFromGame();}
+	public abstract void removeFromGame();
+	
+	//subclasses are responsible for instantiating data_control
 	public Flyer(String nm, ShipType st)
 	{
 		name=nm;
 		type=st;
 		
 		damage=0;
-		hull_strength = st.hull;
 		
 		aggressors = new HashSet<Targetter>();
-		
-		//it is the subclasses responsibility to initialize the ship_data array
-		
-		index=0;
 	}
 	
 	public Flyer(){}
@@ -58,56 +53,7 @@ public abstract class Flyer extends Targetter implements Targetable
 		long prev_time = time;
 		time = (long)(Math.ceil((double)(t)/(double)(GalacticStrategyConstants.TIME_GRANULARITY))*GalacticStrategyConstants.TIME_GRANULARITY);
 		if(time != prev_time)//otherwise, data already got saved 
-			saveData(ALL_DATA);
-	}
-	
-	//loading and saving data functions
-	public void saveData(int amount_of_data_to_save)
-	{
-		//if(this instanceof Ship)
-		//	System.out.println(Integer.toString(((Ship)this).id) + " saving time " + Long.toString(time) + " at index " + Integer.toString(index));
-		
-		ship_data[index].saveData(this);
-		if(amount_of_data_to_save == ALL_DATA)
-			ship_data[index].saveMoreData(this);
-
-		index++;
-		if (index>data_capacity-1)
-			index=0;
-	}
-	
-
-	public void loadData(long t, int amount_of_data_to_get)
-	{
-		saveindex = index;
-		int stepback=(int) (Math.floor((time-t)/GalacticStrategyConstants.TIME_GRANULARITY) + 1);
-		//System.out.println("load data: t is " + Long.toString(t) + " and time is " + Long.toString(time) + ", so step back... " + Integer.toString(stepback));
-		if (stepback>50)
-		{
-			System.out.println("Error loading ship data: the delay is too long");
-		}
-		else
-		{
-			if (stepback<=index)
-				index-=stepback;
-			else
-				index+=data_capacity-stepback;			
-		}
-		//System.out.println(Integer.toString(index)+" "+Integer.toString(stepback));
-		if (ship_data[index]!=null)
-		{
-			ship_data[index].loadData(this);
-			if(amount_of_data_to_get == ALL_DATA)
-				ship_data[index].loadMoreData(this);
-		}
-		else System.out.println("Error loading ship data: data wasn't saved");	//BOOKMARK - we need a different way to detect this.  Or is this error even possible?
-	}
-	
-	private int saveindex;
-	
-	public void restoreIndex()
-	{
-		index=saveindex;
+			data_control.saveData();
 	}
 	
 	//ship physics functions
@@ -199,6 +145,7 @@ public abstract class Flyer extends Targetter implements Targetable
 	//methods to implement destination
 	public String imageLoc(){return type.getImg_loc();}
 	
+	//cache destination data
 	private long dest_coords_time=0; //there cannot be a call to getXCoord or getYCoord with t=0, since ships do not exist then, and if they do will not be targetting other ships
 	private double dest_pos_x;
 	private double dest_pos_y;
@@ -233,19 +180,17 @@ public abstract class Flyer extends Targetter implements Targetable
 		return dest_vel_y;
 	}
 	
+	//this method is used to fill in cached data
 	private void updateDestData(long t)
 	{
-		loadData(t, ONLY_FLYER_DATA); //but do not loadMoreData
+		int index_at_t = data_control.getIndexForTime(t);
 		//System.out.println("TIME is " + Long.toString(time) + " and t is " + Long.toString(t));
-		dest_pos_x = pos_x;
-		dest_pos_y = pos_y;
-		dest_vel_x = speed*Math.cos(direction);
-		dest_vel_y = speed*Math.sin(direction);
+		FlyerDataSaver<?> ds =  (FlyerDataSaver<?>)data_control.saved_data[index_at_t];
+		dest_pos_x = ds.px;
+		dest_pos_y = ds.py;
+		dest_vel_x = ds.sp*Math.cos(ds.dir);
+		dest_vel_y = ds.sp*Math.sin(ds.dir);
 		dest_coords_time = t;
-		restoreIndex();
-		
-		//index-1 because index is set to point to the next place to save data
-		ship_data[(index+data_capacity-1)%data_capacity].loadData(this);
 	}
 	
 	//for Targetable
@@ -256,7 +201,7 @@ public abstract class Flyer extends Targetter implements Targetable
 	public void addDamage(int d)
 	{
 		damage+=d;
-		if(damage>=hull_strength)
+		if(damage>=type.hull)
 			destroyed();
 	}
 	
@@ -270,12 +215,12 @@ public abstract class Flyer extends Targetter implements Targetable
 	public double getDirection(){return direction;}
 	public void setSpeed(double s){speed=s;}
 	public void setDirection(double d){direction=d;}
+	public long getTime(){return time;}
+	public void setTime(long t){time=t;}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 	public int getDamage(){return damage;}
 	public void setDamage(int d){damage=d;}
-	public int getHull_strength(){return hull_strength;}
-	public void setHull_strength(int hs){hull_strength=hs;}
 	public int getId(){return id;}
 	public void setId(int i){id=i;}
 }

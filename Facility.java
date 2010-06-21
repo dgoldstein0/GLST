@@ -1,7 +1,7 @@
 
 import java.util.HashSet;
 
-public abstract class Facility implements Targetable
+public abstract class Facility implements Targetable, RelaxedSaveable
 {	
 	OwnableSatellite location;
 	int id;
@@ -11,6 +11,8 @@ public abstract class Facility implements Targetable
 	int damage;
 	
 	long last_time;//the last time it was updated
+	
+	RelaxedDataSaverControl<? extends Facility> data_control; //must be instantiated by subclasses
 	
 	public Facility(OwnableSatellite l, long t, int endu)
 	{
@@ -23,6 +25,7 @@ public abstract class Facility implements Targetable
 		
 		endurance=endu;
 		damage=0;
+		aggressors = new HashSet<Targetter>();
 	}
 	
 	public void addDamage(int d)
@@ -30,6 +33,7 @@ public abstract class Facility implements Targetable
 		damage+=d;
 		if(damage>=endurance)
 			destroyed();
+		data_control.saveData();
 	}
 	
 	public void destroyed() //default option.  Base overrides this
@@ -42,8 +46,18 @@ public abstract class Facility implements Targetable
 		return new FacilityDescriber(this);
 	}
 	
+	public void handleDataNotSaved(){removeFromGame();}
+	
+	public void removeFromGame()
+	{
+		//should probably cache the facility for recall... but anyway
+		location.facilities.remove(this);
+	}
+	
 	public Facility(){}
 	
+	public long getLast_time(){return last_time;}
+	public void setLast_time(long t){last_time=t;}
 	public double getXCoord(long t){return location.getXCoord(t);}
 	public double getYCoord(long t){return location.getYCoord(t);}
 	public double getXVel(long t){return location.getXVel(t);}

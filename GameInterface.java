@@ -339,7 +339,21 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			{
 				gal_scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
 				//System.out.println(Double.toString(gal_scale));
-				GalaxyPanel.paintGalaxy(GC.map, selected_sys, (galaxy_state== GAL_NORMAL) ? GDFrame.DRAG_NONE : GDFrame.DRAG_RANGE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, GC.players[GC.player_id].ships_in_transit, gal_scale);
+				int options=GDFrame.DRAG_NONE;
+				switch(galaxy_state)
+				{
+					case GAL_NORMAL:
+						options=GDFrame.DRAG_NONE;
+						break;
+					case CHOOSE_WARP_DEST:
+						options=GDFrame.DRAG_RANGE;
+						GalaxyPanel.setMaxDistShown(ShipPanel.the_ship.warpRange());
+						break;
+					default:
+						System.out.println("redraw doesn't support galaxy_state " + Integer.toString(galaxy_state));
+						break;
+				}
+				GalaxyPanel.paintGalaxy(GC.map, selected_sys, options, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, GC.players[GC.player_id].ships_in_transit, gal_scale);
 			}
 			else //before getting to here, sys and selected_in_sys should be specified.  the latter may be null.
 			{

@@ -350,8 +350,9 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 		facilities_panel.removeAll();
 		synchronized(the_shipyard.queue_lock)
 		{
-			for(Ship s : the_shipyard.manufac_queue)
+			for(Integer i : the_shipyard.manufac_queue.keySet())
 			{
+				Ship s = the_shipyard.manufac_queue.get(i);
 				JPanel ship_panel = new JPanel();
 				GroupLayout gl = new GroupLayout(ship_panel);
 				ship_panel.setLayout(gl);
@@ -387,10 +388,11 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	{
 		facilities_panel.removeAll();
 		state = SHIP_CHOICES_DISPLAYED;
-		for(int i=1; i < GalacticStrategyConstants.sTypes.length; i++) //start at 1 since MISSILE is type 0
+		ShipType[] sTypes = ShipType.values();
+		for(int i=1; i < sTypes.length; i++) //start at 1 since MISSILE is type 0
 		{
 			JPanel ship_panel = new JPanel();
-			ship_panel.addMouseListener(new ShipBuilder(the_shipyard, GalacticStrategyConstants.sTypes[i],ship_panel,this));
+			ship_panel.addMouseListener(new ShipBuilder(the_shipyard, sTypes[i],ship_panel,this));
 			GroupLayout gl = new GroupLayout(ship_panel);
 			ship_panel.setLayout(gl);
 			
@@ -400,10 +402,10 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 			gl.setHorizontalGroup(glhgroup);
 			gl.setVerticalGroup(glvgroup);
 			
-			JLabel name_label = new JLabel(GalacticStrategyConstants.sTypes[i].name);
-			JLabel ship_pic = new JLabel(new ImageIcon(GalacticStrategyConstants.sTypes[i].img));
-			JLabel money_cost = new JLabel(Integer.toString(GalacticStrategyConstants.sTypes[i].money_cost) + " money");
-			JLabel metal_cost = new JLabel(Integer.toString(GalacticStrategyConstants.sTypes[i].metal_cost) + " metal");
+			JLabel name_label = new JLabel(sTypes[i].name);
+			JLabel ship_pic = new JLabel(new ImageIcon(sTypes[i].img));
+			JLabel money_cost = new JLabel(Integer.toString(sTypes[i].money_cost) + " money");
+			JLabel metal_cost = new JLabel(Integer.toString(sTypes[i].metal_cost) + " metal");
 			
 			glhgroup.addComponent(name_label);
 			glvgroup.addComponent(name_label);

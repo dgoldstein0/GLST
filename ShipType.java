@@ -1,7 +1,12 @@
 import java.awt.Image;
 
-public class ShipType
+public enum ShipType
 {
+			//name			fuel	hull	money	metal	time to build	troops	default scale	image					max speed	max ang. vel.	max accel	warp accel	warp speed	warp range
+	MISSILE	("Missile",		5,		10,		0,		0,		2000,			0,		.20d,			"images/missile.png",	.15,		.0015,			.0001,		0.0,		0.0,		0),
+	JUNK	("Junk",		20,		100,	100,	100,	10000,			200,	.30d,			"images/junk.png",		.06,		.0007,			.00003,		.0005,		.0016,		100);
+	
+	
 	String name;
 	int max_energy;
 	int hull;
@@ -26,7 +31,7 @@ public class ShipType
 	double warp_speed; //px/ms in Galaxy
 	int warp_range; //px in Galaxy
 	
-	public ShipType(String name, int mfuel, int hull, int money, int metal, int time_to_build, int capacity, double sc, String i, double m_speed, double m_ang_vel, double accel, double waccel, double wspeed, int wrange)
+	private ShipType(String name, int mfuel, int hull, int money, int metal, int time_to_build, int capacity, double sc, String i, double m_speed, double m_ang_vel, double accel, double waccel, double wspeed, int wrange)
 	{
 		this.name=name;
 		max_energy=mfuel;

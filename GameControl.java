@@ -887,29 +887,14 @@ public class GameControl
 		{
 			for(Satellite sat : sys.orbiting)
 			{
-				
 				if(sat instanceof Planet)
 				{
-					players[player_id].changeMoney(((Planet)sat).updatePopAndTax(time_elapsed));
-					((Planet)sat).updateConstruction(GI, time_elapsed);
-					synchronized(((OwnableSatellite)sat).facilities_lock)
-					{
-						for(Integer i: ((Planet)sat).facilities.keySet())
-						{
-							((Planet)sat).facilities.get(i).updateStatus(time_elapsed);
-						}
-					}
+					((Planet)sat).update(time_elapsed);
 					for(Satellite sat2 : ((Planet)sat).orbiting)
 					{
 						if(sat2 instanceof Moon)
 						{
-							players[player_id].changeMoney(((Moon)sat2).updatePopAndTax(time_elapsed));
-							((Moon)sat2).updateConstruction(GI, time_elapsed);
-							synchronized(((Moon)sat2).facilities_lock)
-							{
-								for(Integer i : ((Moon)sat2).facilities.keySet())
-									((Moon)sat2).facilities.get(i).updateStatus(time_elapsed);
-							}
+							((Moon)sat2).update(time_elapsed);
 						}
 						sat2.orbit.move(time_elapsed);
 					}

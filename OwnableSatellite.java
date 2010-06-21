@@ -1,15 +1,17 @@
 import java.util.Hashtable;
 import javax.swing.SwingUtilities;
 
-public abstract class OwnableSatellite extends Satellite
+public abstract class OwnableSatellite extends Satellite implements RelaxedSaveable
 {
 	Object facilities_lock = new Object();
 	Hashtable<Integer, Facility> facilities;
 	Base the_base; //the base is a member of facilities.  As such, it should be governed by facilities_lock.
 	Player owner;
 	
+	long time; //last time there was a change
+	
 	//for building facilities
-	private FacilityType bldg_in_progress; //uses the constants specified in Facility
+	FacilityType bldg_in_progress; //uses the constants specified in Facility
 	long time_finish;
 	long time_start;
 	int next_facility_id;
@@ -25,11 +27,32 @@ public abstract class OwnableSatellite extends Satellite
 	final static int TAX_INTERVAL = 3000; //in milliseconds.  so taxes are compounded every three seconds.
 	final static double TAX_PER_PERSON = .03; //money per person per tax interval
 	
+	OwnableSatelliteDataSaverControl data_control;
+	
 	public OwnableSatellite()
 	{
 		next_facility_id=0;
 		facilities = new Hashtable<Integer, Facility>();
 		bldg_in_progress = FacilityType.NO_BLDG;
+		data_control = new OwnableSatelliteDataSaverControl(this);
+	}
+	
+	public void handleDataNotSaved(){System.out.println("OwnableSatellite data not saved.  Ridiculous!");}
+	
+	public void update(long time_elapsed)
+	{	
+		synchronized(facilities_lock)
+		{
+			for(Integer i: facilities.keySet())
+				facilities.get(i).updateStatus(time_elapsed);
+		}
+		updateConstruction(time_elapsed);
+		
+		if(owner != null)
+			owner.changeMoney(updatePopAndTax(time_elapsed));
+		
+		time=time_elapsed;
+		data_control.saveData();
 	}
 	
 	//this is called when calculating taxes.
@@ -39,7 +62,7 @@ public abstract class OwnableSatellite extends Satellite
 		population = (long)(initial_pop*pop_capacity/(initial_pop+(pop_capacity-initial_pop)*Math.exp(-pop_growth_rate*((double)t))));
 	}
 	
-	public double updatePopAndTax(long t)
+	private double updatePopAndTax(long t)
 	{
 		//taxes are computed incrementally.
 		double new_taxes=0;
@@ -54,7 +77,7 @@ public abstract class OwnableSatellite extends Satellite
 		return new_taxes;
 	}
 	
-	public void updateConstruction(GameInterface GI, long t)
+	private void updateConstruction(long t)
 	{
 		if(bldg_in_progress != FacilityType.NO_BLDG)
 		{
@@ -80,7 +103,7 @@ public abstract class OwnableSatellite extends Satellite
 						bldg_in_progress = FacilityType.NO_BLDG;
 						return;
 				}
-				SwingUtilities.invokeLater(new FacilityAdder(new_fac, GI));
+				SwingUtilities.invokeLater(new FacilityAdder(new_fac, GameInterface.GC.GI));
 				
 				bldg_in_progress = FacilityType.NO_BLDG;
 			}
@@ -163,6 +186,7 @@ public abstract class OwnableSatellite extends Satellite
 			{
 				facilities.get(i).last_time = time; //makes it so that facilities do nothing when possessed by no one.
 										//That is, they lie idle instead of stockpiling production.
+				facilities.get(i).data_control.saveData();
 			}
 		}
 	}

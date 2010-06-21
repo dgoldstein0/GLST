@@ -6,6 +6,7 @@ public class Planet extends OwnableSatellite
 	
 	public Planet(int i, String nm, double init_pop, double pop_cap, int sz, double m, double growth_rate)
 	{
+		super();
 		name=nm;
 		id=i;
 		

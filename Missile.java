@@ -6,14 +6,11 @@ public class Missile extends Flyer
 
 	public Missile(Ship s, Targetable t, long time)
 	{
-		super("", GalacticStrategyConstants.sTypes[GalacticStrategyConstants.MISSILE]);
+		super("", ShipType.MISSILE);
 		
 		//set up ship_data array, as per the subclass' responsibility
-		ship_data=new FlyerDataSaver[data_capacity];
-		for(int i=0; i<ship_data.length; i++)
-			ship_data[i] = new FlyerDataSaver();
+		data_control = new MissileDataSaverControl(this);
 		
-		target = t;
 		location = s.location;
 		id=location.next_missile_id;
 		location.next_missile_id++;
@@ -25,6 +22,7 @@ public class Missile extends Flyer
 		speed = s.getSpeed() + GalacticStrategyConstants.INITIAL_MISSILE_SPEED;
 		location = s.location;
 		
+		target = t;
 		destination=t;
 		t.addAggressor(this);
 		time = (long)(Math.ceil((double)(time)/(double)(GalacticStrategyConstants.TIME_GRANULARITY))*GalacticStrategyConstants.TIME_GRANULARITY);
@@ -33,12 +31,17 @@ public class Missile extends Flyer
 		current_flying_AI = new TrackingAI(this, 0.0, TrackingAI.NO_SLOWDOWN);
 		
 		this.time=time;
-		saveData(ALL_DATA);
+		data_control.saveData();
 	}
 	
 	public DestDescriber describer()
 	{
 		return new MissileDescriber(this);
+	}
+	
+	public void removeFromGame()
+	{
+		location.missiles.remove(id);
 	}
 	
 	//returns true when the missile detonates, false otherwise
@@ -48,7 +51,7 @@ public class Missile extends Flyer
 		{
 			moveIncrement();
 			time += GalacticStrategyConstants.TIME_GRANULARITY;
-			saveData(ALL_DATA);
+			data_control.saveData();
 			
 			if (collidedWithTarget())
 			{

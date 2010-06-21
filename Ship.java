@@ -27,15 +27,12 @@ public class Ship extends Flyer implements Selectable
 	double exit_direction;
 	long arrival_time;
 	
-	public Ship(String nm, ShipType t, int id)
+	public Ship(ShipType t)
 	{
-		super(nm,t);
+		super(t.name,t);
 		
-		ship_data=new ShipDataSaver[data_capacity];
-		for(int i=0; i<ship_data.length; i++)
-			ship_data[i] = new ShipDataSaver();
+		data_control = new ShipDataSaverControl(this);
 		
-		this.id=id;
 		energy = t.max_energy;
 		max_energy = energy;
 		soldier=t.soldier_capacity;//assume ships are fully loaded when built
@@ -48,6 +45,7 @@ public class Ship extends Flyer implements Selectable
 	{
 		//the time dependence of this function needs to be established
 		owner=builder.location.owner;
+		id=owner.nextShipId();
 		
 		//set the position of the planet/moon correctly.  we do not need to restore the position, because in the updateGame function the orbit.move command is given after all facilities are updated
 		builder.location.orbit.move(t);
@@ -102,9 +100,15 @@ public class Ship extends Flyer implements Selectable
 			time += GalacticStrategyConstants.TIME_GRANULARITY;
 			
 			//save data
-			saveData(ALL_DATA);
+			data_control.saveData();
 		}
 		return false;
+	}
+	
+	//this function is called when time is rolled back to before the ship existed
+	public void removeFromGame()
+	{
+		location.fleets[owner.getId()].remove(this);
 	}
 	
 	//this function is NOT incremental, i.e. it is only called once during updateGame() - before the updateGame function cycles through the systems
@@ -326,7 +330,7 @@ public class Ship extends Flyer implements Selectable
 	public void destroyed()
 	{
 		//System.out.println("destroyed-before");	
-		if(location.fleets[owner.getId()].remove(this))//in case another attack has already destroyed the ship, but both call the destroyed method
+		if(location.fleets[owner.getId()].remove(this))//if is so in case another attack has already destroyed the ship, but both call the destroyed method
 		{
 			//notify aggressors
 			for(Targetter t : aggressors)

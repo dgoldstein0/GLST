@@ -98,7 +98,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		pic_vgroup.addComponent(icon_label);
 		pic_hgroup.addComponent(icon_label);
 		
-		health = new JProgressBar(0, s.hull_strength);
+		health = new JProgressBar(0, s.type.hull);
 		health.setMaximumSize(new Dimension(100,20));
 		health.setStringPainted(true);
 		pic_vgroup.addComponent(health);
@@ -112,8 +112,8 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 	
 	public void update()
 	{
-		health.setValue(the_ship.hull_strength - the_ship.damage);
-		health.setString(Integer.toString(the_ship.hull_strength - the_ship.damage));
+		health.setValue(the_ship.type.hull - the_ship.damage);
+		health.setString(Integer.toString(the_ship.type.hull - the_ship.damage));
 		soldier_label.setText("    " + Integer.toString(the_ship.getSoldierInt()) + " soldiers");
 		
 		if(the_ship.destination instanceof OwnableSatellite && Math.hypot(the_ship.dest_x_coord-the_ship.pos_x, the_ship.dest_y_coord-the_ship.pos_y) <= GalacticStrategyConstants.LANDING_RANGE)

@@ -3,8 +3,9 @@ import java.util.*;
 
 public class Shipyard extends Facility{
 
-	ArrayList<Ship> manufac_queue;      //manufacturing queue - the list of ships to build
+	Hashtable<Integer, Ship> manufac_queue;      //manufacturing queue - the list of ships to build
 	Object queue_lock = new Object(); //used to synchronize the queue
+	int next_queue_id;
 	
 	double assemble_x;      //x coord of assemble point
 	double assemble_y;	//y coord
@@ -15,8 +16,10 @@ public class Shipyard extends Facility{
 	
 	public Shipyard(OwnableSatellite loc, long t) {
 		super(loc, t, GalacticStrategyConstants.initial_shipyard_endu);
-		manufac_queue=new ArrayList<Ship>(GalacticStrategyConstants.queue_capa);
+		manufac_queue=new Hashtable<Integer,Ship>(GalacticStrategyConstants.queue_capa);
 		time_on_current_ship = 0;
+		data_control = new ShipyardDataSaverControl(this);
+		next_queue_id=0;
 	}
 	
 	public boolean addToQueue(Ship ship, long t)
@@ -34,11 +37,11 @@ public class Shipyard extends Facility{
 					
 					synchronized(queue_lock)
 					{
-						manufac_queue.add(ship);
+						manufac_queue.put(next_queue_id++,ship);
 						if(manufac_queue.size() == 1) //the ship must start production immediately.  This marks the start time.
 							last_time=t;
 					}
-					
+					data_control.saveData();
 					ret=true;
 				}
 				else
@@ -52,25 +55,20 @@ public class Shipyard extends Facility{
 	{
 		synchronized(queue_lock)
 		{
-			for(int i=0; i<manufac_queue.size(); i++)
+			manufac_queue.remove(ship.getId());
+			
+			if(manufac_queue.size() == 0)
 			{
-				if(manufac_queue.get(i).getId() == ship.getId())
-				{
-					manufac_queue.remove(i);
-					
-					if(i==0)
-					{
-						time_on_current_ship=0l;
-					}
-					else
-					{
-						//refund money and metal
-						location.owner.changeMoney(ship.type.money_cost);
-						location.owner.changeMetal(ship.type.metal_cost);
-					}
-					return;
-				}
+				time_on_current_ship=0l;
 			}
+			else
+			{
+				//refund money and metal
+				location.owner.changeMoney(ship.type.money_cost);
+				location.owner.changeMetal(ship.type.metal_cost);
+			}
+			data_control.saveData();
+			return;
 		}
 	}
 		
@@ -79,10 +77,13 @@ public class Shipyard extends Facility{
 		Ship newship;
 		synchronized(queue_lock)
 		{
-			newship=manufac_queue.get(0);//produce the 1st one in the queue
-			manufac_queue.remove(0);
+			int first = Collections.min(manufac_queue.keySet());
+			
+			newship=manufac_queue.get(first);//produce the 1st one in the queue
+			manufac_queue.remove(first);
 		}
 		newship.assemble(this, t);
+		data_control.saveData();
 	}
 	
 	public void updateStatus(long t)
@@ -94,9 +95,10 @@ public class Shipyard extends Facility{
 				if(manufac_queue.size() != 0)
 				{
 					time_on_current_ship += t-last_time;
-					if(time_on_current_ship >= manufac_queue.get(0).type.time_to_build)
+					int first = indexOfFirstShipInQueue();
+					if(time_on_current_ship >= manufac_queue.get(first).type.time_to_build)
 					{
-						time_on_current_ship -= manufac_queue.get(0).type.time_to_build;
+						time_on_current_ship -= manufac_queue.get(first).type.time_to_build;
 						produce(t-time_on_current_ship);
 						
 						//update the queue display... if it is being displayed.
@@ -116,8 +118,10 @@ public class Shipyard extends Facility{
 	
 	public double percentComplete()
 	{
-		return ((double)time_on_current_ship)/((double)manufac_queue.get(0).type.time_to_build);
+		return ((double)time_on_current_ship)/((double)manufac_queue.get(indexOfFirstShipInQueue()).type.time_to_build);
 	}
+	
+	public int indexOfFirstShipInQueue(){return Collections.min(manufac_queue.keySet());}
 	
 	public FacilityType getType(){return FacilityType.SHIPYARD;}
 	public String imageLoc(){return "images/shipyard.gif";}

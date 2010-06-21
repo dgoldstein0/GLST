@@ -10,6 +10,7 @@ public class GalacticStrategyConstants
 	
 	//time_granularity is the amount of time, in ms, between updates of the game.  Used as a time increment in ship physics.
 	final static long TIME_GRANULARITY = 20; //20ms -> 50 fps
+	final static int data_capacity=50; //amount of time grains to save data from.  50 grains at 20ms per grain = 1 second
 	
 	//******************************************PHYSICS TO PROGRAM CONVERSIONS*******************************************//
 	
@@ -92,12 +93,12 @@ public class GalacticStrategyConstants
 	public static void ImageLoader() //GameControl calls this method when it is instantiated
 	{
 		Toolkit tk = Toolkit.getDefaultToolkit();
-		for(int i=0; i<sTypes.length; i++)
+		for(ShipType t : ShipType.values())
 		{
-			sTypes[i].setImg(tk.getImage(sTypes[i].getImg_loc()));
-			ImageSizer sizer = new ImageSizer(i);
-			sTypes[i].width = sTypes[i].img.getWidth(sizer);
-			sTypes[i].height = sTypes[i].img.getHeight(sizer);
+			t.setImg(tk.getImage(t.getImg_loc()));
+			ImageSizer sizer = new ImageSizer(t);
+			t.width = t.img.getWidth(sizer);
+			t.height = t.img.getHeight(sizer);
 		}
 	}
 	
@@ -107,18 +108,12 @@ public class GalacticStrategyConstants
 	static final long Attacking_cooldown=1200;
 	static final double WARP_EXIT_SPEED = .75; //px/ms
 	
-	//setup for ship types
-	final static int MISSILE = 0;
-	final static int JUNK=1;
-										//name	fuel	hull	money	metal	time to build	troops	default scale	image				max speed	max ang. vel.	max accel	warp accel	warp speed	warp range
-	final static ShipType[] sTypes={	new ShipType("Missile",	5,	10,	0,	0,	2000,		0,	.20d,		"images/missile.png",	.15,		.0015,	.0001,	0.0,		0.0,		0),
-							new ShipType("Junk",		20,	100,	100,	100,	10000,	200,	.30d,		"images/junk.png",	.06,		.0007,	.00003,	.0005,	.0016,	100)};
-	
+	//missile setup
 	final static int MISSILE_DAMAGE = 10;
 	final static double INITIAL_MISSILE_SPEED = .04;
 	
 	//Used by Shipyard
-	static final int queue_capa=10;//the capacity of a shipyard's queue
+	static final int queue_capa=5;//the capacity of a shipyard's queue
 	
 	//Defaults for Bases
 	final static int initial_soldier=100;

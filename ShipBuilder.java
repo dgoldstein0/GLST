@@ -27,7 +27,7 @@ public class ShipBuilder implements MouseListener
 	{
 		if(click_on)
 		{
-			if(yard.addToQueue(new Ship(type.name, type, GameInterface.GC.players[GameInterface.GC.player_id].nextShipId()), GameInterface.GC.TC.getTime()))
+			if(yard.addToQueue(new Ship(type), GameInterface.GC.TC.getTime()))
 			{
 				if(!e.isShiftDown())
 				{

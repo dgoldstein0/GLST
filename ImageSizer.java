@@ -3,13 +3,13 @@ import java.awt.Image;
 
 public class ImageSizer implements ImageObserver
 {
-	int index;
+	ShipType stype;
 	boolean got_width;
 	boolean got_height;
 	
-	public ImageSizer(int i)
+	public ImageSizer(ShipType t)
 	{
-		index=i;
+		stype = t;
 		got_width=false;
 		got_height=false;
 	}
@@ -18,18 +18,18 @@ public class ImageSizer implements ImageObserver
 	{		
 		if((infoflags&ImageObserver.WIDTH) == ImageObserver.WIDTH)
 		{
-			GalacticStrategyConstants.sTypes[index].width = width;
+			stype.width = width;
 			got_width = true;
 		}
 		if((infoflags&ImageObserver.HEIGHT) == ImageObserver.HEIGHT)
 		{
-			GalacticStrategyConstants.sTypes[index].height = height;
+			stype.height = height;
 			got_height = true;
 		}
 		
 		if(got_width && got_height)
 		{
-			GalacticStrategyConstants.sTypes[index].dim = Math.max(GalacticStrategyConstants.sTypes[index].width, GalacticStrategyConstants.sTypes[index].height);
+			stype.dim = Math.max(stype.width, stype.height);
 		}
 		
 		return !(got_width && got_height);

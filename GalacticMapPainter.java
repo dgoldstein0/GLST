@@ -246,6 +246,11 @@ public class GalacticMapPainter extends JPanel
 		repaint();
 	}
 	
+	public void setMaxDistShown(int dist)
+	{
+		max_dist_shown=dist;
+	}
+	
 	private int scaleNum(int x)
 	{
 		return (int)(((double)x)*scale);

@@ -51,7 +51,7 @@ public class PatrolAI extends FlyerAI
 			patrol_speed = the_flyer.type.max_speed;
 			patrol_ang_chng = patrol_speed/radius;
 		}
-		patrol_ang_chng *= the_flyer.time_granularity*dir;
+		patrol_ang_chng *= GalacticStrategyConstants.TIME_GRANULARITY*dir;
 	}
 	
 	public double calcDesiredDirection()

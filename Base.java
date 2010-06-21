@@ -1,7 +1,7 @@
 
 public class Base extends Facility{
 	
-	Object soldier_lock = new Object();
+	final Object soldier_lock = new Object();
 	float soldier;
 	int max_soldier;
 	
@@ -10,6 +10,7 @@ public class Base extends Facility{
 		super(l, t, GalacticStrategyConstants.initial_base_endu);
 		soldier=GalacticStrategyConstants.initial_soldier;
 		max_soldier = GalacticStrategyConstants.default_max_soldier;
+		data_control = new BaseDataSaverControl(this);
 	}
 	
 	public void upgrade()
@@ -30,8 +31,10 @@ public class Base extends Facility{
 			soldier += GalacticStrategyConstants.soldier_production_rate*(time-last_time);
 			if(soldier > max_soldier)
 				soldier=(float)max_soldier;
+			
+			last_time=time;
+			data_control.saveData();
 		}
-		last_time=time;
 	}
 	
 	public float retrieveSoldiers(long time, float asking)
@@ -94,8 +97,6 @@ public class Base extends Facility{
 	
 	public float getSoldier(){return soldier;}
 	public void setSoldier(float s){synchronized(soldier_lock){soldier=s;}}
-	public long getLast_time(){return last_time;}
-	public void setLast_time(long t){last_time=t;}
 	public int getMax_soldier(){return max_soldier;}
 	public void setMax_soldier(int s){max_soldier=s;}
 	
