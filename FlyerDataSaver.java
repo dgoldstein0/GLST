@@ -1,6 +1,6 @@
 import java.util.HashSet;
 
-public class FlyerDataSaver<T extends Flyer> extends DataSaver<T>
+public class FlyerDataSaver<T extends Flyer<T>> extends DataSaver<T>
 {
 	double px; //pos_x and pos_y indicate where in the system the ship is located
 	double py;
@@ -9,7 +9,7 @@ public class FlyerDataSaver<T extends Flyer> extends DataSaver<T>
 	int dmg; //damage
 	HashSet<Targetter> aggr;
 	FlyerAI ai; // mode seems to determine what goes here
-	Destination dest;
+	Destination<?> dest;
 
 	public FlyerDataSaver()
 	{

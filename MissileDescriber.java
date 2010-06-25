@@ -1,4 +1,4 @@
-public class MissileDescriber implements DestDescriber
+public class MissileDescriber implements Describer<Missile>
 {
 	int system_id;
 	int missile_id;
@@ -9,7 +9,7 @@ public class MissileDescriber implements DestDescriber
 		system_id = m.location.getId();
 	}
 	
-	public Describable retrieveDestination(Galaxy g)
+	public Missile retrieveObject(Galaxy g)
 	{
 		return g.systems.get(system_id).missiles.get(missile_id);
 	}

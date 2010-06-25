@@ -1,4 +1,4 @@
-public interface Destination extends Describable
+public interface Destination<T extends Destination<T>> extends Describable<T>
 {
 	public abstract double getXCoord(long t);
 	public abstract double getYCoord(long t);

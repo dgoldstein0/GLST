@@ -20,7 +20,7 @@ public class Player
 	
 	//used for exploration.  specific to each player
 	ArrayList<GSystem> known_systems; //if you know a system, you know the stars in it.
-	ArrayList<Satellite> known_satellites;
+	ArrayList<Satellite<?>> known_satellites;
 	
 	//this constructor prompts for the user to name the player himself
 	public static Player createPlayer() throws CancelException
@@ -39,7 +39,7 @@ public class Player
 		the_player.ready=false;
 		the_player.ships_in_transit=new ArrayList<Ship>();
 		the_player.known_systems = new ArrayList<GSystem>();
-		the_player.known_satellites = new ArrayList<Satellite>();
+		the_player.known_satellites = new ArrayList<Satellite<?>>();
 		the_player.cur_ship_id = -1;
 		return the_player;
 	}
@@ -53,7 +53,7 @@ public class Player
 		metal=GalacticStrategyConstants.DEFAULT_METAL;
 		ships_in_transit = new ArrayList<Ship>();
 		known_systems = new ArrayList<GSystem>();
-		known_satellites = new ArrayList<Satellite>();
+		known_satellites = new ArrayList<Satellite<?>>();
 		ready=false;
 	}
 	

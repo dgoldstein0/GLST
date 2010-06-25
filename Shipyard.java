@@ -1,7 +1,7 @@
 
 import java.util.*;
 
-public class Shipyard extends Facility{
+public class Shipyard extends Facility<Shipyard>{
 
 	Hashtable<Integer, Ship> manufac_queue;      //manufacturing queue - the list of ships to build
 	Object queue_lock = new Object(); //used to synchronize the queue
@@ -14,7 +14,7 @@ public class Shipyard extends Facility{
 	
 	long time_on_current_ship;
 	
-	public Shipyard(OwnableSatellite loc, long t) {
+	public Shipyard(OwnableSatellite<?> loc, long t) {
 		super(loc, t, GalacticStrategyConstants.initial_shipyard_endu);
 		manufac_queue=new Hashtable<Integer,Ship>(GalacticStrategyConstants.queue_capa);
 		time_on_current_ship = 0;

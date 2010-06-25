@@ -1,6 +1,6 @@
 import java.util.HashSet;
 
-public interface Targetable extends Destination
+public interface Targetable<T extends Targetable<T>> extends Destination<T>
 {
 	public abstract void addDamage(int d);
 	public abstract void destroyed();

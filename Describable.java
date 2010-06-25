@@ -1,4 +1,4 @@
-interface Describable
+interface Describable<T>
 {
-	public abstract DestDescriber describer();
+	public abstract Describer<T> describer();
 }

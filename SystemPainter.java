@@ -77,7 +77,7 @@ public class SystemPainter extends JPanel
 				g2.setFont(g2.getFont().deriveFont(Font.BOLD,12.0f));
 				FontMetrics m=g2.getFontMetrics(g2.getFont());
 				
-				for(Satellite orbiting : system.orbiting)
+				for(Satellite<?> orbiting : system.orbiting)
 				{
 					//draw object
 					drawOrbit(orbiting, g2);
@@ -99,8 +99,8 @@ public class SystemPainter extends JPanel
 					//draw objects orbiting planets					
 					if(orbiting instanceof Planet && ((Planet)orbiting).orbiting != null)
 					{
-						ArrayList<Satellite> planet_sats = ((Planet)orbiting).orbiting;
-						for(Satellite sat : planet_sats)
+						ArrayList<Satellite<?>> planet_sats = ((Planet)orbiting).orbiting;
+						for(Satellite<?> sat : planet_sats)
 						{
 							drawOrbit(sat, g2);
 							if(sat instanceof Moon && ((Moon)sat).getOwner() instanceof Player)
@@ -127,7 +127,7 @@ public class SystemPainter extends JPanel
 				{
 					for(Integer j : system.fleets[i].ships.keySet())
 					{
-						Flyer f = (Flyer)system.fleets[i].ships.get(j);
+						Flyer<?> f = system.fleets[i].ships.get(j);
 						drawFlyer(g2,f,system.fleets[i].owner.getColor());
 					}
 				}
@@ -137,7 +137,7 @@ public class SystemPainter extends JPanel
 			{
 				for(Integer i : system.missiles.keySet())
 				{
-					drawFlyer(g2,(Flyer)system.missiles.get(i),null);
+					drawFlyer(g2,(Flyer<Missile>)system.missiles.get(i),null);
 				}
 			}
 			
@@ -146,12 +146,12 @@ public class SystemPainter extends JPanel
 				g2.drawString(system.name + " System", 10, 20);
 		}
 		
-		if(selected instanceof Satellite) {
+		if(selected instanceof Satellite<?>) {
 			g2.setColor(Color.YELLOW);
 			if(game_mode){
-				g2.draw(new Ellipse2D.Double(drawX(((Satellite)selected).absoluteCurX()-((StellarObject)selected).size/2.0)-2.0, drawY(((Satellite)selected).absoluteCurY()-((StellarObject)selected).size/2.0)-2.0, ((StellarObject)selected).size*scale+4.0, ((StellarObject)selected).size*scale+4.0));
+				g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)selected).absoluteCurX()-((StellarObject)selected).size/2.0)-2.0, drawY(((Satellite<?>)selected).absoluteCurY()-((StellarObject)selected).size/2.0)-2.0, ((StellarObject)selected).size*scale+4.0, ((StellarObject)selected).size*scale+4.0));
 			} else {
-				g2.draw(new Ellipse2D.Double(drawX(((Satellite)selected).absoluteInitX()-((StellarObject)selected).size/2.0)-2.0, drawY(((Satellite)selected).absoluteInitY()-((StellarObject)selected).size/2.0)-2.0, ((StellarObject)selected).size*scale+4.0, ((StellarObject)selected).size*scale+4.0));
+				g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)selected).absoluteInitX()-((StellarObject)selected).size/2.0)-2.0, drawY(((Satellite<?>)selected).absoluteInitY()-((StellarObject)selected).size/2.0)-2.0, ((StellarObject)selected).size*scale+4.0, ((StellarObject)selected).size*scale+4.0));
 			}
 		} else if(selected instanceof Star) {
 			//select a star
@@ -179,7 +179,7 @@ public class SystemPainter extends JPanel
 			g2.drawImage(return_arrow, getWidth()-arrow_size, 0, arrow_size, arrow_size, this);
 	}
 	
-	private void drawFlyer(Graphics2D g2, Flyer s, Color c)
+	private void drawFlyer(Graphics2D g2, Flyer<?> s, Color c)
 	{
 		// Get the current transform
 		AffineTransform saveAT = g2.getTransform();
@@ -279,19 +279,19 @@ public class SystemPainter extends JPanel
 		return (float)drawY(the_y);
 	}
 	
-	private void drawOrbit(Satellite obj, Graphics2D g2)
+	private void drawOrbit(Satellite<?> obj, Graphics2D g2)
 	{		
-		double focus1_x = ((Satellite)obj).orbit.boss.absoluteCurX();
-		double focus1_y = ((Satellite)obj).orbit.boss.absoluteCurY();
+		double focus1_x = obj.orbit.boss.absoluteCurX();
+		double focus1_y = obj.orbit.boss.absoluteCurY();
 		
-		double focus2_x = drawX(((Satellite)obj).orbit.focus2.getX()+focus1_x);
-		double focus2_y = drawY(((Satellite)obj).orbit.focus2.getY()+focus1_y);
+		double focus2_x = drawX(obj.orbit.focus2.getX()+focus1_x);
+		double focus2_y = drawY(obj.orbit.focus2.getY()+focus1_y);
 		
 		focus1_x=drawX(focus1_x);
 		focus1_y=drawY(focus1_y);
 		
-		double x = drawX(((Satellite)(obj)).absoluteCurX());
-		double y = drawY(((Satellite)(obj)).absoluteCurY());
+		double x = drawX(obj.absoluteCurX());
+		double y = drawY(obj.absoluteCurY());
 		
 		if(obj==selected && !game_mode)
 		{
@@ -301,9 +301,9 @@ public class SystemPainter extends JPanel
 			g2.draw(new Ellipse2D.Double(focus2_x-1.0, focus2_y-1.0, 3.0,3.0));
 		}
 		
-		double a = ((Satellite)obj).orbit.a*scale;
-		//double c = ((Satellite)obj).orbit.c*scale;
-		double b = ((Satellite)obj).orbit.b*scale;
+		double a = obj.orbit.a*scale;
+		//double c = obj.orbit.c*scale;
+		double b = obj.orbit.b*scale;
 		
 		double theta;
 		if(focus2_x != focus1_x)

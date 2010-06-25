@@ -35,7 +35,7 @@ public class startLocationsDialog extends JDialog implements ActionListener, Mou
 		BoxLayout layout2 = new BoxLayout(the_list, BoxLayout.Y_AXIS);
 		the_list.setLayout(layout2);
 		
-		for(Satellite sat : GDF.map.start_locations)
+		for(OwnableSatellite<?> sat : GDF.map.start_locations)
 		{
 			SatelliteLabel label = new SatelliteLabel(sat);
 			label.addMouseListener(this);

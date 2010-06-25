@@ -1,6 +1,6 @@
 import java.util.Iterator;
 
-public class Ship extends Flyer implements Selectable
+public class Ship extends Flyer<Ship> implements Selectable
 {
 	final static double ESCAPE_DIST = 300.0;
 	
@@ -39,7 +39,7 @@ public class Ship extends Flyer implements Selectable
 		nextAttackingtime=0;
 	}
 	
-	public DestDescriber describer(){return new ShipDescriber(owner, this);}
+	public Describer<Ship> describer(){return new ShipDescriber(owner, this);}
 	
 	public void assemble(Shipyard builder, long t)
 	{
@@ -156,7 +156,7 @@ public class Ship extends Flyer implements Selectable
 		return (mode != ENTER_WARP); //only enforce if mode is NOT enter warp, i.e. ships can go superspeed when warping
 	}
 	
-	public void orderToMove(long t, Destination d)
+	public void orderToMove(long t, Destination<?> d)
 	{
 		if(mode != EXIT_WARP && mode != IN_WARP && mode != ENTER_WARP) //to ensure if the interface tries to issue an order, it can't
 		{
@@ -172,7 +172,7 @@ public class Ship extends Flyer implements Selectable
 		}
 	}
 	
-	public void orderToAttack(long t, Targetable tgt)
+	public void orderToAttack(long t, Targetable<?> tgt)
 	{
 		if(mode != EXIT_WARP && mode != IN_WARP && mode != ENTER_WARP)
 		{

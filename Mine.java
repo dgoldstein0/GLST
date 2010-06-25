@@ -1,9 +1,9 @@
 
-public class Mine extends Facility{
+public class Mine extends Facility<Mine>{
 	
 	double mining_rate;
 	
-	public Mine(OwnableSatellite loc, long t)
+	public Mine(OwnableSatellite<?> loc, long t)
 	{
 		super(loc,t, GalacticStrategyConstants.initial_mine_endu);
 		mining_rate=GalacticStrategyConstants.DEFAULT_MINING_RATE;

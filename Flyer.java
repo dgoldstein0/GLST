@@ -1,6 +1,6 @@
 import java.util.HashSet;
 
-public abstract class Flyer extends Targetter implements Targetable, Saveable
+public abstract class Flyer<T extends Flyer<T>> extends Targetter implements Targetable<T>, Saveable
 {
 	//these two constants are used by loadData for its second argument, to
 	//instruct it whether or not to call loadMoreData from the FlyerDataSaver (or subclass thereof)
@@ -15,7 +15,7 @@ public abstract class Flyer extends Targetter implements Targetable, Saveable
 	
 	HashSet<Targetter> aggressors; //all the ships/ missiles targetting this
 	
-	Destination destination;
+	Destination<?> destination;
 	//save in case SystemPainter wants to paint crosshairs
 	double dest_x_coord;
 	double dest_y_coord;

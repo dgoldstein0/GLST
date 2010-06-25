@@ -1,10 +1,10 @@
 public abstract class Targetter
 {
 	
-	Targetable target;
+	Targetable<?> target;
 	
-	public Targetable getTarget(){return target;}
-	public void setTarget(Targetable s){target = s;}
+	public Targetable<?> getTarget(){return target;}
+	public void setTarget(Targetable<?> s){target = s;}
 	
 	public abstract void targetIsDestroyed(long time);
 	public abstract void targetHasWarped(long time);

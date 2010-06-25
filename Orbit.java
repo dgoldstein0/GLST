@@ -24,10 +24,10 @@ public class Orbit
 	double b;
 	double c;
 	
-	Positioning boss; //the object that is the other focus of this orbit
-	Satellite obj; //the object using this orbit
+	Orbitable<?> boss; //the object that is the other focus of this orbit
+	Satellite<?> obj; //the object using this orbit
 	
-	public Orbit(Satellite theobj, Positioning boss_obj, double focus2_x, double focus2_y, double init_x, double init_y, int dir)
+	public Orbit(Satellite<?> theobj, Orbitable<?> boss_obj, double focus2_x, double focus2_y, double init_x, double init_y, int dir)
 	{
 		boss=boss_obj;
 		obj=theobj;
@@ -153,10 +153,10 @@ public class Orbit
 	
 	//methods required for save/load
 	public Orbit(){}
-	public Positioning getBoss(){return boss;}
-	public void setBoss(Positioning p){boss=p;}
-	public Satellite getObj(){return obj;}
-	public void setObj(Satellite o){obj=o;}
+	public Orbitable<?> getBoss(){return boss;}
+	public void setBoss(Orbitable<?> p){boss=p;}
+	public Satellite<?> getObj(){return obj;}
+	public void setObj(Satellite<?> o){obj=o;}
 	public double getInit_x(){return init_x;}
 	public void setInit_x(double x){init_x=x;}
 	public double getInit_y(){return init_y;}

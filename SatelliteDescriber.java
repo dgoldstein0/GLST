@@ -1,24 +1,25 @@
-public class SatelliteDescriber implements DestDescriber
+public class SatelliteDescriber<T extends Satellite<T>> implements Describer<T>
 {
 	int id;
-	DestDescriber boss_describer;
+	Describer<? extends Orbitable<?>> boss_describer;
 	
-	public SatelliteDescriber(Satellite sat)
+	public SatelliteDescriber(Satellite<T> sat)
 	{
 		id=sat.id;
 		boss_describer = sat.orbit.boss.describer();
 	}
 	
-	public Describable retrieveDestination(Galaxy g)
+	@SuppressWarnings("unchecked")
+	public T retrieveObject(Galaxy g)
 	{
-		Describable boss = boss_describer.retrieveDestination(g);
+		Orbitable<?> boss = boss_describer.retrieveObject(g);
 		
-		return ((GSystem)boss).orbiting.get(id);
+		return (T)boss.getOrbiting().get(id); //orbiting is only an array of Satellites, so, though we know here we will have a T, this gives an unchecked exception
 	}
 	
 	public SatelliteDescriber(){}
 	public int getId(){return id;}
 	public void setId(int i){id=i;}
-	public DestDescriber getBoss_describer(){return boss_describer;}
-	public void setBoss_describer(DestDescriber b){boss_describer=b;}
+	public Describer<? extends Orbitable<?>> getBoss_describer(){return boss_describer;}
+	public void setBoss_describer(Describer<? extends Orbitable<?>> b){boss_describer=b;}
 }

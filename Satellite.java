@@ -1,4 +1,4 @@
-public abstract class Satellite extends StellarObject implements Positioning, Destination
+public abstract class Satellite<T extends Satellite<T>> extends StellarObject implements Destination<T>
 {
 	Orbit orbit;
 	int id;
@@ -8,7 +8,8 @@ public abstract class Satellite extends StellarObject implements Positioning, De
 		return mass;
 	}
 	
-	public DestDescriber describer(){return new SatelliteDescriber(this);}
+	@SuppressWarnings("unchecked")
+	public Describer<T> describer(){return new SatelliteDescriber(this);} //warning about unparameterized type
 	
 	public Orbit getOrbit(){return orbit;}
 	public void setOrbit(Orbit o){orbit=o;}
@@ -71,13 +72,14 @@ public abstract class Satellite extends StellarObject implements Positioning, De
 		
 		orbit.move(t);
 		double boss_y, boss_x, boss_vx, boss_vy;
-		if(orbit.boss instanceof Satellite)
+		if(orbit.boss instanceof Satellite<?>)
 		{
-			((Satellite)orbit.boss).computeCoords(t);
-			boss_y = ((Satellite)orbit.boss).getYCoord(t);
-			boss_x = ((Satellite)orbit.boss).getXCoord(t);
-			boss_vy = ((Satellite)orbit.boss).getYVel(t);
-			boss_vx = ((Satellite)orbit.boss).getXVel(t);
+			Satellite<?> sboss = ((Satellite<?>)orbit.boss);
+			sboss.computeCoords(t);
+			boss_y = sboss.getYCoord(t);
+			boss_x = sboss.getXCoord(t);
+			boss_vy = sboss.getYVel(t);
+			boss_vx = sboss.getXVel(t);
 		}
 		else //boss is a GSystem
 		{

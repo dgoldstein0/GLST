@@ -1,9 +1,10 @@
 
 import java.util.HashSet;
 
-public abstract class Facility implements Targetable, RelaxedSaveable
+//T = the class which extends Facility
+public abstract class Facility<T extends Facility<T>> implements Targetable<T>, RelaxedSaveable
 {	
-	OwnableSatellite location;
+	OwnableSatellite<?> location;
 	int id;
 	
 	HashSet<Targetter> aggressors;
@@ -12,9 +13,9 @@ public abstract class Facility implements Targetable, RelaxedSaveable
 	
 	long last_time;//the last time it was updated
 	
-	RelaxedDataSaverControl<? extends Facility> data_control; //must be instantiated by subclasses
+	RelaxedDataSaverControl<T> data_control; //must be instantiated by subclasses
 	
-	public Facility(OwnableSatellite l, long t, int endu)
+	public Facility(OwnableSatellite<?> l, long t, int endu)
 	{
 		location=l;
 		
@@ -41,7 +42,8 @@ public abstract class Facility implements Targetable, RelaxedSaveable
 		location.facilities.remove(this);
 	}
 	
-	public DestDescriber describer()
+	@SuppressWarnings("unchecked")
+	public FacilityDescriber<T> describer()
 	{
 		return new FacilityDescriber(this);
 	}
@@ -75,8 +77,8 @@ public abstract class Facility implements Targetable, RelaxedSaveable
 	public void setDamage(int d){damage=d;}
 	public int getEndurance(){return endurance;}
 	public void setEndurance(int e){endurance=e;}
-	public OwnableSatellite getLocation(){return location;}
-	public void setLocation(OwnableSatellite s){location=s;}
+	public OwnableSatellite<?> getLocation(){return location;}
+	public void setLocation(OwnableSatellite<?> s){location=s;}
 	
 	public int getId(){return id;}
 	public void setId(int i){id=i;}

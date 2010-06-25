@@ -285,7 +285,7 @@ public class GameControl
 		//start everyone in assigned locations
 		for(int i=0; i<map.start_locations.size(); i++)
 		{
-			Planet p = map.start_locations.get(i);
+			OwnableSatellite<?> p = map.start_locations.get(i);
 			p.setOwner(players[i]);
 			Base b = new Base(p, (long)0);
 			p.facilities.put(b.id,b);
@@ -352,7 +352,7 @@ public class GameControl
 				sys.setUpForGame(this);
 			
 			//start the player in assigned location
-			Planet p = map.start_locations.get(player_id);
+			OwnableSatellite<?> p = map.start_locations.get(player_id);
 			p.setOwner(players[player_id]);
 			Base b = new Base(p, (long)0);
 			p.facilities.put(b.id,b);
@@ -885,12 +885,12 @@ public class GameControl
 		//update data in all systems
 		for(GSystem sys : map.systems)
 		{
-			for(Satellite sat : sys.orbiting)
+			for(Satellite<?> sat : sys.orbiting)
 			{
 				if(sat instanceof Planet)
 				{
 					((Planet)sat).update(time_elapsed);
-					for(Satellite sat2 : ((Planet)sat).orbiting)
+					for(Satellite<?> sat2 : ((Planet)sat).orbiting)
 					{
 						if(sat2 instanceof Moon)
 						{

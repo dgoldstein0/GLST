@@ -1,9 +1,7 @@
 import java.util.*;
 
-public class Planet extends OwnableSatellite
+public class Planet extends OwnableSatellite<Planet>
 {
-	ArrayList<Satellite> orbiting;
-	
 	public Planet(int i, String nm, double init_pop, double pop_cap, int sz, double m, double growth_rate)
 	{
 		super();
@@ -19,8 +17,8 @@ public class Planet extends OwnableSatellite
 		size=sz;
 		mass=m;
 		
-		orbiting=new ArrayList<Satellite>();
-		facilities=new Hashtable<Integer, Facility>();
+		orbiting=new ArrayList<Satellite<?>>();
+		facilities=new Hashtable<Integer, Facility<?>>();
 	}
 	
 	//methods required for load/save
@@ -40,7 +38,4 @@ public class Planet extends OwnableSatellite
 	}
 	
 	public String imageLoc(){return "images/planet.jpg";}
-	
-	public ArrayList<Satellite> getOrbiting(){return orbiting;}
-	public void setOrbiting(ArrayList<Satellite> o){orbiting=o;}
 }

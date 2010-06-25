@@ -1,5 +1,5 @@
 
-public abstract class FlyerDataSaverControl<T extends Flyer> extends DataSaverControl<T> {
+public abstract class FlyerDataSaverControl<T extends Flyer<T>> extends DataSaverControl<T> {
 
 	public FlyerDataSaverControl(T f)
 	{

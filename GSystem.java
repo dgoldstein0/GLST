@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class GSystem implements Orbitable
+public class GSystem implements Orbitable<GSystem>
 {
 	final static int NO_OWNER= -2;
 	final static int OWNER_CONFLICTED = -1;
@@ -10,7 +10,7 @@ public class GSystem implements Orbitable
 	int[] player_claims; //the elements of this array keep track of how many claims - planets or ships - each player owns in the system
 	int next_missile_id;
 	
-	ArrayList<Satellite> orbiting;
+	ArrayList<Satellite<?>> orbiting;
 	HashSet<Star> stars;
 	
 	Object missile_lock = new Object();
@@ -33,7 +33,7 @@ public class GSystem implements Orbitable
 	
 
 	
-	public GSystem(int i, int x, int y, String nm, ArrayList<Satellite> orbiting, HashSet<Star> stars, int nav)
+	public GSystem(int i, int x, int y, String nm, ArrayList<Satellite<?>> orbiting, HashSet<Star> stars, int nav)
 	{
 		id=i;
 		name=nm;
@@ -48,7 +48,7 @@ public class GSystem implements Orbitable
 		next_missile_id=0;
 	}
 	
-	public DestDescriber describer(){return new GSystemDescriber(this);}
+	public Describer<GSystem> describer(){return new GSystemDescriber(this);}
 	
 	public void setUpForGame(GameControl GC)
 	{
@@ -106,6 +106,12 @@ public class GSystem implements Orbitable
 		return sum;
 	}
 	
+	public double getXCoord(long t){return absoluteCurX();}
+	public double getYCoord(long t){return absoluteCurY();}
+	public double getXVel(long t){return 0.0;}
+	public double getYVel(long t){return 0.0;}
+	public String imageLoc(){return "";}
+	
 	//methods required for save/load
 	public GSystem()
 	{
@@ -113,8 +119,8 @@ public class GSystem implements Orbitable
 		missiles = new Hashtable<Integer, Missile>();
 	}
 	
-	public ArrayList<Satellite> getOrbiting(){return orbiting;}
-	public void setOrbiting(ArrayList<Satellite> s){orbiting=s;}
+	public ArrayList<Satellite<?>> getOrbiting(){return orbiting;}
+	public void setOrbiting(ArrayList<Satellite<?>> s){orbiting=s;}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 	public HashSet<Star> getStars(){return stars;}

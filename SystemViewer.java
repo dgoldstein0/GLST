@@ -308,7 +308,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	{
 		if(system.orbiting != null)
 		{
-			for(Satellite sat : system.orbiting)
+			for(Satellite<?> sat : system.orbiting)
 			{
 				//update orbit of sat
 				sat.orbit.move(time);
@@ -316,7 +316,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				{
 					if(((Planet)sat).orbiting != null)
 					{
-						for(Satellite sat2 : ((Planet)sat).orbiting)
+						for(Satellite<?> sat2 : ((Planet)sat).orbiting)
 						{
 							//update orbit of sat2
 							sat2.orbit.move(time);
@@ -379,7 +379,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		//search orbiting planets/objects
 		if(system.orbiting != null)
 		{
-			for(Satellite orbiting : system.orbiting)
+			for(Satellite<?> orbiting : system.orbiting)
 			{
 				//search for orbiting...
 				if(orbiting.absoluteCurX()-orbiting.size/2 <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 && orbiting.absoluteCurY()-orbiting.size/2 <= y && y <= orbiting.absoluteCurY() + orbiting.size/2)
@@ -391,7 +391,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				if(orbiting instanceof Planet && ((Planet)(orbiting)).orbiting != null)
 				{
 					Planet cur_planet=(Planet)orbiting;
-					for(Satellite sat : cur_planet.orbiting)
+					for(Satellite<?> sat : cur_planet.orbiting)
 					{
 						if(sat.absoluteCurX()-OBJ_TOL <= x && x <= sat.absoluteCurX()+OBJ_TOL && sat.absoluteCurY()-OBJ_TOL <= y && y <= sat.absoluteCurY()+OBJ_TOL)
 						{
@@ -402,13 +402,13 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				}
 			}
 			
-			if(selected_obj instanceof Satellite) {//check to see if focus2 of the selected planet was just clicked on
-				if(((Satellite)selected_obj).orbit.focus2.getX()+((Satellite)selected_obj).orbit.boss.absoluteCurX() - OBJ_TOL <= x &&
-					x <= ((Satellite)selected_obj).orbit.focus2.getX()+((Satellite)selected_obj).orbit.boss.absoluteCurX()+OBJ_TOL &&
-					((Satellite)selected_obj).orbit.focus2.getY()+((Satellite)selected_obj).orbit.boss.absoluteCurY()-OBJ_TOL <= y &&
-					y <= ((Satellite)selected_obj).orbit.focus2.getY()+((Satellite)selected_obj).orbit.boss.absoluteCurY()+OBJ_TOL)
+			if(selected_obj instanceof Satellite<?>) {//check to see if focus2 of the selected planet was just clicked on
+				if(((Satellite<?>)selected_obj).orbit.focus2.getX()+((Satellite<?>)selected_obj).orbit.boss.absoluteCurX() - OBJ_TOL <= x &&
+					x <= ((Satellite<?>)selected_obj).orbit.focus2.getX()+((Satellite<?>)selected_obj).orbit.boss.absoluteCurX()+OBJ_TOL &&
+					((Satellite<?>)selected_obj).orbit.focus2.getY()+((Satellite<?>)selected_obj).orbit.boss.absoluteCurY()-OBJ_TOL <= y &&
+					y <= ((Satellite<?>)selected_obj).orbit.focus2.getY()+((Satellite<?>)selected_obj).orbit.boss.absoluteCurY()+OBJ_TOL)
 				{
-					selected_obj = ((Satellite)selected_obj).orbit.focus2;//select the focus!
+					selected_obj = ((Satellite<?>)selected_obj).orbit.focus2;//select the focus!
 					return;
 				}
 			}
@@ -612,7 +612,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	{
 		if(system.orbiting != null)
 		{
-			for(Satellite sat: system.orbiting)
+			for(Satellite<?> sat: system.orbiting)
 			{
 				sat.orbit.calculateOrbit();
 			}
@@ -632,7 +632,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	private void addPlanet(int x, int y)
 	{		
 		Planet theplanet = new Planet(system.orbiting.size(), "", 100.0, 10000.0, DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, .000005);
-		theplanet.orbit = new Orbit((Satellite)theplanet, (Positioning)system, x, y, x, y, 1);
+		theplanet.orbit = new Orbit((Satellite<Planet>)theplanet, (Orbitable<GSystem>)system, x, y, x, y, 1);
 		system.orbiting.add(theplanet);
 		
 		selected_obj = theplanet;
@@ -643,7 +643,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	private void addMoon(int x, int y)
 	{
 		Moon themoon = new Moon(((Planet)selected_obj).orbiting.size(), DEFAULT_MOON_MASS, "", DEFAULT_MOON_SIZE);
-		themoon.orbit = new Orbit((Satellite)themoon, (Positioning)selected_obj,x,y,x,y,1);
+		themoon.orbit = new Orbit((Satellite<Moon>)themoon, (Orbitable<Planet>)selected_obj,x,y,x,y,1);
 		((Planet)selected_obj).orbiting.add(themoon);
 		
 		selected_obj=themoon;
@@ -698,13 +698,13 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 					drawSystem();
 				}
 			}
-			else if(selected_obj instanceof Satellite) //picks up planets, moons and asteroids here
+			else if(selected_obj instanceof Satellite<?>) //picks up planets, moons and asteroids here
 			{
-				((Satellite)selected_obj).orbit.cur_x = screenToDataX(e.getX())-((Satellite)selected_obj).orbit.boss.absoluteCurX();
-				((Satellite)selected_obj).orbit.cur_y = screenToDataY(e.getY())-((Satellite)selected_obj).orbit.boss.absoluteCurY();
-				((Satellite)selected_obj).orbit.init_x = screenToDataX(e.getX())-((Satellite)selected_obj).orbit.boss.absoluteInitX();
-				((Satellite)selected_obj).orbit.init_y = screenToDataY(e.getY())-((Satellite)selected_obj).orbit.boss.absoluteInitY();
-				((Satellite)selected_obj).orbit.calculateOrbit();
+				((Satellite<?>)selected_obj).orbit.cur_x = screenToDataX(e.getX())-((Satellite<?>)selected_obj).orbit.boss.absoluteCurX();
+				((Satellite<?>)selected_obj).orbit.cur_y = screenToDataY(e.getY())-((Satellite<?>)selected_obj).orbit.boss.absoluteCurY();
+				((Satellite<?>)selected_obj).orbit.init_x = screenToDataX(e.getX())-((Satellite<?>)selected_obj).orbit.boss.absoluteInitX();
+				((Satellite<?>)selected_obj).orbit.init_y = screenToDataY(e.getY())-((Satellite<?>)selected_obj).orbit.boss.absoluteInitY();
+				((Satellite<?>)selected_obj).orbit.calculateOrbit();
 				drawSystem();
 			} else {
 				//selected_obj is a Focus!
@@ -729,9 +729,9 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 						drawSystem();
 					break;
 				case ADD_FOCUS:
-					((Satellite)selected_obj).orbit.focus2.setX(screenToDataX(e.getX())-((Satellite)selected_obj).orbit.boss.absoluteInitX());
-					((Satellite)selected_obj).orbit.focus2.setY(screenToDataY(e.getY())-((Satellite)selected_obj).orbit.boss.absoluteInitY());
-					((Satellite)selected_obj).orbit.calculateOrbit();
+					((Satellite<?>)selected_obj).orbit.focus2.setX(screenToDataX(e.getX())-((Satellite<?>)selected_obj).orbit.boss.absoluteInitX());
+					((Satellite<?>)selected_obj).orbit.focus2.setY(screenToDataY(e.getY())-((Satellite<?>)selected_obj).orbit.boss.absoluteInitY());
+					((Satellite<?>)selected_obj).orbit.calculateOrbit();
 					drawSystem();
 					break;
 			}
@@ -809,7 +809,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		{
 			if(selected_obj instanceof Planet || selected_obj instanceof Asteroid)
 			{
-				for(Satellite orbiting : system.orbiting)
+				for(Satellite<?> orbiting : system.orbiting)
 				{
 					if(selected_obj == orbiting)
 					{
@@ -820,12 +820,12 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			}
 			else //search for moons and stations
 			{
-				for(Satellite orbiting : system.orbiting)
+				for(Satellite<?> orbiting : system.orbiting)
 				{
 					if(orbiting instanceof Planet && (selected_obj instanceof Moon))
 					{
 						Planet cur_planet=(Planet)orbiting;
-						for(Satellite sat : cur_planet.orbiting)
+						for(Satellite<?> sat : cur_planet.orbiting)
 						{
 							if(selected_obj == sat)
 								cur_planet.orbiting.remove(sat);

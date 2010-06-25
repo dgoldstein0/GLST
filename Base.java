@@ -1,11 +1,11 @@
 
-public class Base extends Facility{
+public class Base extends Facility<Base>{
 	
 	final Object soldier_lock = new Object();
 	float soldier;
 	int max_soldier;
 	
-	public Base(OwnableSatellite l, long t)
+	public Base(OwnableSatellite<?> l, long t)
 	{
 		super(l, t, GalacticStrategyConstants.initial_base_endu);
 		soldier=GalacticStrategyConstants.initial_soldier;

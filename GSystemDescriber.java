@@ -1,4 +1,4 @@
-public class GSystemDescriber implements DestDescriber
+public class GSystemDescriber implements Describer<GSystem>
 {
 	int id;
 	
@@ -7,7 +7,7 @@ public class GSystemDescriber implements DestDescriber
 		id=sys.id;
 	}
 	
-	public Describable retrieveDestination(Galaxy g)
+	public GSystem retrieveObject(Galaxy g)
 	{
 		return g.systems.get(id);
 	}

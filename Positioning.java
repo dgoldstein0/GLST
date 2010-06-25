@@ -1,4 +1,4 @@
-interface Positioning extends Describable
+interface Positioning<T extends Positioning<T>> extends Destination<T>
 {
 	public abstract double absoluteCurX();
 	public abstract double absoluteCurY();

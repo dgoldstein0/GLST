@@ -45,7 +45,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	JPopupMenu select_menu;
 	
 	ArrayList<GSystem> known_sys; //known systems for this player
-	ArrayList<Satellite> known_sate;   //known satellite for this player
+	ArrayList<Satellite<?>> known_sate;   //known satellite for this player
 	static GameControl GC;
 	
 	GalacticMapPainter GalaxyPanel;
@@ -362,7 +362,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		}
 	}
 	
-	public void displaySatellitePanel(Satellite s)
+	public void displaySatellitePanel(Satellite<?> s)
 	{
 		SatellitePanel.setSat(s);
 		
@@ -643,7 +643,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		//search orbiting planets/objects
 		if(sys.orbiting != null)
 		{
-			for(Satellite orbiting : sys.orbiting)
+			for(Satellite<?> orbiting : sys.orbiting)
 			{
 				//search for satellites...
 				if(orbiting.absoluteCurX()-orbiting.size/2 -OBJ_TOL <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 + OBJ_TOL && orbiting.absoluteCurY()-orbiting.size/2-OBJ_TOL <= y && y <= orbiting.absoluteCurY() + orbiting.size/2+OBJ_TOL)
@@ -654,7 +654,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				if(orbiting instanceof Planet && ((Planet)(orbiting)).orbiting != null)
 				{
 					Planet cur_planet=(Planet)orbiting;
-					for(Satellite sat : cur_planet.orbiting)
+					for(Satellite<?> sat : cur_planet.orbiting)
 					{
 						if(sat.absoluteCurX()-sat.size/2 -OBJ_TOL <= x && x <= sat.absoluteCurX()+sat.size/2+OBJ_TOL && sat.absoluteCurY()-sat.size/2-OBJ_TOL <= y && y <= sat.absoluteCurY()+sat.size/2+OBJ_TOL)
 						{
@@ -699,7 +699,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				displayNoPanel();
 				break;
 			case Selectable.SATELLITE:
-				displaySatellitePanel((Satellite)s);
+				displaySatellitePanel((Satellite<?>)s);
 				break;
 			case Selectable.SHIP:
 				displayShipPanel((Ship)s);
@@ -725,7 +725,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	
 	private void setDestination(double x, double y)
 	{
-		Destination dest = new DestinationPoint(x,y);
+		Destination<?> dest = new DestinationPoint(x,y);
 		
 		//1st search out satellites
 		
@@ -734,7 +734,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		//search orbiting planets/objects
 		if(sys.orbiting != null)
 		{
-			for(Satellite sat : sys.orbiting)
+			for(Satellite<?> sat : sys.orbiting)
 			{
 				//search for satellites...
 				if(sat.absoluteCurX()-sat.size/2 -OBJ_TOL <= x && x <= sat.absoluteCurX()+sat.size/2 + OBJ_TOL && sat.absoluteCurY()-sat.size/2-OBJ_TOL <= y && y <= sat.absoluteCurY() + sat.size/2+OBJ_TOL)
@@ -746,7 +746,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				if(sat instanceof Planet && ((Planet)(sat)).orbiting != null)
 				{
 					Planet cur_planet=(Planet)sat;
-					for(Satellite sat2 : cur_planet.orbiting)
+					for(Satellite<?> sat2 : cur_planet.orbiting)
 					{
 						if(sat2.absoluteCurX()-sat2.size/2 -OBJ_TOL <= x && x <= sat2.absoluteCurX()+sat2.size/2+OBJ_TOL && sat2.absoluteCurY()-sat2.size/2-OBJ_TOL <= y && y <= sat2.absoluteCurY()+sat2.size/2+OBJ_TOL)
 						{
@@ -776,9 +776,9 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		ShipPanel.the_ship.orderToMove(cur_time, dest);
 		ShipPanel.updateDestDisplay();
 		
-		if(dest instanceof Ship)
+		if(dest instanceof Ship && dest != ShipPanel.the_ship)
 		{			
-			ShipPanel.the_ship.orderToAttack(cur_time,(Targetable)dest);
+			ShipPanel.the_ship.orderToAttack(cur_time,(Targetable<Ship>)dest);
 		}
 	}
 	

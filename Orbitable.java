@@ -1,9 +1,7 @@
 import java.util.*;
 
-interface Orbitable extends Positioning
+interface Orbitable<T extends Orbitable<T>> extends Positioning<T>
 {
-	ArrayList<Satellite> orbiting = null;
-	
-	public ArrayList<Satellite> getOrbiting();
-	public void setOrbiting(ArrayList<Satellite> o);
+	public ArrayList<Satellite<?>> getOrbiting();
+	public void setOrbiting(ArrayList<Satellite<?>> o);
 }

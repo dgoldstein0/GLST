@@ -25,7 +25,7 @@ public class SystemLabel extends JLabel implements MouseListener
 			the_interface.prev_sys=the_sys;
 			the_interface.sys=the_sys;
 			the_interface.satellites_list.removeAll();
-			for (Satellite satellite: the_sys.orbiting)
+			for (Satellite<?> satellite: the_sys.orbiting)
 			{
 				SatelliteLabel label=new SatelliteLabel(satellite);
 				the_interface.satellites_list.add(label);			

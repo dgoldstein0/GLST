@@ -1,4 +1,4 @@
-public class ShipDescriber implements DestDescriber
+public class ShipDescriber implements Describer<Ship>
 {
 	int system_id;
 	int player_id;
@@ -11,7 +11,7 @@ public class ShipDescriber implements DestDescriber
 		system_id = s.location.getId();
 	}
 	
-	public Describable retrieveDestination(Galaxy g)
+	public Ship retrieveObject(Galaxy g)
 	{
 		return g.systems.get(system_id).fleets[player_id].ships.get(ship_id);
 	}

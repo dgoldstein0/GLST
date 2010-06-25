@@ -116,11 +116,11 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		health.setString(Integer.toString(the_ship.type.hull - the_ship.damage));
 		soldier_label.setText("    " + Integer.toString(the_ship.getSoldierInt()) + " soldiers");
 		
-		if(the_ship.destination instanceof OwnableSatellite && Math.hypot(the_ship.dest_x_coord-the_ship.pos_x, the_ship.dest_y_coord-the_ship.pos_y) <= GalacticStrategyConstants.LANDING_RANGE)
+		if(the_ship.destination instanceof OwnableSatellite<?> && Math.hypot(the_ship.dest_x_coord-the_ship.pos_x, the_ship.dest_y_coord-the_ship.pos_y) <= GalacticStrategyConstants.LANDING_RANGE)
 		{
-			if(((OwnableSatellite)the_ship.destination).getOwner() instanceof Player && ((OwnableSatellite)the_ship.destination).getOwner().getId() == GameInterface.GC.player_id)
+			if(((OwnableSatellite<?>)the_ship.destination).getOwner() instanceof Player && ((OwnableSatellite<?>)the_ship.destination).getOwner().getId() == GameInterface.GC.player_id)
 			{
-				if(((OwnableSatellite)the_ship.destination).the_base instanceof Base && the_ship.soldier < the_ship.type.soldier_capacity)
+				if(((OwnableSatellite<?>)the_ship.destination).the_base instanceof Base && the_ship.soldier < the_ship.type.soldier_capacity)
 					pickup_troops.setEnabled(true);
 				else
 					pickup_troops.setEnabled(false);
@@ -141,9 +141,9 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 	
 	public void updateDestDisplay()
 	{
-		if(the_ship.destination instanceof OwnableSatellite && ((OwnableSatellite)the_ship.destination).owner instanceof Player)
+		if(the_ship.destination instanceof OwnableSatellite<?> && ((OwnableSatellite<?>)the_ship.destination).owner instanceof Player)
 		{//color background appropriately
-			dest_name_panel.setBackground(((OwnableSatellite)the_ship.destination).owner.getColor());
+			dest_name_panel.setBackground(((OwnableSatellite<?>)the_ship.destination).owner.getColor());
 			dest_name_panel.setOpaque(true);
 		}
 		else
@@ -171,34 +171,34 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		}
 		else if(e.getSource() == invade)
 		{
-			if(((OwnableSatellite)the_ship.destination).getOwner() instanceof Player)
+			if(((OwnableSatellite<?>)the_ship.destination).getOwner() instanceof Player)
 			{
 				boolean base_seen=false;
-				synchronized(((OwnableSatellite)the_ship.destination).facilities_lock)
+				synchronized(((OwnableSatellite<?>)the_ship.destination).facilities_lock)
 				{
-					for(Integer i: ((OwnableSatellite)the_ship.destination).facilities.keySet())
+					for(Integer i: ((OwnableSatellite<?>)the_ship.destination).facilities.keySet())
 					{
-						if(((OwnableSatellite)the_ship.destination).facilities.get(i) instanceof Base) //there should only be one base on the planet
+						if(((OwnableSatellite<?>)the_ship.destination).facilities.get(i) instanceof Base) //there should only be one base on the planet
 						{
-							((Base)((OwnableSatellite)the_ship.destination).facilities.get(i)).attackedByTroops(GameInterface.GC.TC.getTime(), the_ship);
+							((Base)((OwnableSatellite<?>)the_ship.destination).facilities.get(i)).attackedByTroops(GameInterface.GC.TC.getTime(), the_ship);
 							base_seen=true;
 						}
 					}
 				}
 				if(!base_seen) //if base isn't finished being built, player can take over without a fight
-					((OwnableSatellite)the_ship.destination).setOwner(the_ship.getOwner());
+					((OwnableSatellite<?>)the_ship.destination).setOwner(the_ship.getOwner());
 			}
 			else
 			{
-				((OwnableSatellite)the_ship.destination).setOwner(the_ship.getOwner());
+				((OwnableSatellite<?>)the_ship.destination).setOwner(the_ship.getOwner());
 			}
 			updateDestDisplay();
 		}
 		else if(e.getSource() == pickup_troops)
 		{
-			synchronized(((OwnableSatellite)the_ship.destination).facilities_lock)
+			synchronized(((OwnableSatellite<?>)the_ship.destination).facilities_lock)
 			{
-				the_ship.soldier += ((OwnableSatellite)the_ship.destination).the_base.retrieveSoldiers(GameInterface.GC.TC.getTime(),the_ship.type.soldier_capacity - the_ship.soldier);
+				the_ship.soldier += ((OwnableSatellite<?>)the_ship.destination).the_base.retrieveSoldiers(GameInterface.GC.TC.getTime(),the_ship.type.soldier_capacity - the_ship.soldier);
 			}
 		}
 	}

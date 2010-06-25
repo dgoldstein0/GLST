@@ -859,7 +859,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		int i, choice;
 		Random generator= new Random(System.nanoTime());
 		for(GSystem sys : map.systems){
-			for(Satellite sat : sys.orbiting)
+			for(Satellite<?> sat : sys.orbiting)
 			{
 				if(sat.name.length() == 0)
 				{
@@ -877,7 +877,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 				
 				if(sat instanceof Planet)
 				{
-					for(Satellite sat2 : ((Planet)sat).orbiting)
+					for(Satellite<?> sat2 : ((Planet)sat).orbiting)
 					{
 						if(sat2.name.length() == 0)
 						{
@@ -1236,7 +1236,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private void addSystem(int x, int y)
 	{
-		GSystem new_sys = new GSystem(map.systems.size(),x,y,null,new ArrayList<Satellite>(),null,Integer.parseInt(t_nav.getValue().toString()));
+		GSystem new_sys = new GSystem(map.systems.size(),x,y,null,new ArrayList<Satellite<?>>(),null,Integer.parseInt(t_nav.getValue().toString()));
 		/*if(!(map.systems instanceof HashSet)) //***this is unnecessary now since Galaxy creates the HashSet in the Galaxy constructor
 			map.systems = new HashSet<GSystem>();*/
 		map.systems.add(new_sys);

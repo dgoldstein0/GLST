@@ -1,10 +1,10 @@
 import java.util.*;
 
-public class ResearchBuilding extends Facility{
+public class ResearchBuilding extends Facility<ResearchBuilding>{
 	
 	HashSet<ResearchOption> options;
 	
-	public ResearchBuilding(OwnableSatellite loc, long t)
+	public ResearchBuilding(OwnableSatellite<?> loc, long t)
 	{
 		super(loc, t, GalacticStrategyConstants.initial_research_building_endu);
 		options=new HashSet<ResearchOption>();

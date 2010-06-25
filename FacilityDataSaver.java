@@ -1,6 +1,6 @@
 import java.util.HashSet;
 
-public abstract class FacilityDataSaver<T extends Facility> extends DataSaver<T> {
+public abstract class FacilityDataSaver<T extends Facility<T>> extends DataSaver<T> {
 
 	HashSet<Targetter> aggr;
 	int endu;

@@ -1,10 +1,13 @@
+import java.util.ArrayList;
 import java.util.Hashtable;
 import javax.swing.SwingUtilities;
 
-public abstract class OwnableSatellite extends Satellite implements RelaxedSaveable
+public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Satellite<T> implements RelaxedSaveable, Orbitable<T>
 {
+	ArrayList<Satellite<?>> orbiting;
+	
 	Object facilities_lock = new Object();
-	Hashtable<Integer, Facility> facilities;
+	Hashtable<Integer, Facility<?> > facilities;
 	Base the_base; //the base is a member of facilities.  As such, it should be governed by facilities_lock.
 	Player owner;
 	
@@ -32,7 +35,7 @@ public abstract class OwnableSatellite extends Satellite implements RelaxedSavea
 	public OwnableSatellite()
 	{
 		next_facility_id=0;
-		facilities = new Hashtable<Integer, Facility>();
+		facilities = new Hashtable<Integer, Facility<?>>();
 		bldg_in_progress = FacilityType.NO_BLDG;
 		data_control = new OwnableSatelliteDataSaverControl(this);
 	}
@@ -83,7 +86,7 @@ public abstract class OwnableSatellite extends Satellite implements RelaxedSavea
 		{
 			if(t >= time_finish) //if build is finished...
 			{
-				Facility new_fac;
+				Facility<?> new_fac;
 				switch(bldg_in_progress)
 				{
 					case BASE:
@@ -112,10 +115,10 @@ public abstract class OwnableSatellite extends Satellite implements RelaxedSavea
 	
 	public class FacilityAdder implements Runnable
 	{
-		Facility new_fac;
+		Facility<?> new_fac;
 		GameInterface GI;
 		
-		public FacilityAdder(Facility f, GameInterface gi)
+		public FacilityAdder(Facility<?> f, GameInterface gi)
 		{
 			new_fac = f;
 			GI=gi;
@@ -191,8 +194,8 @@ public abstract class OwnableSatellite extends Satellite implements RelaxedSavea
 		}
 	}
 	
-	public Hashtable<Integer, Facility> getFacilities(){return facilities;}
-	public void setFacilities(Hashtable<Integer, Facility> fac){facilities=fac;}
+	public Hashtable<Integer, Facility<?>> getFacilities(){return facilities;}
+	public void setFacilities(Hashtable<Integer, Facility<?>> fac){facilities=fac;}
 	public Player getOwner(){return owner;}
 	public abstract void setOwner(Player p); //this must be overriden by implementing classes, because it is responsible for notifying the GSystem of an owner change
 	public long getPopulation(){return population;}
@@ -210,4 +213,7 @@ public abstract class OwnableSatellite extends Satellite implements RelaxedSavea
 	
 	public int getNext_facility_id(){return next_facility_id;}
 	public void setNext_facility_id(int n){next_facility_id=n;}
+	
+	public ArrayList<Satellite<?>> getOrbiting(){return orbiting;}
+	public void setOrbiting(ArrayList<Satellite<?>> o){orbiting=o;}
 }

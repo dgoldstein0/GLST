@@ -1,10 +1,10 @@
 import java.util.*;
 
-public class Missile extends Flyer
+public class Missile extends Flyer<Missile>
 {
 	private final double Collide_Range=10.0;
 
-	public Missile(Ship s, Targetable t, long time)
+	public Missile(Ship s, Targetable<?> t, long time)
 	{
 		super("", ShipType.MISSILE);
 		
@@ -34,7 +34,7 @@ public class Missile extends Flyer
 		data_control.saveData();
 	}
 	
-	public DestDescriber describer()
+	public Describer<Missile> describer()
 	{
 		return new MissileDescriber(this);
 	}

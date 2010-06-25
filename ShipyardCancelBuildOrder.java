@@ -1,7 +1,7 @@
 
 public class ShipyardCancelBuildOrder extends Order {
 
-	FacilityDescriber shipyard_describer;
+	FacilityDescriber<Shipyard> shipyard_describer;
 	int ship_id;
 	
 	Shipyard the_yard;
@@ -11,7 +11,7 @@ public class ShipyardCancelBuildOrder extends Order {
 	public ShipyardCancelBuildOrder(Shipyard syd, Ship s, long t)
 	{
 		the_yard=syd;
-		shipyard_describer = (FacilityDescriber) s.describer();
+		shipyard_describer = syd.describer();
 		scheduled_time=t;
 		ship_id = s.getId();
 		the_ship = s;
@@ -22,7 +22,7 @@ public class ShipyardCancelBuildOrder extends Order {
 	public void execute(Galaxy g) {
 		if(mode==NETWORK)
 		{
-			the_yard = (Shipyard)shipyard_describer.retrieveDestination(g);
+			the_yard = (Shipyard)shipyard_describer.retrieveObject(g);
 			the_ship = the_yard.manufac_queue.get(ship_id);
 		}
 		
@@ -31,8 +31,8 @@ public class ShipyardCancelBuildOrder extends Order {
 
 	public ShipyardCancelBuildOrder(){mode=Order.NETWORK;}
 	
-	public FacilityDescriber getShipyard_describer(){return shipyard_describer;}
-	public void setShipyard_describer(FacilityDescriber desc){shipyard_describer=desc;}
+	public FacilityDescriber<Shipyard> getShipyard_describer(){return shipyard_describer;}
+	public void setShipyard_describer(FacilityDescriber<Shipyard> desc){shipyard_describer=desc;}
 	public int getShip_id(){return ship_id;}
 	public void setType(int i){ship_id=i;}
 }
