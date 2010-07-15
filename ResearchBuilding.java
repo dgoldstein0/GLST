@@ -4,9 +4,9 @@ public class ResearchBuilding extends Facility<ResearchBuilding>{
 	
 	HashSet<ResearchOption> options;
 	
-	public ResearchBuilding(OwnableSatellite<?> loc, long t)
+	public ResearchBuilding(OwnableSatellite<?> loc, int id, long t)
 	{
-		super(loc, t, GalacticStrategyConstants.initial_research_building_endu);
+		super(loc, id, t, GalacticStrategyConstants.initial_research_building_endu);
 		options=new HashSet<ResearchOption>();
 	}
 	

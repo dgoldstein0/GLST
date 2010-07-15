@@ -1,3 +1,5 @@
+import java.util.Set;
+
 public abstract class Order
 {
 	final static int ORIGIN = 0;
@@ -6,8 +8,16 @@ public abstract class Order
 	int mode;
 	long scheduled_time;
 	
-	public abstract void execute(Galaxy g);
-	//remember once an event is instantiated to ask GameControl to notifyAllPlayers
+	public abstract Set<Order> execute(Galaxy g);
+	/**This function must perform the following tasks:
+	 * 1) retrieve objects from their describers, if the order came over the network
+	 * 2) check the validity of the order.  If not valid, return an empty set.
+	 * 3.1) revertToTime on all objects immediately effected (but not those that will be affected by the revertToTime calls)
+	 * 3.2) create a set of Order's of everything returned from revertToTime calls.  This will be the return value
+	 * 4) execute the actual Order
+	 * 5) return the set created in step 3*/
+	
+	//remember once an Order is instantiated to ask GameControl to notifyAllPlayers
 	
 	public long getScheduled_time(){return scheduled_time;}
 	public void setScheduled_time(long t){scheduled_time=t;}

@@ -1,8 +1,9 @@
 import java.util.*;
 
-public class Missile extends Flyer<Missile>
+public class Missile extends Flyer<Missile, Missile.MissileId>
 {
 	private final double Collide_Range=10.0;
+	MissileId id;
 
 	public Missile(Ship s, Targetable<?> t, long time)
 	{
@@ -12,7 +13,7 @@ public class Missile extends Flyer<Missile>
 		data_control = new MissileDataSaverControl(this);
 		
 		location = s.location;
-		id=location.next_missile_id;
+		id= new MissileId(s.next_missile_id++, s);
 		location.next_missile_id++;
 		
 		//set up physics
@@ -39,31 +40,37 @@ public class Missile extends Flyer<Missile>
 		return new MissileDescriber(this);
 	}
 	
-	public void removeFromGame()
+	@Override
+	public void removeFromGame(long t)
 	{
-		location.missiles.remove(id);
+		location.missiles.remove(id, t);
 	}
 	
 	//returns true when the missile detonates, false otherwise
-	public boolean update(long t, Iterator<Integer> iteration)
+	public boolean update(long t, Iterator<MissileId> missileIteration)
 	{
 		if (time <= t)
 		{
 			moveIncrement();
 			time += GalacticStrategyConstants.TIME_GRANULARITY;
-			data_control.saveData();
 			
 			if (collidedWithTarget())
 			{
-				detonate(iteration);
+				detonate(missileIteration);
+				data_control.saveData();
 				return true;
 			}
 			else
+			{
+				data_control.saveData();
 				return false;
+			}
 		}
-		return false;
+		else
+			return false;
 	}
 	
+	//BOOKMARK: POTENTIAL COORDINATION HAZARD - if missile/ship update order is changed, this won't work
 	public boolean collidedWithTarget()
 	{
 		//can use current x/y coords for ships because ship positions are updated first
@@ -72,26 +79,30 @@ public class Missile extends Flyer<Missile>
 		return (x_dif*x_dif+y_dif*y_dif<Collide_Range*Collide_Range);
 	}
 	
-	public void detonate(Iterator<Integer> iteration)
+	public void detonate(Iterator<MissileId> missileIteration)
 	{
 		//this function could start an explosion animation instead
-		iteration.remove();
+		missileIteration.remove();
 		target.removeAggressor(this);
 		
 		//addDamage is called last to avoid a ConcurrentModificationException.  If the additional damage
 		//destroys the target, then this kicks off an iteration through the remaining aggressors.  The missiles,
-		//right now, destroyed() themselved when notified that their targetIsDestroyed(long).  because iteration.remove
+		//right now, destroyed() themselves when notified that their targetIsDestroyed(long).  because iteration.remove
 		//is called, without removeAggressor(this), this addDamage call would cause the program to try to remove the
 		//element from the missiles hashtable a second time - even though the iteration is using that element at the moment.
-		target.addDamage(GalacticStrategyConstants.MISSILE_DAMAGE);
+		target.addDamage(time, GalacticStrategyConstants.MISSILE_DAMAGE);
+		
+		is_alive=false;
 	}
 	
 	public void destroyed()
 	{
 		synchronized(location.missile_lock)
 		{
-			location.missiles.remove(id); //must call remove with the Key and not the Value
+			location.missiles.remove(id, time); //must call remove with the Key and not the Value
 		}
+		is_alive=false;
+		data_control.saveData(); //TODO: examine consequences of this
 	}
 	
 	public void targetIsDestroyed(long t)
@@ -102,5 +113,32 @@ public class Missile extends Flyer<Missile>
 	public void targetHasWarped(long t)
 	{
 		destroyed();
+	}
+	
+	public static class MissileId extends FlyerId<MissileId>
+	{
+		Ship shooter;
+		int m_id;
+		
+		public MissileId(int id, Ship s)
+		{
+			shooter = s;
+			m_id = id;
+		}
+		
+		public int hashCode()
+		{
+			return shooter.hashCode()*200 + m_id;
+		}
+		
+		public boolean equals(Object o)
+		{
+			if(o instanceof MissileId)
+			{
+				return (((MissileId)o).shooter == shooter) && (((MissileId)o).m_id == m_id);
+			}
+			else
+				return false;
+		}
 	}
 }

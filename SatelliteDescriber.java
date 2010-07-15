@@ -10,9 +10,10 @@ public class SatelliteDescriber<T extends Satellite<T>> implements Describer<T>
 	}
 	
 	@SuppressWarnings("unchecked")
-	public T retrieveObject(Galaxy g)
+	@Override
+	public T retrieveObject(Galaxy g, long t)
 	{
-		Orbitable<?> boss = boss_describer.retrieveObject(g);
+		Orbitable<?> boss = boss_describer.retrieveObject(g, t);
 		
 		return (T)boss.getOrbiting().get(id); //orbiting is only an array of Satellites, so, though we know here we will have a T, this gives an unchecked exception
 	}

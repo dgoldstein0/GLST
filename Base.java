@@ -1,3 +1,4 @@
+import java.util.HashSet;
 
 public class Base extends Facility<Base>{
 	
@@ -5,12 +6,16 @@ public class Base extends Facility<Base>{
 	float soldier;
 	int max_soldier;
 	
-	public Base(OwnableSatellite<?> l, long t)
+	long time_soldiers_taken;//the time for which the soldier_taker set is valid
+	HashSet<Saveable<?>> soldier_taker;
+	
+	public Base(OwnableSatellite<?> l, int i, long t)
 	{
-		super(l, t, GalacticStrategyConstants.initial_base_endu);
+		super(l, i, t, GalacticStrategyConstants.initial_base_endu);
 		soldier=GalacticStrategyConstants.initial_soldier;
 		max_soldier = GalacticStrategyConstants.default_max_soldier;
 		data_control = new BaseDataSaverControl(this);
+		soldier_taker = new HashSet<Saveable<?>>();
 	}
 	
 	public void upgrade()
@@ -32,12 +37,13 @@ public class Base extends Facility<Base>{
 			if(soldier > max_soldier)
 				soldier=(float)max_soldier;
 			
+			soldier_taker.clear();
 			last_time=time;
 			data_control.saveData();
 		}
 	}
 	
-	public float retrieveSoldiers(long time, float asking)
+	public float retrieveSoldiers(long time, float asking, Saveable<?> taker)
 	{
 		float giving; //the number of soldiers the Base is giving up to the ship
 		synchronized(soldier_lock)
@@ -55,9 +61,20 @@ public class Base extends Facility<Base>{
 				soldier = 0.0f;
 			}
 		}
+		
+		if(time == time_soldiers_taken)
+			soldier_taker.add(taker);
+		else
+		{
+			time_soldiers_taken=time;
+			soldier_taker.clear();
+			soldier_taker.add(taker);
+		}
+		
 		return giving;
 	}
 	
+	@Deprecated
 	public void attackedByTroops(long t, Ship enemy) 
 	{
 		synchronized(soldier_lock)
@@ -87,6 +104,7 @@ public class Base extends Facility<Base>{
 	{
 		synchronized(location.facilities_lock)
 		{
+			is_alive=false;
 			location.facilities.remove(this);
 			location.setOwner(null);
 			location.the_base = null;
@@ -99,6 +117,8 @@ public class Base extends Facility<Base>{
 	public void setSoldier(float s){synchronized(soldier_lock){soldier=s;}}
 	public int getMax_soldier(){return max_soldier;}
 	public void setMax_soldier(int s){max_soldier=s;}
+	public long getTime_soldiers_taken(){return time_soldiers_taken;}
+	public void setTime_soldiers_taken(long t){time_soldiers_taken=t;}
 	
 	public FacilityType getType(){return FacilityType.BASE;}
 	public String imageLoc(){return "images/Base.gif";}

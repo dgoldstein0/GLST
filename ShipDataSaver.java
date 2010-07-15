@@ -33,9 +33,8 @@ public class ShipDataSaver extends FlyerDataSaver<Ship> {
 		super();
 	}
 	
-	public void saveData(Ship s)
+	protected void doSaveMoreData(Ship s)
 	{
-		super.saveData(s);
 		md=s.mode;
 		next_at_time=s.nextAttackingtime;
 		arrive_time = s.arrival_time;

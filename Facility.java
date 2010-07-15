@@ -2,35 +2,37 @@
 import java.util.HashSet;
 
 //T = the class which extends Facility
-public abstract class Facility<T extends Facility<T>> implements Targetable<T>, RelaxedSaveable
+public abstract class Facility<T extends Facility<T>> implements Targetable<T>, RelaxedSaveable<T>
 {	
 	OwnableSatellite<?> location;
 	int id;
 	
-	HashSet<Targetter> aggressors;
+	HashSet<Targetter<?>> aggressors;
 	int endurance;
 	int damage;
+	boolean is_alive;
 	
 	long last_time;//the last time it was updated
 	
-	RelaxedDataSaverControl<T> data_control; //must be instantiated by subclasses
+	RelaxedDataSaverControl<T, ? extends FacilityDataSaver<T> > data_control; //must be instantiated by subclasses
 	
-	public Facility(OwnableSatellite<?> l, long t, int endu)
+	public Facility(OwnableSatellite<?> l, int i, long t, int endu)
 	{
 		location=l;
 		
-		id=l.next_facility_id;
-		l.next_facility_id++;
+		id=i;
 		
 		last_time=t;
 		
 		endurance=endu;
 		damage=0;
-		aggressors = new HashSet<Targetter>();
+		is_alive=true;
+		aggressors = new HashSet<Targetter<?>>();
 	}
 	
-	public void addDamage(int d)
+	public void addDamage(long t, int d)
 	{
+		updateStatus(t);
 		damage+=d;
 		if(damage>=endurance)
 			destroyed();
@@ -39,22 +41,42 @@ public abstract class Facility<T extends Facility<T>> implements Targetable<T>, 
 	
 	public void destroyed() //default option.  Base overrides this
 	{
-		location.facilities.remove(this);
+		synchronized(location.facilities_lock)
+		{
+			is_alive=false;
+			location.facilities.remove(this);
+		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public FacilityDescriber<T> describer()
 	{
-		return new FacilityDescriber(this);
+		return new FacilityDescriber<T>((Facility<T>)this);
 	}
 	
-	public void handleDataNotSaved(){removeFromGame();}
+	@Override
+	public void handleDataNotSaved(long t){removeFromGame(t);}
 	
-	public void removeFromGame()
+	public void removeFromGame(long t)
 	{
-		//should probably cache the facility for recall... but anyway
-		location.facilities.remove(this);
+		synchronized(location.facilities_lock)
+		{
+			//should probably cache the facility for recall... but anyway
+			location.facilities.remove(this);
+		}
 	}
+	
+	@Override
+	public boolean isAlive(){return is_alive;}
+	public boolean isAliveAt(long t)
+	{
+		return data_control.saved_data[data_control.getIndexForTime(t)].alive;
+	}
+	
+	//for Saveable
+	public RelaxedDataSaverControl<T, ? extends FacilityDataSaver<T> > getDataControl(){return data_control;}
+	//for RelaxedSaveable
+	@Override
+	public long getTime(){return last_time;}
 	
 	public Facility(){}
 	
@@ -65,9 +87,9 @@ public abstract class Facility<T extends Facility<T>> implements Targetable<T>, 
 	public double getXVel(long t){return location.getXVel(t);}
 	public double getYVel(long t){return location.getYVel(t);}
 	
-	public HashSet<Targetter> getAggressors(){return aggressors;}
-	public void addAggressor(Targetter t){aggressors.add(t);}
-	public void removeAggressor(Targetter t){aggressors.remove(t);}
+	public HashSet<Targetter<?>> getAggressors(){return aggressors;}
+	public void addAggressor(Targetter<?> t){aggressors.add(t);}
+	public void removeAggressor(Targetter<?> t){aggressors.remove(t);}
 	public abstract void updateStatus(long t);
 	public abstract String getName();
 	public abstract FacilityType getType();

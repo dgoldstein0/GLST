@@ -1,7 +1,7 @@
 import java.util.Hashtable;
 
 
-public class OwnableSatelliteDataSaver extends DataSaver<OwnableSatellite<?>> {
+public class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> extends DataSaver<T> {
 
 	boolean is_data_saved;
 	FacilityType bldg_in_prog;
@@ -12,6 +12,7 @@ public class OwnableSatelliteDataSaver extends DataSaver<OwnableSatellite<?>> {
 	Player own;
 	Hashtable<Integer, Facility<?>> fac; //save this in case facility gets destroyed, so we still have a reference to it
 	Base base;
+	long mon_added;
 	
 	public OwnableSatelliteDataSaver()
 	{
@@ -19,7 +20,7 @@ public class OwnableSatelliteDataSaver extends DataSaver<OwnableSatellite<?>> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void loadData(OwnableSatellite<?> sat)
+	public void loadData(T sat)
 	{
 		sat.bldg_in_progress = bldg_in_prog;
 		sat.time_finish = t_finish;
@@ -30,6 +31,7 @@ public class OwnableSatelliteDataSaver extends DataSaver<OwnableSatellite<?>> {
 		sat.facilities = (Hashtable<Integer, Facility<?>>) fac.clone(); //unchecked cast warning
 		sat.the_base = base;
 		sat.time=t;
+		sat.tax_money = mon_added;
 		
 		for(Integer i : sat.facilities.keySet())
 		{
@@ -38,9 +40,8 @@ public class OwnableSatelliteDataSaver extends DataSaver<OwnableSatellite<?>> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void saveData(OwnableSatellite<?> sat)
+	protected void doSaveData(T sat)
 	{
-		super.saveData(sat);
 		bldg_in_prog = sat.bldg_in_progress;
 		t_finish = sat.time_finish;
 		t_start = sat.time_start;
@@ -50,6 +51,7 @@ public class OwnableSatelliteDataSaver extends DataSaver<OwnableSatellite<?>> {
 		fac = (Hashtable<Integer, Facility<?>>) sat.facilities.clone(); //unchecked cast warning
 		base = sat.the_base;
 		t=sat.time;
+		mon_added = sat.tax_money;
 		
 		for(Integer i : sat.facilities.keySet())
 		{

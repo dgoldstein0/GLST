@@ -667,7 +667,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		
 		for(int i=0; i<sys.fleets.length; i++)
 		{
-			for(Integer j : sys.fleets[i].ships.keySet())
+			for(Ship.ShipId j : sys.fleets[i].ships.keySet())
 			{
 				Ship s = sys.fleets[i].ships.get(j);
 				
@@ -760,7 +760,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		
 		for(int i=0; i<sys.fleets.length; i++)
 		{
-			for(Integer j : sys.fleets[i].ships.keySet())
+			for(Ship.ShipId j : sys.fleets[i].ships.keySet())
 			{
 				Ship s = sys.fleets[i].ships.get(j);
 				

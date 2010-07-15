@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import javax.swing.SwingUtilities;
 
-public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Satellite<T> implements RelaxedSaveable, Orbitable<T>
+public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Satellite<T> implements RelaxedSaveable<T>, Orbitable<T>
 {
 	ArrayList<Satellite<?>> orbiting;
 	
@@ -17,7 +17,7 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 	FacilityType bldg_in_progress; //uses the constants specified in Facility
 	long time_finish;
 	long time_start;
-	int next_facility_id;
+	int next_facility_id; //serves as id of facility in progress, as well as the next id counter
 	
 	//for population model
 	long population; //current population
@@ -27,23 +27,28 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 	
 	//for taxation
 	long last_tax_time=0;
+	long tax_money;
 	final static int TAX_INTERVAL = 3000; //in milliseconds.  so taxes are compounded every three seconds.
 	final static double TAX_PER_PERSON = .03; //money per person per tax interval
 	
-	OwnableSatelliteDataSaverControl data_control;
+	OwnableSatelliteDataSaverControl<T> data_control;
+	
+	@Override
+	public OwnableSatelliteDataSaverControl<T> getDataControl(){return data_control;}
 	
 	public OwnableSatellite()
 	{
 		next_facility_id=0;
 		facilities = new Hashtable<Integer, Facility<?>>();
 		bldg_in_progress = FacilityType.NO_BLDG;
-		data_control = new OwnableSatelliteDataSaverControl(this);
+		data_control = new OwnableSatelliteDataSaverControl<T>((T)this);
 	}
 	
-	public void handleDataNotSaved(){System.out.println("OwnableSatellite data not saved.  Ridiculous!");}
+	public void handleDataNotSaved(long t){System.out.println("OwnableSatellite data not saved.  Ridiculous!");}
 	
 	public void update(long time_elapsed)
-	{	
+	{
+		time=time_elapsed;
 		synchronized(facilities_lock)
 		{
 			for(Integer i: facilities.keySet())
@@ -53,9 +58,8 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 		
 		if(owner != null)
 			owner.changeMoney(updatePopAndTax(time_elapsed));
-		
-		time=time_elapsed;
-		data_control.saveData();
+		else
+			updatePop(time_elapsed);
 	}
 	
 	//this is called when calculating taxes.
@@ -65,19 +69,20 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 		population = (long)(initial_pop*pop_capacity/(initial_pop+(pop_capacity-initial_pop)*Math.exp(-pop_growth_rate*((double)t))));
 	}
 	
-	private double updatePopAndTax(long t)
+	private long updatePopAndTax(long t)
 	{
-		//taxes are computed incrementally.
-		double new_taxes=0;
+		//taxes are computed incrementally to prevent rounding inconsistencies
+		tax_money = 0;
 		
-		while(t-last_tax_time >= TAX_INTERVAL)
+		if(t-last_tax_time >= TAX_INTERVAL) //this will be called every every time grain, since it is now within the loop in UpdateGame, so to have it be a while instead of an if is misleading.
 		{
 			last_tax_time += TAX_INTERVAL;
 			updatePop(last_tax_time);
-			new_taxes += TAX_PER_PERSON*((double)population);
+			tax_money = (long) (TAX_PER_PERSON*((double)population));
+			data_control.saveData();
 		}
 		
-		return new_taxes;
+		return tax_money;
 	}
 	
 	private void updateConstruction(long t)
@@ -86,29 +91,22 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 		{
 			if(t >= time_finish) //if build is finished...
 			{
-				Facility<?> new_fac;
-				switch(bldg_in_progress)
+				Facility<?> new_fac = bldg_in_progress.creator.create(this, next_facility_id++, time_finish);
+				if(bldg_in_progress == FacilityType.BASE)
 				{
-					case BASE:
-						new_fac = new Base(this, time_finish);
-						synchronized(facilities_lock){
-							the_base = (Base)new_fac;
-						}
-						break;
-					case MINE:
-						new_fac = new Mine(this, time_finish);
-						break;
-					case SHIPYARD:
-						new_fac = new Shipyard(this, time_finish);
-						break;
-					default:
-						System.out.println("updateConstruction does not support this facility type!  ending construction and returning.");
-						bldg_in_progress = FacilityType.NO_BLDG;
-						return;
+					synchronized(facilities_lock){
+						the_base = (Base)new_fac;
+					}
+				}
+
+				synchronized(facilities_lock)
+				{
+					facilities.put(new_fac.id,new_fac);
 				}
 				SwingUtilities.invokeLater(new FacilityAdder(new_fac, GameInterface.GC.GI));
 				
 				bldg_in_progress = FacilityType.NO_BLDG;
+				data_control.saveData();
 			}
 		}
 	}
@@ -128,8 +126,6 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 		{
 			synchronized(facilities_lock)
 			{
-				facilities.put(new_fac.id,new_fac);
-				
 				//notify interface
 				if(GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP && GI.SatellitePanel.the_sat == new_fac.location)
 				{
@@ -162,13 +158,15 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 				{
 					owner.metal -= met;
 					owner.money -= mon; 
+					
+					data_control.saveData();
 					//notify all players ***
 					
 					return true;
 				}
 				else
 				{
-					cancelConstruction();
+					bldg_in_progress=FacilityType.NO_BLDG;
 					return false;
 				}
 			}
@@ -178,26 +176,35 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 	public void cancelConstruction()
 	{
 		bldg_in_progress=FacilityType.NO_BLDG;
+		data_control.saveData();
 	}
 	
 	public void setOwner(Player p, long time)
 	{
-		setOwner(p);
-		synchronized(facilities_lock)
+		
+		if(owner != null)
+			update(time);
+		else
 		{
-			for(Integer i: facilities.keySet())
+			this.time=time;
+			synchronized(facilities_lock)
 			{
-				facilities.get(i).last_time = time; //makes it so that facilities do nothing when possessed by no one.
-										//That is, they lie idle instead of stockpiling production.
-				facilities.get(i).data_control.saveData();
+				for(Integer i: facilities.keySet())
+				{
+					facilities.get(i).last_time = time; //makes it so that facilities do nothing when possessed by no one.
+											//That is, they lie idle instead of stockpiling production.
+					facilities.get(i).data_control.saveData();
+				}
 			}
 		}
+		setOwner(p);
+		data_control.saveData();
 	}
 	
 	public Hashtable<Integer, Facility<?>> getFacilities(){return facilities;}
 	public void setFacilities(Hashtable<Integer, Facility<?>> fac){facilities=fac;}
 	public Player getOwner(){return owner;}
-	public abstract void setOwner(Player p); //this must be overriden by implementing classes, because it is responsible for notifying the GSystem of an owner change
+	public abstract void setOwner(Player p); //this must be overridden by implementing classes, because it is responsible for notifying the GSystem of an owner change
 	public long getPopulation(){return population;}
 	public void setPopulation(long pop){population=pop;}
 	public double getInitial_pop(){return initial_pop;}
@@ -216,4 +223,7 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 	
 	public ArrayList<Satellite<?>> getOrbiting(){return orbiting;}
 	public void setOrbiting(ArrayList<Satellite<?>> o){orbiting=o;}
+	
+	public long getTime(){return time;}
+	public void setTime(long t){time=t;}
 }

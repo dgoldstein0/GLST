@@ -14,7 +14,7 @@ public class GSystem implements Orbitable<GSystem>
 	HashSet<Star> stars;
 	
 	Object missile_lock = new Object();
-	Hashtable<Integer, Missile> missiles;
+	MissileList missiles;
 	
 	Fleet[] fleets; //indices = player id's
 	String name;
@@ -43,7 +43,7 @@ public class GSystem implements Orbitable<GSystem>
 		this.y=y;
 		navigability=nav;
 		fleets = new Fleet[GalacticStrategyConstants.MAX_PLAYERS];
-		missiles = new Hashtable<Integer, Missile>();
+		missiles = new MissileList();
 		owner_id = NO_OWNER;
 		next_missile_id=0;
 	}
@@ -116,7 +116,7 @@ public class GSystem implements Orbitable<GSystem>
 	public GSystem()
 	{
 		owner_id = NO_OWNER;
-		missiles = new Hashtable<Integer, Missile>();
+		missiles = new MissileList();
 	}
 	
 	public ArrayList<Satellite<?>> getOrbiting(){return orbiting;}
@@ -133,8 +133,8 @@ public class GSystem implements Orbitable<GSystem>
 	public void setNavigability(int nav){navigability=nav;}
 	public Fleet[] getFleets(){return fleets;}
 	public void setFleets(Fleet[] f){fleets=f;}
-	public Hashtable<Integer, Missile> getMissiles(){return missiles;}
-	public void setMissiles(Hashtable<Integer, Missile> m){missiles=m;}
+	public MissileList getMissiles(){return missiles;}
+	public void setMissiles(MissileList m){missiles=m;}
 	public int getOwner_id(){return owner_id;}
 	public void setOwner_id(int id){owner_id=id;}
 	public int getNext_missile_id(){return next_missile_id;}

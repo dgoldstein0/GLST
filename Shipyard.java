@@ -14,8 +14,8 @@ public class Shipyard extends Facility<Shipyard>{
 	
 	long time_on_current_ship;
 	
-	public Shipyard(OwnableSatellite<?> loc, long t) {
-		super(loc, t, GalacticStrategyConstants.initial_shipyard_endu);
+	public Shipyard(OwnableSatellite<?> loc, int i, long t) {
+		super(loc, i, t, GalacticStrategyConstants.initial_shipyard_endu);
 		manufac_queue=new Hashtable<Integer,Ship>(GalacticStrategyConstants.queue_capa);
 		time_on_current_ship = 0;
 		data_control = new ShipyardDataSaverControl(this);
@@ -35,6 +35,7 @@ public class Shipyard extends Facility<Shipyard>{
 					location.owner.metal -= met;
 					location.owner.money -= mon;
 					
+					ship.id = new Ship.ShipId(next_queue_id, this);
 					synchronized(queue_lock)
 					{
 						manufac_queue.put(next_queue_id++,ship);

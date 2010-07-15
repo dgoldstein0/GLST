@@ -1,5 +1,5 @@
 
-public abstract class DataSaver<T extends Saveable> {
+public abstract class DataSaver<T extends Saveable<T>> {
 
 	public long t; //time saved
 	boolean data_saved;
@@ -9,7 +9,13 @@ public abstract class DataSaver<T extends Saveable> {
 		data_saved=false;
 	}
 	
-	public void saveData(T s){data_saved=true;}
+	final public void saveData(T s)
+	{
+		data_saved=true;
+		doSaveData(s);
+	}
+	
+	protected abstract void doSaveData(T s);
 	public abstract void loadData(T s);
 	
 	public final boolean isDataSaved(){return data_saved;};

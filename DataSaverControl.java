@@ -1,17 +1,26 @@
+import java.util.Iterator;
+import java.util.Set;
+import java.util.HashSet;
+
 //subclasses are responsible for instantiating saved_data array
-public abstract class DataSaverControl<T extends Saveable> {
+
+public abstract class DataSaverControl<T extends Saveable<T>, S extends DataSaver<T> > {
 
 	int index;
-	DataSaver<T>[] saved_data;
+	final S[] saved_data;
 	final T the_obj;
 	
-	public DataSaverControl(T s)
+	public DataSaverControl(T s, Creator<T, S> c)
 	{
 		index=0;
 		the_obj=s;
+		
+		saved_data = c.createArray();
+		for(int i=0; i<GalacticStrategyConstants.data_capacity; i++)
+			saved_data[i] = c.create();
 	}
 	
-	//loading and saving data functions
+	//loading and saving data functions.  This is overridden in RelaxedDataSaverControl.
 	public void saveData()
 	{
 		//if(this instanceof Ship)
@@ -25,22 +34,63 @@ public abstract class DataSaverControl<T extends Saveable> {
 	}
 	
 
-	public void revertToTime(long t)
+	final public Set<Order> revertToTime(long t)
 	{
-		index=getIndexForTime(t);
-		//System.out.println(Integer.toString(index)+" "+Integer.toString(stepback));
-		if (saved_data[index].isDataSaved())
+		if(saved_data[index-1].t > t) //this check helps ensure we do not get into an infinite recursion.  Empty sets from deduceEffectsAfterIndex could serve same purpose
 		{
-			saved_data[index].loadData(the_obj);
+			int indx=getIndexForTime(t);
+			//System.out.println(Integer.toString(index)+" "+Integer.toString(stepback));
+			if (saved_data[indx].isDataSaved())
+			{
+				ReversionEffects reversion_effects = deduceEffectedAfterIndex(indx);
+				
+				doReversionPrep(indx);
+				saved_data[indx].loadData(the_obj);
+				index = indx+1; //index points to NEXT DataSaver
+				
+				//must loadData before recursion, else risk of recursion trying to revert something that is already being reverted
+				Set<Order> orders = reversion_effects.orders_to_redo;
+				
+				for(Iterator<ReversionEffects.RevertObj> objs_it = reversion_effects.objects_to_revert.iterator(); objs_it.hasNext();)
+				{
+					ReversionEffects.RevertObj revertable = objs_it.next();
+					orders.addAll(revertable.obj.getDataControl().revertToTime(revertable.time_to_revert));
+				}
+				
+				return orders;
+			}
+			else
+			{
+				//the object did not exist at the indicated time.  Delete it... or possibly save it for re-creation?
+				//remove the object from the data structure
+				
+				the_obj.handleDataNotSaved(t);
+				return new HashSet<Order>();
+			}
 		}
 		else
-		{
-			//the object did not exist at the indicated time.  Delete it... or possibly save it for re-creation?
-			//remove the object from the data structure
-			
-			the_obj.handleDataNotSaved();
-		}
+			return new HashSet<Order>();
 	}
 	
 	public abstract int getIndexForTime(long t);
+	protected abstract ReversionEffects deduceEffectedAfterIndex(int i);
+	
+	protected int getNextIndex(int i)
+	{
+		return (i != saved_data.length-1) ? i+1 : 0;
+	}
+	
+	protected int getPreviousIndex(int i)
+	{
+		return (i != 0)? i-1 : saved_data.length-1;
+	}
+	
+	protected void doReversionPrep(int indx){}
+	
+	//class to create data savers
+	public static abstract class Creator<T extends Saveable<T>, S extends DataSaver<T>>
+	{
+		public abstract S create();
+		public abstract S[] createArray();
+	}
 }

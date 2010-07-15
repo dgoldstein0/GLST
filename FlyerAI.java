@@ -1,6 +1,6 @@
 public abstract class FlyerAI
 {
-	Flyer<?> the_flyer;
+	Flyer<?,?> the_flyer;
 	
 	static final int ABS_DIRECTION=0;
 	static final int REL_DIRECTION=1;

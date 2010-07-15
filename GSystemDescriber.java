@@ -7,7 +7,8 @@ public class GSystemDescriber implements Describer<GSystem>
 		id=sys.id;
 	}
 	
-	public GSystem retrieveObject(Galaxy g)
+	@Override
+	public GSystem retrieveObject(Galaxy g, long t)
 	{
 		return g.systems.get(id);
 	}

@@ -2,10 +2,11 @@
 public class Mine extends Facility<Mine>{
 	
 	double mining_rate;
+	long add_met;
 	
-	public Mine(OwnableSatellite<?> loc, long t)
+	public Mine(OwnableSatellite<?> loc, int i, long t)
 	{
-		super(loc,t, GalacticStrategyConstants.initial_mine_endu);
+		super(loc, i, t, GalacticStrategyConstants.initial_mine_endu);
 		mining_rate=GalacticStrategyConstants.DEFAULT_MINING_RATE;
 		data_control = new MineDataSaverControl(this);
 	}
@@ -17,7 +18,7 @@ public class Mine extends Facility<Mine>{
 	
 	public void updateStatus(long t)
 	{
-		long add_met=0;
+		add_met=0;
 		while(t-last_time >= 3000 && location.owner instanceof Player) //do nothing unless the location has an owner
 		{
 			add_met += mining_rate*3000;

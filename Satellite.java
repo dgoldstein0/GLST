@@ -8,8 +8,7 @@ public abstract class Satellite<T extends Satellite<T>> extends StellarObject im
 		return mass;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Describer<T> describer(){return new SatelliteDescriber(this);} //warning about unparameterized type
+	public Describer<T> describer(){return new SatelliteDescriber<T>((Satellite<T>)this);} //this needs a reminder that it is a Satellite<T>
 	
 	public Orbit getOrbit(){return orbit;}
 	public void setOrbit(Orbit o){orbit=o;}

@@ -1,15 +1,17 @@
 import java.util.HashSet;
 
-public class FlyerDataSaver<T extends Flyer<T>> extends DataSaver<T>
+public class FlyerDataSaver<T extends Flyer<T, ?>> extends DataSaver<T>
 {
 	double px; //pos_x and pos_y indicate where in the system the ship is located
 	double py;
 	double dir; //direction
 	double sp; //speed
 	int dmg; //damage
-	HashSet<Targetter> aggr;
+	HashSet<Targetter<?>> aggr;
 	FlyerAI ai; // mode seems to determine what goes here
 	Destination<?> dest;
+	Targetable<?> tgt;
+	boolean is_alive;
 
 	public FlyerDataSaver()
 	{
@@ -18,19 +20,23 @@ public class FlyerDataSaver<T extends Flyer<T>> extends DataSaver<T>
 	
 	//the Flyer-only implementations
 	@SuppressWarnings("unchecked")
-	public void saveData(T f)
+	final protected void doSaveData(T f)
 	{
-		super.saveData(f);
+		doSaveMoreData(f);
 		dir=f.direction;
 		px=f.pos_x;
 		py=f.pos_y;
 		t=f.time;
 		sp=f.speed;
 		dmg=f.damage;
-		aggr=(HashSet<Targetter>) f.aggressors.clone();
+		aggr=(HashSet<Targetter<?>>) f.aggressors.clone(); //unchecked cast warning
 		ai = f.current_flying_AI;
 		dest = f.destination;
+		tgt = f.target;
+		is_alive = f.is_alive;
 	}
+	
+	protected void doSaveMoreData(T f){}
 	
 	@SuppressWarnings("unchecked")
 	public void loadData(T f)
@@ -41,8 +47,10 @@ public class FlyerDataSaver<T extends Flyer<T>> extends DataSaver<T>
 		f.time = t;
 		f.speed = sp;
 		f.damage=dmg;
-		f.aggressors = (HashSet<Targetter>) aggr.clone(); //unchecked cast warning
+		f.aggressors = (HashSet<Targetter<?>>) aggr.clone(); //unchecked cast warning
 		f.current_flying_AI = ai;
-		f.destination= dest;
+		f.destination = dest;
+		f.target = tgt;
+		f.is_alive = is_alive;
 	}
 }

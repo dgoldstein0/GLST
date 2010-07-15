@@ -287,7 +287,7 @@ public class GameControl
 		{
 			OwnableSatellite<?> p = map.start_locations.get(i);
 			p.setOwner(players[i]);
-			Base b = new Base(p, (long)0);
+			Base b = new Base(p, p.next_facility_id++, (long)0);
 			p.facilities.put(b.id,b);
 			p.the_base = b;
 		}
@@ -354,7 +354,7 @@ public class GameControl
 			//start the player in assigned location
 			OwnableSatellite<?> p = map.start_locations.get(player_id);
 			p.setOwner(players[player_id]);
-			Base b = new Base(p, (long)0);
+			Base b = new Base(p, p.next_facility_id++, (long)0);
 			p.facilities.put(b.id,b);
 			p.the_base = b;
 			
@@ -885,31 +885,60 @@ public class GameControl
 		//update data in all systems
 		for(GSystem sys : map.systems)
 		{
+			//move all planets
 			for(Satellite<?> sat : sys.orbiting)
 			{
 				if(sat instanceof Planet)
 				{
-					((Planet)sat).update(time_elapsed);
 					for(Satellite<?> sat2 : ((Planet)sat).orbiting)
 					{
-						if(sat2 instanceof Moon)
-						{
-							((Moon)sat2).update(time_elapsed);
-						}
 						sat2.orbit.move(time_elapsed);
 					}
 				}
 				sat.orbit.move(time_elapsed);
 			}
 			
+			//update all planets, facilities, ships and missiles
 			for(update_to = TC.getLast_time_updated(); update_to < time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
 			{
+				/*We must stick facilities and planets in this loop because otherwise Ship updating would not
+				be coordinated with facilities and planets, so bugs could then occur in terms of building ships
+				or invading planets.
+				
+				For instance, consider this scenario: ship is attacking a Shipyard, and Shipyard is about to
+				complete a new Ship right around the time it is about to explode.  If it should finish
+				the ship after it is destroyed, but a call to updateGame must handle both the time in which
+				the Shipyard will be destroyed and in which the ship would be completed if the shipyard were
+				not destroyed, and if facilities/planets were updated before the Ships all the way to
+				time_elapsed, then the Shipyard could be updated to a time later than the time it is
+				destroyed at, produce the ship which it should not produce, and then be destroyed.  But now
+				we have a ship which should have not completed construction.   Uh oh...
+				
+				Though less dramatic, similar issues can exist with mining/taxation.  So it all goes in here.*/
+				
+				//update planets/facilities:
+				for(Satellite<?> sat : sys.orbiting)
+				{
+					if(sat instanceof Planet)
+					{
+						((Planet)sat).update(update_to);
+						for(Satellite<?> sat2 : ((Planet)sat).orbiting)
+						{
+							if(sat2 instanceof Moon)
+							{
+								((Moon)sat2).update(update_to);
+							}
+						}
+					}
+				}
+				
+				//update data for all ships
 				for(int i=0; i<sys.fleets.length; i++)
 				{
 					synchronized(sys.fleets[i].lock)
 					{
-						Iterator<Integer> ship_iteration = sys.fleets[i].ships.keySet().iterator();
-						for(int j; ship_iteration.hasNext();)
+						Iterator<Ship.ShipId> ship_iteration = sys.fleets[i].ships.keySet().iterator();
+						for(Ship.ShipId j; ship_iteration.hasNext();)
 						{
 							j=ship_iteration.next();
 							sys.fleets[i].ships.get(j).update(update_to, ship_iteration);
@@ -917,13 +946,29 @@ public class GameControl
 					}
 				}
 				
+				//NOTE: Missile collision detection relies on Missiles being updated after ships.  See Missile.collidedWithTarget
+				//update all missiles AND save data - safe because MISSILES CAN'T HIT MISSILES
 				synchronized(sys.missile_lock)
 				{
-					Iterator<Integer> missile_iteration = sys.missiles.keySet().iterator();
-					for(int i; missile_iteration.hasNext();)
+					Iterator<Missile.MissileId> missile_iteration = sys.missiles.keySet().iterator();
+					for(Missile.MissileId i; missile_iteration.hasNext();)
 					{
 						i=missile_iteration.next();
 						sys.missiles.get(i).update(update_to, missile_iteration); //returns true if the missile detonates
+					}
+				}
+				
+				//save data for all ships
+				for(int i=0; i<sys.fleets.length; i++)
+				{
+					synchronized(sys.fleets[i].lock)
+					{
+						Iterator<Ship.ShipId> ship_iteration = sys.fleets[i].ships.keySet().iterator();
+						for(Ship.ShipId j; ship_iteration.hasNext();)
+						{
+							j=ship_iteration.next();
+							sys.fleets[i].ships.get(j).data_control.saveData();
+						}
 					}
 				}
 			}

@@ -1,6 +1,6 @@
 import java.util.Iterator;
 
-public class Ship extends Flyer<Ship> implements Selectable
+public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 {
 	final static double ESCAPE_DIST = 300.0;
 	
@@ -9,6 +9,7 @@ public class Ship extends Flyer<Ship> implements Selectable
 	int energy;
 	int max_energy;
 	long nextAttackingtime;
+	int next_missile_id;
 	
 	float soldier;
 	int mode;
@@ -18,6 +19,7 @@ public class Ship extends Flyer<Ship> implements Selectable
 		final static int ENTER_WARP=3;
 		final static int IN_WARP=4;
 		final static int EXIT_WARP=5;
+		final static int PICKUP_TROOPS=6;
 	
 	//used for warping
 	GSystem warp_destination;
@@ -37,20 +39,22 @@ public class Ship extends Flyer<Ship> implements Selectable
 		max_energy = energy;
 		soldier=t.soldier_capacity;//assume ships are fully loaded when built
 		nextAttackingtime=0;
+		next_missile_id=0;
 	}
 	
 	public Describer<Ship> describer(){return new ShipDescriber(owner, this);}
 	
+	//the time dependence of this function needs to be established
 	public void assemble(Shipyard builder, long t)
 	{
-		//the time dependence of this function needs to be established
 		owner=builder.location.owner;
-		id=owner.nextShipId();
-		
+			
 		//set the position of the planet/moon correctly.  we do not need to restore the position, because in the updateGame function the orbit.move command is given after all facilities are updated
+		//TODO: replace with recursive functions
 		builder.location.orbit.move(t);
 		if(builder.location instanceof Moon)
 			((Planet)builder.location.orbit.boss).orbit.move(t);
+		
 		pos_x = builder.default_x + builder.location.absoluteCurX();
 		pos_y = builder.default_y + builder.location.absoluteCurY();
 		double vel_x=builder.location.orbit.getAbsVelX();
@@ -58,18 +62,22 @@ public class Ship extends Flyer<Ship> implements Selectable
 		direction = Math.atan2(vel_y, vel_x);
 		speed = Math.hypot(vel_x, vel_y);
 		
+		//TODO: replace with recursive functions
 		if(builder.location instanceof Planet)
 			location = (GSystem)builder.location.orbit.boss;
 		else //builder.location is a Moon
 			location = (GSystem) ((Planet)builder.location.orbit.boss).orbit.boss;
-		location.fleets[owner.getId()].add(this);
+		
+		location.fleets[owner.getId()].add(this, t);
 		orderToMove(t, builder.location); //this call does not go via the game Order handling system.  all computers should issue these orders on their own.
 	}
 	
 	//updates the ship an increment towards time t - moving and attacking.  return value is ignored
-	public boolean update(long t, Iterator<Integer> ship_iteration)
+	//DOES NOT SAVE DATA
+	public boolean update(long t, Iterator<ShipId> shipIteration)
 	{
-		/*this if statement is necessary incase game is updated too slow.  For instance, update last to 60, then
+		//TODO: update this comment
+		/*this if statement is necessary in case game is updated too slow.  For instance, update last to 60, then
 		an order is given which advances the ship to 80., but the next time all are updated to is 100, we want the
 		ship ordered to move to only be updated once and not twice*/
 		if(time <= t)
@@ -90,25 +98,27 @@ public class Ship extends Flyer<Ship> implements Selectable
 					break;
 				case ENTER_WARP:
 					if(fastEnoughToWarp())
-						engageWarpDrive(ship_iteration);
+						engageWarpDrive(shipIteration);
 					break;
 				case EXIT_WARP:
 					if(speed <= type.max_speed)
 						mode=MOVING;
 					break;
+				case PICKUP_TROOPS:
+					if(!doTransferTroops() || soldier == type.soldier_capacity)
+						mode=MOVING;
+					break;
 			}
 			time += GalacticStrategyConstants.TIME_GRANULARITY;
-			
-			//save data
-			data_control.saveData();
 		}
 		return false;
 	}
 	
 	//this function is called when time is rolled back to before the ship existed
-	public void removeFromGame()
+	@Override
+	public void removeFromGame(long t)
 	{
-		location.fleets[owner.getId()].remove(this);
+		location.fleets[owner.getId()].remove(this, t);
 	}
 	
 	//this function is NOT incremental, i.e. it is only called once during updateGame() - before the updateGame function cycles through the systems
@@ -161,6 +171,13 @@ public class Ship extends Flyer<Ship> implements Selectable
 		if(mode != EXIT_WARP && mode != IN_WARP && mode != ENTER_WARP) //to ensure if the interface tries to issue an order, it can't
 		{
 			destination = d;
+			
+			if(target != null)
+			{
+				target.removeAggressor(this);
+				target=null;
+			}
+			
 			advanceTime(t);
 			//System.out.println(Integer.toString(id) + " orderToMove: t is " + Long.toString(t) + " and time is " + Long.toString(time));
 			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
@@ -192,11 +209,16 @@ public class Ship extends Flyer<Ship> implements Selectable
 	
 	public void orderToWarp(long t, GSystem sys)
 	{
-		if(mode != EXIT_WARP && mode != IN_WARP && mode != ENTER_WARP)
+		if(mode != EXIT_WARP && mode != IN_WARP && mode != ENTER_WARP && sys != location) //if sys == location, user means to cancel warp command.
 		{
-			//NEED TO WORK ON
+			if(target != null)
+			{
+				target.removeAggressor(this);
+				target=null;
+			}
+			
 			mode=TRAVEL_TO_WARP;
-			advanceTime(t);
+			advanceTime(t); //TODO: necessary?
 			warp_destination=sys;
 			
 			//calculate exit vector
@@ -214,20 +236,81 @@ public class Ship extends Flyer<Ship> implements Selectable
 		}
 	}
 	
+	public void orderToInvade(OwnableSatellite<?> sat, long scheduled_time)
+	{
+		if(mode == MOVING || mode == ATTACKING)
+		{
+			double x_dif = pos_x-sat.getXCoord(scheduled_time);
+			double y_dif = pos_y-sat.getYCoord(scheduled_time);
+			if(x_dif*x_dif + y_dif*y_dif < GalacticStrategyConstants.LANDING_RANGE*GalacticStrategyConstants.LANDING_RANGE)
+			{
+				if(sat.getOwner() != null)
+				{
+					synchronized(sat.facilities_lock)
+					{
+						if(sat.the_base == null) //if base isn't finished being built, player can take over without a fight
+							sat.setOwner(getOwner());
+						else
+							sat.the_base.attackedByTroops(GameInterface.GC.TC.getTime(), this);
+					}
+				}
+				else
+				{
+					((OwnableSatellite<?>)destination).setOwner(getOwner());
+				}
+			}
+		}
+	}
+	
+	public void orderToPickupTroops(long scheduledTime) {
+		if(mode == MOVING &&
+				destination instanceof OwnableSatellite<?> &&
+				((OwnableSatellite<?>)destination).getOwner() == owner &&
+				((OwnableSatellite<?>)destination).the_base != null &&
+				soldier < type.soldier_capacity)
+		{
+			mode = PICKUP_TROOPS;
+		}
+	}
+	
+	//returns true for success, false if the destination is no longer owned by the player or the base has been destroyed
+	private boolean doTransferTroops()
+	{
+		if(	((OwnableSatellite<?>)destination).getOwner() == owner &&
+				((OwnableSatellite<?>)destination).the_base != null)
+		{
+			double dif_x = dest_x_coord-pos_x;
+			double dif_y = dest_y_coord-pos_y;
+			if(dif_x*dif_x + dif_y*dif_y <= GalacticStrategyConstants.LANDING_RANGE*GalacticStrategyConstants.LANDING_RANGE)
+			{
+				float get_soldiers = Math.min(type.soldier_capacity - soldier, GalacticStrategyConstants.troop_transfer_rate*GalacticStrategyConstants.TIME_GRANULARITY);
+				synchronized(((OwnableSatellite<?>)destination).facilities_lock)
+				{
+					soldier += ((OwnableSatellite<?>)destination).the_base.retrieveSoldiers(time+GalacticStrategyConstants.TIME_GRANULARITY, get_soldiers, this);
+				}
+			}
+			return true;
+		}
+		else
+			return false;
+	}
+	
 	public int warpRange(){return type.warp_range;}
 	
-	private void engageWarpDrive(Iterator<Integer> ship_iteration)
+	private void engageWarpDrive(Iterator<ShipId> shipIteration)
 	{
 		//This function works very much like the destroyed() function
 		System.out.println("Engaging warp drive....");
 		
 		//remove from listing in system
-		ship_iteration.remove(); //remove via the iterator to avoid ConcurrentModificationException
+		shipIteration.remove(); //remove via the iterator to avoid ConcurrentModificationException
 		//location.fleets[owner.getId()].remove(this);
 		
 		//notify aggressors
-		for(Targetter t : aggressors)
+		for(Targetter<?> t : aggressors)
 			t.targetHasWarped(time);
+		
+		aggressors.clear();
 		
 		//deselect the ship, if it was selected
 		if(this == GameInterface.GC.GI.ShipPanel.the_ship)
@@ -261,7 +344,7 @@ public class Ship extends Flyer<Ship> implements Selectable
 		current_flying_AI = new StopAI();
 		
 		ship_it.remove();//owner.ships_in_transit.remove(this);
-		location.fleets[owner.getId()].add(this);
+		location.fleets[owner.getId()].add(this, arrival_time);
 	}
 	
 	/*this function returns true IF:
@@ -320,7 +403,7 @@ public class Ship extends Flyer<Ship> implements Selectable
 			Missile m=new Missile(this, target, time+GalacticStrategyConstants.TIME_GRANULARITY); 
 			synchronized(location.missile_lock)
 			{
-				location.missiles.put(m.id,m);
+				location.missiles.put(m.id, m, t);
 			}
 			nextAttackingtime= time+GalacticStrategyConstants.Attacking_cooldown;
 		}
@@ -330,10 +413,13 @@ public class Ship extends Flyer<Ship> implements Selectable
 	public void destroyed()
 	{
 		//System.out.println("destroyed-before");	
-		if(location.fleets[owner.getId()].remove(this))//if is so in case another attack has already destroyed the ship, but both call the destroyed method
+		if(location.fleets[owner.getId()].remove(this, time))//if is so in case another attack has already destroyed the ship, but both call the destroyed method
 		{
+			is_alive=false;
+			data_control.saveData(); //TODO: examine consequences of this statement
+			
 			//notify aggressors
-			for(Targetter t : aggressors)
+			for(Targetter<?> t : aggressors)
 				t.targetIsDestroyed(time);
 			
 			//notify interface
@@ -353,6 +439,10 @@ public class Ship extends Flyer<Ship> implements Selectable
 		{
 			destination=new DestinationPoint(target.getXCoord(t),target.getYCoord(t));
 		}
+		
+		target=null;
+		
+		//TODO: player notification
 	}
 	
 	public void targetHasWarped(long t)
@@ -362,13 +452,17 @@ public class Ship extends Flyer<Ship> implements Selectable
 		{
 			destination=new DestinationPoint(target.getXCoord(t),target.getYCoord(t));
 		}
+		
+		target=null;
+		
+		//TODO: player notification
 	}
 	
 	public int getSoldierInt(){return (int)Math.floor(soldier);}
 	
 	//for interface Selectable
 	public int getSelectType(){return Selectable.SHIP;}
-	public String generateName(){return "[" + type.name +" #" + Integer.toString(id) + "] " + name;}
+	public String generateName(){return "[" + type.name + "] " + name;}
 	
 	//methods required for save/load
 	public Ship(){}
@@ -378,8 +472,6 @@ public class Ship extends Flyer<Ship> implements Selectable
 	public void setMax_energy(int mf){max_energy=mf;}
 	public Player getOwner() {return owner;}
 	public float getSoldier() {return soldier;}
-	public void setId(int i){id=i;}
-	public int getId(){return id;}
 	public int getMode(){return mode;}
 	public void setMode(int m){mode=m;}
 	public void setExit_vec_x(double x){exit_vec_x = x;}
@@ -388,4 +480,31 @@ public class Ship extends Flyer<Ship> implements Selectable
 	public double getExit_vec_y(){return exit_vec_y;}
 	public void setExit_direction(double d){exit_direction=d;}
 	public double getExit_direction(){return exit_direction;}
+	
+	public static class ShipId extends FlyerId<ShipId>
+	{
+		Shipyard manufacturer;
+		int queue_id;
+		
+		public ShipId(int q_id, Shipyard manu)
+		{
+			manufacturer = manu;
+			queue_id = q_id;
+		}
+		
+		public int hashCode()
+		{
+			return manufacturer.hashCode()*200 + queue_id;
+		}
+		
+		public boolean equals(Object o)
+		{
+			if(o instanceof ShipId)
+			{
+				return (((ShipId)o).manufacturer == manufacturer) && (((ShipId)o).queue_id == queue_id);
+			}
+			else
+				return false;
+		}
+	}
 }

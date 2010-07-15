@@ -3,16 +3,18 @@ public class FacilityDescriber<T extends Facility<T>> implements Describer<T>
 	int id;
 	Describer<? extends OwnableSatellite<?>> boss;
 	
-	public FacilityDescriber(T f)
+	public FacilityDescriber(Facility<T> f)
 	{
 		id = f.id;
 		boss=f.location.describer();
 	}
 	
 	@SuppressWarnings("unchecked")
-	public T retrieveObject(Galaxy g)
+	@Override
+	public T retrieveObject(Galaxy g, long t)
 	{
-		return (T)boss.retrieveObject(g).facilities.get(id);
+		OwnableSatelliteDataSaverControl data_ctrl = boss.retrieveObject(g, t).data_control;
+		return (T)((OwnableSatelliteDataSaver)data_ctrl.saved_data[data_ctrl.getIndexForTime(t)]).fac.get(id);
 	}
 	
 	public FacilityDescriber(){}

@@ -1,48 +1,74 @@
-import java.util.Hashtable;
+import java.util.HashMap;
 
-public class Fleet
+public class Fleet implements RelaxedSaveable<Fleet>
 {
-	Hashtable<Integer, Ship> ships;
+	HashMap<Ship.ShipId, Ship> ships;
 	Player owner;
 	GSystem location;
 	Object lock = new Object();
 	
+	FleetDataSaverControl data_control;
+	long last_time_changed;
+	
 	public Fleet(GSystem loc, Player o)
 	{
-		ships = new Hashtable<Integer, Ship>();
+		ships = new HashMap<Ship.ShipId, Ship>();
 		location = loc;
 		owner = o;
 	}
 	
 	//methods required for load/save
-	public Hashtable<Integer, Ship> getShips(){return ships;}
-	public void setShips(Hashtable<Integer, Ship> sh){ships=sh;}
+	public HashMap<Ship.ShipId, Ship> getShips(){return ships;}
+	public void setShips(HashMap<Ship.ShipId, Ship> sh){ships=sh;}
 	public Player getOwner(){return owner;}
 	public void setOwner(Player p){owner = p;}
 	public void setLocation(GSystem sys){location=sys;}
 	public GSystem getLocation(){return location;}
 	
-	public void add(Ship s)
+	public void add(Ship s, long t)
 	{
 		synchronized(lock)
 		{
 			ships.put(s.getId(), s);
+			last_time_changed=t;
+			data_control.saveData();
 		}
 		location.increaseClaim(owner);
 	}
 	
-	public boolean remove(Ship s)
+	public boolean remove(Ship s, long t)
 	{
 		//this removes the ship.  remove() returns the ship if the ship was in the hashtable, so
-		//the instanceof makes sure we are not removing a ship that has already been removed before decreasing the claim
-		Boolean remove_successful;
+		//check against null makes sure we are not removing a ship that has already been removed
+		//before decreasing the claim
 		synchronized(lock)
 		{
-			remove_successful = (ships.remove(s.getId()) instanceof Ship);
+			if(ships.remove(s.getId()) != null)
+			{
+				last_time_changed = t;
+				location.decreaseClaim(owner);
+				data_control.saveData();
+				return true;
+			}
 		}
-		if(remove_successful)
-			location.decreaseClaim(owner);
 		
-		return remove_successful;
+		return false;
+	}
+
+	@Override
+	public FleetDataSaverControl getDataControl() {
+		
+		return data_control;
+	}
+
+	@Override
+	public void handleDataNotSaved(long t) {
+		
+		System.out.println("handleDataNotSaved called for Fleet!  This is impossible!");
+	}
+
+	@Override
+	public long getTime() {
+		return last_time_changed;
 	}
 }

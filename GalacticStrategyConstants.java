@@ -3,7 +3,7 @@ import java.awt.Toolkit;
 
 public class GalacticStrategyConstants
 {
-	//this class contains constants relavent to the games/galaxy designer's configuration.
+	//this class contains constants relevant to the games/galaxy designer's configuration.
 	//It does NOT contain constants that are only of interest within a certain class, such the numeric values which represent different states of 1 variable.
 	//For instance, GDFrame has DRAG_NONE, DRAG_DIST, and DRAG_RANGE, which tells the interface if ranges or distances should be drawn during drags.
 	//In particular, these values are for the different states of drag_options
@@ -81,6 +81,7 @@ public class GalacticStrategyConstants
 	//default build times and costs for facilities configurable in FacilityType
 	
 	final static double LANDING_RANGE = 10.0d; //the max distance at which ships can get/send troops to planets
+	public final static float troop_transfer_rate = .1f;
 	
 	//Used by Mine
 	static double DEFAULT_MINING_RATE=.002; //metal per mine per millisecond
@@ -142,5 +143,4 @@ public class GalacticStrategyConstants
 	
 	//used by GameControl for networking
 	static final int DEFAULT_PORT_NUMBER = 7007;
-	
 }

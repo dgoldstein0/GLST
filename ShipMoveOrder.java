@@ -1,3 +1,6 @@
+import java.util.Set;
+import java.util.HashSet;
+
 public class ShipMoveOrder extends Order
 {
 	Ship the_ship;
@@ -14,15 +17,27 @@ public class ShipMoveOrder extends Order
 		scheduled_time=t;
 	}
 	
-	public void execute(Galaxy g)
+	public Set<Order> execute(Galaxy g)
 	{
 		if(mode==Order.NETWORK)
 		{
-			the_ship = ship_desc.retrieveObject(g);
-			the_dest= dest_desc.retrieveObject(g);
+			the_ship = ship_desc.retrieveObject(g, scheduled_time);
+			the_dest = dest_desc.retrieveObject(g, scheduled_time);
 		}
 		
-		the_ship.orderToMove(scheduled_time, the_dest);
+		if(the_ship != null && the_dest != null && the_ship.isAliveAt(scheduled_time))
+		{
+			Set<Order> orders = the_ship.data_control.revertToTime(scheduled_time);
+			
+			/*TODO: should we revert destination?  this implementation assumes setting an object as a
+			 * destination has no effect on that object.  As of 7/13/10, this is true.*/
+			
+			the_ship.orderToMove(scheduled_time, the_dest);
+			
+			return orders;
+		}
+		else
+			return new HashSet<Order>();
 	}
 	
 	public ShipMoveOrder(){mode=Order.NETWORK;}

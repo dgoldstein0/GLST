@@ -25,7 +25,7 @@ public class PatrolAI extends FlyerAI
 	double patrol_ang_chng;
 	double patrol_speed;
 	
-	public PatrolAI(Flyer<?> f, double x, double y, double radius, int dir)
+	public PatrolAI(Flyer<?,?> f, double x, double y, double radius, int dir)
 	{
 		the_flyer=f;
 		state = TRAVEL_TO_PATROL;

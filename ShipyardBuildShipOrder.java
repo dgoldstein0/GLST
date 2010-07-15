@@ -1,9 +1,12 @@
+import java.util.Set;
+import java.util.HashSet;
 
 public class ShipyardBuildShipOrder extends Order {
 
 	FacilityDescriber<Shipyard> shipyard_describer;
 	Shipyard the_yard;
 	ShipType type;
+	int player_id;
 	
 	public ShipyardBuildShipOrder(Shipyard s, ShipType tp, long t)
 	{
@@ -12,14 +15,27 @@ public class ShipyardBuildShipOrder extends Order {
 		type=tp;
 		scheduled_time=t;
 		mode = Order.ORIGIN;
+		player_id = s.location.owner.getId();
 	}
 	
 	@Override
-	public void execute(Galaxy g) {
+	public Set<Order> execute(Galaxy g) {
 		if(mode==NETWORK)
-			the_yard = shipyard_describer.retrieveObject(g);
+			the_yard = shipyard_describer.retrieveObject(g, scheduled_time);
 		
-		the_yard.addToQueue(new Ship(type), scheduled_time);
+		if(the_yard != null)
+		{	
+			OwnableSatelliteDataSaverControl<?> ctrl = the_yard.location.data_control;
+			if(player_id == ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].own.getId())
+			{
+				Set<Order> orders = the_yard.data_control.revertToTime(scheduled_time);
+				orders.addAll(the_yard.location.data_control.revertToTime(scheduled_time)); //make sure it uses the right owner
+				the_yard.addToQueue(new Ship(type), scheduled_time);
+				return orders;
+			}
+		}
+		
+		return new HashSet<Order>();
 	}
 
 	public ShipyardBuildShipOrder(){mode=Order.NETWORK;}
@@ -27,4 +43,6 @@ public class ShipyardBuildShipOrder extends Order {
 	public void setShipyard_describer(FacilityDescriber<Shipyard> desc){shipyard_describer=desc;}
 	public ShipType getType(){return type;}
 	public void setType(ShipType t){type=t;}
+	public int getPlayer_id(){return player_id;}
+	public void setPlayer_id(int pid){player_id=pid;}
 }

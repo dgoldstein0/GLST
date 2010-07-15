@@ -58,7 +58,7 @@ public class SystemPainter extends JPanel
 			g2.drawLine(drawXInt(center_x),drawYInt(center_y-5),drawXInt(center_x),drawYInt(center_y+5));
 		}
 		
-		if(system instanceof GSystem)
+		if(system != null)
 		{
 			//draw stars
 			if(system.stars != null)
@@ -81,7 +81,7 @@ public class SystemPainter extends JPanel
 				{
 					//draw object
 					drawOrbit(orbiting, g2);
-					if(orbiting instanceof Planet && ((Planet)orbiting).getOwner() instanceof Player)
+					if(orbiting instanceof Planet && ((Planet)orbiting).getOwner() != null)
 						g2.setColor(((Planet)orbiting).getOwner().getColor());
 					else
 						g2.setColor(Color.WHITE);
@@ -103,7 +103,7 @@ public class SystemPainter extends JPanel
 						for(Satellite<?> sat : planet_sats)
 						{
 							drawOrbit(sat, g2);
-							if(sat instanceof Moon && ((Moon)sat).getOwner() instanceof Player)
+							if(sat instanceof Moon && ((Moon)sat).getOwner() != null)
 								g2.setColor(((Moon)sat).getOwner().getColor());
 							else
 								g2.setColor(Color.WHITE);
@@ -123,11 +123,11 @@ public class SystemPainter extends JPanel
 			//draw all ships
 			for(int i=0; i<system.fleets.length; i++)
 			{
-				if(system.fleets[i] instanceof Fleet)
+				if(system.fleets[i] != null)
 				{
-					for(Integer j : system.fleets[i].ships.keySet())
+					for(Ship.ShipId j : system.fleets[i].ships.keySet())
 					{
-						Flyer<?> f = system.fleets[i].ships.get(j);
+						Flyer<?,?> f = system.fleets[i].ships.get(j);
 						drawFlyer(g2,f,system.fleets[i].owner.getColor());
 					}
 				}
@@ -135,14 +135,14 @@ public class SystemPainter extends JPanel
 			
 			synchronized(system.missile_lock)
 			{
-				for(Integer i : system.missiles.keySet())
+				for(Missile.MissileId i : system.missiles.keySet())
 				{
-					drawFlyer(g2,(Flyer<Missile>)system.missiles.get(i),null);
+					drawFlyer(g2,(Flyer<Missile, Missile.MissileId>)system.missiles.get(i),null);
 				}
 			}
 			
 			g2.setColor(Color.WHITE);
-			if(system.name instanceof String)
+			if(system.name != null)
 				g2.drawString(system.name + " System", 10, 20);
 		}
 		
@@ -179,7 +179,7 @@ public class SystemPainter extends JPanel
 			g2.drawImage(return_arrow, getWidth()-arrow_size, 0, arrow_size, arrow_size, this);
 	}
 	
-	private void drawFlyer(Graphics2D g2, Flyer<?> s, Color c)
+	private void drawFlyer(Graphics2D g2, Flyer<?,?> s, Color c)
 	{
 		// Get the current transform
 		AffineTransform saveAT = g2.getTransform();
@@ -188,7 +188,7 @@ public class SystemPainter extends JPanel
 		g2.rotate(s.direction+Math.PI/2, drawX(s.getPos_x()),drawY(s.getPos_y()));
 		
 		g2.drawImage(s.type.img, drawXInt(s.getPos_x()-s.type.default_scale*s.type.img.getWidth(this)/2.0), drawYInt(s.getPos_y()-s.type.default_scale*s.type.img.getHeight(this)/2.0), (int)(s.type.default_scale*s.type.img.getWidth(this)*scale), (int)(s.type.default_scale*scale*s.type.img.getHeight(this)), this);
-		if(c instanceof Color)
+		if(c != null)
 		{
 			g2.setColor(c);
 			g2.draw(new Rectangle2D.Double(drawX(s.getPos_x())-3.0*scale, drawY(s.getPos_y())-3.0*scale,6.0*scale,6.0*scale));

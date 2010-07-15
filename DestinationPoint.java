@@ -8,15 +8,24 @@ public class DestinationPoint implements Destination<DestinationPoint>, Describe
 		this.y=y;
 	}
 	
-	public DestinationPoint retrieveObject(Galaxy g){return this;}
+	@Override
+	public DestinationPoint retrieveObject(Galaxy g, long t){return this;}
+	
+	@Override
 	public Describer<DestinationPoint> describer(){return this;}
 	
+	@Override
 	public double getXCoord(long t){return x;}
+	@Override
 	public double getYCoord(long t){return y;}
+	@Override
 	public double getXVel(long t){return 0.0d;}
+	@Override
 	public double getYVel(long t){return 0.0d;}
 	
+	@Override
 	public String imageLoc(){return "images/destinationpoint.jpg";}
+	@Override
 	public String getName(){return "Point";}
 	
 	public double getX(){return x;}

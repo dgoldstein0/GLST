@@ -1,6 +1,6 @@
 import java.util.HashSet;
 
-public abstract class Flyer<T extends Flyer<T>> extends Targetter implements Targetable<T>, Saveable
+public abstract class Flyer<T extends Flyer<T,I>, I extends Flyer.FlyerId<I>> extends Targetter<T>
 {
 	//these two constants are used by loadData for its second argument, to
 	//instruct it whether or not to call loadMoreData from the FlyerDataSaver (or subclass thereof)
@@ -11,9 +11,9 @@ public abstract class Flyer<T extends Flyer<T>> extends Targetter implements Tar
 	ShipType type;
 	GSystem location;
 	String name;
-	int id;
+	I id;
 	
-	HashSet<Targetter> aggressors; //all the ships/ missiles targetting this
+	HashSet<Targetter<?>> aggressors; //all the ships/ missiles targeting this
 	
 	Destination<?> destination;
 	//save in case SystemPainter wants to paint crosshairs
@@ -29,11 +29,13 @@ public abstract class Flyer<T extends Flyer<T>> extends Targetter implements Tar
 	double speed;
 	protected long time;
 	FlyerAI current_flying_AI;
+	boolean is_alive;
 	
-	FlyerDataSaverControl<?> data_control;
+	FlyerDataSaverControl<T, ? extends FlyerDataSaver<T> > data_control;
 	
-	public void handleDataNotSaved(){removeFromGame();}
-	public abstract void removeFromGame();
+	@Override
+	public void handleDataNotSaved(long t){removeFromGame(t);}
+	public abstract void removeFromGame(long t);
 	
 	//subclasses are responsible for instantiating data_control
 	public Flyer(String nm, ShipType st)
@@ -42,18 +44,27 @@ public abstract class Flyer<T extends Flyer<T>> extends Targetter implements Tar
 		type=st;
 		
 		damage=0;
-		
-		aggressors = new HashSet<Targetter>();
+		is_alive=true;
+		aggressors = new HashSet<Targetter<?>>();
+		destination=null;
+		target=null;
 	}
 	
 	public Flyer(){}
 	
+	@Deprecated
 	protected void advanceTime(long t)
 	{
 		long prev_time = time;
 		time = (long)(Math.ceil((double)(t)/(double)(GalacticStrategyConstants.TIME_GRANULARITY))*GalacticStrategyConstants.TIME_GRANULARITY);
 		if(time != prev_time)//otherwise, data already got saved 
 			data_control.saveData();
+	}
+	
+	public boolean isAlive(){return is_alive;}
+	public boolean isAliveAt(long t)
+	{
+		return data_control.saved_data[data_control.getIndexForTime(t)].is_alive;
 	}
 	
 	//ship physics functions
@@ -154,7 +165,7 @@ public abstract class Flyer<T extends Flyer<T>> extends Targetter implements Tar
 	
 	public double getXCoord(long t)
 	{
-		if(t != dest_coords_time)		
+		if(t != dest_coords_time)
 			updateDestData(t);
 		return dest_pos_x;
 	}
@@ -193,13 +204,17 @@ public abstract class Flyer<T extends Flyer<T>> extends Targetter implements Tar
 		dest_coords_time = t;
 	}
 	
-	//for Targetable
-	public HashSet<Targetter> getAggressors(){return aggressors;}
-	public void addAggressor(Targetter t){aggressors.add(t);}
-	public void removeAggressor(Targetter t){aggressors.remove(t);}
+	//for Saveable
+	public FlyerDataSaverControl<T, ? extends FlyerDataSaver<T>> getDataControl(){return data_control;}
 	
-	public void addDamage(int d)
-	{
+	//for Targetable
+	public HashSet<Targetter<?>> getAggressors(){return aggressors;}
+	public void addAggressor(Targetter<?> t){aggressors.add(t);}
+	public void removeAggressor(Targetter<?> t){aggressors.remove(t);}
+	
+	@Override
+	public void addDamage(long t, int d)
+	{ //t is ignored
 		damage+=d;
 		if(damage>=type.hull)
 			destroyed();
@@ -221,6 +236,15 @@ public abstract class Flyer<T extends Flyer<T>> extends Targetter implements Tar
 	public void setName(String nm){name=nm;}
 	public int getDamage(){return damage;}
 	public void setDamage(int d){damage=d;}
-	public int getId(){return id;}
-	public void setId(int i){id=i;}
+	public void setId(I i){id=i;}
+	public I getId(){return id;}
+	
+	public static abstract class FlyerId<T extends FlyerId<T>>
+	{
+		@Override
+		public abstract int hashCode();
+		
+		@Override
+		public abstract boolean equals(Object o);
+	}
 }
