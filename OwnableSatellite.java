@@ -181,7 +181,6 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 	
 	public void setOwner(Player p, long time)
 	{
-		
 		if(owner != null)
 			update(time);
 		else
@@ -197,6 +196,10 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 				}
 			}
 		}
+		
+		//start counting taxes from here
+		last_tax_time = time;
+		
 		setOwner(p);
 		data_control.saveData();
 	}

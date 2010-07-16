@@ -15,6 +15,7 @@ public class Fleet implements RelaxedSaveable<Fleet>
 		ships = new HashMap<Ship.ShipId, Ship>();
 		location = loc;
 		owner = o;
+		data_control = new FleetDataSaverControl(this);
 	}
 	
 	//methods required for load/save

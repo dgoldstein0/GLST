@@ -24,9 +24,9 @@ public class Base extends Facility<Base>{
 		endurance+= GalacticStrategyConstants.endu_upgraderate;
 	}
 	
-	public void taken(Player enemy)
+	public void taken(Player enemy, long t)
 	{
-		location.setOwner(enemy);
+		location.setOwner(enemy, t);
 	}
 	
 	public void updateStatus(long time)
@@ -80,6 +80,7 @@ public class Base extends Facility<Base>{
 		synchronized(soldier_lock)
 		{
 			updateStatus(t);
+			soldier_taker.add(enemy);
 			
 			while(soldier >= 1 && enemy.getSoldier() >= 1)
 			{
@@ -94,8 +95,9 @@ public class Base extends Facility<Base>{
 			//figure the results
 			if(soldier < 1)
 			{
-				taken(enemy.getOwner());
-				//report result
+				taken(enemy.getOwner(), t);
+				
+				//TODO: notify player
 			}
 		}
 	}

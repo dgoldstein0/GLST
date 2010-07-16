@@ -13,7 +13,7 @@ public class GSystem implements Orbitable<GSystem>
 	ArrayList<Satellite<?>> orbiting;
 	HashSet<Star> stars;
 	
-	Object missile_lock = new Object();
+	//missiles synchronizes on itself
 	MissileList missiles;
 	
 	Fleet[] fleets; //indices = player id's

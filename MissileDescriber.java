@@ -6,8 +6,8 @@ public class MissileDescriber implements Describer<Missile>
 	
 	public MissileDescriber(Missile m)
 	{
-		missile_id = m.getId().m_id;
-		shooter = m.getId().shooter.describer();
+		missile_id = m.getId().getM_id();
+		shooter = m.getId().getShooter().describer();
 		system_id = m.location.getId();
 	}
 	

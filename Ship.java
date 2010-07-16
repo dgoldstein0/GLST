@@ -126,7 +126,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	public boolean moveDuringWarp(long t, Iterator<Ship> ship_it)
 	{
 		//System.out.println("move during warp");
-		if(mode==IN_WARP)
+		if(t > time && mode==IN_WARP)
 		{
 			//System.out.println("...warping...");
 			if(t >= arrival_time)
@@ -249,14 +249,14 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 					synchronized(sat.facilities_lock)
 					{
 						if(sat.the_base == null) //if base isn't finished being built, player can take over without a fight
-							sat.setOwner(getOwner());
+							sat.setOwner(getOwner(), scheduled_time);
 						else
 							sat.the_base.attackedByTroops(GameInterface.GC.TC.getTime(), this);
 					}
 				}
 				else
 				{
-					((OwnableSatellite<?>)destination).setOwner(getOwner());
+					((OwnableSatellite<?>)destination).setOwner(getOwner(), scheduled_time);
 				}
 			}
 		}
@@ -401,10 +401,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		if ((dx*dx+dy*dy<GalacticStrategyConstants.Attacking_Range*GalacticStrategyConstants.Attacking_Range)&&(nextAttackingtime<=t))
 		{
 			Missile m=new Missile(this, target, time+GalacticStrategyConstants.TIME_GRANULARITY); 
-			synchronized(location.missile_lock)
-			{
-				location.missiles.put(m.id, m, t);
-			}
+			location.missiles.put(m.id, m, t);
 			nextAttackingtime= time+GalacticStrategyConstants.Attacking_cooldown;
 		}
 	}
@@ -506,5 +503,10 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 			else
 				return false;
 		}
+
+		public void setManufacturer(Shipyard manufacturer) {this.manufacturer = manufacturer;}
+		public Shipyard getManufacturer() {return manufacturer;}
+		public void setQueue_id(int queue_id) {this.queue_id = queue_id;}
+		public int getQueue_id() {return queue_id;}
 	}
 }

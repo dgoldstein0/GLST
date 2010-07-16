@@ -1,6 +1,6 @@
 import java.util.Set;
 
-public abstract class Order
+public abstract class Order implements Comparable<Order>
 {
 	final static int ORIGIN = 0;
 	final static int NETWORK = 1;
@@ -21,4 +21,16 @@ public abstract class Order
 	
 	public long getScheduled_time(){return scheduled_time;}
 	public void setScheduled_time(long t){scheduled_time=t;}
+
+	/** NOTE: compareTo here is inconsistent with equals*/
+	@Override
+	public int compareTo(Order o)
+	{
+		if (scheduled_time > o.scheduled_time)
+			return 1;
+		else if(scheduled_time == o.scheduled_time)
+			return 0;
+		else //if(scheduled_time < o.scheduled_time)
+			return -1;
+	}
 }

@@ -133,7 +133,7 @@ public class SystemPainter extends JPanel
 				}
 			}
 			
-			synchronized(system.missile_lock)
+			synchronized(system.missiles)
 			{
 				for(Missile.MissileId i : system.missiles.keySet())
 				{

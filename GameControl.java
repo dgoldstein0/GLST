@@ -9,7 +9,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.JFileChooser;
 import java.awt.Color;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class GameControl
 {
@@ -41,8 +41,7 @@ public class GameControl
 	Thread readThread; //reads data during the game
 	Thread startThread; //processes start game.   This is a separate Thread because it can crash the interface if run on swing's event thread
 	
-	Set<Order> pending_execution = Collections.synchronizedSet(new HashSet<Order>());
-	List<Order> executed = Collections.synchronizedList(new ArrayList<Order>());
+	PriorityBlockingQueue<Order> pending_execution;
 	
 	public GameControl(GameInterface gi)
 	{
@@ -55,6 +54,7 @@ public class GameControl
 		//preload file chooser for singlePloyerTest map loading
 		filechooser = new JFileChooser();
 		filechooser.setFileFilter(new FileNameExtensionFilter("XML files only", "xml"));
+		pending_execution = new PriorityBlockingQueue<Order>();
 	}
 	
 	public GameControl()
@@ -850,37 +850,14 @@ public class GameControl
 		//System.out.println("Updating to time_elapsed=" + Long.toString(time_elapsed));
 		//start events that need to occur before time_elapsed
 		
-		//THIS IS NOT FINISHED!  this block here is supposed to take data read in from the network, and
-		//then make the game backtrack and recompute recent gameplay so that the game reflects all the players'
-		//orders.
-		ArrayList<Order> temp_exec = new ArrayList<Order>();
-		long min_time_exec = time_elapsed;
-		for(Order o: pending_execution)
+		Order first_order = pending_execution.peek();
+		if(first_order != null)
 		{
-			if(o.scheduled_time <= time_elapsed)
-			{
-				//o.run();
-				pending_execution.remove(o);
-				temp_exec.add(o);
-				if(o.scheduled_time < min_time_exec)
-					min_time_exec = o.scheduled_time;
-			}
+			long next_order_time = first_order.scheduled_time;
+			if(next_order_time < update_to)
+				update_to = next_order_time; //forces the main loop to reconsider below
 		}
 		
-		//update all intersystem data
-		for(int i=0; i<players.length; i++)
-		{
-			if(players[i] != null)
-			{
-				Iterator<Ship> ship_it = players[i].ships_in_transit.iterator();
-				Ship s;
-				while(ship_it.hasNext())
-				{
-					s=ship_it.next();
-					s.moveDuringWarp(time_elapsed, ship_it); //the iterator is passed so that moveDuringWarp can remove the ship from the iteration, and by doing so from ships_in_transit
-				}
-			}
-		}
 		
 		//update data in all systems
 		for(GSystem sys : map.systems)
@@ -897,9 +874,36 @@ public class GameControl
 				}
 				sat.orbit.move(time_elapsed);
 			}
+		}
+		
+		//update all planets, facilities, ships and missiles
+		for(; update_to < time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
+		{
+			Order o;
+			while( (o = pending_execution.peek()) != null && o.scheduled_time <= update_to)
+			{
+				/**execute does all the necessary reversion itself.  It never reverts anything to earlier than
+				 * scheduled_time, which should be within one time grain less than update_to*/
+				pending_execution.remove().execute(map);
+			}
 			
-			//update all planets, facilities, ships and missiles
-			for(update_to = TC.getLast_time_updated(); update_to < time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
+			/**update all intersystem data.  This is must be within the loop in case ships are reverted back
+			 * into warp or something of the sort*/
+			for(int i=0; i<players.length; i++)
+			{
+				if(players[i] != null)
+				{
+					Iterator<Ship> ship_it = players[i].ships_in_transit.iterator();
+					Ship s;
+					while(ship_it.hasNext())
+					{
+						s=ship_it.next();
+						s.moveDuringWarp(update_to, ship_it); //the iterator is passed so that moveDuringWarp can remove the ship from the iteration, and by doing so from ships_in_transit
+					}
+				}
+			}
+			
+			for(GSystem sys : map.systems)
 			{
 				/*We must stick facilities and planets in this loop because otherwise Ship updating would not
 				be coordinated with facilities and planets, so bugs could then occur in terms of building ships
@@ -948,7 +952,7 @@ public class GameControl
 				
 				//NOTE: Missile collision detection relies on Missiles being updated after ships.  See Missile.collidedWithTarget
 				//update all missiles AND save data - safe because MISSILES CAN'T HIT MISSILES
-				synchronized(sys.missile_lock)
+				synchronized(sys.missiles)
 				{
 					Iterator<Missile.MissileId> missile_iteration = sys.missiles.keySet().iterator();
 					for(Missile.MissileId i; missile_iteration.hasNext();)
@@ -973,6 +977,7 @@ public class GameControl
 				}
 			}
 		}
+		
 		TC.setLast_time_updated(update_to);
 		
 		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));

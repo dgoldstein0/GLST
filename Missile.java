@@ -97,7 +97,7 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 	
 	public void destroyed()
 	{
-		synchronized(location.missile_lock)
+		synchronized(location.missiles)
 		{
 			location.missiles.remove(id, time); //must call remove with the Key and not the Value
 		}
@@ -117,8 +117,8 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 	
 	public static class MissileId extends FlyerId<MissileId>
 	{
-		Ship shooter;
-		int m_id;
+		private Ship shooter;
+		private int m_id;
 		
 		public MissileId(int id, Ship s)
 		{
@@ -140,5 +140,10 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 			else
 				return false;
 		}
+
+		public void setM_id(int m_id){this.m_id = m_id;}
+		public int getM_id() {return m_id;}
+		public void setShooter(Ship shooter) {this.shooter = shooter;}
+		public Ship getShooter() {return shooter;}
 	}
 }

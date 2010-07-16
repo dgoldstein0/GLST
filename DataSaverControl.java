@@ -23,14 +23,12 @@ public abstract class DataSaverControl<T extends Saveable<T>, S extends DataSave
 	//loading and saving data functions.  This is overridden in RelaxedDataSaverControl.
 	public void saveData()
 	{
-		//if(this instanceof Ship)
-		//	System.out.println(Integer.toString(((Ship)this).id) + " saving time " + Long.toString(time) + " at index " + Integer.toString(index));
+		//if(the_obj instanceof Ship)
+		//	System.out.println(Integer.toString(((Ship)the_obj).id.queue_id) + " saving time " + Long.toString(((Ship)the_obj).time) + " at index " + Integer.toString(index));
 		
 		saved_data[index].saveData(the_obj);
 
-		index++;
-		if (index>GalacticStrategyConstants.data_capacity-1)
-			index=0;
+		index = getNextIndex(index);
 	}
 	
 
