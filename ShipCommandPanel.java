@@ -74,6 +74,14 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		removeAll();
 		the_ship=s;
 		
+		//toggle buttons
+		boolean enable = (the_ship.owner.getId() == GameInterface.GC.player_id);
+		
+		move.setEnabled(enable);
+		warp.setEnabled(enable);
+		
+		
+		
 		JPanel pic_panel = new JPanel();
 		GroupLayout pic_layout = new GroupLayout(pic_panel);
 		pic_panel.setLayout(pic_layout);
@@ -167,16 +175,18 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		}
 		else if(e.getSource() == attack)
 		{
-			the_ship.mode=Ship.ATTACKING;
+			GameInterface.GC.scheduleOrder(new ShipAttackOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.TC.getTime(), (Targetable<?>)the_ship.destination));
 		}
 		else if(e.getSource() == invade)
 		{
-			the_ship.orderToInvade((OwnableSatellite<?>)the_ship.destination, GameInterface.GC.TC.getTime());
+			GameInterface.GC.scheduleOrder(new ShipInvadeOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.TC.getTime()));
+			
+			//TODO: move this function call?
 			updateDestDisplay();
 		}
 		else if(e.getSource() == pickup_troops)
 		{
-			the_ship.orderToPickupTroops(GameInterface.GC.TC.getTime());
+			GameInterface.GC.scheduleOrder(new ShipPickupTroopsOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.TC.getTime()));
 		}
 	}
 }

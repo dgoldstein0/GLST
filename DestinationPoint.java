@@ -28,6 +28,9 @@ public class DestinationPoint implements Destination<DestinationPoint>, Describe
 	@Override
 	public String getName(){return "Point";}
 	
+	//default constructor, for XML encoding/decoding
+	public DestinationPoint(){}
+	
 	public double getX(){return x;}
 	public void setX(double a){x=a;}
 	public double getY(){return y;}

@@ -29,6 +29,7 @@ public abstract class FacilityDataSaver<T extends Facility<T>> extends DataSaver
 	@Override
 	final protected void doSaveData(T f) {
 	
+		doSaveMoreData(f);
 		aggr = (HashSet<Targetter<?>>) f.aggressors.clone(); //unchecked cast warning
 		endu= f.endurance;
 		dmg= f.damage;

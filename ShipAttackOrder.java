@@ -12,8 +12,13 @@ public class ShipAttackOrder extends Order
 	public ShipAttackOrder(Player p, Ship s, long t, Targetable<?> tgt)
 	{
 		mode = Order.ORIGIN;
+		
+		the_ship = s;
 		ship_desc=new ShipDescriber(p,s);
+		
+		the_target = tgt;
 		tgt_desc=tgt.describer();
+		
 		scheduled_time=t;
 	}
 	

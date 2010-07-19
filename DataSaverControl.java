@@ -34,7 +34,7 @@ public abstract class DataSaverControl<T extends Saveable<T>, S extends DataSave
 
 	final public Set<Order> revertToTime(long t)
 	{
-		if(saved_data[index-1].t > t) //this check helps ensure we do not get into an infinite recursion.  Empty sets from deduceEffectsAfterIndex could serve same purpose
+		if(saved_data[getPreviousIndex(index)].isDataSaved() && saved_data[getPreviousIndex(index)].t > t) //this check helps ensure we do not get into an infinite recursion.  Empty sets from deduceEffectsAfterIndex could serve same purpose
 		{
 			int indx=getIndexForTime(t);
 			//System.out.println(Integer.toString(index)+" "+Integer.toString(stepback));
@@ -51,7 +51,8 @@ public abstract class DataSaverControl<T extends Saveable<T>, S extends DataSave
 				
 				for(Iterator<ReversionEffects.RevertObj> objs_it = reversion_effects.objects_to_revert.iterator(); objs_it.hasNext();)
 				{
-					ReversionEffects.RevertObj revertable = objs_it.next();
+					ReversionEffects.RevertObj revertable = objs_it.next();					
+					
 					orders.addAll(revertable.obj.getDataControl().revertToTime(revertable.time_to_revert));
 				}
 				

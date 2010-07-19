@@ -32,13 +32,24 @@ public class ReversionEffects {
 		//equals ignores time_to_revert: 2 RevertObj's are equal if their obj's are equal
 		public boolean equals(RevertObj o)
 		{
-			return obj.equals(o.obj);
+			if(o != null)
+			{
+				if(obj != null)
+					return obj.equals(o.obj);
+				else
+					return (o==null);
+			}
+			else
+				return false;
 		}
 		
 		//overridden to make sure that if two objects are the same according to equals, they have the same hashCode
 		public int hashCode()
 		{
-			return obj.hashCode();
+			if(obj != null)
+				return obj.hashCode();
+			else
+				return 0;
 		}
 	}
 }

@@ -203,6 +203,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 			nextAttackingtime = time;
 			nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
 			
+			//TODO: get constant 5 out of here
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.Attacking_Range-5, TrackingAI.STOP);
 		}
 	}
@@ -489,18 +490,24 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 			queue_id = q_id;
 		}
 		
+		@Override
 		public int hashCode()
 		{
-			return manufacturer.hashCode()*200 + queue_id;
+			if(manufacturer != null)
+				return manufacturer.hashCode()*211 + queue_id;
+			else
+				return 0;
 		}
 		
+		@Override
 		public boolean equals(Object o)
 		{
 			if(o instanceof ShipId)
 			{
-				return (((ShipId)o).manufacturer == manufacturer) && (((ShipId)o).queue_id == queue_id);
+				ShipId s = (ShipId)o;
+				return (s.manufacturer == manufacturer) && (s.queue_id == queue_id);
 			}
-			else
+			else //this will catch the case where o is null
 				return false;
 		}
 

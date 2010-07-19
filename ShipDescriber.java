@@ -17,7 +17,11 @@ public class ShipDescriber implements Describer<Ship>
 	public Ship retrieveObject(Galaxy g, long t)
 	{
 		FleetDataSaverControl fleet_ctrl = g.systems.get(system_id).fleets[player_id].data_control;
-		return fleet_ctrl.saved_data[fleet_ctrl.getIndexForTime(t)].ships.get(new Ship.ShipId(q_id, manu.retrieveObject(g, t)));
+		FleetDataSaver data_saver = fleet_ctrl.saved_data[fleet_ctrl.getIndexForTime(t)];
+		if(data_saver.isDataSaved())
+			return data_saver.ships.get(new Ship.ShipId(q_id, manu.retrieveObject(g, t)));
+		else
+			return null;
 	}
 	
 	public ShipDescriber(){}

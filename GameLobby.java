@@ -180,7 +180,10 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 		if(e.getSource()==start_game)
 		{
 			if(GC.hosting)
+			{
 				GC.startGameViaThread();
+				//dispose();
+			}	
 			else {
 				GC.declareReady();
 				updateNames();

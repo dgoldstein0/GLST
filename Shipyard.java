@@ -20,9 +20,10 @@ public class Shipyard extends Facility<Shipyard>{
 		time_on_current_ship = 0;
 		data_control = new ShipyardDataSaverControl(this);
 		next_queue_id=0;
+		data_control.saveData();
 	}
 	
-	public boolean addToQueue(Ship ship, long t)
+	public boolean addToQueue(Ship ship, long t, boolean notify)
 	{
 		boolean ret;
 		int met = ship.type.metal_cost;
@@ -43,6 +44,8 @@ public class Shipyard extends Facility<Shipyard>{
 							last_time=t;
 					}
 					data_control.saveData();
+					if(notify)
+						GameInterface.GC.notifyAllPlayers(new ShipyardBuildShipOrder(this, ship.type, t));
 					ret=true;
 				}
 				else
@@ -52,11 +55,11 @@ public class Shipyard extends Facility<Shipyard>{
 		return ret;
 	}
 	
-	public void removeFromQueue(Ship ship, long t)
+	public void removeFromQueue(Ship ship, long t, boolean notify)
 	{
 		synchronized(queue_lock)
 		{
-			manufac_queue.remove(ship.getId());
+			manufac_queue.remove(ship.getId().queue_id);
 			
 			if(manufac_queue.size() == 0)
 			{
@@ -69,6 +72,10 @@ public class Shipyard extends Facility<Shipyard>{
 				location.owner.changeMetal(ship.type.metal_cost);
 			}
 			data_control.saveData();
+			
+			if(notify)
+				GameInterface.GC.notifyAllPlayers(new ShipyardCancelBuildOrder(this, ship, t));
+			
 			return;
 		}
 	}

@@ -30,7 +30,7 @@ public class ShipyardBuildShipOrder extends Order {
 			{
 				Set<Order> orders = the_yard.data_control.revertToTime(scheduled_time);
 				orders.addAll(the_yard.location.data_control.revertToTime(scheduled_time)); //make sure it uses the right owner
-				the_yard.addToQueue(new Ship(type), scheduled_time);
+				the_yard.addToQueue(new Ship(type), scheduled_time, false);
 				return orders;
 			}
 		}

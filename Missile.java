@@ -128,7 +128,10 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 		
 		public int hashCode()
 		{
-			return shooter.hashCode()*200 + m_id;
+			if(shooter != null)
+				return shooter.hashCode()*211 + m_id;
+			else
+				return 0;
 		}
 		
 		public boolean equals(Object o)

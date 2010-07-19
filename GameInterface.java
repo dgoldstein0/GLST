@@ -565,7 +565,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 							if(x_dif*x_dif + y_dif*y_dif <= range*range)
 							{
 								//set this as the ship's warp destination
-								ShipPanel.the_ship.orderToWarp(GC.TC.getTime(), the_sys);
+								GC.scheduleOrder(new ShipWarpOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getTime(), the_sys));
 								drawSystem();
 								galaxy_state=GAL_NORMAL;
 							}
@@ -593,7 +593,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 						setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
 						system_state = SYS_NORMAL;
 					}
-					else if(selected_in_sys instanceof Ship && e.getButton() == MouseEvent.BUTTON3)
+					else if(selected_in_sys instanceof Ship && e.getButton() == MouseEvent.BUTTON3 && ((Ship)selected_in_sys).owner.getId() == GC.player_id)
 					{
 						setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
 					}
@@ -771,14 +771,15 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				}
 			}
 		}
-		Long cur_time = GameInterface.GC.TC.getTime();
 		
-		ShipPanel.the_ship.orderToMove(cur_time, dest);
+		GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getTime(), dest));
+
+		//TODO: work on correct updating
 		ShipPanel.updateDestDisplay();
 		
 		if(dest instanceof Ship && dest != ShipPanel.the_ship)
-		{			
-			ShipPanel.the_ship.orderToAttack(cur_time,(Targetable<Ship>)dest);
+		{
+			GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getTime(), (Targetable<Ship>)dest));
 		}
 	}
 	
@@ -799,7 +800,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		
 		}
 		moveCenter();
-		frame.setVisible(true);
+		frame.validate();
 	}
 	
 	private void moveCenter()

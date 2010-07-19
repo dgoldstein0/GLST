@@ -28,7 +28,7 @@ public class ShipDataSaverControl extends FlyerDataSaverControl<Ship, ShipDataSa
 			}
 			
 			//add the target
-			if(!objs.contains(saved_data[j].tgt))
+			if(!objs.contains(saved_data[j].tgt) && saved_data[j].tgt != null)
 				objs.add(new ReversionEffects.RevertObj(saved_data[j].tgt, saved_data[j].t));
 				
 			if(saved_data[i].md != saved_data[j].md)

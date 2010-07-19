@@ -30,7 +30,7 @@ public class FacilityBuildOrder extends Order
 		{
 			Set<Order> need_to_reexecute = the_sat.data_control.revertToTime(scheduled_time); //TODO: will revert everything associated with the planet (via facilities).  necessary?		
 			
-			the_sat.scheduleConstruction(bldg_type, scheduled_time);
+			the_sat.scheduleConstruction(bldg_type, scheduled_time, false);
 			
 			return need_to_reexecute;
 		}

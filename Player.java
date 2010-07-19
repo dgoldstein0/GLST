@@ -26,7 +26,7 @@ public class Player
 		String name;
 		do
 		{
-			name=JOptionPane.showInputDialog("Please name your character.");
+			name=JOptionPane.showInputDialog("Please choose a Screen Name.");
 			if(name == null)
 				throw new CancelException();
 		}

@@ -7,8 +7,8 @@ public class ShipyardCancelBuildOrder extends Order {
 	int ship_id;
 	int player_id;
 	
-	Shipyard the_yard;
-	Ship the_ship;
+	private Shipyard the_yard;
+	private Ship the_ship;
 	
 	
 	public ShipyardCancelBuildOrder(Shipyard syd, Ship s, long t)
@@ -32,16 +32,21 @@ public class ShipyardCancelBuildOrder extends Order {
 		{
 			ShipyardDataSaver data = (ShipyardDataSaver) the_yard.data_control.saved_data[the_yard.data_control.getIndexForTime(scheduled_time)];
 			OwnableSatelliteDataSaverControl<?> ctrl = the_yard.location.data_control;
-			if(data.alive  && data.queue.size() != 0 && ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].own.getId() == player_id) //validity check: is the Shipyard still alive?
+			
+			if(data.alive && data.queue.size() != 0 && ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].own.getId() == player_id) //validity check: is the Shipyard still alive?
 			{
 				Set<Order> orders = the_yard.data_control.revertToTime(scheduled_time);
 				
 				if (mode == NETWORK)
 					the_ship = the_yard.manufac_queue.get(ship_id);
 				
-				orders.addAll(the_ship.data_control.revertToTime(scheduled_time));
-			
-				the_yard.removeFromQueue(the_ship, scheduled_time);
+				if(the_ship != null)
+				{
+					orders.addAll(the_ship.data_control.revertToTime(scheduled_time));
+					orders.addAll(ctrl.revertToTime(scheduled_time)); //make sure it uses the right owner
+					
+					the_yard.removeFromQueue(the_ship, scheduled_time, false);
+				}
 				
 				return orders;
 			}
@@ -55,7 +60,7 @@ public class ShipyardCancelBuildOrder extends Order {
 	public FacilityDescriber<Shipyard> getShipyard_describer(){return shipyard_describer;}
 	public void setShipyard_describer(FacilityDescriber<Shipyard> desc){shipyard_describer=desc;}
 	public int getShip_id(){return ship_id;}
-	public void setType(int i){ship_id=i;}
+	public void setShip_id(int i){ship_id=i;}
 	public int getPlayer_id(){return player_id;}
 	public void setPlayer_id(int id){player_id=id;}
 }

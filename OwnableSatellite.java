@@ -142,7 +142,7 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 	}
 	
 	//return value is true if the building will be built, and false if the player does not have enough money/metal to build it
-	public boolean scheduleConstruction(FacilityType bldg_type, long start_time)
+	public boolean scheduleConstruction(FacilityType bldg_type, long start_time, boolean notify)
 	{
 		bldg_in_progress = bldg_type;
 		time_start = start_time;
@@ -161,6 +161,8 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 					
 					data_control.saveData();
 					//notify all players ***
+					if(notify)
+						GameInterface.GC.notifyAllPlayers(new FacilityBuildOrder(this, bldg_type, start_time));
 					
 					return true;
 				}
@@ -173,10 +175,13 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 		}
 	}
 	
-	public void cancelConstruction()
+	public void cancelConstruction(long t, boolean notify)
 	{
 		bldg_in_progress=FacilityType.NO_BLDG;
 		data_control.saveData();
+		
+		if(notify)
+			GameInterface.GC.notifyAllPlayers(new CancelFacilityBuildOrder(this, t));
 	}
 	
 	public void setOwner(Player p, long time)

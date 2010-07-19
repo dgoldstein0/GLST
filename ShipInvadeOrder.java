@@ -9,6 +9,7 @@ public class ShipInvadeOrder extends Order {
 	public ShipInvadeOrder(Player p, Ship s, long t)
 	{
 		mode = Order.ORIGIN;
+		the_ship = s;
 		ship_desc=new ShipDescriber(p,s);
 		scheduled_time=t;
 	}

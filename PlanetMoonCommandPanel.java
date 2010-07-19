@@ -173,34 +173,28 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 			//update population reading
 			pop.setText("Population: " + ((OwnableSatellite<?>)the_sat).getPopulation());
 			
-			//if building in progress, update progress
-			if(((OwnableSatellite<?>)the_sat).getBldg_in_progress() != FacilityType.NO_BLDG)
+			if(((OwnableSatellite<?>) the_sat).owner == GameInterface.GC.players[GameInterface.GC.player_id])
 			{
-				double prog = ((OwnableSatellite<?>)the_sat).constructionProgress(t);
-				//System.out.println("PMCPanel update to progress " + Double.toString(prog));
-				progress_bar.setValue((int)(1000.0*prog));
-			}
-			else if(need_to_reset)
-			{
-				progress_bar.setValue(0);
-				build.setEnabled(true);
-				cancel.setEnabled(false);
-				need_to_reset = false;
+				//if building in progress, update progress
+				if(((OwnableSatellite<?>)the_sat).getBldg_in_progress() != FacilityType.NO_BLDG)
+				{
+					double prog = ((OwnableSatellite<?>)the_sat).constructionProgress(t);
+					//System.out.println("PMCPanel update to progress " + Double.toString(prog));
+					progress_bar.setValue((int)(1000.0*prog));
+				}
+				else if(need_to_reset)
+				{
+					progress_bar.setValue(0);
+					build.setEnabled(true);
+					cancel.setEnabled(false);
+					need_to_reset = false;
+				}
 			}
 			
 			for(FacilityStatusUpdater updater : facility_updaters)
 				updater.updateFacility();
 			
-			boolean no_base_seen=true;
-			synchronized(((OwnableSatellite<?>)the_sat).facilities_lock)
-			{
-				for(Integer i : ((OwnableSatellite<?>)the_sat).facilities.keySet())
-				{
-					if(((OwnableSatellite<?>)the_sat).facilities.get(i) instanceof Base)
-						no_base_seen=false;
-				}
-			}
-			no_base_mode=no_base_seen;
+			no_base_mode=(((OwnableSatellite<?>)the_sat).the_base == null);
 		}
 	}
 	
@@ -242,7 +236,8 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 					manufac_bar.setStringPainted(true);
 					the_panel.add(manufac_bar);
 					updater = new ShipyardStatusUpdater(health_bar, manufac_bar, (Shipyard)f);
-					the_panel.addMouseListener(new ShipyardSelector((Shipyard)f, this));
+					if(((OwnableSatellite<?>)the_sat).owner != null && GameInterface.GC.player_id == ((OwnableSatellite<?>)the_sat).owner.getId())
+						the_panel.addMouseListener(new ShipyardSelector((Shipyard)f, this));
 					break;
 				default:
 					System.out.println("what sort of facility is " + f.getName() +"?");
@@ -426,7 +421,8 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 	
 	private void executeBuild(FacilityType facility_id)
 	{
-		need_to_reset = ((OwnableSatellite<?>)the_sat).scheduleConstruction(facility_id, GameInterface.GC.TC.getTime());
+		//TODO
+		need_to_reset = ((OwnableSatellite<?>)the_sat).scheduleConstruction(facility_id, GameInterface.GC.TC.getTime(), true);
 		//need_to_reset indicates if the construction was successfully started, and the interface will later need to be set back to its original state when the building is finished
 		if(need_to_reset)
 		{
@@ -447,7 +443,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 		}
 		else if(e.getSource() == cancel)
 		{
-			((OwnableSatellite<?>)the_sat).cancelConstruction();
+			((OwnableSatellite<?>)the_sat).cancelConstruction(GameInterface.GC.TC.getTime(),true);
 			choices_panel.removeAll();
 			build.setEnabled(true);
 			cancel.setEnabled(false);

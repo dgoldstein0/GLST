@@ -301,6 +301,9 @@ public class GameControl
 	
 	public void startGameViaThread()
 	{
+		if(GL != null)
+			GL.dispose();
+			
 		startThread = new Thread(new Runnable(){public void run(){startGame();}});
 		startThread.start();
 	}
@@ -709,11 +712,22 @@ public class GameControl
 		OS = the_socket.getOutputStream();
 	}
 	
+	public void scheduleOrder(Order o)
+	{
+		pending_execution.offer(o);
+		
+		notifyAllPlayers(o);
+	}
+	
 	public void notifyAllPlayers(Order o)
 	{
-		XMLEncoder2 encoder = new XMLEncoder2(OS);
-		encoder.writeObject(o);
-		encoder.finish();
+		//notify other players
+		if(OS != null)
+		{
+			XMLEncoder2 encoder = new XMLEncoder2(OS);
+			encoder.writeObject(o);
+			encoder.finish();
+		}
 	}
 	
 	public void downloadAndLoadMap(boolean SAVE) throws IOException //for the client
@@ -781,7 +795,7 @@ public class GameControl
 					{
 						str.append(line);
 						if(line.indexOf("</java>") == -1)
-							line = br.readLine();
+							line = br.readLine(); //TODO: when does this result in null?
 						else
 							kill=true;
 					}
@@ -850,7 +864,23 @@ public class GameControl
 		//System.out.println("Updating to time_elapsed=" + Long.toString(time_elapsed));
 		//start events that need to occur before time_elapsed
 		
-		Order first_order = pending_execution.peek();
+		//can safely use unsynchronized version here since this is only used by the current thread
+		PriorityQueue<Order> local_pending_execution = new PriorityQueue<Order>();
+		
+		do
+		{
+			Order o = pending_execution.peek();
+			if(o != null && o.scheduled_time <= time_elapsed)
+				local_pending_execution.add(pending_execution.remove()); //if this does not remove o, it removes one just inserted earlier than o.
+			else
+				break; /*small chance an order should be removed and executed this time around but isn't, 
+						if we don't see it with peek.  it will be executed next time through updateGame,
+						though with a bit of reversion*/
+		} while(true);
+		
+		/*now figure out the earliest order in local_pending_execution, and make that time update_to,
+		 * if update_to is currently larger*/
+		Order first_order = local_pending_execution.peek();
 		if(first_order != null)
 		{
 			long next_order_time = first_order.scheduled_time;
@@ -880,11 +910,11 @@ public class GameControl
 		for(; update_to < time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
 		{
 			Order o;
-			while( (o = pending_execution.peek()) != null && o.scheduled_time <= update_to)
+			while( (o = local_pending_execution.peek()) != null && o.scheduled_time <= update_to)
 			{
 				/**execute does all the necessary reversion itself.  It never reverts anything to earlier than
 				 * scheduled_time, which should be within one time grain less than update_to*/
-				pending_execution.remove().execute(map);
+				local_pending_execution.addAll(local_pending_execution.remove().execute(map));
 			}
 			
 			/**update all intersystem data.  This is must be within the loop in case ships are reverted back
@@ -979,6 +1009,12 @@ public class GameControl
 		}
 		
 		TC.setLast_time_updated(update_to);
+		
+		if(!local_pending_execution.isEmpty())
+		{
+			System.out.println("We still have orders in the local queue.  should not be possible!");
+			pending_execution.addAll(local_pending_execution);
+		}
 		
 		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));
 	}

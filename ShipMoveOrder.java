@@ -6,27 +6,45 @@ public class ShipMoveOrder extends Order
 	Ship the_ship;
 	Destination<?> the_dest;
 	
-	ShipDescriber ship_desc;
+	Describer<Ship> ship_desc;
 	Describer<? extends Destination<?>> dest_desc;
+	
+	int player_id;
 	
 	public ShipMoveOrder(Player p, Ship s, long t, Destination<?> d)
 	{
 		mode = Order.ORIGIN;
-		ship_desc=new ShipDescriber(p,s);
+		
+		the_ship = s;
+		ship_desc=s.describer();
+		
+		the_dest = d;
 		dest_desc=d.describer();
+		
+		player_id = p.getId();
+		
 		scheduled_time=t;
 	}
 	
 	public Set<Order> execute(Galaxy g)
 	{
+		System.out.println("ship move order executing...");
 		if(mode==Order.NETWORK)
 		{
 			the_ship = ship_desc.retrieveObject(g, scheduled_time);
 			the_dest = dest_desc.retrieveObject(g, scheduled_time);
 		}
 		
-		if(the_ship != null && the_dest != null && the_ship.isAliveAt(scheduled_time))
+		/*System.out.println("the_ship is null: " + Boolean.toString(the_ship == null));
+		System.out.println("the_dest is null: " + Boolean.toString(the_dest==null));
+		if(the_ship != null)
+			System.out.println("the_ship is alive at scheduled_time: " + Boolean.toString(the_ship.isAliveAt(scheduled_time)));
+		*/
+		
+		if(the_ship != null && the_dest != null && the_ship.isAliveAt(scheduled_time) && the_ship.owner.getId() == player_id)
 		{
+			System.out.println("revert and execute...");
+			
 			Set<Order> orders = the_ship.data_control.revertToTime(scheduled_time);
 			
 			/*TODO: should we revert destination?  this implementation assumes setting an object as a
@@ -41,8 +59,10 @@ public class ShipMoveOrder extends Order
 	}
 	
 	public ShipMoveOrder(){mode=Order.NETWORK;}
-	public ShipDescriber getShip_desc(){return ship_desc;}
-	public void setShip_desc(ShipDescriber sd){ship_desc=sd;}
+	public Describer<Ship> getShip_desc(){return ship_desc;}
+	public void setShip_desc(Describer<Ship> sd){ship_desc=sd;}
 	public Describer<? extends Destination<?>> getDest_desc(){return dest_desc;}
 	public void setDest_desc(Describer<? extends Destination<?>> d){dest_desc=d;}
+	public int getPlayer_id(){return player_id;}
+	public void setPlayer_id(int id){player_id = id;}
 }

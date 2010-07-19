@@ -8,7 +8,7 @@ public class ShipBuilder implements MouseListener
 	ShipType type;
 	PlanetMoonCommandPanel panel;
 	JPanel type_panel;
-	boolean click_on;
+	boolean mouse_in;
 	boolean was_clicked_on;
 	
 	public ShipBuilder(Shipyard s, ShipType t, JPanel typepanel, PlanetMoonCommandPanel p)
@@ -25,9 +25,9 @@ public class ShipBuilder implements MouseListener
 	
 	public void mouseReleased(MouseEvent e)
 	{
-		if(click_on)
+		if(mouse_in)
 		{
-			if(yard.addToQueue(new Ship(type), GameInterface.GC.TC.getTime()))
+			if(yard.addToQueue(new Ship(type), GameInterface.GC.TC.getTime(), true))
 			{
 				if(!e.isShiftDown())
 				{
@@ -49,7 +49,7 @@ public class ShipBuilder implements MouseListener
 		{
 			type_panel.setOpaque(true);
 			type_panel.repaint();
-			click_on=true;
+			mouse_in=true;
 		}
 	}
 	
@@ -57,7 +57,7 @@ public class ShipBuilder implements MouseListener
 	{
 		type_panel.setOpaque(false);
 		type_panel.repaint();
-		click_on=false;
+		mouse_in=false;
 	}
 	
 	public void mousePressed(MouseEvent e)
@@ -65,7 +65,7 @@ public class ShipBuilder implements MouseListener
 		type_panel.setOpaque(true);
 
 		type_panel.repaint();
-		click_on=true;
+		mouse_in=true;
 		was_clicked_on=true;
 	}
 	public void mouseClicked(MouseEvent e){}
