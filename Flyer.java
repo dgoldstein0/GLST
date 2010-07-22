@@ -52,15 +52,6 @@ public abstract class Flyer<T extends Flyer<T,I>, I extends Flyer.FlyerId<I>> ex
 	
 	public Flyer(){}
 	
-	@Deprecated
-	protected void advanceTime(long t)
-	{
-		long prev_time = time;
-		time = (long)(Math.ceil((double)(t)/(double)(GalacticStrategyConstants.TIME_GRANULARITY))*GalacticStrategyConstants.TIME_GRANULARITY);
-		if(time != prev_time)//otherwise, data already got saved 
-			data_control.saveData();
-	}
-	
 	public boolean isAlive(){return is_alive;}
 	public boolean isAliveAt(long t)
 	{

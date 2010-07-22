@@ -14,6 +14,11 @@ public abstract class FlyerDataSaverControl<T extends Flyer<T, ?>, S extends Fly
 		{
 			System.out.println("Error loading ship data: the delay is too long"); //BOOKMARK - how should these errors be dealt with
 		}
+		else if(stepback < 0) //TODO: possibly remove this sanity check, if it never turns up anything.
+		{
+			System.out.println("Major consistency error: stepback in getIndexForTime is " + Integer.toString(stepback) + "with t=" + Long.toString(t) + " and time="+Long.toString(the_obj.getTime()));
+			throw new RuntimeException();
+		}
 		else
 		{
 			if (stepback<=index)

@@ -565,7 +565,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 							if(x_dif*x_dif + y_dif*y_dif <= range*range)
 							{
 								//set this as the ship's warp destination
-								GC.scheduleOrder(new ShipWarpOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getTime(), the_sys));
+								GC.scheduleOrder(new ShipWarpOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getNextTimeGrain(), the_sys));
 								drawSystem();
 								galaxy_state=GAL_NORMAL;
 							}
@@ -772,14 +772,14 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			}
 		}
 		
-		GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getTime(), dest));
+		GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getNextTimeGrain(), dest));
 
 		//TODO: work on correct updating
 		ShipPanel.updateDestDisplay();
 		
 		if(dest instanceof Ship && dest != ShipPanel.the_ship)
 		{
-			GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getTime(), (Targetable<Ship>)dest));
+			GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getNextTimeGrain(), (Targetable<Ship>)dest));
 		}
 	}
 	

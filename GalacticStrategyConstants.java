@@ -1,5 +1,9 @@
 import java.awt.Color;
-import java.awt.Toolkit;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 
 public class GalacticStrategyConstants
 {
@@ -91,15 +95,15 @@ public class GalacticStrategyConstants
 	
 
 	//loads the images for each ship type
-	public static void ImageLoader() //GameControl calls this method when it is instantiated
+	public static void ImageLoader() throws IOException //GameControl calls this method when it is instantiated
 	{
-		Toolkit tk = Toolkit.getDefaultToolkit();
 		for(ShipType t : ShipType.values())
 		{
-			t.setImg(tk.getImage(t.getImg_loc()));
-			ImageSizer sizer = new ImageSizer(t);
-			t.width = t.img.getWidth(sizer);
-			t.height = t.img.getHeight(sizer);
+			t.setImg(ImageIO.read(new File(t.getImg_loc())));
+			t.width = t.img.getWidth();
+			t.height = t.img.getHeight();
+			t.dim = Math.max(t.width, t.height);
+			t.icon = new ImageIcon(t.img);
 		}
 	}
 	

@@ -1,6 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.util.*;
 
 public class GalacticMapPainter extends JPanel
@@ -39,6 +43,9 @@ public class GalacticMapPainter extends JPanel
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
+		
+		Graphics2D g2 = (Graphics2D)g;
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		setBackground(Color.BLACK);
 		
 		if(map != null && map.systems != null)
@@ -48,20 +55,20 @@ public class GalacticMapPainter extends JPanel
 				if(sys.navigability>=nav_level || display_unnavigable)
 				{
 					if(sys.navigability < nav_level)
-						g.setColor(Color.GRAY);
+						g2.setColor(Color.GRAY);
 					else if(sys.owner_id == GSystem.NO_OWNER)
-						g.setColor(Color.WHITE);
+						g2.setColor(Color.WHITE);
 					else if(sys.owner_id == GSystem.OWNER_CONFLICTED)
-						g.setColor(Color.ORANGE);
+						g2.setColor(Color.ORANGE);
 					else
-						g.setColor(GameInterface.GC.players[sys.owner_id].getColor());
-					g.fillOval(scaleNum(sys.x-2),scaleNum(sys.y-2),scaleNum(5),scaleNum(5));
+						g2.setColor(GameInterface.GC.players[sys.owner_id].getColor());
+					g2.fill(new Ellipse2D.Double(scaleNum(sys.x-2),scaleNum(sys.y-2),scaleNum(5),scaleNum(5)));
 					if(nav_display == GDFrame.NAV_DISP_ALL)
 					{
-						g.setFont(g.getFont().deriveFont(Font.BOLD,12.0f));
-						FontMetrics m=g.getFontMetrics(g.getFont());
-						g.setColor(Color.WHITE);
-						g.drawString(Integer.toString(sys.navigability), scaleNum(sys.x+3), scaleNum(sys.y)+m.getHeight());
+						g2.setFont(g2.getFont().deriveFont(Font.BOLD,12.0f));
+						FontMetrics m=g2.getFontMetrics(g2.getFont());
+						g2.setColor(Color.WHITE);
+						g2.drawString(Integer.toString(sys.navigability), (float)scaleNum(sys.x+3), (float)scaleNum(sys.y)+m.getHeight());
 					}
 					
 					if(selected != null)
@@ -75,13 +82,13 @@ public class GalacticMapPainter extends JPanel
 								{
 									String dist=Integer.toString((int)d);
 									
-									g.setColor(Color.RED);
-									g.drawLine(scaleNum(sel_sys.x), scaleNum(sel_sys.y), scaleNum(sys.x), scaleNum(sys.y));
+									g2.setColor(Color.RED);
+									g2.draw(new Line2D.Double(scaleNum(sel_sys.x), scaleNum(sel_sys.y), scaleNum(sys.x), scaleNum(sys.y)));
 									
-									g.setFont(g.getFont().deriveFont(Font.BOLD,11.0f));
-									FontMetrics m=g.getFontMetrics(g.getFont());
-									g.setColor(Color.WHITE);
-									g.drawString(dist,scaleNum((sel_sys.x+sys.x)/2)-m.stringWidth(dist)/2,scaleNum((sel_sys.y+sys.y)/2)+m.getHeight()/2);
+									g2.setFont(g2.getFont().deriveFont(Font.BOLD,11.0f));
+									FontMetrics m=g2.getFontMetrics(g2.getFont());
+									g2.setColor(Color.WHITE);
+									g2.drawString(dist,(float)(scaleNum((sel_sys.x+sys.x)/2.0)-m.stringWidth(dist)/2.0),(float)(scaleNum((sel_sys.y+sys.y)/2.0)+m.getHeight()/2.0));
 								}
 							}
 						}
@@ -93,33 +100,33 @@ public class GalacticMapPainter extends JPanel
 			{
 				for(GSystem sys : selected)
 				{
-					g.setColor(Color.ORANGE);
-					g.drawOval(scaleNum(sys.x-4),scaleNum(sys.y-4),scaleNum(9),scaleNum(9));
-					g.setColor(Color.WHITE);
+					g2.setColor(Color.ORANGE);
+					g2.draw(new Ellipse2D.Double(scaleNum(sys.x-4),scaleNum(sys.y-4),scaleNum(9),scaleNum(9)));
+					g2.setColor(Color.WHITE);
 					
-					g.setFont(g.getFont().deriveFont(Font.BOLD,12.0f));
-					FontMetrics m=g.getFontMetrics(g.getFont());
+					g2.setFont(g2.getFont().deriveFont(Font.BOLD,12.0f));
+					FontMetrics m=g2.getFontMetrics(g2.getFont());
 					
 					if(nav_display == GDFrame.NAV_DISP_SELECTED)
 					{
-						g.setColor(Color.WHITE);
-						g.drawString(Integer.toString(sys.navigability), scaleNum(sys.x+3), scaleNum(sys.y)+m.getHeight());
+						g2.setColor(Color.WHITE);
+						g2.drawString(Integer.toString(sys.navigability), (float)scaleNum(sys.x+3), (float)scaleNum(sys.y)+m.getHeight());
 					}
 					else if(disp_names)
 					{
 						if(sys.name instanceof String) {
 							if(sys.navigability < nav_level)
-								g.setColor(Color.GRAY);
+								g2.setColor(Color.GRAY);
 							else if(sys.owner_id == GSystem.NO_OWNER)
-								g.setColor(Color.WHITE);
+								g2.setColor(Color.WHITE);
 							else if(sys.owner_id == GSystem.OWNER_CONFLICTED)
-								g.setColor(Color.ORANGE);
+								g2.setColor(Color.ORANGE);
 							else
-								g.setColor(GameInterface.GC.players[sys.owner_id].getColor());
-							g.drawString(sys.name, scaleNum(sys.x+3), scaleNum(sys.y)+m.getHeight());
+								g2.setColor(GameInterface.GC.players[sys.owner_id].getColor());
+							g2.drawString(sys.name, (float)scaleNum(sys.x+3), (float)scaleNum(sys.y)+m.getHeight());
 						} else {
-							g.setColor(Color.YELLOW);
-							g.drawString("Unnamed", scaleNum(sys.x+3), scaleNum(sys.y)+m.getHeight());
+							g2.setColor(Color.YELLOW);
+							g2.drawString("Unnamed", (float)scaleNum(sys.x+3), (float)scaleNum(sys.y)+m.getHeight());
 						}
 					}
 				}
@@ -129,34 +136,37 @@ public class GalacticMapPainter extends JPanel
 			{
 				for(GSystem sel_sys : selected)
 				{
-					g.setColor(Color.GREEN);
-					g.drawOval(scaleNum(sel_sys.x-max_dist_shown),scaleNum(sel_sys.y-max_dist_shown),scaleNum(2*max_dist_shown),scaleNum(2*max_dist_shown));
+					g2.setColor(Color.GREEN);
+					g2.draw(new Ellipse2D.Double(scaleNum(sel_sys.x-max_dist_shown),scaleNum(sel_sys.y-max_dist_shown),scaleNum(2*max_dist_shown),scaleNum(2*max_dist_shown)));
 				}
 			}
 			
 			if(ships_in_transit != null)
 			{
-				Graphics2D g2 = (Graphics2D)g;
+				g2.setColor(GameInterface.GC.players[GameInterface.GC.player_id].getColor());
 				for(Ship s : ships_in_transit)
 				{
-					//System.out.println("ship in transit!");
-					g2.setColor(s.owner.getColor());
-					
-					//set up coordinates of equilateral triangle
+					//set up coordinates of equalateral triangle
 					double side = 10.0;
-					double h = side/2.0*Math.sqrt(3);
-					int scale_x = scaleNum(s.getPos_x());
-					int scale_y = scaleNum(s.getPos_y());
+					double h = side/2.0*Math.sqrt(3.0);
+					double scale_x = scaleNum(s.getPos_x());
+					double scale_y = scaleNum(s.getPos_y());
 					
-					int[] xcoords = {(int)(-side/2.0) + scale_x, (int)(side/2.0) + scale_x, scale_x};
-					int[] ycoords = {(int)(-h/3.0) + scale_y,(int)(-h/3.0)+scale_y,(int)(2.0/3.0*h)+scale_y};
+					double[] xcoords = {-side/2.0 + scale_x,	side/2.0 + scale_x,	scale_x};
+					double[] ycoords = {-h/3.0 + scale_y,		-h/3.0+scale_y,		2.0/3.0*h+scale_y};
+					
+					Path2D.Double triangle = new Path2D.Double();
+					triangle.moveTo(xcoords[0], ycoords[0]);
+					triangle.lineTo(xcoords[1], ycoords[1]);
+					triangle.lineTo(xcoords[2], ycoords[2]);
+					triangle.lineTo(xcoords[0], ycoords[0]);
 					
 					// Get the current transform
 					AffineTransform saveAT = g2.getTransform();
 					
 					//draw ship s
 					g2.rotate(s.exit_direction-Math.PI/2, scale_x, scale_y);
-					g2.drawPolygon(xcoords, ycoords,3);
+					g2.draw(triangle);
 					g2.setTransform(saveAT);
 				}
 			}
@@ -164,17 +174,17 @@ public class GalacticMapPainter extends JPanel
 		
 		if(select_box)
 		{
-			g.setColor(Color.GRAY);
-			g.drawRect(scaleNum(select_box_x1), scaleNum(select_box_y1), scaleNum(select_box_x2-select_box_x1), scaleNum(select_box_y2-select_box_y1));
+			g2.setColor(Color.GRAY);
+			g2.draw(new Rectangle2D.Double(scaleNum(select_box_x1), scaleNum(select_box_y1), scaleNum(select_box_x2-select_box_x1), scaleNum(select_box_y2-select_box_y1)));
 		}
 		else if(ghost_system)
 		{
-			g.setColor(Color.GRAY);
-			g.fillOval(scaleNum(ghost_x-2),scaleNum(ghost_y-2),scaleNum(5),scaleNum(5));
+			g2.setColor(Color.GRAY);
+			g2.fill(new Ellipse2D.Double(scaleNum(ghost_x-2),scaleNum(ghost_y-2),scaleNum(5),scaleNum(5)));
 		}
 		
-		g.setColor(Color.WHITE);
-		g.drawRect(0,0,scaleNum(GalacticStrategyConstants.GALAXY_WIDTH), scaleNum(GalacticStrategyConstants.GALAXY_HEIGHT));
+		g2.setColor(Color.WHITE);
+		g2.draw(new Rectangle2D.Double(0,0,scaleNum(GalacticStrategyConstants.GALAXY_WIDTH), scaleNum(GalacticStrategyConstants.GALAXY_HEIGHT)));
 	}
 	
 	public void paintGalaxy(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, ArrayList<Ship> transit, double sc)
@@ -251,13 +261,13 @@ public class GalacticMapPainter extends JPanel
 		max_dist_shown=dist;
 	}
 	
-	private int scaleNum(int x)
+	private double scaleNum(int x)
 	{
-		return (int)(((double)x)*scale);
+		return ((double)x)*scale;
 	}
 	
-	private int scaleNum(double x)
+	private double scaleNum(double x)
 	{
-		return (int)(x*scale);
+		return x*scale;
 	}
 }

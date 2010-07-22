@@ -4,6 +4,7 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 {
 	private final double Collide_Range=10.0;
 	MissileId id;
+	boolean target_alive;
 
 	public Missile(Ship s, Targetable<?> t, long time)
 	{
@@ -26,6 +27,8 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 		target = t;
 		destination=t;
 		t.addAggressor(this);
+		target_alive=true;
+		
 		time = (long)(Math.ceil((double)(time)/(double)(GalacticStrategyConstants.TIME_GRANULARITY))*GalacticStrategyConstants.TIME_GRANULARITY);
 		dest_x_coord = destination.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		dest_y_coord = destination.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
@@ -74,27 +77,40 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 	public boolean collidedWithTarget()
 	{
 		//can use current x/y coords for ships because ship positions are updated first
-		double x_dif=this.pos_x-target.getXCoord(time);
-		double y_dif=this.pos_y-target.getYCoord(time);
-		return (x_dif*x_dif+y_dif*y_dif<Collide_Range*Collide_Range);
+		if(target_alive)
+		{
+			double x_dif=this.pos_x-target.getXCoord(time);
+			double y_dif=this.pos_y-target.getYCoord(time);
+			return (x_dif*x_dif+y_dif*y_dif<Collide_Range*Collide_Range);
+		}
+		else
+		{
+			double x_dif=this.pos_x-((DestinationPoint)destination).getX();
+			double y_dif=this.pos_y-((DestinationPoint)destination).getY();
+			return (x_dif*x_dif+y_dif*y_dif<Collide_Range*Collide_Range);
+		}
 	}
 	
 	public void detonate(Iterator<MissileId> missileIteration)
 	{
 		//this function could start an explosion animation instead
 		missileIteration.remove();
-		target.removeAggressor(this);
-		
-		//addDamage is called last to avoid a ConcurrentModificationException.  If the additional damage
-		//destroys the target, then this kicks off an iteration through the remaining aggressors.  The missiles,
-		//right now, destroyed() themselves when notified that their targetIsDestroyed(long).  because iteration.remove
-		//is called, without removeAggressor(this), this addDamage call would cause the program to try to remove the
-		//element from the missiles hashtable a second time - even though the iteration is using that element at the moment.
-		target.addDamage(time, GalacticStrategyConstants.MISSILE_DAMAGE);
+		if(target_alive)
+		{
+			target.removeAggressor(this);
+			
+			//addDamage is called last to avoid a ConcurrentModificationException.  If the additional damage
+			//destroys the target, then this kicks off an iteration through the remaining aggressors.  The missiles,
+			//right now, destroyed() themselves when notified that their targetIsDestroyed(long).  because iteration.remove
+			//is called, without removeAggressor(this), this addDamage call would cause the program to try to remove the
+			//element from the missiles hashtable a second time - even though the iteration is using that element at the moment.
+			target.addDamage(time, GalacticStrategyConstants.MISSILE_DAMAGE);
+		}
 		
 		is_alive=false;
 	}
 	
+	/**not safe to call while iterating through location.missiles*/
 	public void destroyed()
 	{
 		synchronized(location.missiles)
@@ -107,7 +123,9 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 	
 	public void targetIsDestroyed(long t)
 	{
-		destroyed();
+		destination = new DestinationPoint(target.getXCoord(t), target.getYCoord(t));
+		target_alive = false;
+		target = null;
 	}
 	
 	public void targetHasWarped(long t)

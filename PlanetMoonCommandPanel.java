@@ -365,7 +365,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 				top_panel.add(name_label);
 				top_panel.add(cancel_but);
 				
-				JLabel ship_pic = new JLabel(new ImageIcon(s.type.img));
+				JLabel ship_pic = new JLabel(s.type.icon);
 				
 				glhgroup.addComponent(top_panel);
 				glvgroup.addComponent(top_panel);
@@ -398,7 +398,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener, Mo
 			gl.setVerticalGroup(glvgroup);
 			
 			JLabel name_label = new JLabel(sTypes[i].name);
-			JLabel ship_pic = new JLabel(new ImageIcon(sTypes[i].img));
+			JLabel ship_pic = new JLabel(sTypes[i].icon);
 			JLabel money_cost = new JLabel(Integer.toString(sTypes[i].money_cost) + " money");
 			JLabel metal_cost = new JLabel(Integer.toString(sTypes[i].metal_cost) + " metal");
 			

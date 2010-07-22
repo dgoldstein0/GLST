@@ -5,12 +5,18 @@ public class ShipPickupTroopsOrder extends Order {
 
 	Ship the_ship;
 	
-	ShipDescriber ship_desc;
+	Describer<Ship> ship_desc;
+	int player_id;
 	
 	public ShipPickupTroopsOrder(Player p, Ship s, long t)
 	{
 		mode = Order.ORIGIN;
-		ship_desc=new ShipDescriber(p,s);
+		
+		ship_desc=s.describer();
+		the_ship = s;
+		
+		player_id = p.getId();
+		
 		scheduled_time=t;
 	}
 	
@@ -22,7 +28,7 @@ public class ShipPickupTroopsOrder extends Order {
 		}
 		
 		//validate order
-		if(the_ship != null)
+		if(the_ship != null && the_ship.owner.getId() == player_id)
 		{
 			ShipDataSaver data = (ShipDataSaver) the_ship.data_control.saved_data[the_ship.data_control.getIndexForTime(scheduled_time)];
 			if(data.is_alive && ((OwnableSatellite<?>)data.dest).owner == the_ship.owner && data.dest instanceof OwnableSatellite<?>)
@@ -49,6 +55,8 @@ public class ShipPickupTroopsOrder extends Order {
 	}
 	
 	public ShipPickupTroopsOrder(){mode=Order.NETWORK;}
-	public ShipDescriber getShip_desc(){return ship_desc;}
-	public void setShip_desc(ShipDescriber sd){ship_desc=sd;}
+	public Describer<Ship> getShip_desc(){return ship_desc;}
+	public void setShip_desc(Describer<Ship> sd){ship_desc=sd;}
+	public int getPlayer_id(){return player_id;}
+	public void setPlayer_id(int id){player_id=id;}
 }

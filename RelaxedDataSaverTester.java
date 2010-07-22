@@ -13,7 +13,8 @@ public class RelaxedDataSaverTester {
 							1058,	1060,	1070,	1083,	1131,
 							1142,	1149,	1170,	1189, 	1300,
 							
-							1350,	1420,	1489, 	1520,	1552};
+							1350,	1420,	1489, 	1520,	1552,
+							1660,	1667};
 	
 	
 	/**
@@ -23,6 +24,7 @@ public class RelaxedDataSaverTester {
 		// TODO Auto-generated method stub
 
 		Planet p = new Planet(0,"tester", 100.0, 1000.0, 10, 10.0, .00001);
+		p.owner = new Player();
 		
 		p.data_control.saveData();
 		
@@ -32,7 +34,7 @@ public class RelaxedDataSaverTester {
 			p.data_control.saveData();
 		}
 		
-		p.data_control.revertToTime(1700);
+		p.data_control.revertToTime(1320);
 		System.out.println(p.time);
 	}
 

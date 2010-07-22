@@ -2,6 +2,7 @@ import java.awt.*;
 import javax.swing.*;
 import java.util.*;
 import java.awt.geom.*;
+import java.awt.image.BufferedImage;
 
 public class SystemPainter extends JPanel
 {
@@ -164,7 +165,7 @@ public class SystemPainter extends JPanel
 			g2.setColor(Color.YELLOW);
 			Ship s = (Ship)selected;
 			g2.draw(new Ellipse2D.Double(drawX(s.pos_x - s.type.dim*s.type.default_scale/2.0), drawY(s.pos_y - s.type.dim*s.type.default_scale/2.0), s.type.dim*s.type.default_scale*scale, s.type.dim*s.type.default_scale*scale));
-			g2.setColor(Color.RED);
+			g2.setColor(Color.ORANGE);
 			g2.drawLine(drawXInt(s.dest_x_coord)-3, drawYInt(s.dest_y_coord), drawXInt(s.dest_x_coord)+3, drawYInt(s.dest_y_coord));
 			g2.drawLine(drawXInt(s.dest_x_coord), drawYInt(s.dest_y_coord)-3, drawXInt(s.dest_x_coord), drawYInt(s.dest_y_coord)+3);
 		}
@@ -184,14 +185,30 @@ public class SystemPainter extends JPanel
 		// Get the current transform
 		AffineTransform saveAT = g2.getTransform();
 		
-		//draw ship s
-		g2.rotate(s.direction+Math.PI/2, drawX(s.getPos_x()),drawY(s.getPos_y()));
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		
-		g2.drawImage(s.type.img, drawXInt(s.getPos_x()-s.type.default_scale*s.type.img.getWidth(this)/2.0), drawYInt(s.getPos_y()-s.type.default_scale*s.type.img.getHeight(this)/2.0), (int)(s.type.default_scale*s.type.img.getWidth(this)*scale), (int)(s.type.default_scale*scale*s.type.img.getHeight(this)), this);
+		//draw ship s
+		//old direct image drawing
+		//g2.rotate(s.direction+Math.PI/2, drawX(s.getPos_x()),drawY(s.getPos_y()));
+		//g2.drawImage(s.type.img, drawXInt(s.getPos_x()-s.type.default_scale*s.type.img.getWidth(this)/2.0), drawYInt(s.getPos_y()-s.type.default_scale*s.type.img.getHeight(this)/2.0), (int)(s.type.default_scale*s.type.img.getWidth(this)*scale), (int)(s.type.default_scale*scale*s.type.img.getHeight(this)), this);
+		
+		
+		//idea of how to implement antialiasing from http://weblogs.java.net/blog/2007/03/10/java-2d-trickery-antialiased-image-transforms
+		//this also allows me to use double coordinates instead of int's.  :)
+		g2.setPaint(new TexturePaint(s.type.getScaledImage(scale),
+			    new Rectangle2D.Double(0, 0, s.type.default_scale*s.type.img.getWidth()*scale, s.type.default_scale*s.type.img.getWidth()*scale)));
+		
+		g2.translate(drawX(s.getPos_x()-s.type.default_scale*s.type.img.getWidth()/2.0), drawY(s.getPos_y()-s.type.default_scale*s.type.img.getHeight()/2.0));
+		g2.rotate(s.direction+Math.PI/2, s.type.default_scale*s.type.img.getWidth()*scale/2.0,s.type.default_scale*s.type.img.getHeight()*scale/2.0);
+		g2.fill(new Rectangle.Double(0.0, 0.0, s.type.default_scale*s.type.img.getWidth()*scale, s.type.default_scale*scale*s.type.img.getHeight()));
+		
 		if(c != null)
 		{
 			g2.setColor(c);
-			g2.draw(new Rectangle2D.Double(drawX(s.getPos_x())-3.0*scale, drawY(s.getPos_y())-3.0*scale,6.0*scale,6.0*scale));
+			//different transform means different draw command needed
+			//g2.draw(new Rectangle2D.Double(drawX(s.getPos_x())-3.0*scale, drawY(s.getPos_y())-3.0*scale,6.0*scale,6.0*scale));
+			g2.draw(new Rectangle2D.Double(s.type.default_scale*s.type.img.getWidth()*scale/2.0-3.0*scale, s.type.default_scale*s.type.img.getHeight()*scale/2.0-3.0*scale,6.0*scale,6.0*scale));
 		}
 		
 		// Restore original transform

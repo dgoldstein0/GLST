@@ -18,7 +18,7 @@ public abstract class RelaxedDataSaverControl<T extends RelaxedSaveable<T>, S ex
 		else
 			begin_indx=0;
 		
-		return ModifiedBinarySearch(begin_indx,(index == 0) ? GalacticStrategyConstants.data_capacity-1 : index-1, t);
+		return ModifiedBinarySearch(begin_indx, getPreviousIndex(index), t);
 	}
 
 	//earliest: the index for an entry with time earlier than t
@@ -27,7 +27,7 @@ public abstract class RelaxedDataSaverControl<T extends RelaxedSaveable<T>, S ex
 	//return: the index of the entry in saved_data with the greatest time of the entries that is less than t, or -1 if there is no such entry.
 	private int ModifiedBinarySearch(int earliest, int latest, long t)
 	{
-		if(earliest==latest || earliest+1 == latest)
+		if(earliest==latest || getNextIndex(earliest) == latest)
 		{
 			if(saved_data[earliest].t < t)
 				return earliest;

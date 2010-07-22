@@ -69,7 +69,8 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 			location = (GSystem) ((Planet)builder.location.orbit.boss).orbit.boss;
 		
 		location.fleets[owner.getId()].add(this, t);
-		orderToMove(t, builder.location); //this call does not go via the game Order handling system.  all computers should issue these orders on their own.
+		time = GameInterface.GC.TC.getTimeGrainAfter(t);
+		orderToMove(time, builder.location); //this call does not go via the game Order handling system.  all computers should issue these orders on their own.
 	}
 	
 	//updates the ship an increment towards time t - moving and attacking.  return value is ignored
@@ -133,7 +134,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 			{
 				//System.out.println("arriving...")
 				disengageWarpDrive(ship_it);
-				advanceTime(arrival_time); //takes care of saving data and advancing time for us
+				time = GameInterface.GC.TC.getTimeGrainAfter(arrival_time);
 				return true;
 			}
 			else
@@ -178,7 +179,6 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 				target=null;
 			}
 			
-			advanceTime(t);
 			//System.out.println(Integer.toString(id) + " orderToMove: t is " + Long.toString(t) + " and time is " + Long.toString(time));
 			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
@@ -199,7 +199,6 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 			destination = tgt;
 			mode=ATTACKING;
 			target.addAggressor(this);
-			advanceTime(t);
 			nextAttackingtime = time;
 			nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
 			
@@ -219,7 +218,6 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 			}
 			
 			mode=TRAVEL_TO_WARP;
-			advanceTime(t); //TODO: necessary?
 			warp_destination=sys;
 			
 			//calculate exit vector
@@ -252,7 +250,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 						if(sat.the_base == null) //if base isn't finished being built, player can take over without a fight
 							sat.setOwner(getOwner(), scheduled_time);
 						else
-							sat.the_base.attackedByTroops(GameInterface.GC.TC.getTime(), this);
+							sat.the_base.attackedByTroops(GameInterface.GC.TC.getNextTimeGrain(), this);
 					}
 				}
 				else
@@ -414,7 +412,6 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		if(location.fleets[owner.getId()].remove(this, time))//if is so in case another attack has already destroyed the ship, but both call the destroyed method
 		{
 			is_alive=false;
-			data_control.saveData(); //TODO: examine consequences of this statement
 			
 			//notify aggressors
 			for(Targetter<?> t : aggressors)

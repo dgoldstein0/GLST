@@ -1,4 +1,10 @@
-import java.awt.Image;
+import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
+import java.awt.Transparency;
+import java.awt.image.BufferedImage;
+
+import javax.swing.ImageIcon;
 
 public enum ShipType
 {
@@ -15,7 +21,12 @@ public enum ShipType
 	int soldier_capacity;
 	int time_to_build;
 	String img_loc;
-	Image img;
+	BufferedImage img;
+	ImageIcon icon;
+	
+	//used as Cache
+	private double last_scale;
+	private BufferedImage scaled_img;
 	
 	double default_scale;
 	int width;
@@ -49,8 +60,37 @@ public enum ShipType
 		warp_accel = waccel;
 		warp_speed = wspeed;
 		warp_range = wrange;
+		
+		last_scale=0.0; //will never have a value of zero
 	}
 	
-	public void setImg(Image i){img=i;}
+	public BufferedImage getScaledImage(double scale)
+	{
+		if(last_scale != scale)
+		{
+			if(scaled_img != null)
+				scaled_img.flush();
+			
+			try
+			{
+				scaled_img = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(
+		            (int)(width*default_scale*scale), (int)(height*default_scale*scale), Transparency.BITMASK);
+			}
+			catch(HeadlessException he)
+			{
+				scaled_img = new BufferedImage((int)(default_scale*img.getWidth()*scale), (int)(default_scale*img.getHeight()*scale), BufferedImage.TYPE_INT_ARGB);
+			}
+			
+			Graphics2D temp = scaled_img.createGraphics();
+			temp.drawImage(img, 0, 0, (int)(default_scale*img.getWidth()*scale), (int)(default_scale*scale*img.getHeight()), null);
+			temp.dispose();
+			
+			last_scale = scale;
+		}
+		
+		return scaled_img;
+	}
+	
+	public void setImg(BufferedImage i){img=i;}
 	public String getImg_loc(){return img_loc;}
 }

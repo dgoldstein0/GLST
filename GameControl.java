@@ -4,6 +4,7 @@ import java.util.*;
 import java.beans.*;
 import java.net.*;
 import java.io.*;
+
 import javax.swing.SwingUtilities;
 
 import javax.swing.JFileChooser;
@@ -46,7 +47,13 @@ public class GameControl
 	public GameControl(GameInterface gi)
 	{
 		GI = gi;
-		GalacticStrategyConstants.ImageLoader(); //preload images
+		try {
+			GalacticStrategyConstants.ImageLoader(); //preload images
+		} catch (IOException e) {
+			System.out.println("trouble reading images");
+			e.printStackTrace();
+		}
+		
 		players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
 		map=new Galaxy();
 		GameInterface.GC = this;
@@ -59,7 +66,13 @@ public class GameControl
 	
 	public GameControl()
 	{
-		GalacticStrategyConstants.ImageLoader(); //preload images
+		try {
+			GalacticStrategyConstants.ImageLoader(); //preload images
+		} catch (IOException e) {
+			System.out.println("trouble reading images");
+			e.printStackTrace();
+		}
+		
 		GameInterface.GC = this;
 	}
 		

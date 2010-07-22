@@ -21,6 +21,16 @@ public class TimeControl
 		time_elapsed=offset;
 	}
 	
+	public long getTimeGrainAfter(long t)
+	{
+		return (long)(Math.ceil((double)(t)/(double)(GalacticStrategyConstants.TIME_GRANULARITY))*GalacticStrategyConstants.TIME_GRANULARITY);
+	}
+	
+	public long getNextTimeGrain()
+	{
+		return getTimeGrainAfter(getTime());
+	}
+	
 	public long getTime()
 	{
 		time_elapsed=System.nanoTime()-start_time;
