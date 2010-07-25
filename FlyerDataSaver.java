@@ -20,13 +20,13 @@ public class FlyerDataSaver<T extends Flyer<T, ?>> extends DataSaver<T>
 	
 	//the Flyer-only implementations
 	@SuppressWarnings("unchecked")
+	@Override
 	final protected void doSaveData(T f)
 	{
 		doSaveMoreData(f);
 		dir=f.direction;
 		px=f.pos_x;
 		py=f.pos_y;
-		t=f.time;
 		sp=f.speed;
 		dmg=f.damage;
 		aggr=(HashSet<Targetter<?>>) f.aggressors.clone(); //unchecked cast warning
@@ -37,14 +37,16 @@ public class FlyerDataSaver<T extends Flyer<T, ?>> extends DataSaver<T>
 	}
 	
 	protected void doSaveMoreData(T f){}
+	protected void doLoadMoreData(T f){}
 	
 	@SuppressWarnings("unchecked")
-	public void loadData(T f)
+	@Override
+	final protected void doLoadData(T f)
 	{
+		doLoadMoreData(f);
 		f.direction = dir;
 		f.pos_x = px;
 		f.pos_y = py;
-		f.time = t;
 		f.speed = sp;
 		f.damage=dmg;
 		f.aggressors = (HashSet<Targetter<?>>) aggr.clone(); //unchecked cast warning

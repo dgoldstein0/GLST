@@ -12,15 +12,13 @@ public class MissileListDataSaver extends DataSaver<MissileList> {
 	@Override
 	protected void doSaveData(MissileList l) {
 		
-		t = l.time;
 		tbl = (HashMap<Missile.MissileId, Missile>) l.table.clone();
 
 	}
 
 	@Override
-	public void loadData(MissileList l) {
+	protected void doLoadData(MissileList l) {
 		
-		l.time = t;
 		l.table = (HashMap<Missile.MissileId, Missile>) tbl.clone();
 	}
 

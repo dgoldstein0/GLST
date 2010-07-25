@@ -1,7 +1,9 @@
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
+import java.awt.TexturePaint;
 import java.awt.Transparency;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
@@ -26,7 +28,7 @@ public enum ShipType
 	
 	//used as Cache
 	private double last_scale;
-	private BufferedImage scaled_img;
+	private TexturePaint scaled_img_as_paint;
 	
 	double default_scale;
 	int width;
@@ -35,7 +37,7 @@ public enum ShipType
 	
 	//physics characteristics
 	double max_speed; //px per millisecond
-	double max_angular_vel;//radians per milli
+	double max_angular_vel;//radians per millisecond
 	double accel_rate; // px/ms per ms
 	
 	double warp_accel;
@@ -64,12 +66,11 @@ public enum ShipType
 		last_scale=0.0; //will never have a value of zero
 	}
 	
-	public BufferedImage getScaledImage(double scale)
+	public TexturePaint getScaledImage(double scale)
 	{
 		if(last_scale != scale)
-		{
-			if(scaled_img != null)
-				scaled_img.flush();
+		{			
+			BufferedImage scaled_img;
 			
 			try
 			{
@@ -85,10 +86,13 @@ public enum ShipType
 			temp.drawImage(img, 0, 0, (int)(default_scale*img.getWidth()*scale), (int)(default_scale*scale*img.getHeight()), null);
 			temp.dispose();
 			
+			scaled_img_as_paint = new TexturePaint(scaled_img, new Rectangle2D.Double(0, 0, default_scale*img.getWidth()*scale, default_scale*img.getWidth()*scale));
+			
 			last_scale = scale;
+			scaled_img.flush();
 		}
 		
-		return scaled_img;
+		return scaled_img_as_paint;
 	}
 	
 	public void setImg(BufferedImage i){img=i;}

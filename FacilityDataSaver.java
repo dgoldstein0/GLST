@@ -15,12 +15,12 @@ public abstract class FacilityDataSaver<T extends Facility<T>> extends DataSaver
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void loadData(T f) {
+	final protected void doLoadData(T f) {
 
+		doLoadMoreData(f);
 		f.aggressors = (HashSet<Targetter<?>>) aggr.clone();//unchecked cast warning
 		f.endurance = endu;
 		f.damage = dmg;
-		f.last_time = t;
 		f.is_alive = alive;
 		
 	}
@@ -33,10 +33,9 @@ public abstract class FacilityDataSaver<T extends Facility<T>> extends DataSaver
 		aggr = (HashSet<Targetter<?>>) f.aggressors.clone(); //unchecked cast warning
 		endu= f.endurance;
 		dmg= f.damage;
-		t=f.last_time;
 		alive=f.is_alive;
 	}
 	
 	protected abstract void doSaveMoreData(T f);
-
+	protected abstract void doLoadMoreData(T f);
 }

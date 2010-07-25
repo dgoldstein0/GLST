@@ -77,6 +77,7 @@ public abstract class Facility<T extends Facility<T>> implements Targetable<T>, 
 	//for RelaxedSaveable
 	@Override
 	public long getTime(){return last_time;}
+	public void setTime(long t){last_time=t;}
 	
 	public Facility(){}
 	

@@ -29,7 +29,9 @@ public abstract class RelaxedDataSaverControl<T extends RelaxedSaveable<T>, S ex
 	{
 		if(earliest==latest || getNextIndex(earliest) == latest)
 		{
-			if(saved_data[earliest].t < t)
+			if(saved_data[latest].t <= t) //in case latest never changes throughout recursion, in which case we have never tested it.
+				return latest;
+			else if(saved_data[earliest].t < t)
 				return earliest;
 			else
 				return -1; //indicates the time being looked for it too old to be found.

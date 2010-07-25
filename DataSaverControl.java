@@ -16,7 +16,7 @@ public abstract class DataSaverControl<T extends Saveable<T>, S extends DataSave
 		the_obj=s;
 		
 		saved_data = c.createArray();
-		for(int i=0; i<GalacticStrategyConstants.data_capacity; i++)
+		for(int i=0; i < saved_data.length; ++i)
 			saved_data[i] = c.create();
 	}
 	
@@ -44,7 +44,7 @@ public abstract class DataSaverControl<T extends Saveable<T>, S extends DataSave
 				
 				doReversionPrep(indx);
 				saved_data[indx].loadData(the_obj);
-				index = indx+1; //index points to NEXT DataSaver
+				index = getNextIndex(indx); //index points to NEXT DataSaver
 				
 				//must loadData before recursion, else risk of recursion trying to revert something that is already being reverted
 				Set<Order> orders = reversion_effects.orders_to_redo;

@@ -12,11 +12,18 @@ public abstract class DataSaver<T extends Saveable<T>> {
 	final public void saveData(T s)
 	{
 		data_saved=true;
+		t = s.getTime();
 		doSaveData(s);
 	}
 	
+	final public void loadData(T s)
+	{
+		s.setTime(t);
+		doLoadData(s);
+	}
+	
 	protected abstract void doSaveData(T s);
-	public abstract void loadData(T s);
+	protected abstract void doLoadData(T s);
 	
 	public final boolean isDataSaved(){return data_saved;};
 }

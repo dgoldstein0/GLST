@@ -16,6 +16,8 @@ public class Fleet implements RelaxedSaveable<Fleet>
 		location = loc;
 		owner = o;
 		data_control = new FleetDataSaverControl(this);
+		last_time_changed=0;
+		data_control.saveData();
 	}
 	
 	//methods required for load/save
@@ -30,7 +32,12 @@ public class Fleet implements RelaxedSaveable<Fleet>
 	{
 		synchronized(lock)
 		{
-			ships.put(s.getId(), s);
+			System.out.println("Adding ship to fleet: queue_id = " + s.getId().queue_id);
+			System.out.println("\tmanufacturer has id " + s.getId().manufacturer.getId());
+			System.out.println("\tAt time " + Long.toString(t));
+			
+			Ship val = ships.put(s.getId(), s);
+			System.out.println("\tval is null: " + Boolean.toString(val==null));
 			last_time_changed=t;
 			data_control.saveData();
 		}
@@ -71,5 +78,10 @@ public class Fleet implements RelaxedSaveable<Fleet>
 	@Override
 	public long getTime() {
 		return last_time_changed;
+	}
+
+	@Override
+	public void setTime(long t) {
+		last_time_changed = t;
 	}
 }

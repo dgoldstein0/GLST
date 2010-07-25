@@ -15,8 +15,7 @@ public class ShipyardDataSaver extends FacilityDataSaver<Shipyard> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void loadData(Shipyard s) {
-		super.loadData(s);
+	protected void doLoadMoreData(Shipyard s) {
 
 		s.time_on_current_ship = time_on_cur_s;
 		s.manufac_queue = (Hashtable<Integer,Ship>) queue.clone(); //generates an unchecked type cast warning

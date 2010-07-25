@@ -10,8 +10,8 @@ public class MineDataSaver extends FacilityDataSaver<Mine> {
 	}
 
 	@Override
-	public void loadData(Mine m) {
-		super.loadData(m);
+	protected void doLoadMoreData(Mine m) {
+		
 		m.mining_rate = m_rate;
 		m.add_met = met_added; //not sure this is necessary
 	}

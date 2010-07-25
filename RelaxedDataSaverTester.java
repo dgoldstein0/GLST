@@ -11,10 +11,7 @@ public class RelaxedDataSaverTester {
 							890,	901,	904,	940,	990,
 							1002,	1005,	1010,	1040,	1050,
 							1058,	1060,	1070,	1083,	1131,
-							1142,	1149,	1170,	1189, 	1300,
-							
-							1350,	1420,	1489, 	1520,	1552,
-							1660,	1667};
+							1142};
 	
 	
 	/**
@@ -34,7 +31,9 @@ public class RelaxedDataSaverTester {
 			p.data_control.saveData();
 		}
 		
-		p.data_control.revertToTime(1320);
+		System.out.println(p.data_control.saved_data[p.data_control.getIndexForTime(1142)].t);
+
+		p.data_control.revertToTime(1142);
 		System.out.println(p.time);
 	}
 

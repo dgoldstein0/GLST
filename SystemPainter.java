@@ -2,7 +2,6 @@ import java.awt.*;
 import javax.swing.*;
 import java.util.*;
 import java.awt.geom.*;
-import java.awt.image.BufferedImage;
 
 public class SystemPainter extends JPanel
 {
@@ -196,12 +195,11 @@ public class SystemPainter extends JPanel
 		
 		//idea of how to implement antialiasing from http://weblogs.java.net/blog/2007/03/10/java-2d-trickery-antialiased-image-transforms
 		//this also allows me to use double coordinates instead of int's.  :)
-		g2.setPaint(new TexturePaint(s.type.getScaledImage(scale),
-			    new Rectangle2D.Double(0, 0, s.type.default_scale*s.type.img.getWidth()*scale, s.type.default_scale*s.type.img.getWidth()*scale)));
+		g2.setPaint(s.type.getScaledImage(scale));
 		
 		g2.translate(drawX(s.getPos_x()-s.type.default_scale*s.type.img.getWidth()/2.0), drawY(s.getPos_y()-s.type.default_scale*s.type.img.getHeight()/2.0));
 		g2.rotate(s.direction+Math.PI/2, s.type.default_scale*s.type.img.getWidth()*scale/2.0,s.type.default_scale*s.type.img.getHeight()*scale/2.0);
-		g2.fill(new Rectangle.Double(0.0, 0.0, s.type.default_scale*s.type.img.getWidth()*scale, s.type.default_scale*scale*s.type.img.getHeight()));
+		g2.fill(new Rectangle2D.Double(0.0, 0.0, s.type.default_scale*s.type.img.getWidth()*scale, s.type.default_scale*scale*s.type.img.getHeight()));
 		
 		if(c != null)
 		{
@@ -209,6 +207,15 @@ public class SystemPainter extends JPanel
 			//different transform means different draw command needed
 			//g2.draw(new Rectangle2D.Double(drawX(s.getPos_x())-3.0*scale, drawY(s.getPos_y())-3.0*scale,6.0*scale,6.0*scale));
 			g2.draw(new Rectangle2D.Double(s.type.default_scale*s.type.img.getWidth()*scale/2.0-3.0*scale, s.type.default_scale*s.type.img.getHeight()*scale/2.0-3.0*scale,6.0*scale,6.0*scale));
+		}
+		else
+		{
+			/*this fixed a bug where if there are multiple missiles drawn on the screen,
+			they are drawn as essentially viewports to one underlying paint, i.e. only one
+			missile displays correctly*/
+			
+			g2.setColor(Color.BLACK);
+			g2.draw(new Rectangle(0,0,0,0)); //draw nothing... seems to be necessary
 		}
 		
 		// Restore original transform

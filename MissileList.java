@@ -44,10 +44,10 @@ public class MissileList implements RelaxedSaveable<MissileList> {
 	}
 	
 	@Override
-	public long getTime() {
-		
-		return time;
-	}
+	public long getTime() {return time;}
+	
+	@Override
+	public void setTime(long t) {time=t;}
 
 	@Override
 	public DataSaverControl<MissileList, ? extends DataSaver<MissileList>> getDataControl() {

@@ -12,8 +12,7 @@ public class BaseDataSaver extends FacilityDataSaver<Base> {
 	}
 
 	@Override
-	public void loadData(Base b) {
-		super.loadData(b);
+	protected void doLoadMoreData(Base b) {
 
 		b.soldier = sldr;
 		b.max_soldier = max_sldr;

@@ -33,6 +33,7 @@ public class ShipDataSaver extends FlyerDataSaver<Ship> {
 		super();
 	}
 	
+	@Override
 	protected void doSaveMoreData(Ship s)
 	{
 		md=s.mode;
@@ -47,9 +48,9 @@ public class ShipDataSaver extends FlyerDataSaver<Ship> {
 		loc = s.location;
 	}
 	
-	public void loadData(Ship s)
+	@Override
+	protected void doLoadMoreData(Ship s)
 	{
-		super.loadData(s);
 		s.mode=md;
 		s.nextAttackingtime=next_at_time;
 		s.arrival_time=arrive_time;

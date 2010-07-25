@@ -920,7 +920,7 @@ public class GameControl
 		}
 		
 		//update all planets, facilities, ships and missiles
-		for(; update_to < time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
+		for(; update_to <= time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
 		{
 			Order o;
 			while( (o = local_pending_execution.peek()) != null && o.scheduled_time <= update_to)

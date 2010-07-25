@@ -20,7 +20,8 @@ public class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> extends Da
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void loadData(T sat)
+	@Override
+	protected void doLoadData(T sat)
 	{
 		sat.bldg_in_progress = bldg_in_prog;
 		sat.time_finish = t_finish;
@@ -32,14 +33,10 @@ public class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> extends Da
 		sat.the_base = base;
 		sat.time=t;
 		sat.tax_money = mon_added;
-		
-		for(Integer i : sat.facilities.keySet())
-		{
-			sat.facilities.get(i).data_control.revertToTime(t);
-		}
 	}
 	
 	@SuppressWarnings("unchecked")
+	@Override
 	protected void doSaveData(T sat)
 	{
 		bldg_in_prog = sat.bldg_in_progress;
