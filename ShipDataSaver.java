@@ -1,7 +1,7 @@
 
 public class ShipDataSaver extends FlyerDataSaver<Ship> {
 
-	int md; //mode
+	Ship.MODES md; //mode
 	long next_at_time; //next attacking time
 	long arrive_time;
 	GSystem w_dest; //its a long shot we'll need it, but just in case
@@ -27,6 +27,7 @@ public class ShipDataSaver extends FlyerDataSaver<Ship> {
 						Well, I suppose, if someone makes a twin system or we allow some sort of wormhole later.*/
 	GSystem loc; //like the exit_vec_len issue, in order for location to get corrupted you have to turn back time
 					//from after a warp to before it.
+	Targetable<?> was_tgt;
 	
 	public ShipDataSaver()
 	{
@@ -46,6 +47,7 @@ public class ShipDataSaver extends FlyerDataSaver<Ship> {
 		ex_dir = s.exit_direction;
 		ex_v_len = s.exit_vec_len; //necessary? see above note
 		loc = s.location;
+		was_tgt = s.was_target;
 	}
 	
 	@Override
@@ -61,5 +63,6 @@ public class ShipDataSaver extends FlyerDataSaver<Ship> {
 		s.exit_direction = ex_dir;
 		s.exit_vec_len = ex_v_len; //necessary? see above note
 		s.location = loc;
+		s.was_target = was_tgt;
 	}
 }

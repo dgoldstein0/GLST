@@ -26,7 +26,7 @@ public enum ShipType
 	BufferedImage img;
 	ImageIcon icon;
 	
-	//used as Cache
+	//used to cache paint of the scaled image of the ship type
 	private double last_scale;
 	private TexturePaint scaled_img_as_paint;
 	

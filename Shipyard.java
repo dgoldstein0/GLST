@@ -134,4 +134,10 @@ public class Shipyard extends Facility<Shipyard>{
 	public FacilityType getType(){return FacilityType.SHIPYARD;}
 	public String imageLoc(){return "images/shipyard.gif";}
 	public String getName(){return "Shipyard";}
+
+	@Override
+	public void ownerChanged(long t) {
+		//do nothing
+		//data_control.saveData();
+	}
 }

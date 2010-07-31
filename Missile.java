@@ -121,6 +121,7 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 		data_control.saveData(); //TODO: examine consequences of this
 	}
 	
+	@Override
 	public void targetIsDestroyed(long t)
 	{
 		destination = new DestinationPoint(target.getXCoord(t), target.getYCoord(t));
@@ -128,6 +129,7 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 		target = null;
 	}
 	
+	@Override
 	public void targetHasWarped(long t)
 	{
 		destroyed();

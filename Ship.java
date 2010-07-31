@@ -1,4 +1,5 @@
 import java.util.Iterator;
+import javax.swing.SwingUtilities;
 
 public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 {
@@ -12,14 +13,13 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	int next_missile_id;
 	
 	float soldier;
-	int mode;
-		final static int MOVING =0;
-		final static int ATTACKING =1;
-		final static int TRAVEL_TO_WARP=2;
-		final static int ENTER_WARP=3;
-		final static int IN_WARP=4;
-		final static int EXIT_WARP=5;
-		final static int PICKUP_TROOPS=6;
+	public static enum MODES {MOVING, ATTACKING, TARGETTING_TARGET_LOST, TRAVEL_TO_WARP, ENTER_WARP, IN_WARP, EXIT_WARP, PICKUP_TROOPS;}
+	MODES mode;
+	
+	/**this enum is for cases where targets warp/are destroyed/are lost for some reason
+	 * before the order to attack them can be executed*/
+	public static enum LOST_REASON {WARPED, DESTROYED;}
+	Targetable<?> was_target; //used with modes TARGETTING_TARGET_DESTROYED and TARGETTING_TARGET_WARPED
 	
 	//used for warping
 	GSystem warp_destination;
@@ -75,17 +75,21 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	
 	//updates the ship an increment towards time t - moving and attacking.  return value is ignored
 	//DOES NOT SAVE DATA
-	public boolean update(long t, Iterator<ShipId> shipIteration)
+	public boolean update(long t, Fleet.ShipIterator shipIteration)
 	{
 		//TODO: update this comment
 		/*this if statement is necessary in case game is updated too slow.  For instance, update last to 60, then
 		an order is given which advances the ship to 80., but the next time all are updated to is 100, we want the
 		ship ordered to move to only be updated once and not twice*/
-		if(time <= t)
+		if(time < t)
 		{
 			moveIncrement();
 			switch(mode)
 			{
+				case TARGETTING_TARGET_LOST:
+					mode = MODES.MOVING;
+					was_target=null;
+					break;
 				case ATTACKING:
 					attack(time);
 					break;
@@ -93,7 +97,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 					if(clearToWarp())
 					{
 						System.out.println("clear to warp!");
-						mode=ENTER_WARP;
+						mode=MODES.ENTER_WARP;
 						current_flying_AI = new SpeedUpAI();
 					}
 					break;
@@ -103,11 +107,11 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 					break;
 				case EXIT_WARP:
 					if(speed <= type.max_speed)
-						mode=MOVING;
+						mode=MODES.MOVING;
 					break;
 				case PICKUP_TROOPS:
 					if(!doTransferTroops() || soldier == type.soldier_capacity)
-						mode=MOVING;
+						mode=MODES.MOVING;
 					break;
 			}
 			time += GalacticStrategyConstants.TIME_GRANULARITY;
@@ -127,7 +131,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	public boolean moveDuringWarp(long t, Iterator<Ship> ship_it)
 	{
 		//System.out.println("move during warp");
-		if(t > time && mode==IN_WARP)
+		if(t > time && mode==MODES.IN_WARP)
 		{
 			//System.out.println("...warping...");
 			if(t >= arrival_time)
@@ -156,7 +160,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	
 	protected double getAccel()
 	{
-		if(mode==ENTER_WARP || mode== EXIT_WARP)
+		if(mode==MODES.ENTER_WARP || mode== MODES.EXIT_WARP)
 			return type.warp_accel;
 		else
 			return type.accel_rate;
@@ -164,12 +168,13 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	
 	protected boolean enforceSpeedCap()
 	{
-		return (mode != ENTER_WARP); //only enforce if mode is NOT enter warp, i.e. ships can go superspeed when warping
+		return (mode != MODES.ENTER_WARP); //only enforce if mode is NOT enter warp, i.e. ships can go superspeed when warping
 	}
 	
 	public void orderToMove(long t, Destination<?> d)
 	{
-		if(mode != EXIT_WARP && mode != IN_WARP && mode != ENTER_WARP) //to ensure if the interface tries to issue an order, it can't
+		update(t, null);
+		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP) //to ensure if the interface tries to issue an order, it can't
 		{
 			destination = d;
 			
@@ -184,20 +189,21 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
 			
-			mode=MOVING;
+			mode=MODES.MOVING;
 			//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 		}
 	}
 	
 	public void orderToAttack(long t, Targetable<?> tgt)
 	{
-		if(mode != EXIT_WARP && mode != IN_WARP && mode != ENTER_WARP)
+		update(t, null);
+		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP)
 		{
 			//System.out.println(Integer.toString(id) + "orderToAttack: t is " + Long.toString(t));
 			
 			target= tgt;
 			destination = tgt;
-			mode=ATTACKING;
+			mode=MODES.ATTACKING;
 			target.addAggressor(this);
 			nextAttackingtime = time;
 			nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
@@ -209,7 +215,8 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	
 	public void orderToWarp(long t, GSystem sys)
 	{
-		if(mode != EXIT_WARP && mode != IN_WARP && mode != ENTER_WARP && sys != location) //if sys == location, user means to cancel warp command.
+		update(t, null);
+		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP && sys != location) //if sys == location, user means to cancel warp command.
 		{
 			if(target != null)
 			{
@@ -217,7 +224,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 				target=null;
 			}
 			
-			mode=TRAVEL_TO_WARP;
+			mode=MODES.TRAVEL_TO_WARP;
 			warp_destination=sys;
 			
 			//calculate exit vector
@@ -235,12 +242,13 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		}
 	}
 	
-	public void orderToInvade(OwnableSatellite<?> sat, long scheduled_time)
+	public void orderToInvade(OwnableSatellite<?> sat, long t)
 	{
-		if(mode == MOVING || mode == ATTACKING)
+		update(t, null);
+		if(mode == MODES.MOVING || mode == MODES.ATTACKING)
 		{
-			double x_dif = pos_x-sat.getXCoord(scheduled_time);
-			double y_dif = pos_y-sat.getYCoord(scheduled_time);
+			double x_dif = pos_x-sat.getXCoord(t);
+			double y_dif = pos_y-sat.getYCoord(t);
 			if(x_dif*x_dif + y_dif*y_dif < GalacticStrategyConstants.LANDING_RANGE*GalacticStrategyConstants.LANDING_RANGE)
 			{
 				if(sat.getOwner() != null)
@@ -248,27 +256,28 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 					synchronized(sat.facilities_lock)
 					{
 						if(sat.the_base == null) //if base isn't finished being built, player can take over without a fight
-							sat.setOwner(getOwner(), scheduled_time);
+							sat.setOwner(getOwner(), t);
 						else
 							sat.the_base.attackedByTroops(GameInterface.GC.TC.getNextTimeGrain(), this);
 					}
 				}
 				else
 				{
-					((OwnableSatellite<?>)destination).setOwner(getOwner(), scheduled_time);
+					((OwnableSatellite<?>)destination).setOwner(getOwner(), t);
 				}
 			}
 		}
 	}
 	
-	public void orderToPickupTroops(long scheduledTime) {
-		if(mode == MOVING &&
+	public void orderToPickupTroops(long t) {
+		update(t, null);
+		if(mode == MODES.MOVING &&
 				destination instanceof OwnableSatellite<?> &&
 				((OwnableSatellite<?>)destination).getOwner() == owner &&
 				((OwnableSatellite<?>)destination).the_base != null &&
 				soldier < type.soldier_capacity)
 		{
-			mode = PICKUP_TROOPS;
+			mode = MODES.PICKUP_TROOPS;
 		}
 	}
 	
@@ -296,14 +305,16 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	
 	public int warpRange(){return type.warp_range;}
 	
-	private void engageWarpDrive(Iterator<ShipId> shipIteration)
+	private void engageWarpDrive(Fleet.ShipIterator shipIteration)
 	{
 		//This function works very much like the destroyed() function
 		System.out.println("Engaging warp drive....");
 		
 		//remove from listing in system
-		shipIteration.remove(); //remove via the iterator to avoid ConcurrentModificationException
-		//location.fleets[owner.getId()].remove(this);
+		if(shipIteration != null)
+			shipIteration.remove(time); //remove via the iterator to avoid ConcurrentModificationException
+		else
+			location.fleets[owner.getId()].remove(this, time);
 		
 		//notify aggressors
 		for(Targetter<?> t : aggressors)
@@ -324,7 +335,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		arrival_time = time+(long)(exit_vec_len/type.warp_speed);
 		System.out.println("arrival time is " + Long.toString(arrival_time));
 		
-		mode=IN_WARP;
+		mode=MODES.IN_WARP;
 		owner.ships_in_transit.add(this);
 	}
 	
@@ -339,7 +350,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		speed = GalacticStrategyConstants.WARP_EXIT_SPEED;
 		direction = exit_direction; //should already be true, but just in case
 		
-		mode=EXIT_WARP;
+		mode=MODES.EXIT_WARP;
 		current_flying_AI = new StopAI();
 		
 		ship_it.remove();//owner.ships_in_transit.remove(this);
@@ -412,6 +423,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		if(location.fleets[owner.getId()].remove(this, time))//if is so in case another attack has already destroyed the ship, but both call the destroyed method
 		{
 			is_alive=false;
+			data_control.saveData();
 			
 			//notify aggressors
 			for(Targetter<?> t : aggressors)
@@ -427,30 +439,58 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		}
 	}
 	
-	public void targetIsDestroyed(long t)
+	@Override
+	public void targetIsDestroyed(long t){targetIsDestroyed(t, false, null);}
+	
+	public void targetIsDestroyed(long t, boolean late_order, Targetable<?> tgt)
 	{
-		mode=MOVING;
-		if (destination==target)
-		{
-			destination=new DestinationPoint(target.getXCoord(t),target.getYCoord(t));
-		}
-		
-		target=null;
-		
-		//TODO: player notification
+		targetLost(LOST_REASON.DESTROYED, t, late_order, tgt);
 	}
 	
-	public void targetHasWarped(long t)
+	@Override
+	public void targetHasWarped(long t){targetHasWarped(t, false, null);}
+	
+	public void targetHasWarped(long t, boolean late_order, Targetable<?> tgt)
 	{
-		mode=MOVING;
+		targetLost(LOST_REASON.WARPED, t, late_order, tgt);
+	}
+	
+	public void targetLost(LOST_REASON reason, long t, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
+	{
 		if (destination==target)
 		{
 			destination=new DestinationPoint(target.getXCoord(t),target.getYCoord(t));
+			SwingUtilities.invokeLater(new DestUpdater(this));
+		}
+		
+		if(!late_order)
+			mode=MODES.MOVING;
+		else
+		{
+			mode = MODES.TARGETTING_TARGET_LOST;
+			was_target = tgt;
 		}
 		
 		target=null;
+		//TODO: player notification - THIS SHOULD USE LOST_REASON
+	}
+	
+	private class DestUpdater implements Runnable
+	{
+		final Ship the_ship;
 		
-		//TODO: player notification
+		private DestUpdater(Ship s)
+		{
+			the_ship=s;
+		}
+		
+		public void run()
+		{
+			if(GameInterface.GC.GI.ShipPanel.the_ship == the_ship)
+			{
+				GameInterface.GC.GI.ShipPanel.updateDestDisplay(the_ship.destination);
+			}
+		}
 	}
 	
 	public int getSoldierInt(){return (int)Math.floor(soldier);}
@@ -467,8 +507,8 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	public void setMax_energy(int mf){max_energy=mf;}
 	public Player getOwner() {return owner;}
 	public float getSoldier() {return soldier;}
-	public int getMode(){return mode;}
-	public void setMode(int m){mode=m;}
+	public MODES getMode(){return mode;}
+	public void setMode(MODES m){mode=m;}
 	public void setExit_vec_x(double x){exit_vec_x = x;}
 	public double getExit_vec_x(){return exit_vec_x;}
 	public void setExit_vec_y(double y){exit_vec_y = y;}

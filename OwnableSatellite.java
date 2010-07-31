@@ -26,7 +26,7 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 	double pop_growth_rate;
 	
 	//for taxation
-	long last_tax_time=0;
+	long last_tax_time;
 	long tax_money;
 	final static int TAX_INTERVAL = 3000; //in milliseconds.  so taxes are compounded every three seconds.
 	final static double TAX_PER_PERSON = .03; //money per person per tax interval
@@ -42,6 +42,7 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 		facilities = new Hashtable<Integer, Facility<?>>();
 		bldg_in_progress = FacilityType.NO_BLDG;
 		data_control = new OwnableSatelliteDataSaverControl<T>((T)this);
+		last_tax_time = 0;
 	}
 	
 	public void handleDataNotSaved(long t){System.out.println("OwnableSatellite data not saved.  Ridiculous!");}
@@ -195,9 +196,10 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 			{
 				for(Integer i: facilities.keySet())
 				{
-					facilities.get(i).last_time = time; //makes it so that facilities do nothing when possessed by no one.
-											//That is, they lie idle instead of stockpiling production.
-					facilities.get(i).data_control.saveData();
+					facilities.get(i).ownerChanged(time); /*lets facilities change their states to adjust
+					 								to new ownership.  In most implementations, this means
+					 								that facilities will lie idle when unowned, instead of
+					 								possibly stock-piling resources for the next invader.*/
 				}
 			}
 		}
@@ -207,6 +209,27 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 		
 		setOwner(p);
 		data_control.saveData();
+		
+		SwingUtilities.invokeLater(new DestDisplayUpdater(this));
+	}
+	
+	private class DestDisplayUpdater implements Runnable
+	{
+		final Destination<?> the_sat;
+		
+		private DestDisplayUpdater(Destination<?> sat)
+		{
+			the_sat = sat;
+		}
+		
+		public void run()
+		{
+			ShipCommandPanel panel = GameInterface.GC.GI.ShipPanel;
+			if(panel.the_ship.destination == the_sat)
+			{
+				panel.updateDestDisplay(panel.the_ship.destination);
+			}
+		}
 	}
 	
 	public Hashtable<Integer, Facility<?>> getFacilities(){return facilities;}

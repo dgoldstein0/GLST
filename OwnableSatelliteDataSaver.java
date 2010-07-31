@@ -49,10 +49,5 @@ public class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> extends Da
 		base = sat.the_base;
 		t=sat.time;
 		mon_added = sat.tax_money;
-		
-		for(Integer i : sat.facilities.keySet())
-		{
-			sat.facilities.get(i).data_control.saveData();
-		}
 	}
 }

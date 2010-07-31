@@ -16,17 +16,13 @@ public class Base extends Facility<Base>{
 		max_soldier = GalacticStrategyConstants.default_max_soldier;
 		data_control = new BaseDataSaverControl(this);
 		soldier_taker = new HashSet<Saveable<?>>();
+		data_control.saveData();
 	}
 	
 	public void upgrade()
 	{
 		max_soldier+= GalacticStrategyConstants.max_soldier_upgraderate;
 		endurance+= GalacticStrategyConstants.endu_upgraderate;
-	}
-	
-	public void taken(Player enemy, long t)
-	{
-		location.setOwner(enemy, t);
 	}
 	
 	public void updateStatus(long time)
@@ -95,11 +91,19 @@ public class Base extends Facility<Base>{
 			//figure the results
 			if(soldier < 1)
 			{
-				taken(enemy.getOwner(), t);
+				location.setOwner(enemy.getOwner(), t);
 				
 				//TODO: notify player
 			}
 		}
+	}
+	
+	@Override
+	public void ownerChanged(long t)
+	{
+		last_time=t;
+		soldier=0;
+		data_control.saveData();
 	}
 	
 	public void destroyed()

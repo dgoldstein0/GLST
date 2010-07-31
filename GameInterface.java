@@ -678,12 +678,12 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			}
 		}
 		
-		//if nothing found
+		
 		if(select_items.size() > 1)
 			buildSelectContextMenu(select_items, mouse_x, mouse_y);
 		else if(select_items.size()==1)
 			selectObjInSystem(select_items.get(0));
-		else
+		else //if nothing found
 		{
 			selected_in_sys = null;
 			displayNoPanel();
@@ -772,14 +772,15 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			}
 		}
 		
-		GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getNextTimeGrain(), dest));
+		long time = GC.TC.getTime();
+		GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getTimeGrainAfter(time), dest));
 
 		//TODO: work on correct updating
-		ShipPanel.updateDestDisplay();
+		ShipPanel.updateDestDisplay(dest);
 		
 		if(dest instanceof Ship && dest != ShipPanel.the_ship)
 		{
-			GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getNextTimeGrain(), (Targetable<Ship>)dest));
+			GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getTimeGrainAfter(time), time, (Targetable<Ship>)dest));
 		}
 	}
 	

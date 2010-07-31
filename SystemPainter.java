@@ -215,7 +215,7 @@ public class SystemPainter extends JPanel
 			missile displays correctly*/
 			
 			g2.setColor(Color.BLACK);
-			g2.draw(new Rectangle(0,0,0,0)); //draw nothing... seems to be necessary
+			g2.drawRect(0,0,0,0); //draw nothing... seems to be necessary
 		}
 		
 		// Restore original transform

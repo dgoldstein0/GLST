@@ -1,8 +1,9 @@
-import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
 
 public class Fleet implements RelaxedSaveable<Fleet>
 {
-	HashMap<Ship.ShipId, Ship> ships;
+	Hashtable<Ship.ShipId, Ship> ships;
 	Player owner;
 	GSystem location;
 	Object lock = new Object();
@@ -12,7 +13,7 @@ public class Fleet implements RelaxedSaveable<Fleet>
 	
 	public Fleet(GSystem loc, Player o)
 	{
-		ships = new HashMap<Ship.ShipId, Ship>();
+		ships = new Hashtable<Ship.ShipId, Ship>();
 		location = loc;
 		owner = o;
 		data_control = new FleetDataSaverControl(this);
@@ -21,8 +22,8 @@ public class Fleet implements RelaxedSaveable<Fleet>
 	}
 	
 	//methods required for load/save
-	public HashMap<Ship.ShipId, Ship> getShips(){return ships;}
-	public void setShips(HashMap<Ship.ShipId, Ship> sh){ships=sh;}
+	public Hashtable<Ship.ShipId, Ship> getShips(){return ships;}
+	public void setShips(Hashtable<Ship.ShipId, Ship> sh){ships=sh;}
 	public Player getOwner(){return owner;}
 	public void setOwner(Player p){owner = p;}
 	public void setLocation(GSystem sys){location=sys;}
@@ -62,6 +63,11 @@ public class Fleet implements RelaxedSaveable<Fleet>
 		
 		return false;
 	}
+	
+	public ShipIterator iterator()
+	{
+		return new ShipIterator(ships.keySet().iterator());
+	}
 
 	@Override
 	public FleetDataSaverControl getDataControl() {
@@ -83,5 +89,34 @@ public class Fleet implements RelaxedSaveable<Fleet>
 	@Override
 	public void setTime(long t) {
 		last_time_changed = t;
+	}
+	
+	public class ShipIterator
+	{
+		final Iterator<Ship.ShipId> the_iterator;
+		
+		public ShipIterator(Iterator<Ship.ShipId> iterator) {
+			the_iterator = iterator;
+		}
+		
+		public Ship.ShipId next()
+		{
+			return the_iterator.next();
+		}
+		
+		public boolean hasNext()
+		{
+			return the_iterator.hasNext();
+		}
+
+		public void remove(long t) {
+			synchronized(lock)
+			{
+				the_iterator.remove();
+				last_time_changed = t;
+				location.decreaseClaim(owner);
+				data_control.saveData();
+			}
+		}
 	}
 }

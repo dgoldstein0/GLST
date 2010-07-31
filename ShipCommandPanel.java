@@ -115,7 +115,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		update();		
 		add(button_panel);
 		add(dest_display);
-		updateDestDisplay();
+		updateDestDisplay(s.destination);
 	}
 	
 	public void update()
@@ -147,18 +147,18 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		}
 	}
 	
-	public void updateDestDisplay()
+	public void updateDestDisplay(Destination<?> d)
 	{
-		if(the_ship.destination instanceof OwnableSatellite<?> && ((OwnableSatellite<?>)the_ship.destination).owner instanceof Player)
+		if(d instanceof OwnableSatellite<?> && ((OwnableSatellite<?>)d).owner instanceof Player)
 		{//color background appropriately
-			dest_name_panel.setBackground(((OwnableSatellite<?>)the_ship.destination).owner.getColor());
+			dest_name_panel.setBackground(((OwnableSatellite<?>)d).owner.getColor());
 			dest_name_panel.setOpaque(true);
 		}
 		else
 			dest_name_panel.setOpaque(false); //show no background
 		dest_name_panel.repaint(); //force redraw.  this will force the background to be redrawn, so blank pixels become colored or vice-versa
-		dest_name.setText(the_ship.destination.getName());
-		dest_pic.setIcon(new ImageIcon(the_ship.destination.imageLoc()));
+		dest_name.setText(d.getName());
+		dest_pic.setIcon(new ImageIcon(d.imageLoc()));
 	}
 	
 	public void actionPerformed(ActionEvent e)
@@ -166,7 +166,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		if(e.getSource() == move)
 		{
 			GameInterface.GC.GI.switchSystemToDestinationMode();
-			the_ship.mode=Ship.MOVING;
+			the_ship.mode=Ship.MODES.MOVING;
 		}
 		else if(e.getSource() == warp)
 		{
@@ -175,14 +175,12 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		}
 		else if(e.getSource() == attack)
 		{
-			GameInterface.GC.scheduleOrder(new ShipAttackOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.TC.getNextTimeGrain(), (Targetable<?>)the_ship.destination));
+			long time = GameInterface.GC.TC.getTime();
+			GameInterface.GC.scheduleOrder(new ShipAttackOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.TC.getTimeGrainAfter(time) /*this may be on delay in the future*/, time, (Targetable<?>)the_ship.destination));
 		}
 		else if(e.getSource() == invade)
 		{
 			GameInterface.GC.scheduleOrder(new ShipInvadeOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.TC.getNextTimeGrain()));
-			
-			//TODO: move this function call?
-			updateDestDisplay();
 		}
 		else if(e.getSource() == pickup_troops)
 		{

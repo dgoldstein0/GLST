@@ -984,7 +984,7 @@ public class GameControl
 				{
 					synchronized(sys.fleets[i].lock)
 					{
-						Iterator<Ship.ShipId> ship_iteration = sys.fleets[i].ships.keySet().iterator();
+						Fleet.ShipIterator ship_iteration = sys.fleets[i].iterator();
 						for(Ship.ShipId j; ship_iteration.hasNext();)
 						{
 							j=ship_iteration.next();
@@ -1010,7 +1010,7 @@ public class GameControl
 				{
 					synchronized(sys.fleets[i].lock)
 					{
-						Iterator<Ship.ShipId> ship_iteration = sys.fleets[i].ships.keySet().iterator();
+						Fleet.ShipIterator ship_iteration = sys.fleets[i].iterator();
 						for(Ship.ShipId j; ship_iteration.hasNext();)
 						{
 							j=ship_iteration.next();
