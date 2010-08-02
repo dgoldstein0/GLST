@@ -52,25 +52,27 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 	//returns true when the missile detonates, false otherwise
 	public boolean update(long t, Iterator<MissileId> missileIteration)
 	{
+		boolean retval = false;
+		
 		if (time <= t)
 		{
 			moveIncrement();
-			time += GalacticStrategyConstants.TIME_GRANULARITY;
 			
 			if (collidedWithTarget())
 			{
 				detonate(missileIteration);
 				data_control.saveData();
-				return true;
+				retval = true;
 			}
 			else
 			{
 				data_control.saveData();
-				return false;
 			}
 		}
-		else
-			return false;
+		
+		time += GalacticStrategyConstants.TIME_GRANULARITY;
+		
+		return retval;
 	}
 	
 	//BOOKMARK: POTENTIAL COORDINATION HAZARD - if missile/ship update order is changed, this won't work

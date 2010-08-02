@@ -1,5 +1,6 @@
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 
 import javax.swing.JLabel;
 
@@ -23,7 +24,7 @@ public class SystemLabel extends JLabel implements MouseListener
 		if (arg0.getClickCount()>=1)
 		{			
 			the_interface.prev_sys=the_sys;
-			the_interface.sys=the_sys;
+			//the_interface.sys=the_sys;
 			the_interface.satellites_list.removeAll();
 			for (Satellite<?> satellite: the_sys.orbiting)
 			{
@@ -32,8 +33,8 @@ public class SystemLabel extends JLabel implements MouseListener
 			}			
 			the_interface.selected_sys.clear();
 			the_interface.selected_sys.add(the_sys);		
-			the_interface.prev_selected=null;
-			the_interface.selected_in_sys=null;
+			the_interface.prev_selected=the_interface.selected_in_sys;
+			//the_interface.selected_in_sys=null;
 			the_interface.displayNoPanel();
 		}	
 		if (arg0.getClickCount()==2)
@@ -49,7 +50,7 @@ public class SystemLabel extends JLabel implements MouseListener
 		if (the_sys!=the_interface.sys)
 		{
 			the_interface.prev_selected=the_interface.selected_in_sys;
-			the_interface.selected_in_sys=null;
+			the_interface.selected_in_sys=new ArrayList<Selectable>();
 		}	
 		else
 		{

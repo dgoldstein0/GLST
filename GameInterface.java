@@ -50,7 +50,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	
 	GalacticMapPainter GalaxyPanel;
 	double gal_scale; //the scale which the galaxy is painted at.
-	HashSet<GSystem> selected_sys; //stores a set of currently selected systems - that is, a set of one item.  This is necessary because multiple selection is possible in GDFrame
+	Set<GSystem> selected_sys; //stores a set of currently selected systems - that is, a set of one item.  This is necessary because multiple selection is possible in GDFrame
 	
 	int galaxy_state;
 		static final int GAL_NORMAL=0;
@@ -59,12 +59,23 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	
 	SystemPainter SystemPanel;
 	GSystem sys,prev_sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
-	Selectable selected_in_sys, prev_selected;
+	List<Selectable> selected_in_sys, prev_selected;
+	List<Selectable> maybe_select_in_sys; //used to assist with shift/alt support in multiple selection
+	
+	//for multi-selection in systems
+	int button_down; //the button pressed in mousePressed
+	boolean mouse_was_dragged; //whether we ever had any dragging between mousePressed and mouseReleased
+	boolean clear_for_drag;
+		double mouse_down_x;
+		double mouse_down_y;
+		double cur_x;
+		double cur_y;
+		
 	double prev_scale,prev_x,prev_y;
 	double sys_scale;
 	double sys_center_x;
 	double sys_center_y;
-	double move_center_x_speed = 0; //left is negqtive, right is positive
+	double move_center_x_speed = 0; //left is negative, right is positive
 	double move_center_y_speed = 0; //up is negative, down is positive
 	MoveScreenCursors cursors;
 	int recenter_delay;
@@ -99,11 +110,12 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		//create frame and layout	
 		frame=new JFrame("Galactic Strategy Game");
 		//frame.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		//frame.setSize(1500,900);
+		
 		frame.setMinimumSize(new Dimension(800,600));
 		frame.addWindowListener(this);
 		frame.addComponentListener(this);
 		
+		//capture all mouse motion events
 		Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.MOUSE_MOTION_EVENT_MASK);
 		
 		panel= new JPanel(new GridBagLayout());
@@ -241,9 +253,9 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		panel.add(stat_and_order,c);	
 	
 		selected_sys = new HashSet<GSystem>();
+		selected_in_sys = new ArrayList<Selectable>();
+		maybe_select_in_sys = new ArrayList<Selectable>();
 	
-		frame.pack();
-		
 		//set up game control
 		GC = new GameControl(this);
 		
@@ -259,11 +271,17 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		//set up select_menu for later use
 		select_menu = new JPopupMenu();
 		
+		mouse_was_dragged=false;
+		clear_for_drag=false;
 		sys_scale = 1.0d;
 		sys_center_x = theinterface.getWidth()/2;
 		sys_center_y = theinterface.getHeight()/2;
 		
+		//frame.pack();
+		frame.setExtendedState(frame.getExtendedState()|JFrame.MAXIMIZED_BOTH); //auto-maximizes the game.  Pack() would set it to whatever fit preferred size
+		//GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().setFullScreenWindow(frame);
 		frame.setVisible(true);	
+		
 		GC.startupDialog();
 	}
 	
@@ -302,7 +320,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			if(galaxy_state == GAL_NORMAL)
 			{
 				theinterface.setCursor(Cursor.getDefaultCursor());
-				selected_in_sys=null;
+				selected_in_sys.clear();
 				displayNoPanel();
 			}
 		}
@@ -327,7 +345,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 /*		sys_scale = 1.0d;
 		sys_center_x = theinterface.getWidth()/2;
 		sys_center_y = theinterface.getHeight()/2;*/
-		SystemPanel.paintSystem(sys, selected_in_sys, sys_center_x, sys_center_y, sys_scale, true);
+		SystemPanel.paintSystem(sys, combineSelectedInSys(), sys_center_x, sys_center_y, sys_scale, true, mouse_was_dragged, mouse_down_x, mouse_down_y, cur_x, cur_y);
 		frame.setVisible(true); //makes all components within the frame displayable.  frame.pack() does this too, but pack resizes the frame to fit all components in their preferred sizes
 	}
 	
@@ -355,11 +373,19 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				}
 				GalaxyPanel.paintGalaxy(GC.map, selected_sys, options, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, GC.players[GC.player_id].ships_in_transit, gal_scale);
 			}
-			else //before getting to here, sys and selected_in_sys should be specified.  the latter may be null.
+			else //before getting to here, sys and selected_in_sys should be specified.
 			{
-				SystemPanel.paintSystem(sys, selected_in_sys, sys_center_x, sys_center_y, sys_scale, true);
+				SystemPanel.paintSystem(sys, combineSelectedInSys(), sys_center_x, sys_center_y, sys_scale, true, mouse_was_dragged, mouse_down_x, mouse_down_y, cur_x, cur_y);
 			}
 		}
+	}
+	
+	private List<Selectable> combineSelectedInSys()
+	{
+		List<Selectable> selected = new ArrayList<Selectable>();
+		selected.addAll(selected_in_sys);
+		selected.addAll(maybe_select_in_sys);
+		return selected;
 	}
 	
 	public void displaySatellitePanel(Satellite<?> s)
@@ -427,23 +453,61 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	//this is ONLY invoked by MOUSE MOTION EVENTS, and is in charge of deciding how fast to move the view of the system
 	public void eventDispatched(AWTEvent a)
 	{
-		MouseEvent e=(MouseEvent)a;
-		int x, y;
-		
-		Point corner;
-		if(e.getSource() instanceof JComponent)
-			corner = ((JComponent)e.getSource()).getLocationOnScreen();
-		else
-			corner = frame.getLocationOnScreen();
-		
-		Point pane_pos = frame.getContentPane().getLocationOnScreen();
-		x=e.getX() - pane_pos.x + corner.x;
-		y=e.getY() - pane_pos.y + corner.y;
-		
-		//System.out.println("x,y is " + Integer.toString(x) + "," + Integer.toString(y));
-		
 		if(isSystemDisplayed())
 		{
+			MouseEvent e=(MouseEvent)a;
+			int x, y;
+			
+			if((MouseEvent.MOUSE_DRAGGED & e.getModifiers()) != 0 && e.getSource() == theinterface && button_down == MouseEvent.BUTTON1)
+			{
+				//handle MouseDragged event here
+				if(clear_for_drag)
+				{
+					clear_for_drag=false;
+					selected_in_sys.clear();
+				}
+				
+				mouse_was_dragged=true;
+				cur_x = sysScreenToDataX(e.getX());
+				cur_y = sysScreenToDataY(e.getY());
+				
+				Selectable first_maybe_select = null;
+				if(maybe_select_in_sys.size() != 0)
+					first_maybe_select = maybe_select_in_sys.get(0);
+				
+				maybe_select_in_sys = new ArrayList<Selectable>();
+				selectInSystemInRange(maybe_select_in_sys,	Math.min(mouse_down_x, cur_x), Math.min(mouse_down_y, cur_y),
+														Math.max(mouse_down_x, cur_x), Math.max(mouse_down_y,cur_y));
+				
+				if(!maybe_select_in_sys.contains(first_maybe_select))
+					first_maybe_select=null;
+				
+				if(/*selected_in_sys.size() != 0 || */maybe_select_in_sys.size() > 1)
+				{
+					for(Iterator<Selectable> select_it = maybe_select_in_sys.iterator();select_it.hasNext();)
+					{
+						Selectable obj = select_it.next();
+						if(!(obj instanceof Ship) || ((Ship)obj).owner.getId() != GC.player_id)
+						{
+							select_it.remove();
+						}
+					}
+				}
+				
+				if(maybe_select_in_sys.size() == 0 && first_maybe_select != null)
+					maybe_select_in_sys.add(first_maybe_select);
+			}
+				
+			Point corner;
+			if(e.getSource() instanceof JComponent)
+				corner = ((JComponent)e.getSource()).getLocationOnScreen();
+			else
+				corner = frame.getLocationOnScreen();
+			
+			Point pane_pos = frame.getContentPane().getLocationOnScreen();
+			x=e.getX() - pane_pos.x + corner.x;
+			y=e.getY() - pane_pos.y + corner.y;
+			
 			//boolean previously_moving = true;
 			//if(move_center_x_speed==0.0 && move_center_y_speed==0.0)
 			//	previously_moving = false;
@@ -539,6 +603,16 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	}
 
 	public void mousePressed(MouseEvent e) {
+		if(isSystemDisplayed())
+		{
+			cur_x = mouse_down_x = sysScreenToDataX(e.getX());
+			cur_y = mouse_down_y = sysScreenToDataY(e.getY());
+			
+			button_down = e.getButton();
+			
+			if(!e.isShiftDown() && e.getButton() != MouseEvent.BUTTON3)
+				clear_for_drag=true;
+		}
 	}
 
 	public void mouseReleased(MouseEvent e) {
@@ -578,24 +652,47 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			}
 			else
 			{ //system is displayed
-				if(e.getX() >= theinterface.getWidth() - SystemPainter.arrow_size && e.getY() <= SystemPainter.arrow_size)
-					drawGalaxy();
+				if(mouse_was_dragged)
+				{
+					mouse_was_dragged=false;
+					selected_in_sys.addAll(maybe_select_in_sys);
+					maybe_select_in_sys.clear();
+					
+					if(selected_in_sys.size() == 1)
+					{
+						if(selected_in_sys.get(0) instanceof Ship)
+							displayShipPanel((Ship) selected_in_sys.get(0));
+						else if(selected_in_sys.get(0) instanceof Satellite<?>)
+							displaySatellitePanel((Satellite<?>) selected_in_sys.get(0));
+					}
+					else if(selected_in_sys.size() > 1)
+					{
+						//mass ship selection
+					}
+					else
+						displayNoPanel();
+				}
 				else
 				{
-					if(system_state == SYS_NORMAL && e.getButton() == MouseEvent.BUTTON1)
+					if(e.getX() >= theinterface.getWidth() - SystemPainter.arrow_size && e.getY() <= SystemPainter.arrow_size)
+						drawGalaxy();
+					else
 					{
-						//look for object to select
-						selectInSystemAt(e.getX(), e.getY());
-						redraw();
-					}
-					else if(system_state == SELECT_DESTINATION)
-					{
-						setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
-						system_state = SYS_NORMAL;
-					}
-					else if(selected_in_sys instanceof Ship && e.getButton() == MouseEvent.BUTTON3 && ((Ship)selected_in_sys).owner.getId() == GC.player_id)
-					{
-						setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
+						if(system_state == SYS_NORMAL && e.getButton() == MouseEvent.BUTTON1)
+						{
+							//look for object to select
+							selectInSystemAt(e.getX(), e.getY());
+							redraw();
+						}
+						else if(system_state == SELECT_DESTINATION)
+						{
+							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
+							system_state = SYS_NORMAL;
+						}
+						else if(selected_in_sys.get(0) instanceof Ship && e.getButton() == MouseEvent.BUTTON3 && ((Ship)selected_in_sys.get(0)).owner.getId() == GC.player_id)
+						{
+							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
+						}
 					}
 				}
 			}
@@ -628,12 +725,27 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		
 		ArrayList<Selectable> select_items = new ArrayList<Selectable>();
 		
+		selectInSystemInRange(select_items, x-OBJ_TOL, y-OBJ_TOL, x+OBJ_TOL, y+OBJ_TOL);
+		
+		if(select_items.size() > 1)
+			buildSelectContextMenu(select_items, mouse_x, mouse_y);
+		else if(select_items.size()==1)
+			selectObjInSystem(select_items.get(0));
+		else //if nothing found
+		{
+			selected_in_sys.clear();
+			displayNoPanel();
+		}
+	}
+	
+	private void selectInSystemInRange(List<Selectable> select_items, double x1, double y1, double x2, double y2)
+	{
 		if(sys.stars != null)
 		{
 			for(Star st : sys.stars)
 			{
 				//search for star...
-				if(st.x-st.size/2 <= x && x <= st.x+st.size/2 && st.y-st.size/2 <= y && y <= st.y+st.size/2)
+				if(st.x-st.size/2 <= x2 && x1 <= st.x+st.size/2 && st.y-st.size/2 <= y2 && y1 <= st.y+st.size/2)
 				{
 					select_items.add(st);
 				}
@@ -646,7 +758,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			for(Satellite<?> orbiting : sys.orbiting)
 			{
 				//search for satellites...
-				if(orbiting.absoluteCurX()-orbiting.size/2 -OBJ_TOL <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 + OBJ_TOL && orbiting.absoluteCurY()-orbiting.size/2-OBJ_TOL <= y && y <= orbiting.absoluteCurY() + orbiting.size/2+OBJ_TOL)
+				if(orbiting.absoluteCurX()-orbiting.size/2 <= x2 && x1 <= orbiting.absoluteCurX()+orbiting.size/2 && orbiting.absoluteCurY()-orbiting.size/2 <= y2 && y1 <= orbiting.absoluteCurY() + orbiting.size/2)
 				{
 					select_items.add(orbiting);
 				}
@@ -656,7 +768,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 					Planet cur_planet=(Planet)orbiting;
 					for(Satellite<?> sat : cur_planet.orbiting)
 					{
-						if(sat.absoluteCurX()-sat.size/2 -OBJ_TOL <= x && x <= sat.absoluteCurX()+sat.size/2+OBJ_TOL && sat.absoluteCurY()-sat.size/2-OBJ_TOL <= y && y <= sat.absoluteCurY()+sat.size/2+OBJ_TOL)
+						if(sat.absoluteCurX()-sat.size/2 <= x2 && x1 <= sat.absoluteCurX()+sat.size/2 && sat.absoluteCurY()-sat.size/2 <= y2 && y1 <= sat.absoluteCurY()+sat.size/2)
 						{
 							select_items.add(sat);
 						}
@@ -671,28 +783,18 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			{
 				Ship s = sys.fleets[i].ships.get(j);
 				
-				if(s.pos_x-OBJ_TOL-s.type.dim*s.type.default_scale/2*sys_scale <= x && x <= s.pos_x+OBJ_TOL+s.type.dim*s.type.default_scale/2 && s.pos_y-OBJ_TOL-s.type.dim*s.type.default_scale/2 <= y && y <= s.pos_y+OBJ_TOL+s.type.dim*s.type.default_scale/2)
+				if(s.pos_x-s.type.dim*s.type.default_scale/2*sys_scale <= x2 && x1 <= s.pos_x+s.type.dim*s.type.default_scale/2 && s.pos_y-s.type.dim*s.type.default_scale/2 <= y2 && y1 <= s.pos_y+s.type.dim*s.type.default_scale/2)
 				{
 					select_items.add(s);
 				}
 			}
 		}
-		
-		
-		if(select_items.size() > 1)
-			buildSelectContextMenu(select_items, mouse_x, mouse_y);
-		else if(select_items.size()==1)
-			selectObjInSystem(select_items.get(0));
-		else //if nothing found
-		{
-			selected_in_sys = null;
-			displayNoPanel();
-		}
 	}
 	
 	public void selectObjInSystem(Selectable s)
 	{
-		selected_in_sys = s;
+		selected_in_sys.clear();
+		selected_in_sys.add(s);
 		switch(s.getSelectType())
 		{
 			case Selectable.STAR:
@@ -773,14 +875,17 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		}
 		
 		long time = GC.TC.getTime();
-		GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getTimeGrainAfter(time), dest));
-
-		//TODO: work on correct updating
-		ShipPanel.updateDestDisplay(dest);
-		
-		if(dest instanceof Ship && dest != ShipPanel.the_ship)
+		for(Selectable the_ship : selected_in_sys)
 		{
-			GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getTimeGrainAfter(time), time, (Targetable<Ship>)dest));
+			GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], (Ship)the_ship, GC.TC.getTimeGrainAfter(time), dest));
+	
+			//TODO: work on correct updating
+			ShipPanel.updateDestDisplay(dest);
+			
+			if(dest instanceof Ship && dest != ShipPanel.the_ship)
+			{
+				GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, GC.TC.getTimeGrainAfter(time), time, (Targetable<Ship>)dest));
+			}
 		}
 	}
 	

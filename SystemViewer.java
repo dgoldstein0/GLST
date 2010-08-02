@@ -187,14 +187,26 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		setVisible(true);
 	}
 	
+	public <T> java.util.List<T> wrapInList(T obj)
+	{
+		java.util.List<T> the_set = new ArrayList<T>();
+		if(obj != null)
+			the_set.add(obj);
+		return the_set;
+	}
+	
 	public void actionPerformed(ActionEvent e)
 	{
 		if(e.getSource()==t_toggle)
-			painter.paintSystem(system, selected_obj, !painter.design_view, center_x, center_y, scale);
+			painter.paintSystem(system, wrapInList(selected_obj), !painter.design_view, center_x, center_y, scale);
 		else if(e.getSource()==t_add)
 		{
 			String obj_to_add;
-			if(!(selected_obj instanceof Planet))
+			if(system.stars == null || system.stars.size() == 0)
+			{
+				obj_to_add="Star";
+			}
+			else if(!(selected_obj instanceof Planet))
 			{
 				String[] add_options={"Planet", "Star", "Asteroid"};
 				obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
@@ -220,32 +232,46 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		{
 			String obj_to_add;
 
-			//Moons and stars may only be added under certain conditions.  For moons, that condition is that the planet they will orbit is already selected.
-			//For stars, that condition is that the location is "star suitable."  The if statements take care of these conditions
-			if(!(selected_obj instanceof Planet))
+			boolean star_suitable = locationStarSuitable(screenToDataX(c_x),screenToDataY(c_y));
+			if(system.stars == null || system.stars.size() == 0)
 			{
-				if(locationStarSuitable(screenToDataX(c_x),screenToDataY(c_y)))
-				{
-					String[] add_options={"Planet", "Star", "Asteroid"};
-					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
-				}
+				if(star_suitable)
+					obj_to_add="Star";
 				else
 				{
-					String[] add_options={"Planet", "Asteroid"};
-					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
+					JOptionPane.showMessageDialog(this, "You must add a star first.", "Cannot add here", JOptionPane.ERROR_MESSAGE);
+					return;
 				}
 			}
 			else
 			{
-				if(locationStarSuitable(screenToDataX(c_x),screenToDataY(c_y)))
+				//Moons and stars may only be added under certain conditions.  For moons, that condition is that the planet they will orbit is already selected.
+				//For stars, that condition is that the location is "star suitable."  The if statements take care of these conditions
+				if(!(selected_obj instanceof Planet))
 				{
-					String[] add_options={"Planet", "Star", "Moon", "Asteroid"};
-					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
+					if(star_suitable)
+					{
+						String[] add_options={"Planet", "Star", "Asteroid"};
+						obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
+					}
+					else
+					{
+						String[] add_options={"Planet", "Asteroid"};
+						obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
+					}
 				}
 				else
 				{
-					String[] add_options={"Planet", "Moon", "Asteroid"};
-					obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
+					if(star_suitable)
+					{
+						String[] add_options={"Planet", "Star", "Moon", "Asteroid"};
+						obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
+					}
+					else
+					{
+						String[] add_options={"Planet", "Moon", "Asteroid"};
+						obj_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of object to add", "Add Object", JOptionPane.QUESTION_MESSAGE, null, add_options, add_options[0]);
+					}
 				}
 			}
 			
@@ -384,7 +410,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				//search for orbiting...
 				if(orbiting.absoluteCurX()-orbiting.size/2 <= x && x <= orbiting.absoluteCurX()+orbiting.size/2 && orbiting.absoluteCurY()-orbiting.size/2 <= y && y <= orbiting.absoluteCurY() + orbiting.size/2)
 				{
-					selected_obj=orbiting;
+					selected_obj = orbiting;
 					return;
 				}
 				
@@ -395,7 +421,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 					{
 						if(sat.absoluteCurX()-OBJ_TOL <= x && x <= sat.absoluteCurX()+OBJ_TOL && sat.absoluteCurY()-OBJ_TOL <= y && y <= sat.absoluteCurY()+OBJ_TOL)
 						{
-							selected_obj=sat;
+							selected_obj = sat;
 							return;
 						}
 					}
@@ -599,7 +625,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			Star new_star = new Star("", DEFAULT_STAR_SIZE, DEFAULT_STAR_MASS, GalacticStrategyConstants.COLOR_NULL, x, y, system);
 			system.stars.add(new_star);
 			
-			selected_obj=new_star;
+			selected_obj = new_star;
 			recalculateOrbits();
 		}
 		
@@ -646,7 +672,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		themoon.orbit = new Orbit((Satellite<Moon>)themoon, (Orbitable<Planet>)selected_obj,x,y,x,y,1);
 		((Planet)selected_obj).orbiting.add(themoon);
 		
-		selected_obj=themoon;
+		selected_obj = themoon;
 		wait_to_add=ADD_FOCUS;
 		drawSystem();
 	}
@@ -724,7 +750,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			{
 				case ADD_STAR:
 					if(locationStarSuitable(screenToDataX(e.getX()), screenToDataY(e.getY())))
-						painter.paintGhostObj(system, selected_obj, screenToDataX(e.getX()), screenToDataY(e.getY()), DEFAULT_STAR_SIZE, center_x, center_y, scale);
+						painter.paintGhostObj(system, wrapInList(selected_obj), screenToDataX(e.getX()), screenToDataY(e.getY()), DEFAULT_STAR_SIZE, center_x, center_y, scale);
 					else
 						drawSystem();
 					break;
@@ -795,7 +821,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	{
 		system.setWidth(painter.getWidth());
 		system.setHeight(painter.getHeight());
-		painter.paintSystem(system, selected_obj, center_x, center_y, scale);
+		painter.paintSystem(system, wrapInList(selected_obj), center_x, center_y, scale);
 	}
 	
 	private void deleteSelected()

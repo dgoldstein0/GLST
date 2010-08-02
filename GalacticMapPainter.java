@@ -10,7 +10,7 @@ import java.util.*;
 public class GalacticMapPainter extends JPanel
 {
 	Galaxy map;
-	HashSet<GSystem> selected;
+	Set<GSystem> selected;
 	ArrayList<Ship> ships_in_transit;
 	int drag_options;
 	int max_dist_shown;
@@ -43,6 +43,7 @@ public class GalacticMapPainter extends JPanel
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
+		long time = (GameInterface.GC != null) ? GameInterface.GC.TC.getTime() : 0;
 		
 		Graphics2D g2 = (Graphics2D)g;
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -56,12 +57,8 @@ public class GalacticMapPainter extends JPanel
 				{
 					if(sys.navigability < nav_level)
 						g2.setColor(Color.GRAY);
-					else if(sys.owner_id == GSystem.NO_OWNER)
-						g2.setColor(Color.WHITE);
-					else if(sys.owner_id == GSystem.OWNER_CONFLICTED)
-						g2.setColor(Color.ORANGE);
 					else
-						g2.setColor(GameInterface.GC.players[sys.owner_id].getColor());
+						g2.setColor(sys.currentColor(time));
 					g2.fill(new Ellipse2D.Double(scaleNum(sys.x-2),scaleNum(sys.y-2),scaleNum(5),scaleNum(5)));
 					if(nav_display == GDFrame.NAV_DISP_ALL)
 					{
@@ -117,12 +114,8 @@ public class GalacticMapPainter extends JPanel
 						if(sys.name instanceof String) {
 							if(sys.navigability < nav_level)
 								g2.setColor(Color.GRAY);
-							else if(sys.owner_id == GSystem.NO_OWNER)
-								g2.setColor(Color.WHITE);
-							else if(sys.owner_id == GSystem.OWNER_CONFLICTED)
-								g2.setColor(Color.ORANGE);
 							else
-								g2.setColor(GameInterface.GC.players[sys.owner_id].getColor());
+								g2.setColor(sys.currentColor(time));
 							g2.drawString(sys.name, (float)scaleNum(sys.x+3), (float)scaleNum(sys.y)+m.getHeight());
 						} else {
 							g2.setColor(Color.YELLOW);
@@ -187,10 +180,10 @@ public class GalacticMapPainter extends JPanel
 		g2.draw(new Rectangle2D.Double(0,0,scaleNum(GalacticStrategyConstants.GALAXY_WIDTH), scaleNum(GalacticStrategyConstants.GALAXY_HEIGHT)));
 	}
 	
-	public void paintGalaxy(Galaxy map, HashSet<GSystem> selected, int options, int nav, int disp_nav, boolean unnav, ArrayList<Ship> transit, double sc)
+	public void paintGalaxy(Galaxy map, Set<GSystem> selectedSys, int options, int nav, int disp_nav, boolean unnav, ArrayList<Ship> transit, double sc)
 	{
 		this.map=map;
-		this.selected=selected;
+		this.selected=selectedSys;
 		select_box=false;
 		ghost_system=false;
 		nav_level=nav;
@@ -198,7 +191,7 @@ public class GalacticMapPainter extends JPanel
 		display_unnavigable=unnav;
 		ships_in_transit = transit;
 		
-		if(selected == null)
+		if(selectedSys == null)
 			drag_options=GDFrame.DRAG_NONE;
 		else
 			drag_options=options;

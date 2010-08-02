@@ -1,6 +1,7 @@
 import java.awt.*;
 import javax.swing.*;
 import java.util.*;
+import java.util.List;
 import java.awt.geom.*;
 
 public class SystemPainter extends JPanel
@@ -9,7 +10,7 @@ public class SystemPainter extends JPanel
 	final int GHOST_OBJ=1;
 	
 	GSystem system;
-	Selectable selected;
+	List<Selectable> selected;
 	
 	boolean design_view;
 	int focus2_x;
@@ -27,9 +28,15 @@ public class SystemPainter extends JPanel
 	double center_y;
 	
 	boolean game_mode=false;
+	boolean draw_select_box;
+		double select_x1;
+		double select_y1;
+		double select_x2;
+		double select_y2;
+	
 	Image return_arrow;
 	
-	static int arrow_size = 25;
+	final static int arrow_size = 25;
 	
 	public SystemPainter(boolean design)
 	{
@@ -37,6 +44,8 @@ public class SystemPainter extends JPanel
 		design_view=design;
 		ghost_obj=GHOST_NONE;
 		return_arrow=Toolkit.getDefaultToolkit().getImage("images/return_arrow.jpg");
+		draw_select_box=false;
+		selected = new ArrayList<Selectable>();
 	}
 	
 	public void paintComponent(Graphics g)
@@ -144,29 +153,38 @@ public class SystemPainter extends JPanel
 			g2.setColor(Color.WHITE);
 			if(system.name != null)
 				g2.drawString(system.name + " System", 10, 20);
+			
+			if(draw_select_box)
+			{
+				g2.setColor(Color.GRAY);
+				g2.draw(new Rectangle2D.Double(drawX(Math.min(select_x1, select_x2)), drawY(Math.min(select_y1, select_y2)), scale*Math.abs(select_x1-select_x2), scale*Math.abs(select_y1-select_y2)));
+			}
 		}
 		
-		if(selected instanceof Satellite<?>) {
-			g2.setColor(Color.YELLOW);
-			if(game_mode){
-				g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)selected).absoluteCurX()-((StellarObject)selected).size/2.0)-2.0, drawY(((Satellite<?>)selected).absoluteCurY()-((StellarObject)selected).size/2.0)-2.0, ((StellarObject)selected).size*scale+4.0, ((StellarObject)selected).size*scale+4.0));
-			} else {
-				g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)selected).absoluteInitX()-((StellarObject)selected).size/2.0)-2.0, drawY(((Satellite<?>)selected).absoluteInitY()-((StellarObject)selected).size/2.0)-2.0, ((StellarObject)selected).size*scale+4.0, ((StellarObject)selected).size*scale+4.0));
+		for(Selectable obj : selected)
+		{
+			if(obj instanceof Satellite<?>) {
+				g2.setColor(Color.YELLOW);
+				if(game_mode){
+					g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)obj).absoluteCurX()-((StellarObject)obj).size/2.0)-2.0, drawY(((Satellite<?>)obj).absoluteCurY()-((StellarObject)obj).size/2.0)-2.0, ((StellarObject)obj).size*scale+4.0, ((StellarObject)obj).size*scale+4.0));
+				} else {
+					g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)obj).absoluteInitX()-((StellarObject)obj).size/2.0)-2.0, drawY(((Satellite<?>)obj).absoluteInitY()-((StellarObject)obj).size/2.0)-2.0, ((StellarObject)obj).size*scale+4.0, ((StellarObject)obj).size*scale+4.0));
+				}
+			} else if(obj instanceof Star) {
+				//select a star
+				g2.setColor(Color.YELLOW);
+				g2.draw(new Ellipse2D.Double(drawX(((Star)obj).x-((StellarObject)obj).size/2.0), drawY(((Star)obj).y-((StellarObject)obj).size/2.0), ((StellarObject)obj).size*scale, ((StellarObject)obj).size*scale));
+			} else if(obj instanceof Focus) {
+				g2.setColor(Color.YELLOW);
+				g2.draw(new Ellipse2D.Double(drawX(((Focus)obj).getX()+(((Focus)obj).owner.boss.absoluteCurX()))-2.0, drawY(((Focus)obj).getY()+(((Focus)obj).owner.boss.absoluteCurY()))-2.0, 5.0,5.0));
+			} else if(obj instanceof Ship) {
+				g2.setColor(Color.YELLOW);
+				Ship s = (Ship)obj;
+				g2.draw(new Ellipse2D.Double(drawX(s.pos_x - s.type.dim*s.type.default_scale/2.0), drawY(s.pos_y - s.type.dim*s.type.default_scale/2.0), s.type.dim*s.type.default_scale*scale, s.type.dim*s.type.default_scale*scale));
+				g2.setColor(Color.ORANGE);
+				g2.drawLine(drawXInt(s.dest_x_coord)-3, drawYInt(s.dest_y_coord), drawXInt(s.dest_x_coord)+3, drawYInt(s.dest_y_coord));
+				g2.drawLine(drawXInt(s.dest_x_coord), drawYInt(s.dest_y_coord)-3, drawXInt(s.dest_x_coord), drawYInt(s.dest_y_coord)+3);
 			}
-		} else if(selected instanceof Star) {
-			//select a star
-			g2.setColor(Color.YELLOW);
-			g2.draw(new Ellipse2D.Double(drawX(((Star)selected).x-((StellarObject)selected).size/2.0), drawY(((Star)selected).y-((StellarObject)selected).size/2.0), ((StellarObject)selected).size*scale, ((StellarObject)selected).size*scale));
-		} else if(selected instanceof Focus) {
-			g2.setColor(Color.YELLOW);
-			g2.draw(new Ellipse2D.Double(drawX(((Focus)selected).getX()+(((Focus)selected).owner.boss.absoluteCurX()))-2.0, drawY(((Focus)selected).getY()+(((Focus)selected).owner.boss.absoluteCurY()))-2.0, 5.0,5.0));
-		} else if(selected instanceof Ship) {
-			g2.setColor(Color.YELLOW);
-			Ship s = (Ship)selected;
-			g2.draw(new Ellipse2D.Double(drawX(s.pos_x - s.type.dim*s.type.default_scale/2.0), drawY(s.pos_y - s.type.dim*s.type.default_scale/2.0), s.type.dim*s.type.default_scale*scale, s.type.dim*s.type.default_scale*scale));
-			g2.setColor(Color.ORANGE);
-			g2.drawLine(drawXInt(s.dest_x_coord)-3, drawYInt(s.dest_y_coord), drawXInt(s.dest_x_coord)+3, drawYInt(s.dest_y_coord));
-			g2.drawLine(drawXInt(s.dest_x_coord), drawYInt(s.dest_y_coord)-3, drawXInt(s.dest_x_coord), drawYInt(s.dest_y_coord)+3);
 		}
 		
 		if(ghost_obj==GHOST_OBJ)
@@ -222,42 +240,35 @@ public class SystemPainter extends JPanel
 		g2.setTransform(saveAT);
 	}
 	
-	public void paintSystem(GSystem system, Selectable selected, boolean view, double centerx, double centery, double sc)
+	public void paintSystem(GSystem system, List<Selectable> selected, double centerx, double centery, double sc)
 	{
 		this.system=system;
 		this.selected=selected;
+		ghost_obj=GHOST_NONE;
+		center_x=centerx;
+		center_y=centery;
+		scale=sc;
+		repaint();
+	}
+	
+	public void paintSystem(GSystem system, List<Selectable> selected, boolean view, double centerx, double centery, double sc)
+	{
 		design_view=view;
-		ghost_obj=GHOST_NONE;
-		center_x=centerx;
-		center_y=centery;
-		scale=sc;
-		repaint();
+		paintSystem(system, selected, centerx, centery, sc);
 	}
 	
-	public void paintSystem(GSystem system, Selectable selected, double centerx, double centery, double sc)
+	public void paintSystem(GSystem system, List<Selectable> selected, double centerx, double centery, double sc, boolean back, boolean select_box, double x1, double y1, double x2, double y2)
 	{
-		this.system=system;
-		this.selected=selected;
-		ghost_obj=GHOST_NONE;
-		center_x=centerx;
-		center_y=centery;
-		scale=sc;
-		repaint();
-	}
-	
-	public void paintSystem(GSystem system, Selectable selected, double centerx, double centery, double sc, boolean back)
-	{
-		this.system=system;
-		this.selected=selected;
-		ghost_obj=GHOST_NONE;
-		center_x=centerx;
-		center_y=centery;
-		scale=sc;
 		game_mode = back;
-		repaint();
+		draw_select_box = select_box;
+		select_x1 = x1;
+		select_y1 = y1;
+		select_x2 = x2;
+		select_y2 = y2;
+		paintSystem(system, selected, centerx, centery, sc);
 	}
 	
-	public void paintGhostObj(GSystem system, Selectable selected, int x, int y, int size, double centerx, double centery, double sc)
+	public void paintGhostObj(GSystem system, List<Selectable> selected, int x, int y, int size, double centerx, double centery, double sc)
 	{
 		this.system=system;
 		this.selected=selected;
@@ -317,7 +328,7 @@ public class SystemPainter extends JPanel
 		double x = drawX(obj.absoluteCurX());
 		double y = drawY(obj.absoluteCurY());
 		
-		if(obj==selected && !game_mode)
+		if(selected.contains(obj) && !game_mode)
 		{
 			g2.setColor(Color.RED);
 			g2.draw(new Ellipse2D.Double(x,y,2.0,2.0));
@@ -347,7 +358,7 @@ public class SystemPainter extends JPanel
 		double start_x=center_x*Math.cos(theta)+center_y*Math.sin(theta)-a;
 		double start_y=-center_x*Math.sin(theta)+center_y*Math.cos(theta)-b;
 		
-		if(obj==selected)
+		if(selected.contains(obj))
 			g2.setColor(Color.YELLOW);
 		else
 			g2.setColor(Color.GRAY);

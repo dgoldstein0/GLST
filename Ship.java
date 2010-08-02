@@ -433,8 +433,8 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 			if(this == GameInterface.GC.GI.ShipPanel.the_ship)
 			{
 				GameInterface.GC.GI.displayNoPanel();
-				GameInterface.GC.GI.selected_in_sys = null;
-			}			
+			}
+			GameInterface.GC.GI.selected_in_sys.remove(this);		
 			//System.out.println("destroyed-after");
 		}
 	}

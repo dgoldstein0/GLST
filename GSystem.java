@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.util.*;
 
 public class GSystem implements Orbitable<GSystem>
@@ -8,6 +9,11 @@ public class GSystem implements Orbitable<GSystem>
 	//indicates which player is in control - from the current player's perspective
 	int owner_id; //-2 is none, -1 is conflicted, otherwise corresponds to player id's
 	int[] player_claims; //the elements of this array keep track of how many claims - planets or ships - each player owns in the system
+	
+	int current_player_id; //used in OWNER_CONFLICTED state to keep track of the last player whose color was used
+	long time_last_color_valid_until; //the time until which the last_color will be used
+	Color last_color; //the last return value of currentColor()
+	
 	int next_missile_id;
 	
 	ArrayList<Satellite<?>> orbiting;
@@ -46,6 +52,7 @@ public class GSystem implements Orbitable<GSystem>
 		missiles = new MissileList();
 		owner_id = NO_OWNER;
 		next_missile_id=0;
+		time_last_color_valid_until=-1;
 	}
 	
 	public Describer<GSystem> describer(){return new GSystemDescriber(this);}
@@ -65,7 +72,10 @@ public class GSystem implements Orbitable<GSystem>
 	{
 		player_claims[p.getId()]++;
 		if(owner_id >= 0 && owner_id != p.getId()) //if there is an owner of the system, and the increaser is not the owner, now conflicted
+		{
 			owner_id = OWNER_CONFLICTED;
+			current_player_id = p.getId();
+		}
 		else if(owner_id == NO_OWNER)
 			owner_id = p.getId();
 	}
@@ -104,6 +114,33 @@ public class GSystem implements Orbitable<GSystem>
 				sum += st.getMass();
 		}
 		return sum;
+	}
+	
+	public Color currentColor(long time)
+	{
+		if(time <= time_last_color_valid_until)
+		{
+			return last_color;
+		}
+		else
+		{
+			time_last_color_valid_until = time+500;
+			switch(owner_id)
+			{
+				case NO_OWNER:
+					return last_color = Color.white;
+				case OWNER_CONFLICTED:
+					
+					do {
+						current_player_id = (current_player_id+1) % player_claims.length;
+					} while(player_claims[current_player_id] == 0);
+					
+					return last_color = GameInterface.GC.players[current_player_id].getColor();
+	
+				default:
+					return last_color = GameInterface.GC.players[owner_id].getColor();
+			}
+		}
 	}
 	
 	public double getXCoord(long t){return absoluteCurX();}
