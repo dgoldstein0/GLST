@@ -1,9 +1,14 @@
 import java.util.Iterator;
+import java.util.Random;
+
 import javax.swing.SwingUtilities;
 
 public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 {
 	final static double ESCAPE_DIST = 300.0;
+	final static double EXIT_MULTIPLIER = 2.0; //the multiple of ESCAPE_DIST at which ships exit from warp
+	final static double EXIT_PLACE_JITTER = 50.0;
+	final static double EXIT_DIRECTION_JITTER = 0.2;
 	
 	Player owner;
 	
@@ -323,10 +328,10 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		aggressors.clear();
 		
 		//deselect the ship, if it was selected
+		GameInterface.GC.GI.selected_in_sys.remove(this);
 		if(this == GameInterface.GC.GI.ShipPanel.the_ship)
 		{
-			GameInterface.GC.GI.displayNoPanel();
-			GameInterface.GC.GI.selected_in_sys = null;
+			GameInterface.GC.GI.displayNoPanel();	
 		}
 		
 		//compute details of flight plan
@@ -344,11 +349,14 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		System.out.println("Disengaging warp drive");
 		location=warp_destination;
 		
+		//set up random jitter with arrival_time as seed.  necessary to seed it to keep everything coordinated.
+		Random generator = new Random(arrival_time);
+		
 		//rewrite physics values
-		pos_x=-exit_vec_x*ESCAPE_DIST + location.absoluteCurX();
-		pos_y=-exit_vec_y*ESCAPE_DIST + location.absoluteCurY();
+		pos_x=-exit_vec_x*ESCAPE_DIST*EXIT_MULTIPLIER + location.absoluteCurX() + EXIT_PLACE_JITTER*generator.nextGaussian();
+		pos_y=-exit_vec_y*ESCAPE_DIST*EXIT_MULTIPLIER + location.absoluteCurY() + EXIT_PLACE_JITTER*generator.nextGaussian();
 		speed = GalacticStrategyConstants.WARP_EXIT_SPEED;
-		direction = exit_direction; //should already be true, but just in case
+		direction = exit_direction + EXIT_DIRECTION_JITTER*generator.nextGaussian(); //should already be true, but just in case
 		
 		mode=MODES.EXIT_WARP;
 		current_flying_AI = new StopAI();

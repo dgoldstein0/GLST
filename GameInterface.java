@@ -60,12 +60,13 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	SystemPainter SystemPanel;
 	GSystem sys,prev_sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
 	List<Selectable> selected_in_sys, prev_selected;
-	List<Selectable> maybe_select_in_sys; //used to assist with shift/alt support in multiple selection
+	List<Selectable> maybe_select_in_sys, maybe_deselect_in_sys; //used to assist with shift/alt support in multiple selection
 	
 	//for multi-selection in systems
 	int button_down; //the button pressed in mousePressed
 	boolean mouse_was_dragged; //whether we ever had any dragging between mousePressed and mouseReleased
-	boolean clear_for_drag;
+	enum MODIFIER {ALT, SHIFT, NONE};
+	MODIFIER drag_modifier;
 		double mouse_down_x;
 		double mouse_down_y;
 		double cur_x;
@@ -255,6 +256,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		selected_sys = new HashSet<GSystem>();
 		selected_in_sys = new ArrayList<Selectable>();
 		maybe_select_in_sys = new ArrayList<Selectable>();
+		maybe_deselect_in_sys = new ArrayList<Selectable>();
 	
 		//set up game control
 		GC = new GameControl(this);
@@ -272,7 +274,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		select_menu = new JPopupMenu();
 		
 		mouse_was_dragged=false;
-		clear_for_drag=false;
+		drag_modifier=MODIFIER.NONE;
 		sys_scale = 1.0d;
 		sys_center_x = theinterface.getWidth()/2;
 		sys_center_y = theinterface.getHeight()/2;
@@ -385,6 +387,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		List<Selectable> selected = new ArrayList<Selectable>();
 		selected.addAll(selected_in_sys);
 		selected.addAll(maybe_select_in_sys);
+		selected.removeAll(maybe_deselect_in_sys);
 		return selected;
 	}
 	
@@ -458,12 +461,11 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			MouseEvent e=(MouseEvent)a;
 			int x, y;
 			
-			if((MouseEvent.MOUSE_DRAGGED & e.getModifiers()) != 0 && e.getSource() == theinterface && button_down == MouseEvent.BUTTON1)
+			if((MouseEvent.BUTTON1_MASK & e.getModifiers()) == MouseEvent.BUTTON1_MASK && e.getSource() == theinterface && button_down == MouseEvent.BUTTON1)
 			{
 				//handle MouseDragged event here
-				if(clear_for_drag)
+				if(drag_modifier == MODIFIER.NONE)
 				{
-					clear_for_drag=false;
 					selected_in_sys.clear();
 				}
 				
@@ -475,27 +477,60 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				if(maybe_select_in_sys.size() != 0)
 					first_maybe_select = maybe_select_in_sys.get(0);
 				
-				maybe_select_in_sys = new ArrayList<Selectable>();
-				selectInSystemInRange(maybe_select_in_sys,	Math.min(mouse_down_x, cur_x), Math.min(mouse_down_y, cur_y),
+				List<Selectable> mod_selection = (drag_modifier == MODIFIER.ALT) ? maybe_deselect_in_sys : maybe_select_in_sys;
+				mod_selection.clear();
+				selectInSystemInRange(mod_selection,	Math.min(mouse_down_x, cur_x), Math.min(mouse_down_y, cur_y),
 														Math.max(mouse_down_x, cur_x), Math.max(mouse_down_y,cur_y));
 				
-				if(!maybe_select_in_sys.contains(first_maybe_select))
-					first_maybe_select=null;
-				
-				if(/*selected_in_sys.size() != 0 || */maybe_select_in_sys.size() > 1)
+				if(!mod_selection.contains(first_maybe_select))
 				{
-					for(Iterator<Selectable> select_it = maybe_select_in_sys.iterator();select_it.hasNext();)
+					if(mod_selection.size() != 0)
+						first_maybe_select=mod_selection.get(0);
+					else
+						first_maybe_select=null;
+				}
+				
+				List<Selectable> overall_view_ships = combineSelectedInSys();
+				for(Iterator<Selectable> select_it = overall_view_ships.iterator();select_it.hasNext();)
+				{
+					Selectable obj = select_it.next();
+					if(!(obj instanceof Ship) || ((Ship)obj).owner.getId() != GC.player_id)
 					{
-						Selectable obj = select_it.next();
-						if(!(obj instanceof Ship) || ((Ship)obj).owner.getId() != GC.player_id)
-						{
-							select_it.remove();
-						}
+						select_it.remove();
 					}
 				}
 				
-				if(maybe_select_in_sys.size() == 0 && first_maybe_select != null)
-					maybe_select_in_sys.add(first_maybe_select);
+				if(overall_view_ships.size() == 0) //everything is non-ship
+				{
+					switch(drag_modifier)
+					{
+						case SHIFT:
+						case NONE:
+							maybe_deselect_in_sys.clear();
+							maybe_select_in_sys.clear();
+							if(selected_in_sys.size() == 0)
+								maybe_select_in_sys.add(first_maybe_select);
+							break;
+						case ALT:
+							break;
+					}
+				}
+				else
+				{
+					switch(drag_modifier)
+					{
+						case NONE:
+						case SHIFT:
+							maybe_deselect_in_sys = new ArrayList<Selectable>();
+							maybe_deselect_in_sys.addAll(selected_in_sys);
+							maybe_deselect_in_sys.removeAll(overall_view_ships);
+							maybe_select_in_sys = overall_view_ships;
+							maybe_select_in_sys.removeAll(selected_in_sys);
+							break;
+						case ALT:
+							break;
+					}
+				}
 			}
 				
 			Point corner;
@@ -610,8 +645,10 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			
 			button_down = e.getButton();
 			
-			if(!e.isShiftDown() && e.getButton() != MouseEvent.BUTTON3)
-				clear_for_drag=true;
+			if(e.getButton() == MouseEvent.BUTTON1)
+			{
+				drag_modifier = (e.isShiftDown()) ? MODIFIER.SHIFT : ((e.isAltDown()) ? MODIFIER.ALT : MODIFIER.NONE);
+			}
 		}
 	}
 
@@ -655,8 +692,12 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				if(mouse_was_dragged)
 				{
 					mouse_was_dragged=false;
+					
+					//combine selection permanently
 					selected_in_sys.addAll(maybe_select_in_sys);
+					selected_in_sys.removeAll(maybe_deselect_in_sys);
 					maybe_select_in_sys.clear();
+					maybe_deselect_in_sys.clear();
 					
 					if(selected_in_sys.size() == 1)
 					{
@@ -689,7 +730,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
 							system_state = SYS_NORMAL;
 						}
-						else if(selected_in_sys.get(0) instanceof Ship && e.getButton() == MouseEvent.BUTTON3 && ((Ship)selected_in_sys.get(0)).owner.getId() == GC.player_id)
+						else if(selected_in_sys.size() != 0 && selected_in_sys.get(0) instanceof Ship && e.getButton() == MouseEvent.BUTTON3 && ((Ship)selected_in_sys.get(0)).owner.getId() == GC.player_id)
 						{
 							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
 						}

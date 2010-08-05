@@ -1,4 +1,5 @@
 import java.util.HashSet;
+import java.util.Random;
 
 public class Base extends Facility<Base>{
 	
@@ -78,10 +79,12 @@ public class Base extends Facility<Base>{
 			updateStatus(t);
 			soldier_taker.add(enemy);
 			
+			Random gen = new Random(t);
+			
 			while(soldier >= 1 && enemy.getSoldier() >= 1)
 			{
 				double probability=(double) (enemy.getSoldier())/(getSoldier()+enemy.getSoldier());
-				double p=Math.random();
+				double p=gen.nextDouble();
 				if (p<probability)
 					soldier--;
 				else
