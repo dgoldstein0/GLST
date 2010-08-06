@@ -225,7 +225,7 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 		public void run()
 		{
 			ShipCommandPanel panel = GameInterface.GC.GI.ShipPanel;
-			if(panel.the_ship.destination == the_sat)
+			if(panel.the_ship != null && panel.the_ship.destination == the_sat)
 			{
 				panel.updateDestDisplay(panel.the_ship.destination);
 			}

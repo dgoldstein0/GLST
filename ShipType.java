@@ -12,7 +12,7 @@ public enum ShipType
 {
 			//name			fuel	hull	money	metal	time to build	troops	default scale	image					max speed	max ang. vel.	max accel	warp accel	warp speed	warp range
 	MISSILE	("Missile",		5,		10,		0,		0,		2000,			0,		.20d,			"images/missile.png",	.15,		.0015,			.0001,		0.0,		0.0,		0),
-	JUNK	("Junk",		20,		100,	100,	100,	10000,			200,	.30d,			"images/junk.png",		.06,		.0007,			.00003,		.0005,		.0016,		100);
+	JUNK	("Junk",		20,		100,	100,	100,	10000,			400,	.30d,			"images/junk.png",		.06,		.0007,			.00003,		.0005,		.0016,		100);
 	
 	
 	String name;

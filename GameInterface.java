@@ -671,12 +671,22 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 						{
 							int x_dif = the_sys.x-sys.x;
 							int y_dif = the_sys.y-sys.y;
-							int range = ShipPanel.the_ship.warpRange();
+							boolean some_warped=false; //TODO: figure out how to handle if some can warp but not others
 							
-							if(x_dif*x_dif + y_dif*y_dif <= range*range)
+							for(Selectable s : selected_in_sys)
 							{
-								//set this as the ship's warp destination
-								GC.scheduleOrder(new ShipWarpOrder(GC.players[GC.player_id], ShipPanel.the_ship, GC.TC.getNextTimeGrain(), the_sys));
+								int range = ShipPanel.the_ship.warpRange();
+								
+								if(x_dif*x_dif + y_dif*y_dif <= range*range)
+								{
+									//set this as the ship's warp destination
+									some_warped=true;
+									GC.scheduleOrder(new ShipWarpOrder(GC.players[GC.player_id], (Ship)s, GC.TC.getNextTimeGrain(), the_sys));
+								}
+							}
+							
+							if(some_warped)
+							{
 								drawSystem();
 								galaxy_state=GAL_NORMAL;
 							}
@@ -709,6 +719,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 					else if(selected_in_sys.size() > 1)
 					{
 						//mass ship selection
+						displayShipPanel((Ship) selected_in_sys.get(0));
 					}
 					else
 						displayNoPanel();

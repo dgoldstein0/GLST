@@ -7,6 +7,8 @@ public class Moon extends OwnableSatellite<Moon>
 		this.mass=m;
 		this.name=nm;
 		this.size=sz;
+		
+		data_control.saveData();
 	}
 	
 	public Moon(){super();}

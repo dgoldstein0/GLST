@@ -31,9 +31,11 @@ public class RelaxedDataSaverTester {
 			p.data_control.saveData();
 		}
 		
-		System.out.println(p.data_control.saved_data[p.data_control.getIndexForTime(1142)].t);
+		int indx = p.data_control.getIndexForTime(5);
+		System.out.println("indx = " + Integer.toString(indx));
+		System.out.println(p.data_control.saved_data[indx].t);
 
-		p.data_control.revertToTime(1142);
+		p.data_control.revertToTime(5);
 		System.out.println(p.time);
 	}
 

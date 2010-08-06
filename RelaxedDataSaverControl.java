@@ -8,6 +8,8 @@ public abstract class RelaxedDataSaverControl<T extends RelaxedSaveable<T>, S ex
 	@Override
 	public int getIndexForTime(long t)
 	{
+		System.out.println("t is " + Long.toString(t) + " and game time is " + Long.toString(GameInterface.GC.TC.getTime()));
+		
 		/*figure out where the earliest information we still have is stored.
 			either 0, if the whole array has yet to be utilized, or index,
 			because this is the next location to save to*/
@@ -31,7 +33,7 @@ public abstract class RelaxedDataSaverControl<T extends RelaxedSaveable<T>, S ex
 		{
 			if(saved_data[latest].t <= t) //in case latest never changes throughout recursion, in which case we have never tested it.
 				return latest;
-			else if(saved_data[earliest].t < t)
+			else if(saved_data[earliest].t <= t)
 				return earliest;
 			else
 				return -1; //indicates the time being looked for it too old to be found.

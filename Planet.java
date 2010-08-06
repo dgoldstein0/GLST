@@ -19,6 +19,7 @@ public class Planet extends OwnableSatellite<Planet>
 		
 		orbiting=new ArrayList<Satellite<?>>();
 		facilities=new Hashtable<Integer, Facility<?>>();
+		data_control.saveData();
 	}
 	
 	//methods required for load/save
