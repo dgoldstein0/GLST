@@ -305,6 +305,8 @@ public class GameControl
 			p.the_base = b;
 		}
 		
+		map.saveOwnablesData();
+		
 		//start game graphics...
 		GI.drawGalaxy();
 		
@@ -373,6 +375,8 @@ public class GameControl
 			Base b = new Base(p, p.next_facility_id++, (long)0);
 			p.facilities.put(b.id,b);
 			p.the_base = b;
+			
+			map.saveOwnablesData();
 			
 			//display the Galaxy
 			GI.drawGalaxy();

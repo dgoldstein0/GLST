@@ -191,4 +191,13 @@ public class GSystem implements Orbitable<GSystem>
 	
 	public void setId(int i){id=i;}
 	public int getId(){return id;}
+
+	public void saveOwnablesData() {
+		
+		for(Satellite<?> sat : orbiting)
+		{
+			sat.recursiveSaveData();
+		}
+		
+	}
 }

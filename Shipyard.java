@@ -91,6 +91,8 @@ public class Shipyard extends Facility<Shipyard>{
 			manufac_queue.remove(first);
 		}
 		newship.assemble(this, t);
+		
+		last_time=t;
 		data_control.saveData();
 	}
 	

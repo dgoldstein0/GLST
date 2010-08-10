@@ -19,13 +19,13 @@ public class OwnableSatelliteDataSaverControl<T extends OwnableSatellite<T>> ext
 			objs.add(new ReversionEffects.RevertObj(saved_data[indx].fac.get(id), saved_data[indx].t));
 		}
 		
-		for(int i= indx, j=getNextIndex(i); j != index; i=j, j=getNextIndex(j))
+		for(int i = indx, j=getNextIndex(i); j != index; i=j, j=getNextIndex(j))
 		{
 			//list all facilities
 			for(int id : saved_data[j].fac.keySet())
 			{
 				//role back facility to before it existed
-				ReversionEffects.RevertObj obj = new ReversionEffects.RevertObj(saved_data[j].fac.get(id), saved_data[i].t);
+				ReversionEffects.RevertObj obj = new ReversionEffects.RevertObj(saved_data[j].fac.get(id), saved_data[j].t-1);
 				if(!objs.contains(obj))
 					objs.add(obj);
 			}
@@ -52,7 +52,7 @@ public class OwnableSatelliteDataSaverControl<T extends OwnableSatellite<T>> ext
 	
 	protected void doReversionPrep(int indx)
 	{
-		for(int i = getNextIndex(indx); i != index; i++)
+		for(int i = getNextIndex(indx); i != index; i=getNextIndex(i))
 		{
 			saved_data[i].own.changeMoney(-saved_data[i].mon_added);
 		}

@@ -160,6 +160,7 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 					owner.metal -= met;
 					owner.money -= mon; 
 					
+					time=start_time;
 					data_control.saveData();
 					//notify all players ***
 					if(notify)

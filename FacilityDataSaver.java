@@ -5,7 +5,6 @@ public abstract class FacilityDataSaver<T extends Facility<T>> extends DataSaver
 	HashSet<Targetter<?>> aggr;
 	int endu;
 	int dmg;
-	long t;
 	boolean alive;
 	
 	public FacilityDataSaver()

@@ -36,7 +36,7 @@ public class ShipyardDataSaverControl extends FacilityDataSaverControl<Shipyard,
 					if(saved_data[j].t - saved_data[i].t + saved_data[i].time_on_cur_s < ship_in_prog.type.time_to_build)
 						orders.add(new ShipyardCancelBuildOrder(the_obj, saved_data[i].queue.get(k), saved_data[i].t));
 					else
-						objs.add(new ReversionEffects.RevertObj(ship_in_prog, saved_data[i].t));
+						objs.add(new ReversionEffects.RevertObj(ship_in_prog, saved_data[j].t-1));
 				}
 				
 				Set<Integer> new_remove_old = ((Hashtable<Integer, Ship>)saved_data[j].queue.clone()).keySet();

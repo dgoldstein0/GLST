@@ -53,7 +53,7 @@ public abstract class DataSaverControl<T extends Saveable<T>, S extends DataSave
 				{
 					ReversionEffects.RevertObj revertable = objs_it.next();					
 					
-					orders.addAll(revertable.obj.getDataControl().revertToTime(revertable.time_to_revert));
+					orders.addAll(revertable.obj.getDataControl().revertToTime(Math.max(t, revertable.time_to_revert)));
 				}
 				
 				return orders;

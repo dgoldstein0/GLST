@@ -8,5 +8,6 @@ public class Asteroid extends Satellite<Asteroid>
 	
 	public Asteroid(){}
 	
-	public String imageLoc(){return "images/asteroid.jpg";}
+	@Override public String imageLoc(){return "images/asteroid.jpg";}
+	@Override public void recursiveSaveData() {}
 }

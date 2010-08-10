@@ -221,8 +221,8 @@ public abstract class Flyer<T extends Flyer<T,I>, I extends Flyer.FlyerId<I>> ex
 	public double getDirection(){return direction;}
 	public void setSpeed(double s){speed=s;}
 	public void setDirection(double d){direction=d;}
-	public long getTime(){return time;}
-	public void setTime(long t){time=t;}
+	final public long getTime(){return time;}
+	final public void setTime(long t){time=t;}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 	public int getDamage(){return damage;}

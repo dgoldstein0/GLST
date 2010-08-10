@@ -8,7 +8,7 @@ public abstract class RelaxedDataSaverControl<T extends RelaxedSaveable<T>, S ex
 	@Override
 	public int getIndexForTime(long t)
 	{
-		System.out.println("t is " + Long.toString(t) + " and game time is " + Long.toString(GameInterface.GC.TC.getTime()));
+		//System.out.println("t is " + Long.toString(t) + " and game time is " + Long.toString(GameInterface.GC.TC.getTime()));
 		
 		/*figure out where the earliest information we still have is stored.
 			either 0, if the whole array has yet to be utilized, or index,
@@ -36,7 +36,13 @@ public abstract class RelaxedDataSaverControl<T extends RelaxedSaveable<T>, S ex
 			else if(saved_data[earliest].t <= t)
 				return earliest;
 			else
-				return -1; //indicates the time being looked for it too old to be found.
+			{
+				int before_earliest = getPreviousIndex(earliest);
+				if(saved_data[before_earliest].isDataSaved())
+					return -1; //indicates the time being looked for it too old to be found.
+				else
+					return before_earliest; //will find later that data is not saved
+			}
 		}
 		
 		int middle_indx = translateNormalToActualIndex((translateToNormalArrayIndex(earliest) + translateToNormalArrayIndex(latest))/2);

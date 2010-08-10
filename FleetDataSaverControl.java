@@ -24,7 +24,7 @@ public class FleetDataSaverControl extends RelaxedDataSaverControl<Fleet, FleetD
 		{
 			for(Ship.ShipId id : saved_data[j].ships.keySet())
 			{
-				ReversionEffects.RevertObj obj = new ReversionEffects.RevertObj(saved_data[j].ships.get(id), saved_data[i].t);
+				ReversionEffects.RevertObj obj = new ReversionEffects.RevertObj(saved_data[j].ships.get(id), saved_data[j].t-1);
 				if(!ships_to_revert.contains(obj))
 					ships_to_revert.add(obj);
 			}

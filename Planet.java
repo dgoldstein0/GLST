@@ -39,4 +39,13 @@ public class Planet extends OwnableSatellite<Planet>
 	}
 	
 	public String imageLoc(){return "images/planet.jpg";}
+
+	@Override
+	public void recursiveSaveData() {
+		data_control.saveData();
+		for(Satellite<?> sat : orbiting)
+		{
+			sat.recursiveSaveData();
+		}
+	}
 }

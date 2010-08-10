@@ -26,7 +26,7 @@ public class ShipyardBuildShipOrder extends Order {
 		if(the_yard != null)
 		{	
 			OwnableSatelliteDataSaverControl<?> ctrl = the_yard.location.data_control;
-			if(player_id == ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].own.getId())
+			if(GameInterface.GC.players[player_id] == ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].own)
 			{
 				Set<Order> orders = the_yard.data_control.revertToTime(scheduled_time);
 				orders.addAll(the_yard.location.data_control.revertToTime(scheduled_time)); //make sure it uses the right owner

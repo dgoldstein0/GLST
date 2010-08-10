@@ -38,7 +38,10 @@ public class CancelFacilityBuildOrder extends Order {
 						/*don't add these orders to the returned Set - we are, after all, canceling the facility,
 						so all orders that go along with it thus become void*/
 						
-						the_sat.facilities.get(data.next_fac_id).data_control.revertToTime(scheduled_time);
+						Facility<?> the_fac = the_sat.facilities.get(data.next_fac_id);
+						
+						if(the_fac != null)
+							the_fac.data_control.revertToTime(scheduled_time);
 					}
 				}
 				orders_to_reexecute = the_sat.data_control.revertToTime(scheduled_time);

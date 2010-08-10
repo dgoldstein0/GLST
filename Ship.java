@@ -78,7 +78,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		orderToMove(time, builder.location); //this call does not go via the game Order handling system.  all computers should issue these orders on their own.
 	}
 	
-	//updates the ship an increment towards time t - moving and attacking.  return value is ignored
+	//updates the ship an increment towards time t - moving and attacking.  return value is meaningless/ignored
 	//DOES NOT SAVE DATA
 	public boolean update(long t, Fleet.ShipIterator shipIteration)
 	{
@@ -152,7 +152,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 				pos_x += dist_moved*exit_vec_x;
 				pos_y += dist_moved*exit_vec_y;
 				time=t;
-				return false;
+				data_control.saveData();
 			}
 		}
 		return false;

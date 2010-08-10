@@ -19,4 +19,12 @@ public class Galaxy
 	public String getName(){return name;}
 	public void setStart_locations(ArrayList<OwnableSatellite<?>> loc){start_locations = loc;}
 	public ArrayList<OwnableSatellite<?>> getStart_locations(){return start_locations;}
+
+	public void saveOwnablesData() {
+		
+		for(GSystem s : systems)
+		{
+			s.saveOwnablesData();
+		}
+	}
 }

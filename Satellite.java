@@ -106,4 +106,6 @@ public abstract class Satellite<T extends Satellite<T>> extends StellarObject im
 	double y_coord;
 	double x_vel;
 	double y_vel;
+
+	public abstract void recursiveSaveData();
 }

@@ -68,9 +68,11 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 			{
 				data_control.saveData();
 			}
+			
+			time += GalacticStrategyConstants.TIME_GRANULARITY;
 		}
 		
-		time += GalacticStrategyConstants.TIME_GRANULARITY;
+
 		
 		return retval;
 	}

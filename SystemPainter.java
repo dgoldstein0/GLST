@@ -134,10 +134,13 @@ public class SystemPainter extends JPanel
 			{
 				if(system.fleets[i] != null)
 				{
-					for(Ship.ShipId j : system.fleets[i].ships.keySet())
+					synchronized(system.fleets[i].lock)
 					{
-						Flyer<?,?> f = system.fleets[i].ships.get(j);
-						drawFlyer(g2,f,system.fleets[i].owner.getColor());
+						for(Ship.ShipId j : system.fleets[i].ships.keySet())
+						{
+							Flyer<?,?> f = system.fleets[i].ships.get(j);
+							drawFlyer(g2,f,system.fleets[i].owner.getColor());
+						}
 					}
 				}
 			}

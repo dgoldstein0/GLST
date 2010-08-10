@@ -22,4 +22,9 @@ public class Moon extends OwnableSatellite<Moon>
 	}
 	
 	public String imageLoc(){return "images/moon.jpg";}
+
+	@Override
+	public void recursiveSaveData() {
+		data_control.saveData();
+	}
 }

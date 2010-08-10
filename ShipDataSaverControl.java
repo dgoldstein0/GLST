@@ -56,11 +56,11 @@ public class ShipDataSaverControl extends FlyerDataSaverControl<Ship, ShipDataSa
 						break;
 					case EXIT_WARP:
 						//mark fleet of system we arrived in for reversion
-						objs.add(new ReversionEffects.RevertObj(saved_data[j].loc.fleets[the_obj.owner.getId()],saved_data[i].t));
+						objs.add(new ReversionEffects.RevertObj(saved_data[j].loc.fleets[the_obj.owner.getId()],saved_data[j].t-1));
 						break;
 					case IN_WARP:
 						//mark fleet of system we left for reversion
-						objs.add(new ReversionEffects.RevertObj(saved_data[i].loc.fleets[the_obj.owner.getId()],saved_data[i].t));
+						objs.add(new ReversionEffects.RevertObj(saved_data[i].loc.fleets[the_obj.owner.getId()],saved_data[j].t-1));
 						break;
 				}
 			}
