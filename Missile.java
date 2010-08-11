@@ -54,7 +54,7 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 	{
 		boolean retval = false;
 		
-		if (time <= t)
+		if (time < t)
 		{
 			moveIncrement();
 			

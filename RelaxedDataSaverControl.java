@@ -65,20 +65,4 @@ public abstract class RelaxedDataSaverControl<T extends RelaxedSaveable<T>, S ex
 	{
 		return (i+index)%saved_data.length;
 	}
-	
-	@Override
-	public void saveData()
-	{
-		int prev_index = getPreviousIndex(index);
-		if(saved_data[prev_index].t == ((T)the_obj).getTime())
-			saved_data[prev_index].saveData(the_obj);
-		else
-		{
-			saved_data[index].saveData(the_obj);
-	
-			index++;
-			if (index>GalacticStrategyConstants.data_capacity-1)
-				index=0;
-		}
-	}
 }

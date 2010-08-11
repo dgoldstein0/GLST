@@ -10,6 +10,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.JFileChooser;
 import java.awt.Color;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
 import java.util.concurrent.PriorityBlockingQueue;
 
 public class GameControl
@@ -869,12 +870,21 @@ public class GameControl
 		
 		public void run()
 		{
-			updateGame();
+			try
+			{
+				updateGame();
+			}
+			catch (DataSaverControl.DataNotYetSavedException e)
+			{
+				//TODO: work on exception handling
+				e.printStackTrace();
+				throw new RuntimeException();
+			}
 			//System.out.println("update!!" + Long.toString(TC.getTime()));
 		}
 	}
 	
-	public void updateGame()
+	public void updateGame() throws DataSaverControl.DataNotYetSavedException
 	{
 		long time_elapsed=TC.getTime();
 		long update_to=TC.getLast_time_updated();

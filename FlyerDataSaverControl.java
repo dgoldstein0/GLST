@@ -5,7 +5,7 @@ public abstract class FlyerDataSaverControl<T extends Flyer<T, ?>, S extends Fly
 		super(f, c);
 	}
 	
-	public int getIndexForTime(long t)
+	public int getIndexForTime(long t) throws DataNotYetSavedException
 	{
 		System.out.println("t is " + Long.toString(t) + " and game time is " + Long.toString(GameInterface.GC.TC.getTime()));
 		
@@ -16,10 +16,10 @@ public abstract class FlyerDataSaverControl<T extends Flyer<T, ?>, S extends Fly
 		{
 			System.out.println("Error loading ship data: the delay is too long"); //BOOKMARK - how should these errors be dealt with
 		}
-		else if(stepback < 0) //TODO: possibly remove this sanity check, if it never turns up anything.
+		else if(stepback <= 0)
 		{
 			System.out.println("Major consistency error: stepback in getIndexForTime is " + Integer.toString(stepback) + "with t=" + Long.toString(t) + " and time="+Long.toString(the_obj.getTime()));
-			throw new RuntimeException();
+			throw new DataNotYetSavedException(stepback);
 		}
 		else
 		{

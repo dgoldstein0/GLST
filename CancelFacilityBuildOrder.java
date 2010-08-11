@@ -16,7 +16,7 @@ public class CancelFacilityBuildOrder extends Order {
 		mode = Order.ORIGIN;
 	}
 	
-	public Set<Order> execute(Galaxy g)
+	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.NETWORK)
 		{

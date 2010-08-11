@@ -34,7 +34,12 @@ public class RelaxedDataSaverTester {
 		System.out.println("indx = " + Integer.toString(indx));
 		System.out.println(p.data_control.saved_data[indx].t);
 
-		p.data_control.revertToTime(17);
+		try {
+			p.data_control.revertToTime(17);
+		} catch (DataSaverControl.DataNotYetSavedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println(p.time);
 	}
 

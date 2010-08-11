@@ -24,7 +24,7 @@ public class ShipAttackOrder extends Order
 		target_t=target_time;
 	}
 	
-	public Set<Order> execute(Galaxy g)
+	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.NETWORK)
 		{

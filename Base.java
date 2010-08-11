@@ -71,7 +71,6 @@ public class Base extends Facility<Base>{
 		return giving;
 	}
 	
-	@Deprecated
 	public void attackedByTroops(long t, Ship enemy) 
 	{
 		synchronized(soldier_lock)

@@ -1,6 +1,7 @@
 import java.util.Set;
 import java.util.HashSet;
 
+
 public class ShipMoveOrder extends Order
 {
 	Ship the_ship;
@@ -26,7 +27,7 @@ public class ShipMoveOrder extends Order
 		scheduled_time=t;
 	}
 	
-	public Set<Order> execute(Galaxy g)
+	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.NETWORK)
 		{

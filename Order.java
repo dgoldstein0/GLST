@@ -8,7 +8,7 @@ public abstract class Order implements Comparable<Order>
 	int mode;
 	long scheduled_time;
 	
-	public abstract Set<Order> execute(Galaxy g);
+	public abstract Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException;
 	/**This function must perform the following tasks:
 	 * 1) retrieve objects from their describers, if the order came over the network
 	 * 2) check the validity of the order.  If not valid, return an empty set.

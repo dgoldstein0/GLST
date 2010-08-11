@@ -25,14 +25,20 @@ public abstract class DataSaverControl<T extends Saveable<T>, S extends DataSave
 	{
 		//if(the_obj instanceof Ship)
 		//	System.out.println(Integer.toString(((Ship)the_obj).id.queue_id) + " saving time " + Long.toString(((Ship)the_obj).time) + " at index " + Integer.toString(index));
-		
-		saved_data[index].saveData(the_obj);
 
-		index = getNextIndex(index);
+		int prev_index = getPreviousIndex(index);
+		if(saved_data[prev_index].t == ((T)the_obj).getTime())
+			saved_data[prev_index].saveData(the_obj);
+		else
+		{
+			saved_data[index].saveData(the_obj);
+	
+			index = getNextIndex(index);
+		}
 	}
 	
 
-	final public Set<Order> revertToTime(long t)
+	final public Set<Order> revertToTime(long t) throws DataSaverControl.DataNotYetSavedException
 	{		
 		if(saved_data[getPreviousIndex(index)].isDataSaved() && saved_data[getPreviousIndex(index)].t > t) //this check helps ensure we do not get into an infinite recursion.  Empty sets from deduceEffectsAfterIndex could serve same purpose
 		{
@@ -71,7 +77,7 @@ public abstract class DataSaverControl<T extends Saveable<T>, S extends DataSave
 			return new HashSet<Order>();
 	}
 	
-	public abstract int getIndexForTime(long t);
+	public abstract int getIndexForTime(long t) throws DataNotYetSavedException;
 	protected abstract ReversionEffects deduceEffectedAfterIndex(int i);
 	
 	protected int getNextIndex(int i)
@@ -91,5 +97,15 @@ public abstract class DataSaverControl<T extends Saveable<T>, S extends DataSave
 	{
 		public abstract S create();
 		public abstract S[] createArray();
+	}
+	
+	public static class DataNotYetSavedException extends Exception
+	{
+		final int stepback;
+		
+		public DataNotYetSavedException(int step)
+		{
+			stepback = step;
+		}
 	}
 }

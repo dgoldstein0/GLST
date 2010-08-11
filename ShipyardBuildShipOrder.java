@@ -19,7 +19,7 @@ public class ShipyardBuildShipOrder extends Order {
 	}
 	
 	@Override
-	public Set<Order> execute(Galaxy g) {
+	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
 		if(mode==NETWORK)
 			the_yard = shipyard_describer.retrieveObject(g, scheduled_time);
 		

@@ -53,9 +53,26 @@ public abstract class Flyer<T extends Flyer<T,I>, I extends Flyer.FlyerId<I>> ex
 	public Flyer(){}
 	
 	public boolean isAlive(){return is_alive;}
-	public boolean isAliveAt(long t)
+	public boolean isAliveAt(long t) throws DataSaverControl.DataNotYetSavedException
 	{
-		return data_control.saved_data[data_control.getIndexForTime(t)].is_alive;
+		if(t == time + GalacticStrategyConstants.TIME_GRANULARITY)
+			return isAlive();
+		else
+		{
+			try
+			{
+				return data_control.saved_data[data_control.getIndexForTime(t)].is_alive;
+			}
+			catch(DataSaverControl.DataNotYetSavedException e)
+			{
+				if(!data_control.saved_data[data_control.getPreviousIndex(data_control.index)].is_alive)
+					return false;
+				/*else if (e.stepback == 0) //not necessary due to first if in the function
+					return true;*/
+				else
+					throw e; //TODO: in Java 1.7, this can be changed to throw;
+			}
+		}
 	}
 	
 	//ship physics functions
@@ -185,14 +202,20 @@ public abstract class Flyer<T extends Flyer<T,I>, I extends Flyer.FlyerId<I>> ex
 	//this method is used to fill in cached data
 	private void updateDestData(long t)
 	{
-		int index_at_t = data_control.getIndexForTime(t);
-		//System.out.println("TIME is " + Long.toString(time) + " and t is " + Long.toString(t));
-		FlyerDataSaver<?> ds =  (FlyerDataSaver<?>)data_control.saved_data[index_at_t];
-		dest_pos_x = ds.px;
-		dest_pos_y = ds.py;
-		dest_vel_x = ds.sp*Math.cos(ds.dir);
-		dest_vel_y = ds.sp*Math.sin(ds.dir);
-		dest_coords_time = t;
+		try {
+			int index_at_t = data_control.getIndexForTime(t);
+			//System.out.println("TIME is " + Long.toString(time) + " and t is " + Long.toString(t));
+			FlyerDataSaver<?> ds =  (FlyerDataSaver<?>)data_control.saved_data[index_at_t];
+			dest_pos_x = ds.px;
+			dest_pos_y = ds.py;
+			dest_vel_x = ds.sp*Math.cos(ds.dir);
+			dest_vel_y = ds.sp*Math.sin(ds.dir);
+			dest_coords_time = t;
+		} catch (DataSaverControl.DataNotYetSavedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
 	}
 	
 	//for Saveable

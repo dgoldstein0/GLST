@@ -20,7 +20,7 @@ public class ShipPickupTroopsOrder extends Order {
 		scheduled_time=t;
 	}
 	
-	public Set<Order> execute(Galaxy g)
+	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.NETWORK)
 		{

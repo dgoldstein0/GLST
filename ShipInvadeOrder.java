@@ -15,7 +15,7 @@ public class ShipInvadeOrder extends Order {
 	}
 	
 	@Override
-	public Set<Order> execute(Galaxy g) {
+	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
 		
 		if(mode == Order.NETWORK)
 			the_ship = ship_desc.retrieveObject(g, scheduled_time);

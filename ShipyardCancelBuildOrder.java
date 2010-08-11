@@ -24,7 +24,7 @@ public class ShipyardCancelBuildOrder extends Order {
 	}
 	
 	@Override
-	public Set<Order> execute(Galaxy g) {
+	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
 		if(mode==NETWORK)
 			the_yard = (Shipyard)shipyard_describer.retrieveObject(g, scheduled_time);
 		

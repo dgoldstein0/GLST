@@ -8,5 +8,5 @@ public interface Targetable<T extends Targetable<T>> extends Destination<T>, Sav
 	public abstract void addAggressor(Targetter<?> t);
 	public abstract void removeAggressor(Targetter<?> t);
 	public abstract boolean isAlive();
-	public abstract boolean isAliveAt(long t);
+	public abstract boolean isAliveAt(long t) throws DataSaverControl.DataNotYetSavedException;
 }
