@@ -223,15 +223,24 @@ public abstract class Flyer<T extends Flyer<T,I>, I extends Flyer.FlyerId<I>> ex
 	
 	//for Targetable
 	public HashSet<Targetter<?>> getAggressors(){return aggressors;}
-	public void addAggressor(Targetter<?> t){aggressors.add(t);}
-	public void removeAggressor(Targetter<?> t){aggressors.remove(t);}
+	public void addAggressor(Targetter<?> t)
+	{
+		aggressors.add(t);
+		data_control.saveData();
+	}
+	public void removeAggressor(Targetter<?> t)
+	{
+		aggressors.remove(t);
+		data_control.saveData();
+	}
 	
 	@Override
 	public void addDamage(long t, int d)
-	{ //t is ignored
+	{ //TODO: t is ignored... should it be?
 		damage+=d;
 		if(damage>=type.hull)
 			destroyed();
+		data_control.saveData();
 	}
 	
 	public ShipType getType(){return type;}

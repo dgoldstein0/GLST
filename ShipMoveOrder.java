@@ -53,6 +53,7 @@ public class ShipMoveOrder extends Order
 			/*TODO: should we revert destination?  this implementation assumes setting an object as a
 			 * destination has no effect on that object.  As of 7/13/10, this is true.*/
 			
+			the_ship.update(scheduled_time, null);
 			the_ship.orderToMove(scheduled_time, the_dest);
 			
 			return orders;

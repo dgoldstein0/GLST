@@ -44,7 +44,6 @@ public abstract class Facility<T extends Facility<T>> implements Targetable<T>, 
 		synchronized(location.facilities_lock)
 		{
 			is_alive=false;
-			data_control.saveData();
 			location.facilities.remove(this);
 		}
 	}
@@ -97,8 +96,17 @@ public abstract class Facility<T extends Facility<T>> implements Targetable<T>, 
 	
 	@Override public HashSet<Targetter<?>> getAggressors(){return aggressors;}
 	
-	@Override public void addAggressor(Targetter<?> t){aggressors.add(t);}
-	@Override public void removeAggressor(Targetter<?> t){aggressors.remove(t);}
+	@Override public void addAggressor(Targetter<?> t)
+	{
+		aggressors.add(t);
+		data_control.saveData();
+	}
+	
+	@Override public void removeAggressor(Targetter<?> t)
+	{
+		aggressors.remove(t);
+		data_control.saveData();
+	}
 	public abstract void updateStatus(long t);
 	public abstract String getName();
 	public abstract FacilityType getType();

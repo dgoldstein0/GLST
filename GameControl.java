@@ -1008,7 +1008,7 @@ public class GameControl
 				}
 				
 				//NOTE: Missile collision detection relies on Missiles being updated after ships.  See Missile.collidedWithTarget
-				//update all missiles AND save data - safe because MISSILES CAN'T HIT MISSILES
+				//update all missiles AND save data
 				synchronized(sys.missiles)
 				{
 					Iterator<Missile.MissileId> missile_iteration = sys.missiles.keySet().iterator();
@@ -1016,20 +1016,6 @@ public class GameControl
 					{
 						i=missile_iteration.next();
 						sys.missiles.get(i).update(update_to, missile_iteration); //returns true if the missile detonates
-					}
-				}
-				
-				//save data for all ships
-				for(int i=0; i<sys.fleets.length; i++)
-				{
-					synchronized(sys.fleets[i].lock)
-					{
-						Fleet.ShipIterator ship_iteration = sys.fleets[i].iterator();
-						for(Ship.ShipId j; ship_iteration.hasNext();)
-						{
-							j=ship_iteration.next();
-							sys.fleets[i].ships.get(j).data_control.saveData();
-						}
 					}
 				}
 			}

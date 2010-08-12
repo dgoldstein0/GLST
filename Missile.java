@@ -71,9 +71,7 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 			
 			time += GalacticStrategyConstants.TIME_GRANULARITY;
 		}
-		
-
-		
+				
 		return retval;
 	}
 	
@@ -122,7 +120,6 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 			location.missiles.remove(id, time); //must call remove with the Key and not the Value
 		}
 		is_alive=false;
-		data_control.saveData(); //TODO: examine consequences of this
 	}
 	
 	@Override

@@ -1,3 +1,4 @@
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -99,7 +100,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 					attack(time);
 					break;
 				case TRAVEL_TO_WARP:
-					if(clearToWarp())
+					if(isClearToWarp())
 					{
 						System.out.println("clear to warp!");
 						mode=MODES.ENTER_WARP;
@@ -120,6 +121,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 					break;
 			}
 			time += GalacticStrategyConstants.TIME_GRANULARITY;
+			data_control.saveData();
 		}
 		return false;
 	}
@@ -152,8 +154,8 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 				pos_x += dist_moved*exit_vec_x;
 				pos_y += dist_moved*exit_vec_y;
 				time=t;
-				data_control.saveData();
 			}
+			data_control.saveData();
 		}
 		return false;
 	}
@@ -178,7 +180,6 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	
 	public void orderToMove(long t, Destination<?> d)
 	{
-		update(t, null);
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP) //to ensure if the interface tries to issue an order, it can't
 		{
 			destination = d;
@@ -195,13 +196,13 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
 			
 			mode=MODES.MOVING;
+			data_control.saveData();
 			//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 		}
 	}
 	
 	public void orderToAttack(long t, Targetable<?> tgt)
 	{
-		update(t, null);
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP)
 		{
 			//System.out.println(Integer.toString(id) + "orderToAttack: t is " + Long.toString(t));
@@ -215,12 +216,12 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 			
 			//TODO: get constant 5 out of here
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.Attacking_Range-5, TrackingAI.STOP);
+			data_control.saveData();
 		}
 	}
 	
 	public void orderToWarp(long t, GSystem sys)
 	{
-		update(t, null);
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP && sys != location) //if sys == location, user means to cancel warp command.
 		{
 			if(target != null)
@@ -244,12 +245,12 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 			exit_direction = Math.atan2(exit_vec_y, exit_vec_x);
 			
 			current_flying_AI = new WarpAI(this);
+			data_control.saveData();
 		}
 	}
 	
 	public void orderToInvade(OwnableSatellite<?> sat, long t)
 	{
-		update(t, null);
 		if(mode == MODES.MOVING || mode == MODES.ATTACKING)
 		{
 			double x_dif = pos_x-sat.getXCoord(t);
@@ -271,11 +272,12 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 					((OwnableSatellite<?>)destination).setOwner(getOwner(), t);
 				}
 			}
+			data_control.saveData();
 		}
 	}
 	
 	public void orderToPickupTroops(long t) {
-		update(t, null);
+		
 		if(mode == MODES.MOVING &&
 				destination instanceof OwnableSatellite<?> &&
 				((OwnableSatellite<?>)destination).getOwner() == owner &&
@@ -283,6 +285,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 				soldier < type.soldier_capacity)
 		{
 			mode = MODES.PICKUP_TROOPS;
+			data_control.saveData();
 		}
 	}
 	
@@ -301,6 +304,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 				{
 					soldier += ((OwnableSatellite<?>)destination).the_base.retrieveSoldiers(time+GalacticStrategyConstants.TIME_GRANULARITY, get_soldiers, this);
 				}
+				data_control.saveData();
 			}
 			return true;
 		}
@@ -328,7 +332,15 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		aggressors.clear();
 		
 		//deselect the ship, if it was selected
-		SwingUtilities.invokeLater(new ShipDeselector(this));
+		try {
+			SwingUtilities.invokeAndWait(new ShipDeselector(this));
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		//compute details of flight plan
 		pos_x=location.x;
@@ -338,6 +350,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		
 		mode=MODES.IN_WARP;
 		owner.ships_in_transit.add(this);
+		data_control.saveData();
 	}
 	
 	private void disengageWarpDrive(Iterator<Ship> ship_it)
@@ -359,6 +372,8 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		
 		ship_it.remove();//owner.ships_in_transit.remove(this);
 		location.fleets[owner.getId()].add(this, arrival_time);
+		
+		//no data_control.saveData() here since this method is only called from moveDuringWarp and that does the saveData
 	}
 	
 	/*this function returns true IF:
@@ -371,7 +386,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 				not other way around)
 	*/
 	
-	private boolean clearToWarp()
+	private boolean isClearToWarp()
 	{
 		if(direction != exit_direction)
 			return false;
@@ -423,20 +438,27 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	
 	public void destroyed()
 	{
-		//System.out.println("destroyed-before");	
+		System.out.println("destroyed-before");	
 		if(location.fleets[owner.getId()].remove(this, time))//if is so in case another attack has already destroyed the ship, but both call the destroyed method
 		{
 			is_alive=false;
-			data_control.saveData();
 			
 			//notify aggressors
 			for(Targetter<?> t : aggressors)
 				t.targetIsDestroyed(time);
 			
 			//notify interface
-			SwingUtilities.invokeLater(new ShipDeselector(this));
+			try {
+				SwingUtilities.invokeAndWait(new ShipDeselector(this));
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 				
-			//System.out.println("destroyed-after");
+			System.out.println("destroyed-after");
 		}
 	}
 	
@@ -477,8 +499,10 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	
 	public void targetLost(LOST_REASON reason, long t, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
 	{
-		if (destination==target)
+		//System.out.println("target lost");
+		if (destination==(Destination<?>)target)
 		{
+			//System.out.println("\tchanging destination...");
 			destination=new DestinationPoint(target.getXCoord(t),target.getYCoord(t));
 			SwingUtilities.invokeLater(new DestUpdater(this));
 		}
@@ -492,6 +516,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		}
 		
 		target=null;
+		data_control.saveData();
 		//TODO: player notification - THIS SHOULD USE LOST_REASON
 	}
 	

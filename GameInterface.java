@@ -936,7 +936,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			
 			if(dest instanceof Ship && dest != ShipPanel.the_ship)
 			{
-				GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, GC.TC.getTimeGrainAfter(time), time, (Targetable<Ship>)dest));
+				GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, GC.TC.getTimeGrainAfter(time), time, (Targetable<?>)dest));
 			}
 		}
 	}

@@ -7,7 +7,7 @@ public abstract class FlyerDataSaverControl<T extends Flyer<T, ?>, S extends Fly
 	
 	public int getIndexForTime(long t) throws DataNotYetSavedException
 	{
-		System.out.println("t is " + Long.toString(t) + " and game time is " + Long.toString(GameInterface.GC.TC.getTime()));
+		//System.out.println("t is " + Long.toString(t) + " and game time is " + Long.toString(GameInterface.GC.TC.getTime()));
 		
 		int stepback=(int) (Math.floor((the_obj.getTime()-t)/GalacticStrategyConstants.TIME_GRANULARITY) + 1);
 		int indx=-1;

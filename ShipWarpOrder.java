@@ -32,6 +32,7 @@ public class ShipWarpOrder extends Order
 		
 		if(the_ship != null && the_ship.isAliveAt(scheduled_time) && the_ship.owner.getId() == player_id)
 		{
+			the_ship.update(scheduled_time, null);
 			Set<Order> orders = the_ship.data_control.revertToTime(scheduled_time);
 			the_ship.orderToWarp(scheduled_time, the_dest);
 			return orders;

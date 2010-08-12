@@ -23,8 +23,9 @@ public class ShipInvadeOrder extends Order {
 		//validate order
 		if(the_ship != null)
 		{
+			the_ship.update(scheduled_time, null); //update by one increment - this will do nothing if we are already past up to date/in need of reversion
 			ShipDataSaver data = (ShipDataSaver)the_ship.data_control.saved_data[the_ship.data_control.getIndexForTime(scheduled_time)];
-			if(data.is_alive && data.dest instanceof OwnableSatellite<?>)
+			if(the_ship.isAliveAt(scheduled_time) && data.dest instanceof OwnableSatellite<?>)
 			{
 				Set<Order> orders = the_ship.data_control.revertToTime(scheduled_time);
 				orders.addAll(((OwnableSatellite<?>)the_ship.destination).getDataControl().revertToTime(scheduled_time));
