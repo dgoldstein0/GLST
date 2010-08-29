@@ -215,7 +215,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		c.gridy = 1;    
 		tabbedPane.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 		panel.add(tabbedPane,c);
-
+		prev_scale=1.0;
 
 		//create the interface
 		theinterface = new JPanel(new BorderLayout());
