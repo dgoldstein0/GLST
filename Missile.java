@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Missile extends Flyer<Missile, Missile.MissileId>
+public class Missile extends Flyer<Missile, Missile.MissileId, Iterator<Missile.MissileId>>
 {
 	private final double Collide_Range=10.0;
 	MissileId id;
@@ -50,6 +50,7 @@ public class Missile extends Flyer<Missile, Missile.MissileId>
 	}
 	
 	//returns true when the missile detonates, false otherwise
+	@Override
 	public boolean update(long t, Iterator<MissileId> missileIteration)
 	{
 		boolean retval = false;

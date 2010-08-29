@@ -12,7 +12,7 @@ public class TrackingAI extends FlyerAI
 		//for following an object closely, like a planet, use low tol and ms=MATCH_SPEED
 		//for attacking / following at a distance, use high tol and ms=true
 		//missiles use ms=NO_SLOWDOWN, so they don't try to match their target's manuevers but rather will plow right into their targets
-	public TrackingAI(Flyer<?,?> f, double tol, int ms)
+	public TrackingAI(Flyer<?,?,?> f, double tol, int ms)
 	{
 		the_flyer = f;
 		dest_tolerance = tol;

@@ -48,12 +48,15 @@ public class ShipMoveOrder extends Order
 		{
 			//System.out.println("\trevert and execute...");
 			
+			the_ship.update(scheduled_time, null);
 			Set<Order> orders = the_ship.data_control.revertToTime(scheduled_time);
 			
 			/*TODO: should we revert destination?  this implementation assumes setting an object as a
 			 * destination has no effect on that object.  As of 7/13/10, this is true.*/
 			
-			the_ship.update(scheduled_time, null);
+			if(the_dest instanceof Flyer<?,?,?>)
+				((Flyer<?,?,?>)the_dest).update(scheduled_time,null);
+			
 			the_ship.orderToMove(scheduled_time, the_dest);
 			
 			return orders;

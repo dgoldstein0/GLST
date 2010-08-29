@@ -803,27 +803,43 @@ public class GameControl
 			BufferedReader br = new BufferedReader(new InputStreamReader(IS));
 			try
 			{
-				while(!Thread.interrupted())
+				Boolean connected=true;
+				while(!Thread.interrupted() && connected)
 				{
 					System.out.println("reading object...");
 					String line="";
 					StringBuffer str = new StringBuffer("");
+					
 					Boolean kill=false;
 					while(!kill)
 					{
 						str.append(line);
 						if(line.indexOf("</java>") == -1)
-							line = br.readLine(); //TODO: when does this result in null?
+						{
+							line = br.readLine();
+							if(line==null)
+							{
+								kill=true;
+								connected=false;
+							}
+						}
 						else
 							kill=true;
 					}
 					
-					ByteArrayInputStream sr = new ByteArrayInputStream(str.toString().getBytes("UTF-8"));
-					XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(sr));
-					Order o =(Order) decoder.readObject();
-					decoder.close();
-					pending_execution.add(o);
+					if(connected)
+					{
+						ByteArrayInputStream sr = new ByteArrayInputStream(str.toString().getBytes("UTF-8"));
+						XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(sr));
+						Order o =(Order) decoder.readObject(); //TODO: add in leaving message, which will need to be handled differently here
+						decoder.close();
+						System.out.println("\t" + o.getClass().getName());
+						pending_execution.add(o);
+					}
 				}
+				
+				if(!connected)
+					JOptionPane.showMessageDialog(GI.frame, "Connection Lost.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 			catch(IOException ioe)
 			{

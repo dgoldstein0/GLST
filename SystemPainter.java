@@ -138,7 +138,7 @@ public class SystemPainter extends JPanel
 					{
 						for(Ship.ShipId j : system.fleets[i].ships.keySet())
 						{
-							Flyer<?,?> f = system.fleets[i].ships.get(j);
+							Flyer<?,?,?> f = system.fleets[i].ships.get(j);
 							drawFlyer(g2,f,system.fleets[i].owner.getColor());
 						}
 					}
@@ -149,7 +149,7 @@ public class SystemPainter extends JPanel
 			{
 				for(Missile.MissileId i : system.missiles.keySet())
 				{
-					drawFlyer(g2,(Flyer<Missile, Missile.MissileId>)system.missiles.get(i),null);
+					drawFlyer(g2,(Flyer<Missile, Missile.MissileId, Iterator<Missile.MissileId>>)system.missiles.get(i),null);
 				}
 			}
 			
@@ -200,7 +200,7 @@ public class SystemPainter extends JPanel
 			g2.drawImage(return_arrow, getWidth()-arrow_size, 0, arrow_size, arrow_size, this);
 	}
 	
-	private void drawFlyer(Graphics2D g2, Flyer<?,?> s, Color c)
+	private void drawFlyer(Graphics2D g2, Flyer<?,?,?> s, Color c)
 	{
 		// Get the current transform
 		AffineTransform saveAT = g2.getTransform();

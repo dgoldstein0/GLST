@@ -4,7 +4,7 @@ import java.util.Random;
 
 import javax.swing.SwingUtilities;
 
-public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
+public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implements Selectable
 {
 	final static double ESCAPE_DIST = 300.0;
 	final static double EXIT_MULTIPLIER = 2.0; //the multiple of ESCAPE_DIST at which ships exit from warp
@@ -81,6 +81,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 	
 	//updates the ship an increment towards time t - moving and attacking.  return value is meaningless/ignored
 	//DOES NOT SAVE DATA
+	@Override
 	public boolean update(long t, Fleet.ShipIterator shipIteration)
 	{
 		//TODO: update this comment
@@ -332,15 +333,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 		aggressors.clear();
 		
 		//deselect the ship, if it was selected
-		try {
-			SwingUtilities.invokeAndWait(new ShipDeselector(this));
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		SwingUtilities.invokeLater(new ShipDeselector(this));
 		
 		//compute details of flight plan
 		pos_x=location.x;
@@ -448,15 +441,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId> implements Selectable
 				t.targetIsDestroyed(time);
 			
 			//notify interface
-			try {
-				SwingUtilities.invokeAndWait(new ShipDeselector(this));
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			SwingUtilities.invokeLater(new ShipDeselector(this));
 				
 			System.out.println("destroyed-after");
 		}

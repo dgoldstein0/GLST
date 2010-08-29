@@ -1,6 +1,7 @@
 import java.util.HashSet;
+import java.util.Iterator;
 
-public abstract class Flyer<T extends Flyer<T,I>, I extends Flyer.FlyerId<I>> extends Targetter<T>
+public abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends Flyer.FlyerId<ID>, ITERATOR extends Iterator<ID>> extends Targetter<T>
 {
 	//these two constants are used by loadData for its second argument, to
 	//instruct it whether or not to call loadMoreData from the FlyerDataSaver (or subclass thereof)
@@ -11,7 +12,7 @@ public abstract class Flyer<T extends Flyer<T,I>, I extends Flyer.FlyerId<I>> ex
 	ShipType type;
 	GSystem location;
 	String name;
-	I id;
+	ID id;
 	
 	HashSet<Targetter<?>> aggressors; //all the ships/ missiles targeting this
 	
@@ -33,10 +34,6 @@ public abstract class Flyer<T extends Flyer<T,I>, I extends Flyer.FlyerId<I>> ex
 	
 	FlyerDataSaverControl<T, ? extends FlyerDataSaver<T> > data_control;
 	
-	@Override
-	public void handleDataNotSaved(long t){removeFromGame(t);}
-	public abstract void removeFromGame(long t);
-	
 	//subclasses are responsible for instantiating data_control
 	public Flyer(String nm, ShipType st)
 	{
@@ -51,6 +48,10 @@ public abstract class Flyer<T extends Flyer<T,I>, I extends Flyer.FlyerId<I>> ex
 	}
 	
 	public Flyer(){}
+	
+	@Override
+	public void handleDataNotSaved(long t){removeFromGame(t);}
+	public abstract void removeFromGame(long t);
 	
 	public boolean isAlive(){return is_alive;}
 	public boolean isAliveAt(long t) throws DataSaverControl.DataNotYetSavedException
@@ -74,6 +75,8 @@ public abstract class Flyer<T extends Flyer<T,I>, I extends Flyer.FlyerId<I>> ex
 			}
 		}
 	}
+	
+	public abstract boolean update(long time, ITERATOR iterator);
 	
 	//ship physics functions
 	
@@ -259,8 +262,8 @@ public abstract class Flyer<T extends Flyer<T,I>, I extends Flyer.FlyerId<I>> ex
 	public void setName(String nm){name=nm;}
 	public int getDamage(){return damage;}
 	public void setDamage(int d){damage=d;}
-	public void setId(I i){id=i;}
-	public I getId(){return id;}
+	public void setId(ID i){id=i;}
+	public ID getId(){return id;}
 	
 	public static abstract class FlyerId<T extends FlyerId<T>>
 	{

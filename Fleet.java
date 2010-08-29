@@ -91,7 +91,7 @@ public class Fleet implements RelaxedSaveable<Fleet>
 		last_time_changed = t;
 	}
 	
-	public class ShipIterator
+	public class ShipIterator implements Iterator<Ship.ShipId>
 	{
 		final Iterator<Ship.ShipId> the_iterator;
 		
@@ -99,11 +99,13 @@ public class Fleet implements RelaxedSaveable<Fleet>
 			the_iterator = iterator;
 		}
 		
+		@Override
 		public Ship.ShipId next()
 		{
 			return the_iterator.next();
 		}
 		
+		@Override
 		public boolean hasNext()
 		{
 			return the_iterator.hasNext();
@@ -117,6 +119,13 @@ public class Fleet implements RelaxedSaveable<Fleet>
 				location.decreaseClaim(owner);
 				data_control.saveData();
 			}
+		}
+
+		@Override
+		@Deprecated
+		public void remove() {
+			
+			throw new UnsupportedOperationException();
 		}
 	}
 }

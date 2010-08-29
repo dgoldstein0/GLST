@@ -1,8 +1,6 @@
 public class WarpAI extends FlyerAI
 {
-	Flyer<Ship, Ship.ShipId> the_flyer;
-	
-	public WarpAI(Flyer<Ship, Ship.ShipId> f)
+	public WarpAI(Ship f)
 	{
 		the_flyer=f;
 	}
@@ -23,6 +21,6 @@ public class WarpAI extends FlyerAI
 		return the_flyer.type.max_speed*cosine*Math.abs(cosine);
 	}
 	
-	public Flyer<Ship, Ship.ShipId> getThe_flyer(){return the_flyer;}
-	public void setThe_flyer(Flyer<Ship, Ship.ShipId> f){the_flyer=f;}
+	public Ship getThe_flyer(){return (Ship)the_flyer;}
+	public void setThe_flyer(Ship f){the_flyer=f;}
 }
