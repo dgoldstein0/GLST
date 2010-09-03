@@ -50,7 +50,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 	
 	public Describer<Ship> describer(){return new ShipDescriber(owner, this);}
 	
-	//the time dependence of this function needs to be established
+	//TODO: the time dependence of this function needs to be established
 	public void assemble(Shipyard builder, long t)
 	{
 		owner=builder.location.owner;
@@ -444,25 +444,6 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 			SwingUtilities.invokeLater(new ShipDeselector(this));
 				
 			System.out.println("destroyed-after");
-		}
-	}
-	
-	public class ShipDeselector implements Runnable
-	{
-		final Ship the_ship;
-		
-		public ShipDeselector(Ship s)
-		{
-			the_ship = s;
-		}
-		
-		public void run()
-		{
-			if(the_ship == GameInterface.GC.GI.ShipPanel.the_ship)
-			{
-				GameInterface.GC.GI.displayNoPanel();
-			}
-			GameInterface.GC.GI.selected_in_sys.remove(this);	
 		}
 	}
 	
