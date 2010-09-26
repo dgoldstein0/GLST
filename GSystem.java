@@ -70,40 +70,45 @@ public class GSystem implements Orbitable<GSystem>
 	
 	public void increaseClaim(Player p)
 	{
-		int id = p.getId();
-		player_claims[id]++;
-		if(owner_id >= 0 && owner_id != p.getId()) //if there is an owner of the system, and the increaser is not the owner, now conflicted
+		if(player_claims != null) //this condition only fails when the player was not created for a game, but rather for the XMLEncoder
 		{
-			owner_id = OWNER_CONFLICTED;
-			current_player_id = p.getId();
+			player_claims[p.getId()]++;
+			if(owner_id >= 0 && owner_id != p.getId()) //if there is an owner of the system, and the increaser is not the owner, now conflicted
+			{
+				owner_id = OWNER_CONFLICTED;
+				current_player_id = p.getId();
+			}
+			else if(owner_id == NO_OWNER)
+				owner_id = p.getId();
 		}
-		else if(owner_id == NO_OWNER)
-			owner_id = p.getId();
 	}
 	
 	public void decreaseClaim(Player p)
 	{
-		player_claims[p.getId()]--;
-		if(player_claims[p.getId()]==0 && owner_id == OWNER_CONFLICTED)
+		if(player_claims != null) //this condition only fails when the player was not created for a game, but rather for the XMLEncoder
 		{
-			int claimers=0;
-			int claimer_id=-2;
-			for(int i=0; i<player_claims.length; i++)
+			player_claims[p.getId()]--;
+			if(player_claims[p.getId()]==0 && owner_id == OWNER_CONFLICTED)
 			{
-				if(player_claims[i] > 0)
+				int claimers=0;
+				int claimer_id=-2;
+				for(int i=0; i<player_claims.length; i++)
 				{
-					claimers++;
-					claimer_id=i;
+					if(player_claims[i] > 0)
+					{
+						claimers++;
+						claimer_id=i;
+					}
 				}
+				
+				if(claimers == 1)
+					owner_id = claimer_id;
+				//else - still conflicted, so no change
 			}
-			
-			if(claimers == 1)
-				owner_id = claimer_id;
-			//else - still conflicted, so no change
-		}
-		else if(player_claims[p.getId()]==0) //decreasing claim in a non-conflicted system to 0 -> no owner
-		{
-			owner_id = NO_OWNER;
+			else if(player_claims[p.getId()]==0) //decreasing claim in a non-conflicted system to 0 -> no owner
+			{
+				owner_id = NO_OWNER;
+			}
 		}
 	}
 	
