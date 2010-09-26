@@ -38,7 +38,10 @@ public class ShipWarpOrder extends Order
 			return orders;
 		}
 		else
+		{
+			orderDropped();
 			return new HashSet<Order>();
+		}
 	}
 	
 	public ShipWarpOrder(){mode=Order.NETWORK;}

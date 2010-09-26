@@ -859,22 +859,32 @@ public class GameControl
 	
 	public void endAllThreads()
 	{
-		if(serverThread instanceof Thread)
+		if(serverThread != null)
 			serverThread.interrupt();
-		if(lobbyThread instanceof Thread)
+		if(lobbyThread != null)
 		{
 			leavingLobby();
 			lobbyThread.interrupt();
 		}
-		if(readThread instanceof Thread)
+		if(readThread != null)
 		{
 			//BOOKMARK!  send leaving game message
 			readThread.interrupt();
 		}
-		if(startThread instanceof Thread)
+		if(startThread != null)
 			startThread.interrupt(); //BOOKMARK - in this case, the other player needs to be able to detect if the person left the game.  perhaps modify this to send a notification, and StartGame function to recieve it.
-		if(TC instanceof TimeControl)
+		if(TC != null)
+		{
 			TC.stopTask();
+			//TODO: debugging code should later be removed
+			try {
+				if(logFile != null)
+					logFile.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		endConnection();
 	}
 	
@@ -1035,6 +1045,10 @@ public class GameControl
 					}
 				}
 			}
+			
+			//TODO: debuging code, should later be removed
+			log("\r\nUpdated to " + update_to, map);
+			log("\n",players);
 		}
 		
 		TC.setLast_time_updated(update_to);
@@ -1072,5 +1086,33 @@ public class GameControl
 		GI.metal.setText("Metal: "+Long.toString(new Double(players[player_id].metal).longValue()));
 		GI.money.setText(GI.indentation + "Money: "+Long.toString(new Double(players[player_id].money).longValue()));
 		GI.redraw();
+	}
+	
+	BufferedOutputStream logFile;
+	
+	public void setupLogFile()
+	{
+		try {
+			logFile = new BufferedOutputStream(new FileOutputStream("log.txt"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void log(String message, Object o)
+	{
+		/*if(logFile == null)
+			setupLogFile();
+		
+		try {
+			logFile.write(("\n"+message).getBytes());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		XMLEncoder2 encoder = new XMLEncoder2(logFile);
+		encoder.writeObject(o);
+		encoder.finish();*/
 	}
 }

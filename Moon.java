@@ -13,14 +13,16 @@ public class Moon extends OwnableSatellite<Moon>
 	
 	public Moon(){super();}
 	
+	@Override
 	public void setOwner(Player p)
 	{
-		if(owner instanceof Player)
+		if(owner != null)
 			((GSystem)((Planet)orbit.boss).orbit.boss).decreaseClaim(owner);
 		owner=p;
 		((GSystem)((Planet)orbit.boss).orbit.boss).increaseClaim(p);
 	}
 	
+	@Override
 	public String imageLoc(){return "images/moon.jpg";}
 
 	@Override

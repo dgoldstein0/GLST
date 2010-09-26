@@ -93,7 +93,7 @@ public class Base extends Facility<Base>{
 			//figure the results
 			if(soldier < 1)
 			{
-				location.setOwner(enemy.getOwner(), t);
+				location.setOwnerAtTime(enemy.getOwner(), t);
 				
 				//TODO: notify player
 			}
@@ -120,6 +120,11 @@ public class Base extends Facility<Base>{
 	}
 	
 	public int getSoldierInt(){return (int)Math.floor(soldier);}
+	
+	public Base(){}
+	
+	public HashSet<Saveable<?>> getSoldier_taker(){return soldier_taker;}
+	public void setSoldier_taker(HashSet<Saveable<?>> takers){soldier_taker = takers;}
 	
 	public float getSoldier(){return soldier;}
 	public void setSoldier(float s){synchronized(soldier_lock){soldier=s;}}

@@ -33,4 +33,14 @@ public abstract class Order implements Comparable<Order>
 		else //if(scheduled_time < o.scheduled_time)
 			return -1;
 	}
+	
+	public void orderDropped()
+	{
+		throw new OrderDroppedException();
+	}
+	
+	/**the following nested class is for debugging purposes only*/
+	public class OrderDroppedException extends RuntimeException
+	{
+	}
 }

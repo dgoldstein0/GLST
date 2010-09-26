@@ -33,7 +33,9 @@ public class ShipyardBuildShipOrder extends Order {
 				the_yard.addToQueue(new Ship(type), scheduled_time, false);
 				return orders;
 			}
+			else orderDropped();
 		}
+		else orderDropped();
 		
 		return new HashSet<Order>();
 	}

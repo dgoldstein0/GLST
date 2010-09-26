@@ -30,9 +30,10 @@ public class Planet extends OwnableSatellite<Planet>
 		pop_growth_rate = .000005;
 	}
 	
+	@Override
 	public void setOwner(Player p)
 	{
-		if(owner instanceof Player)
+		if(owner != null)
 			((GSystem)orbit.boss).decreaseClaim(owner);
 		owner=p;
 		((GSystem)orbit.boss).increaseClaim(p);

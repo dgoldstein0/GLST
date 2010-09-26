@@ -34,7 +34,11 @@ public class ShipInvadeOrder extends Order {
 				
 				return orders;
 			}
+			else
+				orderDropped();
 		}
+		else
+			orderDropped();
 		
 		return new HashSet<Order>();
 	}

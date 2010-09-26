@@ -50,6 +50,8 @@ public class CancelFacilityBuildOrder extends Order {
 			//the actual execution of the order.
 			the_sat.cancelConstruction(scheduled_time, false); //(bldg_type, scheduled_time);
 		}
+		else
+			orderDropped();
 		return orders_to_reexecute;
 	}
 	

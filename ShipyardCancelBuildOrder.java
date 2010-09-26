@@ -47,10 +47,16 @@ public class ShipyardCancelBuildOrder extends Order {
 					
 					the_yard.removeFromQueue(the_ship, scheduled_time, false);
 				}
+				else
+					orderDropped();
 				
 				return orders;
 			}
+			else
+				orderDropped();
 		}
+		else
+			orderDropped();
 		
 		return new HashSet<Order>();
 	}

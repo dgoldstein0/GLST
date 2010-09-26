@@ -49,8 +49,11 @@ public class ShipPickupTroopsOrder extends Order {
 					
 					return orders;
 				}
+				else orderDropped();
 			}
+			else orderDropped();
 		}
+		else orderDropped();
 		
 		return new HashSet<Order>();
 	}

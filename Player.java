@@ -49,7 +49,7 @@ public class Player
 	
 	public Color getColor()
 	{
-		if(!(color instanceof Color))
+		if(color == null)
 			color = GalacticStrategyConstants.DEFAULT_COLORS[getId()];
 		return color;
 	}

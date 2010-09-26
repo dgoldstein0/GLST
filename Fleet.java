@@ -22,6 +22,7 @@ public class Fleet implements RelaxedSaveable<Fleet>
 	}
 	
 	//methods required for load/save
+	public Fleet(){}
 	public Hashtable<Ship.ShipId, Ship> getShips(){return ships;}
 	public void setShips(Hashtable<Ship.ShipId, Ship> sh){ships=sh;}
 	public Player getOwner(){return owner;}

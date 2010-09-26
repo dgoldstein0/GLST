@@ -62,7 +62,10 @@ public class ShipMoveOrder extends Order
 			return orders;
 		}
 		else
+		{
+			orderDropped();
 			return new HashSet<Order>();
+		}
 	}
 	
 	public ShipMoveOrder(){mode=Order.NETWORK;}

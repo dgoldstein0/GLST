@@ -43,6 +43,7 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 		bldg_in_progress = FacilityType.NO_BLDG;
 		data_control = new OwnableSatelliteDataSaverControl<T>((T)this);
 		last_tax_time = 0;
+		owner = null;
 	}
 	
 	public void handleDataNotSaved(long t){System.out.println("OwnableSatellite data not saved.  Ridiculous!");}
@@ -186,7 +187,7 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 			GameInterface.GC.notifyAllPlayers(new CancelFacilityBuildOrder(this, t));
 	}
 	
-	public void setOwner(Player p, long time)
+	public void setOwnerAtTime(Player p, long time)
 	{
 		if(owner != null)
 			update(time);

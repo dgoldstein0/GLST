@@ -76,6 +76,7 @@ public class ShipAttackOrder extends Order
 			
 			return orders;
 		}
+		else orderDropped();
 		
 		return new HashSet<Order>();
 	}

@@ -7,8 +7,11 @@ public class Shipyard extends Facility<Shipyard>{
 	Object queue_lock = new Object(); //used to synchronize the queue
 	int next_queue_id;
 	
-	double assemble_x;      //x coord of assemble point
+	//TODO: add getters and setters, make an order to change this, add that order into the deduceEffected in ShipyardDataSaverControl
+	double assemble_x;  //x coord of assemble point
 	double assemble_y;	//y coord
+	
+	//right now, these coords are not saved.
 	double default_x = 0;	//default coords to create the new ship, then order it to move to assemble point
 	double default_y = 0;
 	
@@ -22,6 +25,15 @@ public class Shipyard extends Facility<Shipyard>{
 		next_queue_id=0;
 		data_control.saveData();
 	}
+	
+	//for saving/loading data
+	public Shipyard(){}
+	public Hashtable<Integer, Ship> getManufac_queue(){return manufac_queue;}
+	public void setManufac_queue(Hashtable<Integer, Ship> q){manufac_queue = q;}
+	public int getNext_queue_id(){return next_queue_id;}
+	public void setNext_queue_id(int i){next_queue_id = i;}
+	public long getTime_on_current_ship(){return time_on_current_ship;}
+	public void setTime_on_current_ship(long t){time_on_current_ship=t;}
 	
 	public boolean addToQueue(Ship ship, long t, boolean notify)
 	{
@@ -98,7 +110,7 @@ public class Shipyard extends Facility<Shipyard>{
 	
 	public void updateStatus(long t)
 	{
-		if(location.owner instanceof Player) //do nothing unless the location has an owner
+		if(location.owner != null) //do nothing unless the location has an owner
 		{
 			synchronized(queue_lock)
 			{

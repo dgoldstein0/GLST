@@ -263,14 +263,14 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 					synchronized(sat.facilities_lock)
 					{
 						if(sat.the_base == null) //if base isn't finished being built, player can take over without a fight
-							sat.setOwner(getOwner(), t);
+							sat.setOwnerAtTime(getOwner(), t);
 						else
 							sat.the_base.attackedByTroops(GameInterface.GC.TC.getNextTimeGrain(), this);
 					}
 				}
 				else
 				{
-					((OwnableSatellite<?>)destination).setOwner(getOwner(), t);
+					((OwnableSatellite<?>)destination).setOwnerAtTime(getOwner(), t);
 				}
 			}
 			data_control.saveData();
@@ -537,6 +537,8 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 			manufacturer = manu;
 			queue_id = q_id;
 		}
+		
+		public ShipId(){};
 		
 		@Override
 		public int hashCode()

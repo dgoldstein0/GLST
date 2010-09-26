@@ -84,8 +84,8 @@ public class GameMenu extends JDialog implements ActionListener
 			GC.GI.satellites_list.repaint();
 			GC.GI.system_list.removeAll();
 			GC.GI.system_list.repaint();
-			GC.GI.selected_sys = new HashSet<GSystem>();
-			GC.GI.selected_in_sys = null;
+			GC.GI.selected_sys.clear();
+			GC.GI.selected_in_sys.clear();;
 			GC.GI.labels_made=false;
 			GC.GI.prev_sys=null;
 			GC.GI.prev_selected=null;

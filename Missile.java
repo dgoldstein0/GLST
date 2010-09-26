@@ -3,7 +3,6 @@ import java.util.*;
 public class Missile extends Flyer<Missile, Missile.MissileId, Iterator<Missile.MissileId>>
 {
 	private final double Collide_Range=10.0;
-	MissileId id;
 	boolean target_alive;
 
 	public Missile(Ship s, Targetable<?> t, long time)
@@ -37,6 +36,8 @@ public class Missile extends Flyer<Missile, Missile.MissileId, Iterator<Missile.
 		this.time=time;
 		data_control.saveData();
 	}
+	
+	public Missile(){}
 	
 	public Describer<Missile> describer()
 	{
@@ -137,6 +138,9 @@ public class Missile extends Flyer<Missile, Missile.MissileId, Iterator<Missile.
 		destroyed();
 	}
 	
+	public boolean getTarget_alive(){return target_alive;}
+	public void setTarget_alive(boolean b){target_alive=b;}
+	
 	public static class MissileId extends FlyerId<MissileId>
 	{
 		private Ship shooter;
@@ -147,6 +151,8 @@ public class Missile extends Flyer<Missile, Missile.MissileId, Iterator<Missile.
 			shooter = s;
 			m_id = id;
 		}
+		
+		public MissileId(){}
 		
 		public int hashCode()
 		{

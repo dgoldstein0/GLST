@@ -35,7 +35,10 @@ public class FacilityBuildOrder extends Order
 			return need_to_reexecute;
 		}
 		else
+		{
+			orderDropped();
 			return new HashSet<Order>();
+		}
 	}
 	
 	public FacilityBuildOrder(){mode = Order.NETWORK;}
