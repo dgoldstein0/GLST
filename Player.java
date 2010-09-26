@@ -39,6 +39,11 @@ public class Player
 	public Player(String nm)
 	{
 		name = nm;
+		setDefaultValues();
+	}
+	
+	private void setDefaultValues()
+	{
 		money=GalacticStrategyConstants.DEFAULT_MONEY;
 		metal=GalacticStrategyConstants.DEFAULT_METAL;
 		ships_in_transit = new ArrayList<Ship>();
@@ -88,7 +93,12 @@ public class Player
 	}
 	
 	//methods necessary for saving/loading
-	public Player(){}
+	public Player()
+	{
+		name="";
+		setDefaultValues();
+	}
+
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 	public double getMoney(){return money;}

@@ -215,29 +215,19 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 		SwingUtilities.invokeLater(new DestDisplayUpdater(this));
 	}
 	
-	private class DestDisplayUpdater implements Runnable
-	{
-		final Destination<?> the_sat;
-		
-		private DestDisplayUpdater(Destination<?> sat)
-		{
-			the_sat = sat;
-		}
-		
-		public void run()
-		{
-			ShipCommandPanel panel = GameInterface.GC.GI.ShipPanel;
-			if(panel.the_ship != null && panel.the_ship.destination == the_sat)
-			{
-				panel.updateDestDisplay(panel.the_ship.destination);
-			}
-		}
-	}
+	public abstract GSystem getGSystem();
 	
 	public Hashtable<Integer, Facility<?>> getFacilities(){return facilities;}
 	public void setFacilities(Hashtable<Integer, Facility<?>> fac){facilities=fac;}
 	public Player getOwner(){return owner;}
-	public abstract void setOwner(Player p); //this must be overridden by implementing classes, because it is responsible for notifying the GSystem of an owner change
+	public void setOwner(Player p)
+	{
+		if(owner != null)
+			getGSystem().decreaseClaim(owner);
+		owner=p;
+		getGSystem().increaseClaim(p);
+	}
+	
 	public long getPopulation(){return population;}
 	public void setPopulation(long pop){population=pop;}
 	public double getInitial_pop(){return initial_pop;}

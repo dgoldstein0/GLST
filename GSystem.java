@@ -70,7 +70,8 @@ public class GSystem implements Orbitable<GSystem>
 	
 	public void increaseClaim(Player p)
 	{
-		player_claims[p.getId()]++;
+		int id = p.getId();
+		player_claims[id]++;
 		if(owner_id >= 0 && owner_id != p.getId()) //if there is an owner of the system, and the increaser is not the owner, now conflicted
 		{
 			owner_id = OWNER_CONFLICTED;

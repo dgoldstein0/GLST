@@ -15,6 +15,8 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 public class GameControl
 {
+	static final boolean DEBUGGING = false;
+	
 	static final int DEFAULT_PORT_NUMBER = GalacticStrategyConstants.DEFAULT_PORT_NUMBER;
 	static final String LEFT_LOBBY_MSG = "Im leaving the lobby.";
 	static final String MAP_CHOSEN = "Host chooses map::"; //do not change ending
@@ -1047,8 +1049,11 @@ public class GameControl
 			}
 			
 			//TODO: debuging code, should later be removed
-			log("\r\nUpdated to " + update_to, map);
-			log("\n",players);
+			if(DEBUGGING)
+			{
+				log("\r\nUpdated to " + update_to, map);
+				log("\n",players);
+			}
 		}
 		
 		TC.setLast_time_updated(update_to);
@@ -1102,7 +1107,7 @@ public class GameControl
 	
 	public void log(String message, Object o)
 	{
-		/*if(logFile == null)
+		if(logFile == null)
 			setupLogFile();
 		
 		try {
@@ -1112,7 +1117,19 @@ public class GameControl
 			e.printStackTrace();
 		}
 		XMLEncoder2 encoder = new XMLEncoder2(logFile);
+		encoder.setExceptionListener(new MyExceptionListener());
 		encoder.writeObject(o);
-		encoder.finish();*/
+		encoder.finish();
+	}
+	
+	private class MyExceptionListener implements ExceptionListener
+	{
+
+		@Override
+		public void exceptionThrown(Exception arg0) {
+			// TODO Auto-generated method stub
+			arg0.printStackTrace();
+		}
+		
 	}
 }

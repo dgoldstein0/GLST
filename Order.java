@@ -36,7 +36,8 @@ public abstract class Order implements Comparable<Order>
 	
 	public void orderDropped()
 	{
-		throw new OrderDroppedException();
+		if(GameControl.DEBUGGING)
+			throw new OrderDroppedException();
 	}
 	
 	/**the following nested class is for debugging purposes only*/

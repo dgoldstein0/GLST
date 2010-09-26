@@ -31,12 +31,9 @@ public class Planet extends OwnableSatellite<Planet>
 	}
 	
 	@Override
-	public void setOwner(Player p)
+	public GSystem getGSystem()
 	{
-		if(owner != null)
-			((GSystem)orbit.boss).decreaseClaim(owner);
-		owner=p;
-		((GSystem)orbit.boss).increaseClaim(p);
+		return (GSystem)orbit.boss;
 	}
 	
 	public String imageLoc(){return "images/planet.jpg";}
