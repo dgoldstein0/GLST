@@ -21,7 +21,7 @@ public abstract class Order implements Comparable<Order>
 	
 	public long getScheduled_time(){return scheduled_time;}
 	public void setScheduled_time(long t){scheduled_time=t;}
-
+	
 	/** NOTE: compareTo here is inconsistent with equals*/
 	@Override
 	public int compareTo(Order o)

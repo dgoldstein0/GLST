@@ -46,6 +46,7 @@ public abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Sa
 		owner = null;
 	}
 	
+	@Override
 	public void handleDataNotSaved(long t){System.out.println("OwnableSatellite data not saved.  Ridiculous!");}
 	
 	public void update(long time_elapsed)
