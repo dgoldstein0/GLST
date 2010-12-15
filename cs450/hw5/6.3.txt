@@ -1,0 +1,23 @@
+sixpoint3parta
+
+the minimun on interval [0,3] is 
+0.780885050255
+the function is unimodel
+
+sixpoint3partb
+
+the minimun on interval [0,3] is 
+0.739084612026
+the function is unimodel
+
+sixpoint3partc
+
+the minimun on interval [0,3] is 
+1.895493311945
+the function is unimodel
+
+sixpoint3partd
+
+the minimun on interval [0,3] is 
+1.461625287238
+the function is unimodel

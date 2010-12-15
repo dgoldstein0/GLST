@@ -1,0 +1,34 @@
+\documentclass[a4paper,12pt]{article}
+\begin{document}
+Yongzuan Wu
+
+wu68
+
+cs573
+
+HW 4
+
+Problem 1
+
+(a)
+
+We use the notation for treap analysis in the lecture notes. 
+
+We know that $x_{j}$ is a proper ancestor of node $x_{i}$ iff $x_{j}$ is the minimal element in $X(i,j)$. Also $x_{j}$ is a proper ancestor of $x_{k}$ iff $x_{j}$ is the minimal element in $X(j,k)$. Thus,  $x_{j}$ is a common ancestor of $x_{i}$ and $x_{k}$ iff $x_{j}$ is the minimal element in $X(i,k)$. The probability is $\frac{1}{k-i+1}$.
+
+(b)
+
+Let $x_{j}$ be the deepest common ancestor of $x_{i}$ and $x_{k}$, $i\leq j \leq k$. Then the length of the unique path from $x_{i}$ to  $x_{k}$ is 
+\[ $path length$=depth(x_{i})+depth(x_{k})-2depth(x_{j}) \]
+
+We take the expectation value according to the formula from the lecture nodes, i.e. $E[depth(x_{i})]=H_{i}+H_{n-i+1}-2$, then
+
+\begin{array}{lcl}
+       
+
+E[$path length between node i and k$ ]&=&E[depth(x_{i})+depth(x_{k})-2depth(x_{j})]\\&=&E[depth(x_{i})]+E[depth(x_{k})]-2E[depth(x_{j})]\\&=&H_{i}+H_{n-i+1}-2+H_{k}+H_{n-k+1}-2
+
+\\&+&\sum_{j=i}^{k}\frac{1}{i-k+1}(H_{j}+H_{n-j+1}-2)$
+\end{array}
+
+\end{document}

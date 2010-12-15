@@ -1,0 +1,124 @@
+\documentclass[a4paper,12pt]{article}
+\begin{document}
+Yongzuan Wu
+
+wu68
+
+cs573
+
+HW 5
+
+Problem 5
+
+(a)
+
+Proof: Here's Sally's stratrgy
+
+\
+
+GameSally(G,r)
+
+\ run Paul's algorithm GamePaul(G,r), returning path $P$
+
+\ return any edge in $P$
+
+\
+
+Sally will always win since the edge she returns is in $P$, thus $P\cap S\neq \emptyset$
+
+\
+
+(b)
+
+Here's Sally's stratrgy
+
+\
+
+GameSally(G,r)
+
+\ compute a min $(s,t)$-cut $C$ in $G$
+
+\ return $C$
+
+\
+
+Sally will always win since $C$ is a cut. Any path from $s$ to $t$ that Paul computes must include at least one edge in $C$. Thus $P\cap S\neq \emptyset$.
+
+\
+
+(c)
+
+Proof:
+
+Here's Paul's strategy
+
+\
+
+GamePaul(G,r)
+
+\ compute Sally's edge set $S$ by GameSally(G,r)
+
+\ remove $S$ from $G$ to get $G'$
+
+\ return any path $P$ in $G'$
+
+\
+
+The algorithm is correct iff after removing $S$, the remaining graph still has a path from $s$ to $t$. Since $\left|S\right|\leq r < M$, and $M$ is the size of the minimum $(s,t)$-cut, $S$ can't be an $(s,t)$-cut. Therefore, after removing $S$, $s$ and $t$ are still connected. Thus such path does exist.
+
+\
+
+(d)
+
+Here's Sally's stratrgy
+
+\
+
+GameSally(G,r)
+
+\ compute a min $(s,t)$-cut $C$ in $G$
+
+\ if $(r\geq M)$ 
+
+\ \ \ return $C$
+
+\ else 
+
+\ \ \ uniformly randomly choose $r$ edges in $c$
+
+\ \ \ return that subset $C'$
+
+\
+
+Proof:
+
+When $r\geq M$, Sally is gauranteed to win as proved in part (b).
+
+When $r<M$, since $C$ is a minimum $(s,t)$-cut in $G$, then any path Paul choose will have at least one edge in $C$. When we uniformly randomly choose $r$ edges from $C$, the probability that we hit that edge is $\frac{r}{\left|C\right|}=\frac{r}{M}$. Thus the probalility that Sally wins is at least $\frac{r}{M}$ in this case.
+
+Therefore the probability that Sally wins is $min(\frac{r}{M},1)$.
+
+(e)
+
+
+Here's Paul's strategy
+
+\
+
+GamePaul(G,r)
+
+\ compute a min $(s,t)$-cut $C$ in $G$
+
+\ uniformly randomly choose an edge $e\in C$
+
+\ remove $(C-\{e\})$ from $G$ to get $G'$
+
+\ compute all paths from $s$ to $t$ in $G'$
+
+\ uniformly randomly choose one path and return
+
+\
+
+I don't know of a proof for the winning probability.
+
+\end{document}

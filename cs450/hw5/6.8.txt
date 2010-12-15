@@ -1,0 +1,63 @@
+sixpoint8
+the second component of gradient=0 implies x+2y=0, thus we can plug in this equation into
+the first componemt and get a polynomial of x
+
+r =
+                   0
+  -1.747552345830290
+  -1.070542291823659
+   1.747552345830288
+   1.070542291823660
+
+there are five critical points
+when x=0.000000000000, the eigen values are 
+
+eigen =
+
+   1.585786437626905
+   4.414213562373095
+
+x=0.000000000000 is a minimum
+
+when x=-1.747552345830, the eigen values are 
+
+eigen =
+
+   1.902445154992817
+  12.250644136909559
+
+x=-1.747552345830 is a minimum
+
+when x=-1.070542291824, the eigen values are 
+
+eigen =
+
+  -4.038688172234972
+   2.165598880332629
+
+x=-1.070542291824 is a saddle point
+
+when x=1.747552345830, the eigen values are 
+
+eigen =
+
+   1.902445154992816
+  12.250644136909496
+
+x=1.747552345830 is a minimum
+
+when x=1.070542291824, the eigen values are 
+
+eigen =
+
+  -4.038688172234974
+   2.165598880332629
+
+x=1.070542291824 is a saddle point
+
+the global minimum occurs at 
+x=
+0.000000000000
+-0.000000000000
+the global minimum is
+0.000000000000

@@ -1,0 +1,34 @@
+%Yongzuan Wu wu68 cs450 HW3 4.2 part*b)
+
+A=[2 3 2; 10 3 4; 3 6 1];
+x1=[0.5; 1; 0.75];
+e2=[0; 1; 0];
+u1=A'*e2;
+A=A-(x1*u1');
+A=A(2:3,2:3);                      %the new matrix 
+ 
+%power iteration again
+ 
+X0=[0; 1];
+disp(' k                    Xk                                          Eigenvalue   ');
+fprintf('%2d  %15d     %15d  \n',0, 0, 1);
+X=A*X0;            
+ratio=0;
+k=1;
+done=0;
+while (done==0)
+    X0=X;
+    X=A*X;
+    if (abs(X(2,1)/X0(2,1)-ratio)>1e-6)    %compute with 6 digit precision
+      ratio=X(3,1)/X0(2,1);
+      scale=max(X);                 %normalize
+      X=X/scale;
+      fprintf('%2d  %15d  %15d    %15d        %10.6f \n', k , X(1,1), X(2,1), X(3,1),ratio);        
+    else
+        done=1;
+    end; 
+    k=k+1;
+end;
+disp('the dominant eigenvalue of A is 11, and a corresponding eigenvector is [0.5 1 0.75]\n')
+
+ 
