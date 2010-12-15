@@ -1,7 +1,0 @@
-fivepoint12
-
-t =
-
-  22.436442086707093
-
-diary off
