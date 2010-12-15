@@ -1,6 +1,0 @@
-function v=shooting(inislope)
-reltol=1e-7;
-option=odeset('RelTol',reltol);
-sol=ode45(@ivp,[0 1],[0 inislope]',option);
-v=deval(sol,1)(1)-1;
-end
