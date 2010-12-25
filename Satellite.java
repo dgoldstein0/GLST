@@ -14,8 +14,15 @@ public abstract class Satellite<T extends Satellite<T>> extends StellarObject im
 	public void setOrbit(Orbit o){orbit=o;}
 	
 	//for Selectable, which is implemented by StellarObject
+	@Override
 	public String generateName(){return getName();}
+	@Override
 	public int getSelectType(){return Selectable.SATELLITE;}
+	@Override
+	public int getTypeNumber()
+	{
+		return Selectable.SATELLITE | (picture_num << 2);
+	}
 	
 	public double absoluteCurX(){return orbit.absoluteCurX();}
 	public double absoluteCurY(){return orbit.absoluteCurY();}
@@ -28,7 +35,7 @@ public abstract class Satellite<T extends Satellite<T>> extends StellarObject im
 	public int getId(){return id;}	
 	
 	//the rest of the code is to implement Destination without unnecessary computation.
-	
+	@Override
 	public double getXCoord(long t)
 	{
 		if(t != last_t_gotten)
@@ -36,7 +43,7 @@ public abstract class Satellite<T extends Satellite<T>> extends StellarObject im
 		
 		return x_coord;
 	}
-	
+	@Override
 	public double getYCoord(long t)
 	{
 		if(t != last_t_gotten)
@@ -44,7 +51,7 @@ public abstract class Satellite<T extends Satellite<T>> extends StellarObject im
 		
 		return y_coord;
 	}
-	
+	@Override
 	public double getXVel(long t)
 	{
 		if(t != last_t_gotten)
@@ -52,7 +59,7 @@ public abstract class Satellite<T extends Satellite<T>> extends StellarObject im
 		
 		return x_vel;
 	}
-	
+	@Override
 	public double getYVel(long t)
 	{
 		if(t != last_t_gotten)

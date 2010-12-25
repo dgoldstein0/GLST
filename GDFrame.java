@@ -391,6 +391,14 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		o_screen_exit.addActionListener(this);
 		open_screen_dialog.add(o_screen_exit);
 		
+		//load resources
+		try {
+			Resources.Preload();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		open_screen_dialog.pack();
 		showOpenScreenDialog();
 	}

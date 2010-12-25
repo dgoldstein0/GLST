@@ -1,4 +1,3 @@
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -526,6 +525,19 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 	public double getExit_vec_y(){return exit_vec_y;}
 	public void setExit_direction(double d){exit_direction=d;}
 	public double getExit_direction(){return exit_direction;}
+	
+	//support for Selectable
+	@Override
+	public int getTypeNumber()
+	{
+		return Selectable.SHIP | (type.ordinal() << 2);
+	}
+	
+	@Override
+	public ImageResource getImage()
+	{
+		return type.img;
+	}
 	
 	public static class ShipId extends FlyerId<ShipId>
 	{

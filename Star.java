@@ -1,6 +1,5 @@
 public class Star extends StellarObject
 {
-	int color;
 	GSystem owner;
 	
 	int x;
@@ -10,7 +9,7 @@ public class Star extends StellarObject
 	{
 		this.name=name;
 		this.size=size;
-		this.color=color;
+		this.picture_num=color;
 		this.x=x;
 		this.y=y;
 		mass=m;
@@ -18,6 +17,13 @@ public class Star extends StellarObject
 	}
 	
 	//for Selectable, implemented by StellarObject
+	@Override
+	public int getTypeNumber()
+	{
+		return Selectable.STAR | (picture_num << 2);
+	}
+	
+	@Override
 	public String generateName()
 	{
 		if(name != "")
@@ -26,14 +32,15 @@ public class Star extends StellarObject
 			return owner.name;
 	}
 	
+	@Override
 	public int getSelectType(){return Selectable.STAR;}
 	
 	//save/loading methods
 	public Star(){}
 	public GSystem getOwner(){return owner;}
 	public void setOwner(GSystem o){owner=o;}
-	public int getColor(){return color;}
-	public void setColor(int c){color=c;}
+	@Deprecated
+	public void setColor(int c){picture_num=c;}
 	public int getX(){return x;}
 	public void setX(int x){this.x=x;}
 	public int getY(){return y;}

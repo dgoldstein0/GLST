@@ -198,7 +198,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	public void actionPerformed(ActionEvent e)
 	{
 		if(e.getSource()==t_toggle)
-			painter.paintSystem(system, wrapInList(selected_obj), !painter.design_view, center_x, center_y, scale);
+			painter.paintSystem(system, wrapInList(selected_obj), !painter.design_view, center_x, center_y, scale, null);
 		else if(e.getSource()==t_add)
 		{
 			String obj_to_add;
@@ -622,7 +622,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		{
 			if (system.stars == null)
 				system.stars=new HashSet<Star>();
-			Star new_star = new Star("", DEFAULT_STAR_SIZE, DEFAULT_STAR_MASS, GalacticStrategyConstants.COLOR_NULL, x, y, system);
+			Star new_star = new Star("", DEFAULT_STAR_SIZE, DEFAULT_STAR_MASS, ImageResource.NULL_STAR.ordinal(), x, y, system);
 			system.stars.add(new_star);
 			
 			selected_obj = new_star;
@@ -821,7 +821,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	{
 		system.setWidth(painter.getWidth());
 		system.setHeight(painter.getHeight());
-		painter.paintSystem(system, wrapInList(selected_obj), center_x, center_y, scale);
+		painter.paintSystem(system, wrapInList(selected_obj), center_x, center_y, scale, null);
 	}
 	
 	private void deleteSelected()
@@ -914,7 +914,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			{
 				String[] color_options={"Choose a Color", "Red", "Orange", "Yellow", "White", "Blue"};
 				JComboBox box = new JComboBox(color_options);
-				box.setSelectedItem(color_options[((Star)selected_obj).color]);
+				box.setSelectedItem(color_options[((Star)selected_obj).picture_num]);
 				box.addActionListener(this);
 				master.add(box);
 			}
@@ -943,7 +943,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			if(e.getSource() instanceof JComboBox)
 			{
 				int color = ((JComboBox)e.getSource()).getSelectedIndex();
-				((Star)selected_obj).color=color;
+				((Star)selected_obj).picture_num=color;
 				drawSystem();
 			}
 			else if(e.getSource() instanceof JButton)

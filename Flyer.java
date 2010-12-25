@@ -165,7 +165,7 @@ public abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends Flyer.Fly
 	}
 	
 	//methods to implement destination
-	public String imageLoc(){return type.getImg_loc();}
+	public String imageLoc(){return type.img.img_path;}
 	
 	//cache destination data
 	private long dest_coords_time=0; //there cannot be a call to getXCoord or getYCoord with t=0, since ships do not exist then, and if they do will not be targetting other ships

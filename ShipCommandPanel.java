@@ -101,7 +101,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		pic_vgroup.addComponent(name_panel);
 		pic_hgroup.addComponent(name_panel);
 		
-		ImageIcon pic = new ImageIcon(s.type.img);
+		ImageIcon pic = s.type.icon;
 		JLabel icon_label = new JLabel(pic);
 		pic_vgroup.addComponent(icon_label);
 		pic_hgroup.addComponent(icon_label);

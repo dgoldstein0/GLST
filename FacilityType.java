@@ -1,3 +1,5 @@
+import javax.swing.ImageIcon;
+
 public enum FacilityType
 {
 	//					name					metal	money	build_time	icon_image_path					creator
@@ -11,7 +13,7 @@ public enum FacilityType
 	final int metal_cost;
 	final int money_cost;
 	final long build_time;
-	final FacilityIcon icon;
+	final ImageIcon icon;
 	final FacilityCreator<?> creator;
 	
 	FacilityType(String nm, int met, int mon, long bt, String icon_path, FacilityCreator<?> fc)
@@ -23,7 +25,7 @@ public enum FacilityType
 		creator = fc;
 		
 		if(icon_path != "")
-			icon = new FacilityIcon(icon_path, this);
+			icon = new ImageIcon(icon_path);
 		else
 			icon=null;
 	}

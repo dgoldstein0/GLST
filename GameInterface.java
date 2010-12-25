@@ -61,6 +61,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	GSystem sys,prev_sys; //doubles as the variable of the selected system in Galaxy as as the currently open system
 	List<Selectable> selected_in_sys, prev_selected;
 	List<Selectable> maybe_select_in_sys, maybe_deselect_in_sys; //used to assist with shift/alt support in multiple selection
+	Selectable mouseover_obj; //used for mouseover highlight effect
 	
 	//for multi-selection in systems
 	int button_down; //the button pressed in mousePressed
@@ -257,6 +258,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		selected_in_sys = new ArrayList<Selectable>();
 		maybe_select_in_sys = new ArrayList<Selectable>();
 		maybe_deselect_in_sys = new ArrayList<Selectable>();
+		mouseover_obj = null;
 	
 		//set up game control
 		GC = new GameControl(this);
@@ -347,7 +349,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 /*		sys_scale = 1.0d;
 		sys_center_x = theinterface.getWidth()/2;
 		sys_center_y = theinterface.getHeight()/2;*/
-		SystemPanel.paintSystem(sys, combineSelectedInSys(), sys_center_x, sys_center_y, sys_scale, true, mouse_was_dragged, mouse_down_x, mouse_down_y, cur_x, cur_y);
+		SystemPanel.paintSystem(sys, combineSelectedInSys(), sys_center_x, sys_center_y, sys_scale, true, mouse_was_dragged, mouse_down_x, mouse_down_y, cur_x, cur_y, mouseover_obj);
 		frame.setVisible(true); //makes all components within the frame displayable.  frame.pack() does this too, but pack resizes the frame to fit all components in their preferred sizes
 	}
 	
@@ -377,7 +379,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			}
 			else //before getting to here, sys and selected_in_sys should be specified.
 			{
-				SystemPanel.paintSystem(sys, combineSelectedInSys(), sys_center_x, sys_center_y, sys_scale, true, mouse_was_dragged, mouse_down_x, mouse_down_y, cur_x, cur_y);
+				SystemPanel.paintSystem(sys, combineSelectedInSys(), sys_center_x, sys_center_y, sys_scale, true, mouse_was_dragged, mouse_down_x, mouse_down_y, cur_x, cur_y, mouseover_obj);
 			}
 		}
 	}
@@ -459,7 +461,6 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 		if(isSystemDisplayed())
 		{
 			MouseEvent e=(MouseEvent)a;
-			int x, y;
 			
 			if((MouseEvent.BUTTON1_MASK & e.getModifiers()) == MouseEvent.BUTTON1_MASK && e.getSource() == theinterface && button_down == MouseEvent.BUTTON1)
 			{
@@ -532,6 +533,19 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 					}
 				}
 			}
+			
+			if(e.getSource() == theinterface) //just a mouse-move or drag event
+			{
+				//mouseover highlight effect
+				final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/sys_scale; //tolerance
+				double x = sysScreenToDataX(e.getX());
+				double y = sysScreenToDataY(e.getY());
+				
+				ArrayList<Selectable> select_items = new ArrayList<Selectable>();
+				
+				selectInSystemInRange(select_items, x-OBJ_TOL, y-OBJ_TOL, x+OBJ_TOL, y+OBJ_TOL);
+				mouseover_obj = (select_items.size() != 0) ? select_items.get(0) : null;
+			}
 				
 			Point corner;
 			if(e.getSource() instanceof JComponent)
@@ -540,8 +554,8 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				corner = frame.getLocationOnScreen();
 			
 			Point pane_pos = frame.getContentPane().getLocationOnScreen();
-			x=e.getX() - pane_pos.x + corner.x;
-			y=e.getY() - pane_pos.y + corner.y;
+			int x=e.getX() - pane_pos.x + corner.x;
+			int y=e.getY() - pane_pos.y + corner.y;
 			
 			//boolean previously_moving = true;
 			//if(move_center_x_speed==0.0 && move_center_y_speed==0.0)
@@ -727,7 +741,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 				else
 				{
 					if(e.getX() >= theinterface.getWidth() - SystemPainter.arrow_size && e.getY() <= SystemPainter.arrow_size)
-						drawGalaxy();
+						drawGalaxy(); //back arrow clicked
 					else
 					{
 						if(system_state == SYS_NORMAL && e.getButton() == MouseEvent.BUTTON1)
@@ -771,18 +785,21 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	
 	private void selectInSystemAt(int mouse_x, int mouse_y)
 	{
-		final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/sys_scale; //tolerance
+		/*final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/sys_scale; //tolerance
 		double x = sysScreenToDataX(mouse_x);
 		double y = sysScreenToDataY(mouse_y);
 		
 		ArrayList<Selectable> select_items = new ArrayList<Selectable>();
 		
-		selectInSystemInRange(select_items, x-OBJ_TOL, y-OBJ_TOL, x+OBJ_TOL, y+OBJ_TOL);
+		selectInSystemInRange(select_items, x-OBJ_TOL, y-OBJ_TOL, x+OBJ_TOL, y+OBJ_TOL);*/
 		
-		if(select_items.size() > 1)
+		/*if(select_items.size() > 1)
 			buildSelectContextMenu(select_items, mouse_x, mouse_y);
 		else if(select_items.size()==1)
-			selectObjInSystem(select_items.get(0));
+			selectObjInSystem(select_items.get(0));*/
+		
+		if(mouseover_obj != null)
+			selectObjInSystem(mouseover_obj);
 		else //if nothing found
 		{
 			selected_in_sys.clear();
@@ -835,7 +852,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			{
 				Ship s = sys.fleets[i].ships.get(j);
 				
-				if(s.pos_x-s.type.dim*s.type.default_scale/2*sys_scale <= x2 && x1 <= s.pos_x+s.type.dim*s.type.default_scale/2 && s.pos_y-s.type.dim*s.type.default_scale/2 <= y2 && y1 <= s.pos_y+s.type.dim*s.type.default_scale/2)
+				if(s.pos_x-s.type.dim*s.type.img.scale/2 <= x2 && x1 <= s.pos_x+s.type.dim*s.type.img.scale/2 && s.pos_y-s.type.dim*s.type.img.scale/2 <= y2 && y1 <= s.pos_y+s.type.dim*s.type.img.scale/2)
 				{
 					select_items.add(s);
 				}
@@ -918,7 +935,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			{
 				Ship s = sys.fleets[i].ships.get(j);
 				
-				if(s.pos_x-OBJ_TOL-s.type.dim*s.type.default_scale/2*sys_scale <= x && x <= s.pos_x+OBJ_TOL+s.type.dim*s.type.default_scale/2 && s.pos_y-OBJ_TOL-s.type.dim*s.type.default_scale/2 <= y && y <= s.pos_y+OBJ_TOL+s.type.dim*s.type.default_scale/2)
+				if(s.pos_x-OBJ_TOL-s.type.dim*s.type.img.scale/2*sys_scale <= x && x <= s.pos_x+OBJ_TOL+s.type.dim*s.type.img.scale/2 && s.pos_y-OBJ_TOL-s.type.dim*s.type.img.scale/2 <= y && y <= s.pos_y+OBJ_TOL+s.type.dim*s.type.img.scale/2)
 				{
 					dest = s;
 					break;

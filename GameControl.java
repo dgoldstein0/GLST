@@ -51,7 +51,7 @@ public class GameControl
 	{
 		GI = gi;
 		try {
-			GalacticStrategyConstants.ImageLoader(); //preload images
+			Resources.Preload(); //preload images
 		} catch (IOException e) {
 			System.out.println("trouble reading images");
 			e.printStackTrace();
@@ -70,7 +70,7 @@ public class GameControl
 	public GameControl()
 	{
 		try {
-			GalacticStrategyConstants.ImageLoader(); //preload images
+			Resources.Preload(); //preload images
 		} catch (IOException e) {
 			System.out.println("trouble reading images");
 			e.printStackTrace();

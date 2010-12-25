@@ -111,7 +111,7 @@
               <object class="java.util.ArrayList"/> 
              </void> 
              <void property="size"> 
-              <int>10</int> 
+              <int>20</int> 
              </void> 
             </object> 
            </void> 
@@ -237,14 +237,14 @@
                   </object> 
                  </void> 
                  <void property="size"> 
-                  <int>6</int> 
+                  <int>15</int> 
                  </void> 
                 </object> 
                </void> 
               </object> 
              </void> 
              <void property="size"> 
-              <int>10</int> 
+              <int>20</int> 
              </void> 
             </object> 
            </void> 
@@ -267,7 +267,7 @@
               <object idref="GSystem0"/> 
              </void> 
              <void property="size"> 
-              <int>35</int> 
+              <int>50</int> 
              </void> 
              <void property="x"> 
               <int>392</int> 
@@ -336,7 +336,7 @@
       <object class="java.util.ArrayList"/> 
      </void> 
      <void property="size"> 
-      <int>10</int> 
+      <int>20</int> 
      </void> 
     </object> 
    </void> 
@@ -443,7 +443,7 @@
               <object class="java.util.ArrayList"/> 
              </void> 
              <void property="size"> 
-              <int>10</int> 
+              <int>20</int> 
              </void> 
             </object> 
            </void> 
@@ -515,7 +515,7 @@
               <object class="java.util.ArrayList"/> 
              </void> 
              <void property="size"> 
-              <int>10</int> 
+              <int>20</int> 
              </void> 
             </object> 
            </void> 
@@ -538,7 +538,7 @@
               <object idref="GSystem1"/> 
              </void> 
              <void property="size"> 
-              <int>42</int> 
+              <int>55</int> 
              </void> 
              <void property="x"> 
               <int>392</int> 
@@ -607,7 +607,7 @@
       <object class="java.util.ArrayList"/> 
      </void> 
      <void property="size"> 
-      <int>10</int> 
+      <int>20</int> 
      </void> 
     </object> 
    </void> 

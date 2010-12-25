@@ -1,9 +1,4 @@
 import java.awt.Color;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 
 public class GalacticStrategyConstants
 {
@@ -93,20 +88,6 @@ public class GalacticStrategyConstants
 	static long DEFAULT_MONEY=1000;
 	static long DEFAULT_METAL=1000;
 	
-
-	//loads the images for each ship type
-	public static void ImageLoader() throws IOException //GameControl calls this method when it is instantiated
-	{
-		for(ShipType t : ShipType.values())
-		{
-			t.setImg(ImageIO.read(new File(t.getImg_loc())));
-			t.width = t.img.getWidth();
-			t.height = t.img.getHeight();
-			t.dim = Math.max(t.width, t.height);
-			t.icon = new ImageIcon(t.img);
-		}
-	}
-	
 	//ship attacking range
 	static final double Attacking_Range_Sq=40000.0;
 	static final double Attacking_Range=200.0;
@@ -132,18 +113,6 @@ public class GalacticStrategyConstants
 	final static int endu_upgraderate=100;
 	
 	//***************************************************************GENERAL DATA*******************************************//
-	
-	//used in Star
-	//these integers correspond to the indices of the corresponding image url in the array color_choice
-	final static int COLOR_NULL=0;
-	final static int COLOR_RED=1;
-	final static int COLOR_ORANGE=2;
-	final static int COLOR_YELLOW=3;
-	final static int COLOR_WHITE=4;
-	final static int COLOR_BLUE=5;
-	
-	//stores image URLs
-	final static String[] color_choice={"images/null.png","images/red.png","images/orange.png","images/yellow.png","images/white.png","images/blue.png"};
 	
 	//used by GameControl for networking
 	static final int DEFAULT_PORT_NUMBER = 7007;

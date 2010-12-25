@@ -5,7 +5,6 @@ import javax.swing.JOptionPane;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.GridLayout;
-import java.util.HashSet;
 
 public class GameMenu extends JDialog implements ActionListener
 {

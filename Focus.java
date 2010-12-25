@@ -11,8 +11,12 @@ public class Focus implements Selectable
 		owner=o;
 	}
 	
+	@Override
 	public int getSelectType(){return Selectable.FOCUS;}
+	@Override
 	public String generateName(){return "Focus of " + owner.obj.generateName();}
+	@Override
+	public int getTypeNumber(){return Selectable.FOCUS;}
 	
 	public Focus(){}
 	public double getX(){return x;}
@@ -21,4 +25,10 @@ public class Focus implements Selectable
 	public void setY(double b){y=b;}
 	public Orbit getOwner(){return owner;}
 	public void setOwner(Orbit o){owner = o;}
+
+	@Override
+	public ImageResource getImage() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
