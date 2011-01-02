@@ -10,8 +10,6 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 	final static double EXIT_PLACE_JITTER = 50.0;
 	final static double EXIT_DIRECTION_JITTER = 0.2;
 	
-	Player owner;
-	
 	int energy;
 	int max_energy;
 	long nextAttackingtime;
@@ -515,7 +513,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 	public void setEnergy(int f){energy=f;}
 	public int getMax_energy(){return max_energy;}
 	public void setMax_energy(int mf){max_energy=mf;}
-	public Player getOwner() {return owner;}
+	
 	public float getSoldier() {return soldier;}
 	public MODES getMode(){return mode;}
 	public void setMode(MODES m){mode=m;}

@@ -24,6 +24,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 	//for facility-building progress
 	JProgressBar progress_bar;
 	boolean need_to_reset;
+	JPanel cur_fac_in_prog_panel;
 	
 	boolean no_base_mode;
 	
@@ -47,6 +48,9 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		
 		cancel = new JButton("Cancel");
 		cancel.addActionListener(this);
+		
+		cur_fac_in_prog_panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		cur_fac_in_prog_panel.setAlignmentY(JPanel.BOTTOM_ALIGNMENT);
 		
 		need_to_reset=false;
 		
@@ -102,6 +106,9 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		
 		if(s instanceof OwnableSatellite<?>)
 		{			
+			//cancel any half-started build.
+			cur_fac_in_prog_panel.removeAll();
+			
 			addPopulation();
 			
 			if(((OwnableSatellite<?>)s).getOwner() instanceof Player)
@@ -136,7 +143,8 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		stats_panel.add(progress_bar);
 		
 		//set the buttons to reflect building/not building
-		boolean is_building = (((OwnableSatellite<?>)the_sat).getBldg_in_progress() != FacilityType.NO_BLDG);
+		FacilityType bldg_in_prog = ((OwnableSatellite<?>)the_sat).getBldg_in_progress();
+		boolean is_building = (bldg_in_prog != FacilityType.NO_BLDG);
 		build.setEnabled(!is_building);
 		cancel.setEnabled(is_building);
 		need_to_reset=is_building;
@@ -145,6 +153,13 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		button_strip.add(build);
 		button_strip.add(cancel);
 		stats_panel.add(button_strip);
+		
+		if(is_building)
+		{
+			cur_fac_in_prog_panel.add(new JLabel(bldg_in_prog.icon));
+			cur_fac_in_prog_panel.add(new JLabel(bldg_in_prog.name));
+			stats_panel.add(cur_fac_in_prog_panel);
+		}
 	}
 	
 	public void update(long t)
@@ -166,6 +181,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 				else if(need_to_reset)
 				{
 					progress_bar.setValue(0);
+					cur_fac_in_prog_panel.removeAll();
 					build.setEnabled(true);
 					cancel.setEnabled(false);
 					need_to_reset = false;
@@ -340,6 +356,8 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		for(int i=first_fac; i < end_facs; i++) //start at 1 since NO_BUILDING is type 0
 		{
 			JPanel fac_panel = new JPanel();
+			fac_panel.setToolTipText(fTypes[i].tooltip);
+			fac_panel.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 			fac_panel.setMinimumSize(new Dimension(65,130));
 			fac_panel.addMouseListener(new ObjBuilder<FacilityType, OwnableSatellite<?>>((OwnableSatellite<?>)the_sat, fTypes[i], ObjBuilder.FacilityManufactureFuncs, fac_panel, false, this));
 			GroupLayout gl = new GroupLayout(fac_panel);
@@ -421,6 +439,8 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		for(int i=1; i < sTypes.length; i++) //start at 1 since MISSILE is type 0
 		{
 			JPanel ship_panel = new JPanel();
+			ship_panel.setToolTipText(sTypes[i].tooltip);
+			ship_panel.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 			ship_panel.addMouseListener(new ObjBuilder<ShipType, Shipyard>(the_shipyard, sTypes[i], ObjBuilder.ShipManufactureFuncs, ship_panel, true, this));
 			GroupLayout gl = new GroupLayout(ship_panel);
 			ship_panel.setLayout(gl);

@@ -1,7 +1,4 @@
-import java.io.File;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 public class Resources
@@ -11,7 +8,7 @@ public class Resources
 		//load Images
 		for(ImageResource r : ImageResource.values())
 		{
-			r.image = ImageIO.read(new File(r.img_path));
+			r.image = GraphicsUtilities.loadCompatibleImage(r.img_path);
 		}
 		
 		//store metrics from images to ShipTypes

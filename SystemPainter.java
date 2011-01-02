@@ -298,7 +298,7 @@ public class SystemPainter extends JPanel
 		//idea of how to implement antialiasing from http://weblogs.java.net/blog/2007/03/10/java-2d-trickery-antialiased-image-transforms
 		//this also allows me to use double coordinates instead of int's.  :)
 		if(s != mouseover_obj)
-			g2.setPaint(s.type.getScaledImage(scale));
+			g2.setPaint(s.type.getScaledImage(scale, s.getOwner().getColor()));
 		else
 			g2.setPaint(getMouseoverPaint());
 		
@@ -306,14 +306,14 @@ public class SystemPainter extends JPanel
 		g2.rotate(s.direction+Math.PI/2, s.type.img.scale*s.type.img.getWidth()*scale/2.0,s.type.img.scale*s.type.img.getHeight()*scale/2.0);
 		g2.fill(new Rectangle2D.Double(0.0, 0.0, s.type.img.scale*s.type.img.getWidth()*scale, s.type.img.scale*scale*s.type.img.getHeight()));
 		
-		if(c != null)
+		/*if(c != null)
 		{
 			g2.setColor(c);
 			//different transform means different draw command needed
 			//g2.draw(new Rectangle2D.Double(drawX(s.getPos_x())-3.0*scale, drawY(s.getPos_y())-3.0*scale,6.0*scale,6.0*scale));
 			g2.draw(new Rectangle2D.Double(s.type.img.scale*s.type.img.getWidth()*scale/2.0-3.0*scale, s.type.img.scale*s.type.img.getHeight()*scale/2.0-3.0*scale,6.0*scale,6.0*scale));
 		}
-		else
+		else*/
 		{
 			/*this fixed a bug where if there are multiple missiles drawn on the screen,
 			they are drawn as essentially viewports to one underlying paint, i.e. only one

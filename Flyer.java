@@ -13,6 +13,7 @@ public abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends Flyer.Fly
 	GSystem location;
 	String name;
 	ID id;
+	Player owner;
 	
 	HashSet<Targetter<?>> aggressors; //all the ships/ missiles targeting this
 	
@@ -264,6 +265,8 @@ public abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends Flyer.Fly
 	public void setDamage(int d){damage=d;}
 	public void setId(ID i){id=i;}
 	public ID getId(){return id;}
+	public Player getOwner() {return owner;}
+	public void setOwner(Player p){owner = p;}
 	
 	public static abstract class FlyerId<T extends FlyerId<T>>
 	{

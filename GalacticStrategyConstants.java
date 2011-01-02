@@ -19,10 +19,10 @@ public class GalacticStrategyConstants
 	//*******************************DEFAULTS USED IN Galaxy Designer********************************************************//
 	
 	//Used in SystemViewer
-	static int DEFAULT_STAR_SIZE=25;
+	static int DEFAULT_STAR_SIZE=35;
 	static int DEFAULT_STAR_ZONE_SIZE=50;
-	static int DEFAULT_PLANET_SIZE = 10;
-	static int DEFAULT_MOON_SIZE = 6;
+	static int DEFAULT_PLANET_SIZE = 20;
+	static int DEFAULT_MOON_SIZE = 12;
 	static double DEFAULT_PLANET_MASS = 10;
 	static double DEFAULT_STAR_MASS = 10000;
 	static double DEFAULT_MOON_MASS= 1;
@@ -65,7 +65,7 @@ public class GalacticStrategyConstants
 	static final int GALAXY_HEIGHT=600; //the height of the galaxy
 	
 	static final double DEFAULT_SCALE = 1.0d; //this sets the default scale for the view of the system
-	static final double MIN_SCALE = 1.0d;
+	static final double MIN_SCALE = 0.66d;
 	static final double MAX_SCALE=5.0d;
 	static final double SCROLL_SENSITIVITY=.1d; //the amount the wheel is rotated will be multiplied by this number to determine how much the scale changes.
 	

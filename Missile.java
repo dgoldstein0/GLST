@@ -15,6 +15,7 @@ public class Missile extends Flyer<Missile, Missile.MissileId, Iterator<Missile.
 		location = s.location;
 		id= new MissileId(s.next_missile_id++, s);
 		location.next_missile_id++;
+		owner = s.owner;
 		
 		//set up physics
 		pos_x = s.getPos_x();

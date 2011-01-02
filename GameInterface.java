@@ -26,7 +26,7 @@ import java.awt.BorderLayout;
 import java.util.*;
 
 
-public class GameInterface implements ActionListener, MouseListener, WindowListener, ComponentListener, MouseWheelListener, AWTEventListener
+public class GameInterface implements MouseListener, WindowListener, ComponentListener, MouseWheelListener, AWTEventListener
 {
 	
 	JFrame frame;
@@ -448,12 +448,6 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	
 	public boolean isGalaxyDisplayed(){return mode;}
 	public boolean isSystemDisplayed(){return !mode;}
-	
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	//this is ONLY invoked by MOUSE MOTION EVENTS, and is in charge of deciding how fast to move the view of the system
 	public void eventDispatched(AWTEvent a)
@@ -631,16 +625,10 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseClicked(MouseEvent arg0) {}
 
 	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseEntered(MouseEvent arg0) {}
 
 	@Override
 	public void mouseExited(MouseEvent arg0) {
@@ -1029,7 +1017,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 			else if(sys_scale > GalacticStrategyConstants.MAX_SCALE)
 				sys_scale = GalacticStrategyConstants.MAX_SCALE;
 			
-			//adjust center if part of screen goes out of bounds ////BOOKMARK
+			//adjust center if part of screen goes out of bounds //TODO: glitchy bounds-control needs fixing
 			enforceSystemBounds();
 			redraw();
 		}
@@ -1063,7 +1051,7 @@ public class GameInterface implements ActionListener, MouseListener, WindowListe
 
 	@Override
 	public void windowClosing(WindowEvent arg0) {
-		// TODO Auto-generated method stub
+		
 		GC.endAllThreads(); //used to end any connections, and notify other players, in addition to closing errant threads.
 		System.exit(0);
 	}

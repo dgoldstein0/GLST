@@ -13,7 +13,7 @@ public class SoundManager
 			AudioStream as = new AudioStream(in);
 			
 			// Use the static class member "player" from class AudioPlayer to play clip.
-			AudioPlayer.player.start(as);            
+			AudioPlayer.player.start(as);
 			
 			// Similarly, to stop the audio.
 			//AudioPlayer.player.stop(as); 
