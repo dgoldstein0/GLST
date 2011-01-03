@@ -1,6 +1,6 @@
 import java.util.HashSet;
 
-public class BaseDataSaver extends FacilityDataSaver<Base> {
+public strictfp class BaseDataSaver extends FacilityDataSaver<Base> {
 
 	float sldr;
 	int max_sldr;

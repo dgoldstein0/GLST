@@ -2,9 +2,9 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
 
-//subclasses are responsible for instantiating saved_data array
+//saved_data array is instantiated via the Creator object passed into the constructor
 
-public abstract class DataSaverControl<T extends Saveable<T>, S extends DataSaver<T> > {
+public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends DataSaver<T> > {
 
 	int index;
 	final S[] saved_data;

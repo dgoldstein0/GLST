@@ -1,7 +1,7 @@
 import java.util.Hashtable;
 import java.util.Iterator;
 
-public class Fleet implements RelaxedSaveable<Fleet>
+public strictfp class Fleet implements RelaxedSaveable<Fleet>
 {
 	Hashtable<Ship.ShipId, Ship> ships;
 	Player owner;

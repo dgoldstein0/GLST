@@ -1,4 +1,4 @@
-public class GSystemDescriber implements Describer<GSystem>
+public strictfp class GSystemDescriber implements Describer<GSystem>
 {
 	int id;
 	

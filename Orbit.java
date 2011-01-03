@@ -1,4 +1,4 @@
-public class Orbit
+public strictfp class Orbit
 {
 	final static double PERIOD_CONSTANT=GalacticStrategyConstants.PERIOD_CONSTANT;
 

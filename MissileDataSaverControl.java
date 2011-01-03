@@ -1,7 +1,7 @@
 import java.util.Set;
 import java.util.HashSet;
 
-public class MissileDataSaverControl extends FlyerDataSaverControl<Missile, FlyerDataSaver<Missile>> {
+public strictfp class MissileDataSaverControl extends FlyerDataSaverControl<Missile, FlyerDataSaver<Missile>> {
 
 	@SuppressWarnings("unchecked")
 	public MissileDataSaverControl(Missile m)

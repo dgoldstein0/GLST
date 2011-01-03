@@ -11,7 +11,7 @@ import java.util.Hashtable;
 
 import javax.swing.ImageIcon;
 
-public enum ShipType
+public strictfp enum ShipType
 {
 			//name			fuel	hull	money	metal	time to build	troops	image					max speed	max ang. vel.	max accel	warp accel	warp speed	warp range	tooltip
 	MISSILE	("Missile",		5,		10,		0,		0,		2000,			0,		ImageResource.MISSILE,	.15,		.0015,			.0001,		0.0,		0.0,		0,			"BOOM!  You're dead if you get hit by one of these..."),

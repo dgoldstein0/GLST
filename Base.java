@@ -1,7 +1,7 @@
 import java.util.HashSet;
 import java.util.Random;
 
-public class Base extends Facility<Base>{
+public strictfp class Base extends Facility<Base>{
 	
 	final Object soldier_lock = new Object();
 	float soldier;

@@ -1,4 +1,4 @@
-public class SatelliteDescriber<T extends Satellite<T>> implements Describer<T>
+public strictfp class SatelliteDescriber<T extends Satellite<T>> implements Describer<T>
 {
 	int id;
 	Describer<? extends Orbitable<?>> boss_describer;

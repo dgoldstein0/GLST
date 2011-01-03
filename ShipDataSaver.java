@@ -1,5 +1,5 @@
 
-public class ShipDataSaver extends FlyerDataSaver<Ship> {
+public strictfp class ShipDataSaver extends FlyerDataSaver<Ship> {
 
 	Ship.MODES md; //mode
 	long next_at_time; //next attacking time

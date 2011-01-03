@@ -1,7 +1,7 @@
 import java.awt.Color;
 import java.util.*;
 
-public class GSystem implements Orbitable<GSystem>
+public strictfp class GSystem implements Orbitable<GSystem>
 {
 	final static int NO_OWNER= -2;
 	final static int OWNER_CONFLICTED = -1;

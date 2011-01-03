@@ -2,6 +2,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JMenuItem;
 
+//TODO: remove this class - it is no longer used
+@Deprecated
 public class SelectableMenuItem extends JMenuItem implements ActionListener
 {
 	Selectable the_selectable;

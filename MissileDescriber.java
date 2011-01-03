@@ -1,4 +1,4 @@
-public class MissileDescriber implements Describer<Missile>
+public strictfp class MissileDescriber implements Describer<Missile>
 {
 	int system_id;
 	int missile_id;

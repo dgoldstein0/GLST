@@ -1,7 +1,7 @@
 import java.util.Set;
 import java.util.HashSet;
 
-public class ShipWarpOrder extends Order
+public strictfp class ShipWarpOrder extends Order
 {
 	Ship the_ship;
 	GSystem the_dest;

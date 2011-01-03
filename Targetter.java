@@ -1,4 +1,4 @@
-public abstract class Targetter<T extends Targetter<T>> implements Targetable<T>
+public strictfp abstract class Targetter<T extends Targetter<T>> implements Targetable<T>
 {
 	
 	Targetable<?> target;

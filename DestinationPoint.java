@@ -1,4 +1,4 @@
-public class DestinationPoint implements Destination<DestinationPoint>, Describer<DestinationPoint>
+public strictfp class DestinationPoint implements Destination<DestinationPoint>, Describer<DestinationPoint>
 {
 	double x,y;
 	

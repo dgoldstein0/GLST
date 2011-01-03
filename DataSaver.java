@@ -1,5 +1,5 @@
 
-public abstract class DataSaver<T extends Saveable<T>> {
+public strictfp abstract class DataSaver<T extends Saveable<T>> {
 
 	public long t; //time saved
 	boolean data_saved;

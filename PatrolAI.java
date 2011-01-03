@@ -1,4 +1,4 @@
-public class PatrolAI extends FlyerAI
+public strictfp class PatrolAI extends FlyerAI
 {
 	//this AI makes a ship fly in a circle
 	

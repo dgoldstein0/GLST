@@ -1,4 +1,4 @@
-public abstract class Satellite<T extends Satellite<T>> extends StellarObject implements Destination<T>
+public strictfp abstract class Satellite<T extends Satellite<T>> extends StellarObject implements Destination<T>
 {
 	Orbit orbit;
 	int id;
@@ -18,11 +18,6 @@ public abstract class Satellite<T extends Satellite<T>> extends StellarObject im
 	public String generateName(){return getName();}
 	@Override
 	public int getSelectType(){return Selectable.SATELLITE;}
-	@Override
-	public int getTypeNumber()
-	{
-		return Selectable.SATELLITE | (picture_num << 2);
-	}
 	
 	public double absoluteCurX(){return orbit.absoluteCurX();}
 	public double absoluteCurY(){return orbit.absoluteCurY();}

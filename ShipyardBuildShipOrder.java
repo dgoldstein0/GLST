@@ -1,7 +1,7 @@
 import java.util.Set;
 import java.util.HashSet;
 
-public class ShipyardBuildShipOrder extends Order {
+public strictfp class ShipyardBuildShipOrder extends Order {
 
 	FacilityDescriber<Shipyard> shipyard_describer;
 	Shipyard the_yard;

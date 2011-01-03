@@ -1,4 +1,4 @@
-public class Focus implements Selectable
+public strictfp class Focus implements Selectable
 {
 	private double x;
 	private double y;
@@ -15,8 +15,6 @@ public class Focus implements Selectable
 	public int getSelectType(){return Selectable.FOCUS;}
 	@Override
 	public String generateName(){return "Focus of " + owner.obj.generateName();}
-	@Override
-	public int getTypeNumber(){return Selectable.FOCUS;}
 	
 	public Focus(){}
 	public double getX(){return x;}

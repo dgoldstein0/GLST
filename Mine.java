@@ -1,5 +1,5 @@
 
-public class Mine extends Facility<Mine>{
+public strictfp class Mine extends Facility<Mine>{
 	
 	double mining_rate;
 	long add_met;

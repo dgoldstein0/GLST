@@ -1,4 +1,4 @@
-public class WarpAI extends FlyerAI
+public strictfp class WarpAI extends FlyerAI
 {
 	public WarpAI(Ship f)
 	{

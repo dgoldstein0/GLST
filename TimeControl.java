@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class TimeControl
+public strictfp class TimeControl
 {
 	long time_elapsed; //can support over 292 years
 	long last_time_updated;

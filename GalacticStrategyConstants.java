@@ -1,6 +1,6 @@
 import java.awt.Color;
 
-public class GalacticStrategyConstants
+public strictfp class GalacticStrategyConstants
 {
 	//this class contains constants relevant to the games/galaxy designer's configuration.
 	//It does NOT contain constants that are only of interest within a certain class, such the numeric values which represent different states of 1 variable.

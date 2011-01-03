@@ -14,9 +14,6 @@ public class RelaxedDataSaverTester {
 							1142,	1200,	1300,	1400,	1500, 1501};
 	
 	
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 
 		Planet p = new Planet(0,"tester", 100.0, 1000.0, 10, 10.0, .00001);

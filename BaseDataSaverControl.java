@@ -1,4 +1,4 @@
-public class BaseDataSaverControl extends FacilityDataSaverControl<Base, BaseDataSaver> {
+public strictfp class BaseDataSaverControl extends FacilityDataSaverControl<Base, BaseDataSaver> {
 	
 	public BaseDataSaverControl(Base b) {
 		super(b, new Creator<Base, BaseDataSaver >(){

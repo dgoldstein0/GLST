@@ -1,5 +1,5 @@
 
-public abstract class RelaxedDataSaverControl<T extends RelaxedSaveable<T>, S extends DataSaver<T> > extends DataSaverControl<T, S> {
+public strictfp abstract class RelaxedDataSaverControl<T extends RelaxedSaveable<T>, S extends DataSaver<T> > extends DataSaverControl<T, S> {
 
 	public RelaxedDataSaverControl(T s, Creator<T, S> c) {
 		super(s, c);

@@ -3,7 +3,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Hashtable;
 
-public class ShipyardDataSaverControl extends FacilityDataSaverControl<Shipyard, ShipyardDataSaver> {
+public strictfp class ShipyardDataSaverControl extends FacilityDataSaverControl<Shipyard, ShipyardDataSaver> {
 	
 	public ShipyardDataSaverControl(Shipyard s) {
 		super(s, new Creator<Shipyard, ShipyardDataSaver >(){

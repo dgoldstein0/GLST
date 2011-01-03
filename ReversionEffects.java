@@ -1,7 +1,7 @@
 import java.util.Set;
 import java.util.HashSet;
 
-public class ReversionEffects {
+public strictfp class ReversionEffects {
 
 	Set<Order> orders_to_redo;
 	Set<RevertObj> objects_to_revert;

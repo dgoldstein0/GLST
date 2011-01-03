@@ -1,7 +1,7 @@
 import java.util.Set;
 import java.util.HashSet;
 
-public class FacilityBuildOrder extends Order
+public strictfp class FacilityBuildOrder extends Order
 {
 	SatelliteDescriber<? extends OwnableSatellite<?>> sat_desc;
 	OwnableSatellite<?> the_sat;

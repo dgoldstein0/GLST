@@ -1,7 +1,7 @@
 import java.util.Set;
 import java.util.HashSet;
 
-public class ShipAttackOrder extends Order
+public strictfp class ShipAttackOrder extends Order
 {
 	Ship the_ship;
 	Targetable<?> the_target;

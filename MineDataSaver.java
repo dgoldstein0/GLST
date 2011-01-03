@@ -1,5 +1,5 @@
 
-public class MineDataSaver extends FacilityDataSaver<Mine> {
+public strictfp class MineDataSaver extends FacilityDataSaver<Mine> {
 	
 	double m_rate;
 	long met_added; //MineDataSaverControl has special support to use this to claw back metal

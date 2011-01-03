@@ -1,7 +1,7 @@
 import java.util.HashSet;
 import java.util.Set;
 
-public class ShipDataSaverControl extends FlyerDataSaverControl<Ship, ShipDataSaver> {
+public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, ShipDataSaver> {
 
 	public ShipDataSaverControl(Ship s)
 	{
@@ -42,7 +42,7 @@ public class ShipDataSaverControl extends FlyerDataSaverControl<Ship, ShipDataSa
 							orders.add(new ShipMoveOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].dest));
 						}
 						break;
-					case TARGETTING_TARGET_LOST:
+					case TARGET_LOST:
 						orders.add(new ShipAttackOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].t /*target_t doesn't matter, because it is only used over network*/, saved_data[j].was_tgt));
 						break;
 					case ATTACKING:

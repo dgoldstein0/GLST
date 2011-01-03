@@ -1,7 +1,7 @@
 import java.util.Hashtable;
 
 
-public class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> extends DataSaver<T> {
+public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> extends DataSaver<T> {
 
 	boolean is_data_saved;
 	FacilityType bldg_in_prog;

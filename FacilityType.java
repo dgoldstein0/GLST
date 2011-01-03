@@ -1,6 +1,6 @@
 import javax.swing.ImageIcon;
 
-public enum FacilityType
+public strictfp enum FacilityType
 {
 	//					name					metal	money	build_time	icon_image_path					tooltip															creator
 	NO_BLDG				("",					0,		0,		0l,			"",								"",																null),

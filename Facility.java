@@ -2,7 +2,7 @@
 import java.util.HashSet;
 
 //T = the class which extends Facility
-public abstract class Facility<T extends Facility<T>> implements Targetable<T>, RelaxedSaveable<T>
+public strictfp abstract class Facility<T extends Facility<T>> implements Targetable<T>, RelaxedSaveable<T>
 {	
 	OwnableSatellite<?> location;
 	int id;

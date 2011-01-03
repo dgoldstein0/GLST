@@ -3,7 +3,7 @@ import java.util.Random;
 
 import javax.swing.SwingUtilities;
 
-public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implements Selectable
+public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implements Selectable
 {
 	final static double ESCAPE_DIST = 300.0;
 	final static double EXIT_MULTIPLIER = 2.0; //the multiple of ESCAPE_DIST at which ships exit from warp
@@ -16,13 +16,13 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 	int next_missile_id;
 	
 	float soldier;
-	public static enum MODES {MOVING, ATTACKING, TARGETTING_TARGET_LOST, TRAVEL_TO_WARP, ENTER_WARP, IN_WARP, EXIT_WARP, PICKUP_TROOPS;}
+	public static enum MODES {MOVING, ATTACKING, TARGET_LOST, TRAVEL_TO_WARP, ENTER_WARP, IN_WARP, EXIT_WARP, PICKUP_TROOPS;}
 	MODES mode;
 	
 	/**this enum is for cases where targets warp/are destroyed/are lost for some reason
 	 * before the order to attack them can be executed*/
 	public static enum LOST_REASON {WARPED, DESTROYED;}
-	Targetable<?> was_target; //used with modes TARGETTING_TARGET_DESTROYED and TARGETTING_TARGET_WARPED
+	Targetable<?> was_target; //used with modes TARGETTING_TARGET_LOST
 	
 	//used for warping
 	GSystem warp_destination;
@@ -81,7 +81,6 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 	@Override
 	public boolean update(long t, Fleet.ShipIterator shipIteration)
 	{
-		//TODO: update this comment
 		/*this if statement is necessary in case game is updated too slow.  For instance, update last to 60, then
 		an order is given which advances the ship to 80., but the next time all are updated to is 100, we want the
 		ship ordered to move to only be updated once and not twice*/
@@ -90,7 +89,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 			moveIncrement();
 			switch(mode)
 			{
-				case TARGETTING_TARGET_LOST:
+				case TARGET_LOST:
 					mode = MODES.MOVING;
 					was_target=null;
 					break;
@@ -428,7 +427,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 	
 	public void destroyed()
 	{
-		System.out.println("destroyed-before");	
+		//System.out.println("destroyed-before");	
 		if(location.fleets[owner.getId()].remove(this, time))//if is so in case another attack has already destroyed the ship, but both call the destroyed method
 		{
 			is_alive=false;
@@ -440,7 +439,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 			//notify interface
 			SwingUtilities.invokeLater(new ShipDeselector(this));
 				
-			System.out.println("destroyed-after");
+			//System.out.println("destroyed-after");
 		}
 	}
 	
@@ -460,7 +459,7 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 		targetLost(LOST_REASON.WARPED, t, late_order, tgt);
 	}
 	
-	public void targetLost(LOST_REASON reason, long t, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
+	private void targetLost(LOST_REASON reason, long t, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
 	{
 		//System.out.println("target lost");
 		if (destination==(Destination<?>)target)
@@ -470,13 +469,11 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 			SwingUtilities.invokeLater(new DestUpdater(this));
 		}
 		
+		mode = MODES.TARGET_LOST;
 		if(!late_order)
-			mode=MODES.MOVING;
+			was_target = target;
 		else
-		{
-			mode = MODES.TARGETTING_TARGET_LOST;
 			was_target = tgt;
-		}
 		
 		target=null;
 		data_control.saveData();
@@ -525,12 +522,6 @@ public class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> implement
 	public double getExit_direction(){return exit_direction;}
 	
 	//support for Selectable
-	@Override
-	public int getTypeNumber()
-	{
-		return Selectable.SHIP | (type.ordinal() << 2);
-	}
-	
 	@Override
 	public ImageResource getImage()
 	{

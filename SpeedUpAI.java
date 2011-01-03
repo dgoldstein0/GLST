@@ -1,4 +1,4 @@
-public class SpeedUpAI extends FlyerAI
+public strictfp class SpeedUpAI extends FlyerAI
 {
 	public SpeedUpAI(){}
 	

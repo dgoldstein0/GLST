@@ -13,7 +13,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.util.concurrent.PriorityBlockingQueue;
 
-public class GameControl
+public strictfp class GameControl
 {
 	static final boolean DEBUGGING = false;
 	

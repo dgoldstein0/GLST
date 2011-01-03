@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Galaxy
+public strictfp class Galaxy
 {
 	ArrayList<GSystem> systems;
 	String name;

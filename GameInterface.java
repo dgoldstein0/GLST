@@ -70,7 +70,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	MODIFIER drag_modifier;
 		double mouse_down_x;
 		double mouse_down_y;
-		double cur_x;
+		double cur_x; //used also for mouseover effects
 		double cur_y;
 		
 	double prev_scale,prev_x,prev_y;
@@ -153,7 +153,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		
 		//create time
 		time=new JLabel("Time: 0");
-	//	time.setSize(600, 200);
+		//time.setSize(600, 200);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx =0.4;
 		c.weighty=0;
@@ -527,18 +527,11 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 					}
 				}
 			}
-			
-			if(e.getSource() == theinterface) //just a mouse-move or drag event
+			else if(e.getSource() == theinterface) //just a mouse-move or drag event
 			{
-				//mouseover highlight effect
-				final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/sys_scale; //tolerance
-				double x = sysScreenToDataX(e.getX());
-				double y = sysScreenToDataY(e.getY());
-				
-				ArrayList<Selectable> select_items = new ArrayList<Selectable>();
-				
-				selectInSystemInRange(select_items, x-OBJ_TOL, y-OBJ_TOL, x+OBJ_TOL, y+OBJ_TOL);
-				mouseover_obj = (select_items.size() != 0) ? select_items.get(0) : null;
+				//update mouse coords for the mouse-over highlight effect
+				cur_x = sysScreenToDataX(e.getX());
+				cur_y = sysScreenToDataY(e.getY());
 			}
 				
 			Point corner;
@@ -761,11 +754,22 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 			selected_sys.add(sys); //if found system, add it to the selection
 	}
 	
-	private GSystem findSystemAt(double x, double y) //arguments specified in Galaxy coordinates, not screen coordinates
+	/**The arguments are specified in Galaxy coordinates, not screen coordinates.
+	 * 
+	 * @param x x-coordinate in the Galaxy to look for a system at
+	 * @param y y-coordinate in the Galaxy to look for a system at
+	 * @return the system that is closest, if it is within SELECTION_TOLERANCE.  If no GSystem is within the tolerance, it returns null.
+	 * 
+	 * @see GalacticStrategyConstants.SELECTION_TOLERANCE
+	 * */
+	private GSystem findSystemAt(double x, double y)
 	{
-		for(GSystem the_sys : GC.map.systems) //BOOKMARK - this should search through GC.players[GC.player_id].known_systems
+		for(GSystem the_sys : GC.map.systems) //TODO: this should search through GC.players[GC.player_id].known_systems
 		{
-			if(Math.hypot(the_sys.x - x, the_sys.y-y) <= GalacticStrategyConstants.SELECTION_TOLERANCE)
+			double dif_x = the_sys.x - x;
+			double dif_y = the_sys.y - y;
+			
+			if(dif_x*dif_x + dif_y*dif_y <= GalacticStrategyConstants.SELECTION_TOLERANCE*GalacticStrategyConstants.SELECTION_TOLERANCE)
 				return the_sys;
 		}
 		return null; //no system found
@@ -773,6 +777,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	
 	private void selectInSystemAt(int mouse_x, int mouse_y)
 	{
+		//TODO: remove unused code...
+		
 		/*final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/sys_scale; //tolerance
 		double x = sysScreenToDataX(mouse_x);
 		double y = sysScreenToDataY(mouse_y);
@@ -869,6 +875,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		}
 	}
 	
+	@Deprecated
 	public void buildSelectContextMenu(ArrayList<Selectable> select_which, int x, int y)
 	{
 		select_menu.removeAll();
@@ -962,6 +969,18 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 			}
 		
 		}
+		
+		if(isSystemDisplayed())
+		{
+			//mouseover effect
+			final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/sys_scale; //tolerance
+			
+			ArrayList<Selectable> select_items = new ArrayList<Selectable>();
+			
+			selectInSystemInRange(select_items, cur_x-OBJ_TOL, cur_y-OBJ_TOL, cur_x+OBJ_TOL, cur_y+OBJ_TOL);
+			mouseover_obj = (select_items.size() != 0) ? select_items.get(0) : null;
+		}
+		
 		moveCenter();
 		frame.validate();
 	}

@@ -1,4 +1,4 @@
-public abstract class StellarObject implements Selectable
+public strictfp abstract class StellarObject implements Selectable
 {
 	double size;
 	double mass;

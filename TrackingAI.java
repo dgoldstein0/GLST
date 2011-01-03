@@ -1,4 +1,4 @@
-public class TrackingAI extends FlyerAI
+public strictfp class TrackingAI extends FlyerAI
 {
 	double dest_tolerance; //how close we should be to destination before match speed by default
 	int in_range_behavior; //if the AI should try to match the speed of its destination or not

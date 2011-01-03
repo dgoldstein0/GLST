@@ -1,4 +1,4 @@
-public class ShipDescriber implements Describer<Ship>
+public strictfp class ShipDescriber implements Describer<Ship>
 {
 	int system_id;
 	int player_id;

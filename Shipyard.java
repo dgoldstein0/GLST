@@ -1,7 +1,7 @@
 
 import java.util.*;
 
-public class Shipyard extends Facility<Shipyard>{
+public strictfp class Shipyard extends Facility<Shipyard>{
 
 	Hashtable<Integer, Ship> manufac_queue;      //manufacturing queue - the list of ships to build
 	Object queue_lock = new Object(); //used to synchronize the queue

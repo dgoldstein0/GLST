@@ -1,4 +1,4 @@
-public abstract class FlyerAI
+public strictfp abstract class FlyerAI
 {
 	Flyer<?,?,?> the_flyer;
 	

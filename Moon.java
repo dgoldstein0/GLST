@@ -1,4 +1,4 @@
-public class Moon extends OwnableSatellite<Moon>
+public strictfp class Moon extends OwnableSatellite<Moon>
 {
 	public Moon(int i, double m, String nm, int sz)
 	{

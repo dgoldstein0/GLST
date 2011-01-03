@@ -1,4 +1,4 @@
-public class Star extends StellarObject
+public strictfp class Star extends StellarObject
 {
 	GSystem owner;
 	
@@ -16,13 +16,7 @@ public class Star extends StellarObject
 		owner=o;
 	}
 	
-	//for Selectable, implemented by StellarObject
-	@Override
-	public int getTypeNumber()
-	{
-		return Selectable.STAR | (picture_num << 2);
-	}
-	
+	//for Selectable, implemented by StellarObject	
 	@Override
 	public String generateName()
 	{

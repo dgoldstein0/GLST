@@ -1,6 +1,6 @@
 import java.util.HashMap;
 
-public class MissileListDataSaver extends DataSaver<MissileList> {
+public strictfp class MissileListDataSaver extends DataSaver<MissileList> {
 
 	HashMap<Missile.MissileId, Missile> tbl;
 	

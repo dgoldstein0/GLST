@@ -1,6 +1,6 @@
 import java.util.Set;
 
-public abstract class Order implements Comparable<Order>
+public strictfp abstract class Order implements Comparable<Order>
 {
 	final static int ORIGIN = 0;
 	final static int NETWORK = 1;

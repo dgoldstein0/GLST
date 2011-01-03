@@ -1,7 +1,7 @@
 import java.util.HashMap;
 import java.util.Set;
 
-public class MissileList implements RelaxedSaveable<MissileList> {
+public strictfp class MissileList implements RelaxedSaveable<MissileList> {
 	
 	HashMap<Missile.MissileId, Missile> table;
 	MissileListDataControl data_control;

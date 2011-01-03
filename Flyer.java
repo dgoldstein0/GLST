@@ -1,7 +1,7 @@
 import java.util.HashSet;
 import java.util.Iterator;
 
-public abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends Flyer.FlyerId<ID>, ITERATOR extends Iterator<ID>> extends Targetter<T>
+public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends Flyer.FlyerId<ID>, ITERATOR extends Iterator<ID>> extends Targetter<T>
 {
 	//these two constants are used by loadData for its second argument, to
 	//instruct it whether or not to call loadMoreData from the FlyerDataSaver (or subclass thereof)

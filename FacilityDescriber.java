@@ -1,4 +1,4 @@
-public class FacilityDescriber<T extends Facility<T>> implements Describer<T>
+public strictfp class FacilityDescriber<T extends Facility<T>> implements Describer<T>
 {
 	int id;
 	Describer<? extends OwnableSatellite<?>> boss;

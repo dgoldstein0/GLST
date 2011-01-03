@@ -1,6 +1,6 @@
 import java.util.HashSet;
 
-public interface Targetable<T extends Targetable<T>> extends Destination<T>, Saveable<T>
+public strictfp interface Targetable<T extends Targetable<T>> extends Destination<T>, Saveable<T>
 {
 	public abstract void addDamage(long t, int d);
 	public abstract void destroyed();

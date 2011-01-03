@@ -26,7 +26,7 @@ public class SystemPainter extends JPanel
 	int ghost_y;
 	int ghost_size;
 	
-	double scale=1.0d; //always greater than or equal to 1
+	double scale;
 	double center_x;
 	double center_y;
 	
@@ -43,9 +43,6 @@ public class SystemPainter extends JPanel
 	
 	//cache for mouseover effects
 	Selectable mouseover_obj;
-	int mouseover_paint_type; //type number corresponding to mouseover_paint
-	double mouseover_paint_scale;
-	TexturePaint mouseover_paint;
 	
 	public SystemPainter(boolean design)
 	{
@@ -55,75 +52,9 @@ public class SystemPainter extends JPanel
 		return_arrow=Toolkit.getDefaultToolkit().getImage("images/return_arrow.jpg");
 		draw_select_box=false;
 		selected = new ArrayList<Selectable>();
+		scale = 1.0d;
 		
-		mouseover_paint_type = -1;
-		mouseover_paint_scale=0.0;
 		mouseover_obj = null;
-		mouseover_paint= null;
-	}
-	
-	public TexturePaint getMouseoverPaint()
-	{
-		//do we need to change the image?
-		if(mouseover_paint_type != mouseover_obj.getTypeNumber() || scale != mouseover_paint_scale)
-		{
-			RescaleOp op = new RescaleOp(1.3f, 30.0f, null);
-			
-			//create new BufferedImage for the rescaled (brightened) picture
-			ImageResource obj_img = mouseover_obj.getImage();
-			
-			//initialize mouseover_img as a copy of obj_img.image
-			BufferedImage mouseover_img = new BufferedImage(obj_img.image.getWidth(null), obj_img.image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-			java.awt.Graphics2D g2d = mouseover_img.createGraphics();
-			g2d.drawImage(obj_img.image, 0, 0, null);
-			g2d.dispose();
-			
-			//brighten!
-			op.filter(mouseover_img, mouseover_img);
-			
-			//now scale the picture (size)
-			BufferedImage scaled_img;
-			double default_scale = obj_img.scale;
-			//mouseover_img = obj_img.image;
-			
-			try
-			{
-				scaled_img = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(
-		            (int)(mouseover_img.getWidth()*default_scale*scale), (int)(mouseover_img.getHeight()*default_scale*scale), Transparency.BITMASK);
-			}
-			catch(HeadlessException he)
-			{
-				scaled_img = new BufferedImage((int)(default_scale*mouseover_img.getWidth()*scale), (int)(default_scale*mouseover_img.getHeight()*scale), BufferedImage.TYPE_INT_ARGB);
-			}
-			
-			Graphics2D temp = scaled_img.createGraphics();
-			temp.drawImage(mouseover_img, 0, 0, (int)(default_scale*mouseover_img.getWidth()*scale), (int)(default_scale*scale*mouseover_img.getHeight()), null);
-			temp.dispose();
-			
-			mouseover_paint = new TexturePaint(scaled_img, new Rectangle2D.Double(0, 0, default_scale*mouseover_img.getWidth()*scale, default_scale*mouseover_img.getHeight()*scale));
-			scaled_img.flush();
-			mouseover_img.flush();
-			
-			//mark cache as valid
-			mouseover_paint_type = mouseover_obj.getTypeNumber();
-			mouseover_paint_scale = scale;
-		}
-		return mouseover_paint;
-	}
-	
-	public Color brighten(Color base_color)
-	{
-		float[] hsb = new float[3];
-		Color.RGBtoHSB(base_color.getRed(), base_color.getGreen(), base_color.getBlue(), hsb);
-		hsb[2] += .35f;
-		hsb[1] -= .35f;
-		if(hsb[2] > 1.0f)
-		{
-			hsb[2] = 1.0f;
-		}
-		if(hsb[1] < 0.0f)
-			hsb[1] = 0.0f;
-		return Color.getHSBColor(hsb[0], hsb[1], hsb[2]);
 	}
 	
 	public void paintComponent(Graphics g)
@@ -173,8 +104,6 @@ public class SystemPainter extends JPanel
 					else
 						g2.setColor(Color.WHITE);
 					
-					if(orbiting == mouseover_obj)
-						g2.setColor(brighten(g2.getColor()));
 					g2.fill(new Ellipse2D.Double(drawX(orbiting.absoluteCurX()-(orbiting.size/2.0)), drawY(orbiting.absoluteCurY()-(orbiting.size/2.0)), orbiting.size*scale, orbiting.size*scale));
 					
 					//draw name
@@ -247,8 +176,8 @@ public class SystemPainter extends JPanel
 		
 		for(Selectable obj : selected)
 		{
+			g2.setColor(Color.WHITE);
 			if(obj instanceof Satellite<?>) {
-				g2.setColor(Color.YELLOW);
 				if(game_mode){
 					g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)obj).absoluteCurX()-((StellarObject)obj).size/2.0)-2.0, drawY(((Satellite<?>)obj).absoluteCurY()-((StellarObject)obj).size/2.0)-2.0, ((StellarObject)obj).size*scale+4.0, ((StellarObject)obj).size*scale+4.0));
 				} else {
@@ -256,18 +185,35 @@ public class SystemPainter extends JPanel
 				}
 			} else if(obj instanceof Star) {
 				//select a star
-				g2.setColor(Color.YELLOW);
 				g2.draw(new Ellipse2D.Double(drawX(((Star)obj).x-((StellarObject)obj).size/2.0), drawY(((Star)obj).y-((StellarObject)obj).size/2.0), ((StellarObject)obj).size*scale, ((StellarObject)obj).size*scale));
 			} else if(obj instanceof Focus) {
-				g2.setColor(Color.YELLOW);
 				g2.draw(new Ellipse2D.Double(drawX(((Focus)obj).getX()+(((Focus)obj).owner.boss.absoluteCurX()))-2.0, drawY(((Focus)obj).getY()+(((Focus)obj).owner.boss.absoluteCurY()))-2.0, 5.0,5.0));
 			} else if(obj instanceof Ship) {
-				g2.setColor(Color.YELLOW);
 				Ship s = (Ship)obj;
 				g2.draw(new Ellipse2D.Double(drawX(s.pos_x - s.type.dim*s.type.img.scale/2.0), drawY(s.pos_y - s.type.dim*s.type.img.scale/2.0), s.type.dim*s.type.img.scale*scale, s.type.dim*s.type.img.scale*scale));
 				g2.setColor(Color.ORANGE);
 				g2.drawLine(drawXInt(s.dest_x_coord)-3, drawYInt(s.dest_y_coord), drawXInt(s.dest_x_coord)+3, drawYInt(s.dest_y_coord));
 				g2.drawLine(drawXInt(s.dest_x_coord), drawYInt(s.dest_y_coord)-3, drawXInt(s.dest_x_coord), drawYInt(s.dest_y_coord)+3);
+			}
+		}
+		
+		if(mouseover_obj != null)
+		{
+			g2.setColor(Color.YELLOW);
+			if(mouseover_obj instanceof Satellite<?>) {
+				if(game_mode){
+					g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)mouseover_obj).absoluteCurX()-((StellarObject)mouseover_obj).size/2.0)-2.0, drawY(((Satellite<?>)mouseover_obj).absoluteCurY()-((StellarObject)mouseover_obj).size/2.0)-2.0, ((StellarObject)mouseover_obj).size*scale+4.0, ((StellarObject)mouseover_obj).size*scale+4.0));
+				} else {
+					g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)mouseover_obj).absoluteInitX()-((StellarObject)mouseover_obj).size/2.0)-2.0, drawY(((Satellite<?>)mouseover_obj).absoluteInitY()-((StellarObject)mouseover_obj).size/2.0)-2.0, ((StellarObject)mouseover_obj).size*scale+4.0, ((StellarObject)mouseover_obj).size*scale+4.0));
+				}
+			} else if(mouseover_obj instanceof Star) {
+				//select a star
+				g2.draw(new Ellipse2D.Double(drawX(((Star)mouseover_obj).x-((StellarObject)mouseover_obj).size/2.0), drawY(((Star)mouseover_obj).y-((StellarObject)mouseover_obj).size/2.0), ((StellarObject)mouseover_obj).size*scale, ((StellarObject)mouseover_obj).size*scale));
+			} else if(mouseover_obj instanceof Focus) {
+				g2.draw(new Ellipse2D.Double(drawX(((Focus)mouseover_obj).getX()+(((Focus)mouseover_obj).owner.boss.absoluteCurX()))-2.0, drawY(((Focus)mouseover_obj).getY()+(((Focus)mouseover_obj).owner.boss.absoluteCurY()))-2.0, 5.0,5.0));
+			} else if(mouseover_obj instanceof Ship) {
+				Ship s = (Ship)mouseover_obj;
+				g2.draw(new Ellipse2D.Double(drawX(s.pos_x - s.type.dim*s.type.img.scale/2.0), drawY(s.pos_y - s.type.dim*s.type.img.scale/2.0), s.type.dim*s.type.img.scale*scale, s.type.dim*s.type.img.scale*scale));
 			}
 		}
 		
@@ -297,10 +243,7 @@ public class SystemPainter extends JPanel
 		
 		//idea of how to implement antialiasing from http://weblogs.java.net/blog/2007/03/10/java-2d-trickery-antialiased-image-transforms
 		//this also allows me to use double coordinates instead of int's.  :)
-		if(s != mouseover_obj)
-			g2.setPaint(s.type.getScaledImage(scale, s.getOwner().getColor()));
-		else
-			g2.setPaint(getMouseoverPaint());
+		g2.setPaint(s.type.getScaledImage(scale, s.getOwner().getColor()));
 		
 		g2.translate(drawX(s.getPos_x()-s.type.img.scale*s.type.img.getWidth()/2.0), drawY(s.getPos_y()-s.type.img.scale*s.type.img.getHeight()/2.0));
 		g2.rotate(s.direction+Math.PI/2, s.type.img.scale*s.type.img.getWidth()*scale/2.0,s.type.img.scale*s.type.img.getHeight()*scale/2.0);

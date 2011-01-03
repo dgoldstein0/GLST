@@ -1,7 +1,7 @@
 import java.util.Hashtable;
 
-
-public class ShipyardDataSaver extends FacilityDataSaver<Shipyard> {
+public strictfp class ShipyardDataSaver extends FacilityDataSaver<Shipyard> {
+	
 	long time_on_cur_s;
 	Hashtable<Integer, Ship> queue;
 	double as_x;

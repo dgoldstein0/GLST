@@ -1,6 +1,6 @@
 import javax.swing.JProgressBar;
 
-public class MineStatusUpdater extends FacilityStatusUpdater
+public strictfp class MineStatusUpdater extends FacilityStatusUpdater
 {
 	JProgressBar health;
 	Mine the_mine;

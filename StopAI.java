@@ -1,4 +1,4 @@
-public class StopAI extends FlyerAI
+public strictfp class StopAI extends FlyerAI
 {
 	public StopAI(){}
 	

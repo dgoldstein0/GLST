@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class ResearchBuilding extends Facility<ResearchBuilding>{
+public strictfp class ResearchBuilding extends Facility<ResearchBuilding>{
 	
 	public ResearchBuilding(OwnableSatellite<?> loc, int id, long t)
 	{

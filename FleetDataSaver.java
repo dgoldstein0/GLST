@@ -1,7 +1,7 @@
 import java.util.Hashtable;
 
 
-public class FleetDataSaver extends DataSaver<Fleet> {
+public strictfp class FleetDataSaver extends DataSaver<Fleet> {
 
 	Hashtable<Ship.ShipId, Ship> ships;
 	

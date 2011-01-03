@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Missile extends Flyer<Missile, Missile.MissileId, Iterator<Missile.MissileId>>
+public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator<Missile.MissileId>>
 {
 	private final double Collide_Range=10.0;
 	boolean target_alive;

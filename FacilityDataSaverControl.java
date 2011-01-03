@@ -1,6 +1,6 @@
 import java.util.Set;
 
-public abstract class FacilityDataSaverControl<T extends Facility<T>, S extends FacilityDataSaver<T>> extends RelaxedDataSaverControl<T, S> {
+public strictfp abstract class FacilityDataSaverControl<T extends Facility<T>, S extends FacilityDataSaver<T>> extends RelaxedDataSaverControl<T, S> {
 
 	public FacilityDataSaverControl(T fac, Creator<T, S> c)
 	{

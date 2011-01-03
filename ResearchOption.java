@@ -1,5 +1,5 @@
 
-public class ResearchOption extends Options{
+public strictfp class ResearchOption extends Options{
 	
 	public ResearchOption()
 	{

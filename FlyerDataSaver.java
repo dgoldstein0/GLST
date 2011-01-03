@@ -1,6 +1,6 @@
 import java.util.HashSet;
 
-public class FlyerDataSaver<T extends Flyer<T, ?, ?>> extends DataSaver<T>
+public strictfp class FlyerDataSaver<T extends Flyer<T, ?, ?>> extends DataSaver<T>
 {
 	double px; //pos_x and pos_y indicate where in the system the ship is located
 	double py;
