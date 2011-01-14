@@ -491,7 +491,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 			}
 			else
 			{
-				((OwnableSatellite<?>)the_sat).cancelConstruction(GameInterface.GC.TC.getTime(),true);
+				((OwnableSatellite<?>)the_sat).cancelConstruction(GameInterface.GC.updater.getTime(),true);
 				build.setEnabled(true);
 				cancel.setEnabled(false);
 			}

@@ -11,7 +11,7 @@ public class Notifier extends JPanel
 {
 	private JLabel msg_label;
 	private Timer t;
-	private hideTask task;
+	private HideTask task;
 	
 	public Notifier()
 	{
@@ -35,13 +35,13 @@ public class Notifier extends JPanel
 		msg_label.setText(msg);
 		//setPreferredSize(msg_label.getPreferredSize());
 		
-		if(task instanceof hideTask)
+		if(task != null)
 			task.cancel();
-		task=new hideTask();
+		task=new HideTask();
 		t.schedule(task, 3000);
 	}
 	
-	public class hideTask extends TimerTask
+	public class HideTask extends TimerTask
 	{
 		public void run()
 		{

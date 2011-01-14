@@ -1,6 +1,5 @@
 import javax.swing.JOptionPane;
 
-import java.util.*;
 import java.beans.*;
 import java.net.*;
 import java.io.*;
@@ -11,12 +10,8 @@ import javax.swing.JFileChooser;
 import java.awt.Color;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import java.util.concurrent.PriorityBlockingQueue;
-
 public strictfp class GameControl
 {
-	static final boolean DEBUGGING = false;
-	
 	static final int DEFAULT_PORT_NUMBER = GalacticStrategyConstants.DEFAULT_PORT_NUMBER;
 	static final String LEFT_LOBBY_MSG = "Im leaving the lobby.";
 	static final String MAP_CHOSEN = "Host chooses map::"; //do not change ending
@@ -24,7 +19,7 @@ public strictfp class GameControl
 	static final String NOT_READY_MSG = "wait, I take that back, I'm not ready";
 	static final String START_MSG = "START THE GAME";
 	
-	TimeControl TC;
+	GameUpdater updater;
 	int player_id;
 	Player[] players;
 	Galaxy map;
@@ -39,13 +34,11 @@ public strictfp class GameControl
 	volatile Socket the_socket;
 	volatile OutputStream OS;
 	volatile InputStream IS;
-	boolean hosting;//true if running as server  false if running as client
+	
 	Thread serverThread; //waits for connections
 	Thread lobbyThread; //reads data and updates the GameLobby
 	Thread readThread; //reads data during the game
 	Thread startThread; //processes start game.   This is a separate Thread because it can crash the interface if run on swing's event thread
-	
-	PriorityBlockingQueue<Order> pending_execution;
 	
 	public GameControl(GameInterface gi)
 	{
@@ -59,12 +52,11 @@ public strictfp class GameControl
 		
 		players = new Player[GalacticStrategyConstants.MAX_PLAYERS];
 		map=new Galaxy();
-		GameInterface.GC = this;
 		
 		//preload file chooser for singlePloyerTest map loading
 		filechooser = new JFileChooser();
 		filechooser.setFileFilter(new FileNameExtensionFilter("XML files only", "xml"));
-		pending_execution = new PriorityBlockingQueue<Order>();
+		updater = new GameUpdater(this);
 	}
 	
 	public GameControl()
@@ -75,19 +67,17 @@ public strictfp class GameControl
 			System.out.println("trouble reading images");
 			e.printStackTrace();
 		}
-		
-		GameInterface.GC = this;
 	}
 		
-	public Player createThePlayer() throws CancelException
+	public Player createThePlayer(boolean hosting) throws CancelException
 	{
-		return Player.createPlayer();
+		return Player.createPlayer(hosting);
 	}
 	
 	public int nextAvailableID()
 	{
 		for(int i=0; i<players.length; i++){
-			if(!(players[i] instanceof Player))
+			if(!(players[i] != null))
 			{
 				System.out.println(Integer.toString(i) + "is available!");
 				return i;
@@ -101,7 +91,7 @@ public strictfp class GameControl
 	{
 		int num_players=0;
 		for(int i=0; i<players.length; i++){
-			if(players[i] instanceof Player)
+			if(players[i] != null)
 				num_players++;
 		}
 		return num_players;
@@ -116,7 +106,7 @@ public strictfp class GameControl
 	
 	public void startupDialog()
 	{
-		if(GSD instanceof GameStartupDialog)
+		if(GSD != null)
 			GSD.constructDialog();
 		else
 			GSD = new GameStartupDialog(GI.frame, this);
@@ -136,7 +126,7 @@ public strictfp class GameControl
 			return;
 		}
 		
-		//BOOKMARK - This next block is commented out since it is not yet necessary.  Once one player joins
+		//TODO: This next block is commented out since it is not yet necessary.  Once one player joins
 		//the server socket closes; if the game is extended to include more than just the 2 player mode, this
 		//will be necessary.
 		
@@ -160,7 +150,7 @@ public strictfp class GameControl
 			PrintWriter writer = new PrintWriter(OS, true);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(IS));
 			
-			if(hosting)
+			if(players[player_id].hosting)
 			{
 				System.out.println("host start sequence begin");
 				
@@ -218,20 +208,20 @@ public strictfp class GameControl
 				//figure out which ping was returned, and compute estimate
 				
 				int offset_estimate = (int)((pongtime-pingtimes[Integer.parseInt(pongmsg)])/2);
-				System.out.println("Offset estimated: "+Integer.toString(offset_estimate));
+				//System.out.println("Offset estimated: "+Integer.toString(offset_estimate));
 				
 				//send offset_estimate
 				writer.println(Integer.toString(offset_estimate));
-				System.out.println("estimate sent");
+				//System.out.println("estimate sent");
 				
 				//Start time
-				TC=new TimeControl(0);
-				System.out.println("time started!");
+				updater.startClock(0);
+				//System.out.println("time started!");
 				
 				//send start signal
 				
 				writer.println("Start");
-				System.out.println("Start signal sent!");
+				//System.out.println("Start signal sent!");
 			}
 			else
 			{
@@ -245,6 +235,10 @@ public strictfp class GameControl
 				System.out.println("waiting for ping");
 				String pingmsg= reader.readLine(); //impractical to make this non-blocking, since it will mess up timing measure
 				System.out.println("pong time");
+				
+				if(pingmsg == null) //only if the connection is closed
+					throw new IOException();
+				
 				writer.println(pingmsg.substring(4));
 				System.out.println("pong!");
 				
@@ -273,9 +267,9 @@ public strictfp class GameControl
 				int offset = Integer.parseInt(received);
 				System.out.println("offset recieved");
 				
-				//start time when start signal is recieved
+				//start time when start signal is received
 				reader.readLine();
-				TC = new TimeControl(offset);
+				updater.startClock(offset);
 			}
 		}
 		catch(IOException ioe)
@@ -287,6 +281,7 @@ public strictfp class GameControl
 		catch(InterruptedException ie) //interrupt generated by GL.leaveGame
 		{
 			System.out.println("Start game interrupted.  Leaving game...");
+			endConnection();
 			return;
 		}
 		
@@ -314,7 +309,7 @@ public strictfp class GameControl
 		GI.drawGalaxy();
 		
 		//set game to update itself
-		TC.startConstIntervalTask(new Updater(),(int)GalacticStrategyConstants.TIME_GRANULARITY);
+		updater.startUpdating();
 	}
 	
 	public void startGameViaThread()
@@ -329,7 +324,7 @@ public strictfp class GameControl
 	public void startSinglePlayerTest()
 	{
 		try{
-			Player the_player = createThePlayer();
+			Player the_player = createThePlayer(true);
 			player_id=0;
 			the_player.setId(0);
 			the_player.setColor(Color.GREEN);
@@ -351,7 +346,7 @@ public strictfp class GameControl
 			try{
 				loadMap(map_file); //parsing errors render the map invalid, causing one of the messages in the catch statements.
 				//the existence of the name is the second line of defense.
-				if(!(map.getName() instanceof String)){
+				if(!(map.getName() != null)){
 					map=null;
 					JOptionPane.showMessageDialog(GI.frame, "The selected file is not a completed map.  Please pick a different map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
 				}
@@ -366,7 +361,7 @@ public strictfp class GameControl
 				return;
 			}
 			
-			TC = new TimeControl(0);
+			updater.startClock(0);
 			
 			//set up systems for the game
 			for(GSystem sys : map.systems)
@@ -385,7 +380,7 @@ public strictfp class GameControl
 			GI.drawGalaxy();
 			
 			//set game to update itself
-			TC.startConstIntervalTask(new Updater(),20);
+			updater.startUpdating();
 		} else {
 			startupDialog();
 		}
@@ -394,7 +389,7 @@ public strictfp class GameControl
 	public void host() //creates new thread to host the game on
 	{
 		try{
-			Player the_player = createThePlayer();
+			Player the_player = createThePlayer(true);
 			player_id=0;
 			the_player.setId(0);
 			players[0] = the_player;
@@ -402,7 +397,7 @@ public strictfp class GameControl
 			startupDialog();
 			return;
 		}
-		hosting=true;
+		
 		GL=new GameLobby(GI.frame, this);
 		serverThread = new Thread(new HostRunnable());
 		serverThread.start();
@@ -424,7 +419,7 @@ public strictfp class GameControl
 			System.out.println("Host runnable running...");
 			try
 			{
-				if(the_server_socket instanceof ServerSocket)
+				if(the_server_socket != null)
 					the_server_socket.close();
 			}
 			catch(IOException e){}
@@ -439,7 +434,7 @@ public strictfp class GameControl
 			
 			try
 			{
-				if(the_socket instanceof Socket)
+				if(the_socket != null)
 					the_socket.close();
 			}
 			catch(IOException e){}
@@ -466,7 +461,7 @@ public strictfp class GameControl
 						w.println(Integer.toString(num_players));
 						
 						for(int i=0; i<num_players; i++){
-							if(players[i] instanceof Player){
+							if(players[i] != null){
 								w.println(players[i].getName());
 								w.println(Integer.toString(i));
 								w.println(Boolean.toString(players[i].ready));
@@ -479,7 +474,7 @@ public strictfp class GameControl
 						//request name
 						String name;
 						name=r.readLine();
-						Player p = new Player(name);
+						Player p = new Player(name, false);
 						
 						//assign id number.  each ID is 1 more than last assigned
 						int next_id = nextAvailableID();
@@ -520,7 +515,7 @@ public strictfp class GameControl
 		
 		try
 		{
-			if(the_socket instanceof Socket)
+			if(the_socket != null)
 				the_socket.close();
 		}
 		catch(IOException e){}
@@ -530,7 +525,7 @@ public strictfp class GameControl
 		while(!ip_valid) {
 			try {
 				String ip_in_string=JOptionPane.showInputDialog("Enter the IP address of the host:");
-				if(ip_in_string instanceof String){
+				if(ip_in_string != null){
 					String[] ip=ip_in_string.split("\\.");
 					
 					if(ip.length != 4)
@@ -553,7 +548,7 @@ public strictfp class GameControl
 		
 		Player the_player;
 		try{
-			the_player = createThePlayer();
+			the_player = createThePlayer(false);
 		} catch(CancelException e){
 			startupDialog();
 			return;
@@ -565,7 +560,6 @@ public strictfp class GameControl
 			//InetAddress ipaddress=InetAddress.getLocalHost();
 			the_socket = new Socket(ipaddress, DEFAULT_PORT_NUMBER);
 			setUpIOStreams();
-			hosting=false;
 			
 			//receive other players' names and id's
 			BufferedReader r = new BufferedReader(new InputStreamReader(IS));
@@ -575,7 +569,7 @@ public strictfp class GameControl
 			for(int i=0; i<num_players; i++){
 				String name_input = r.readLine();
 				if(!name_input.equals("skip player>>")) {
-					Player p = new Player(name_input);
+					Player p = new Player(name_input, false);
 					p.setId(Integer.parseInt(r.readLine()));
 					p.setReady(Boolean.parseBoolean(r.readLine()));
 					players[p.getId()] = p;
@@ -637,44 +631,51 @@ public strictfp class GameControl
 		
 		public void run()
 		{
+			//TODO: this only works for one other player
 			BufferedReader r = new BufferedReader(new InputStreamReader(IS));
 			try {
 				while(!Thread.interrupted()){
 					if(r.ready()) {
 						String notification = r.readLine();
-						String[] split_notification = notification.split(":");
-						if(notification.indexOf(":")!= -1 && split_notification[1].equals(LEFT_LOBBY_MSG)) {
-							if(hosting){
-								int id_leaving = Integer.parseInt(split_notification[0]);
-								players[id_leaving]=null;
-								updateGL();
-								serverThread = new Thread(new HostRunnable());
-								serverThread.start();
-								return;
-							} else {
-								JOptionPane.showMessageDialog(GI.frame, "The host has left the game.", "Host Left", JOptionPane.INFORMATION_MESSAGE);
-								GL.leaveGame(false);
-								return;
+						if(notification != null)
+						{
+							String[] split_notification = notification.split(":");
+							if(notification.indexOf(":")!= -1 && split_notification[1].equals(LEFT_LOBBY_MSG)) {
+								playerLeft(Integer.parseInt(split_notification[0]));
+							} else if(notification.indexOf(":")!= -1 && split_notification[1].equals(READY_MSG)) {
+								//only the host should recieve this message
+								int id_ready = Integer.parseInt(split_notification[0]);
+								players[id_ready].ready=true;
+								updateGL(); //this function takes care of enabling/disabling start button for us
+							} else if(notification.indexOf(":")!= -1 && split_notification[1].equals(NOT_READY_MSG)) {
+								//only the host should recieve this message
+								int id_ready = Integer.parseInt(split_notification[0]);
+								players[id_ready].ready=false;
+								updateGL(); //this function takes care of enabling/disabling start button for us
 							}
-						} else if(notification.indexOf(":")!= -1 && split_notification[1].equals(READY_MSG)) {
-							//only the host should recieve this message
-							int id_ready = Integer.parseInt(split_notification[0]);
-							players[id_ready].ready=true;
-							updateGL(); //this function takes care of enabling/disabling start button for us
-						} else if(notification.indexOf(":")!= -1 && split_notification[1].equals(NOT_READY_MSG)) {
-							//only the host should recieve this message
-							int id_ready = Integer.parseInt(split_notification[0]);
-							players[id_ready].ready=false;
-							updateGL(); //this function takes care of enabling/disabling start button for us
+							else if(notification.indexOf(MAP_CHOSEN) != -1)
+							{
+								GL.map_label.setText(notification.split("::")[1]);
+								GL.start_game.setEnabled(GL.readyToStart()); //check to see if we are ready to start the game, and enable start button if so.
+							}
+							else if(notification.equals(START_MSG))
+							{
+								startGameViaThread(); //must start on a different thread because start game terminates this one.  If start game ran on this thread, it would end itself.
+							}
 						}
-						else if(notification.indexOf(MAP_CHOSEN) != -1)
+						else
 						{
-							GL.map_label.setText(notification.split("::")[1]);
-							GL.start_game.setEnabled(GL.readyToStart()); //check to see if we are ready to start the game, and enable start button if so.
-						}
-						else if(notification.equals(START_MSG))
-						{
-							startGameViaThread(); //must start on a different thread because start game terminates this one.  If start game ran on this thread, it would end itself.
+							//TODO: figure out who left, in multiplayer game.  right now it suffices to say
+							//that the other player left, since there is only one.
+							
+							int other_player_id = -1;
+							for(int i=0; i<players.length; ++i)
+							{
+								if(players[i] != null && player_id != i)
+									other_player_id = i;
+							}
+							
+							playerLeft(other_player_id);
 						}
 					}
 					else
@@ -687,11 +688,26 @@ public strictfp class GameControl
 				return;
 			}
 		}
+		
+		private void playerLeft(int id_leaving)
+		{
+			if(!players[id_leaving].hosting){
+				players[id_leaving]=null;
+				updateGL();
+				serverThread = new Thread(new HostRunnable());
+				serverThread.start();
+				return;
+			} else { //TODO: this assumes if you aren't hosting, the other player is - i.e. 2 player assumption
+				JOptionPane.showMessageDialog(GI.frame, "The host has left the game.", "Host Left", JOptionPane.INFORMATION_MESSAGE);
+				GL.leaveGame(false);
+				return;
+			}
+		}
 	}
 	
 	public void leavingLobby() //responsible for informing other players of the user leaving the game.
 	{
-		if(OS instanceof OutputStream)
+		if(OS != null)
 		{
 			PrintWriter w = new PrintWriter(OS, true);
 			w.println(Integer.toString(player_id) +":" + LEFT_LOBBY_MSG);
@@ -699,9 +715,9 @@ public strictfp class GameControl
 		}
 	}
 	
-	public void declareReady() //BOOKMARK - in a 3+ player game, this function will need to be modified to notify ALL players in the game
+	public void declareReady() //TODO: in a 3+ player game, this function will need to be modified to notify ALL players in the game
 	{
-		if(OS instanceof OutputStream)
+		if(OS != null)
 		{
 			PrintWriter w = new PrintWriter(OS, true);
 			if(!players[player_id].ready)
@@ -719,7 +735,7 @@ public strictfp class GameControl
 	
 	public void mapChosen() //responsible for informing other players of map choice, or lack thereof
 	{
-		if(OS instanceof OutputStream)
+		if(OS != null)
 		{
 			PrintWriter w = new PrintWriter(OS, true);
 			w.println(MAP_CHOSEN + GL.map_label.getText());
@@ -730,13 +746,6 @@ public strictfp class GameControl
 	{
 		IS = the_socket.getInputStream();
 		OS = the_socket.getOutputStream();
-	}
-	
-	public void scheduleOrder(Order o)
-	{
-		pending_execution.offer(o);
-		
-		notifyAllPlayers(o);
 	}
 	
 	public void notifyAllPlayers(Order o)
@@ -785,7 +794,7 @@ public strictfp class GameControl
 		map = (Galaxy)d.readObject();
 		d.close();
 		
-		if(!(map instanceof Galaxy)) //BOOKMARK!  NEEDS BETTER VALIDITY TESTS.  empty galaxies still pass this test... but it is a start.
+		if(map == null) //TODO: NEEDS BETTER VALIDITY TESTS.  empty galaxies still pass this test... but it is a start.
 			throw new NullPointerException();
 	}
 	
@@ -836,7 +845,7 @@ public strictfp class GameControl
 						Order o =(Order) decoder.readObject(); //TODO: add in leaving message, which will need to be handled differently here
 						decoder.close();
 						System.out.println("\t" + o.getClass().getName());
-						pending_execution.add(o);
+						updater.scheduleOrder(o);
 					}
 				}
 				
@@ -854,9 +863,9 @@ public strictfp class GameControl
 	
 	public void endConnection()
 	{
-		try{OS.close();}catch(Exception e){}
-		try{IS.close();}catch(Exception e){}
-		try{the_socket.close();}catch(Exception e){}
+		try{OS.close();}catch(IOException e){}
+		try{IS.close();}catch(IOException e){}
+		try{the_socket.close();}catch(IOException e){}
 	}
 	
 	public void endAllThreads()
@@ -875,208 +884,24 @@ public strictfp class GameControl
 		}
 		if(startThread != null)
 			startThread.interrupt(); //BOOKMARK - in this case, the other player needs to be able to detect if the person left the game.  perhaps modify this to send a notification, and StartGame function to recieve it.
-		if(TC != null)
+		if(updater != null)
 		{
-			TC.stopTask();
-			//TODO: debugging code should later be removed
-			try {
-				if(logFile != null)
-					logFile.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			updater.stopUpdating();
 		}
 		endConnection();
 	}
 	
-	//***************************************************************************These next few methods deal with in-game updating
-	
-	private class Updater extends TimerTask
+	/**scheduleOrder
+	 * calls GameUpdater.scheduleOrder and notifyAllPlayers
+	 * i.e. should be used to schedule an order AND tell other computers too
+	 * 
+	 * @param o the order to schedule for execution
+	 * */
+	public void scheduleOrder(Order o)
 	{
-		private Updater(){}
+		updater.scheduleOrder(o);
 		
-		public void run()
-		{
-			try
-			{
-				updateGame();
-			}
-			catch (DataSaverControl.DataNotYetSavedException e)
-			{
-				//TODO: work on exception handling
-				e.printStackTrace();
-				throw new RuntimeException();
-			}
-			//System.out.println("update!!" + Long.toString(TC.getTime()));
-		}
-	}
-	
-	public void updateGame() throws DataSaverControl.DataNotYetSavedException
-	{
-		long time_elapsed=TC.getTime();
-		long update_to=TC.getLast_time_updated();
-		//System.out.println("Updating to time_elapsed=" + Long.toString(time_elapsed));
-		//start events that need to occur before time_elapsed
-		
-		//can safely use unsynchronized version here since this is only used by the current thread
-		PriorityQueue<Order> local_pending_execution = new PriorityQueue<Order>();
-		
-		do
-		{
-			Order o = pending_execution.peek();
-			if(o != null && o.scheduled_time <= time_elapsed)
-				local_pending_execution.add(pending_execution.remove()); //if this does not remove o, it removes one just inserted earlier than o.
-			else
-				break; /*small chance an order should be removed and executed this time around but isn't, 
-						if we don't see it with peek.  it will be executed next time through updateGame,
-						though with a bit of reversion*/
-		} while(true);
-		
-		/*now figure out the earliest order in local_pending_execution, and make that time update_to,
-		 * if update_to is currently larger*/
-		Order first_order = local_pending_execution.peek();
-		if(first_order != null)
-		{
-			long next_order_time = first_order.scheduled_time;
-			if(next_order_time < update_to)
-				update_to = next_order_time; //forces the main loop to reconsider below
-		}
-		
-		
-		//update data in all systems
-		for(GSystem sys : map.systems)
-		{
-			//move all planets
-			for(Satellite<?> sat : sys.orbiting)
-			{
-				if(sat instanceof Planet)
-				{
-					for(Satellite<?> sat2 : ((Planet)sat).orbiting)
-					{
-						sat2.orbit.move(time_elapsed);
-					}
-				}
-				sat.orbit.move(time_elapsed);
-			}
-		}
-		
-		//update all planets, facilities, ships and missiles
-		for(; update_to <= time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
-		{
-			Order o;
-			while( (o = local_pending_execution.peek()) != null && o.scheduled_time <= update_to)
-			{
-				/**execute does all the necessary reversion itself.  It never reverts anything to earlier than
-				 * scheduled_time, which should be within one time grain less than update_to*/
-				local_pending_execution.addAll(local_pending_execution.remove().execute(map));
-			}
-			
-			/**update all intersystem data.  This is must be within the loop in case ships are reverted back
-			 * into warp or something of the sort*/
-			for(int i=0; i<players.length; i++)
-			{
-				if(players[i] != null)
-				{
-					Iterator<Ship> ship_it = players[i].ships_in_transit.iterator();
-					Ship s;
-					while(ship_it.hasNext())
-					{
-						s=ship_it.next();
-						s.moveDuringWarp(update_to, ship_it); //the iterator is passed so that moveDuringWarp can remove the ship from the iteration, and by doing so from ships_in_transit
-					}
-				}
-			}
-			
-			for(GSystem sys : map.systems)
-			{
-				/*We must stick facilities and planets in this loop because otherwise Ship updating would not
-				be coordinated with facilities and planets, so bugs could then occur in terms of building ships
-				or invading planets.
-				
-				For instance, consider this scenario: ship is attacking a Shipyard, and Shipyard is about to
-				complete a new Ship right around the time it is about to explode.  If it should finish
-				the ship after it is destroyed, but a call to updateGame must handle both the time in which
-				the Shipyard will be destroyed and in which the ship would be completed if the shipyard were
-				not destroyed, and if facilities/planets were updated before the Ships all the way to
-				time_elapsed, then the Shipyard could be updated to a time later than the time it is
-				destroyed at, produce the ship which it should not produce, and then be destroyed.  But now
-				we have a ship which should have not completed construction.   Uh oh...
-				
-				Though less dramatic, similar issues can exist with mining/taxation.  So it all goes in here.*/
-				
-				//update planets/facilities:
-				for(Satellite<?> sat : sys.orbiting)
-				{
-					if(sat instanceof Planet)
-					{
-						((Planet)sat).update(update_to);
-						for(Satellite<?> sat2 : ((Planet)sat).orbiting)
-						{
-							if(sat2 instanceof Moon)
-							{
-								((Moon)sat2).update(update_to);
-							}
-						}
-					}
-				}
-				
-				//update data for all ships
-				for(int i=0; i<sys.fleets.length; i++)
-				{
-					synchronized(sys.fleets[i].lock)
-					{
-						Fleet.ShipIterator ship_iteration = sys.fleets[i].iterator();
-						for(Ship.ShipId j; ship_iteration.hasNext();)
-						{
-							j=ship_iteration.next();
-							sys.fleets[i].ships.get(j).update(update_to, ship_iteration);
-						}
-					}
-				}
-				
-				//NOTE: Missile collision detection relies on Missiles being updated after ships.  See Missile.collidedWithTarget
-				//update all missiles AND save data
-				synchronized(sys.missiles)
-				{
-					Iterator<Missile.MissileId> missile_iteration = sys.missiles.keySet().iterator();
-					for(Missile.MissileId i; missile_iteration.hasNext();)
-					{
-						i=missile_iteration.next();
-						sys.missiles.get(i).update(update_to, missile_iteration); //returns true if the missile detonates
-					}
-				}
-			}
-			
-			//TODO: debuging code, should later be removed
-			if(DEBUGGING)
-			{
-				log("\r\nUpdated to " + update_to, map);
-				log("\n",players);
-			}
-		}
-		
-		TC.setLast_time_updated(update_to);
-		
-		if(!local_pending_execution.isEmpty())
-		{
-			System.out.println("We still have orders in the local queue.  should not be possible!");
-			pending_execution.addAll(local_pending_execution);
-		}
-		
-		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));
-	}
-	
-	public class InterfaceUpdater implements Runnable
-	{
-		long time;
-		
-		public InterfaceUpdater(long t){time=t;}
-		
-		public void run()
-		{
-			updateInterface(time);
-		}
+		notifyAllPlayers(o);
 	}
 	
 	public void updateInterface(long time_elapsed)
@@ -1087,49 +912,9 @@ public strictfp class GameControl
 			GI.SatellitePanel.update(time_elapsed);
 		else if(GI.sat_or_ship_disp == GameInterface.SHIP_PANEL_DISP)
 			GI.ShipPanel.update();
-		GI.time.setText("Time: " + Long.toString(time_elapsed/1000));
-		GI.metal.setText("Metal: "+Long.toString(new Double(players[player_id].metal).longValue()));
-		GI.money.setText(GI.indentation + "Money: "+Long.toString(new Double(players[player_id].money).longValue()));
+		GI.time.setText("Time: " + time_elapsed/1000);
+		GI.metal.setText("Metal: " + Math.round(players[player_id].metal));
+		GI.money.setText(GI.indentation + "Money: " + Math.round(players[player_id].money));
 		GI.redraw();
-	}
-	
-	BufferedOutputStream logFile;
-	
-	public void setupLogFile()
-	{
-		try {
-			logFile = new BufferedOutputStream(new FileOutputStream("log.txt"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	public void log(String message, Object o)
-	{
-		if(logFile == null)
-			setupLogFile();
-		
-		try {
-			logFile.write(("\n"+message).getBytes());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		XMLEncoder2 encoder = new XMLEncoder2(logFile);
-		encoder.setExceptionListener(new MyExceptionListener());
-		encoder.writeObject(o);
-		encoder.finish();
-	}
-	
-	private class MyExceptionListener implements ExceptionListener
-	{
-
-		@Override
-		public void exceptionThrown(Exception arg0) {
-			// TODO Auto-generated method stub
-			arg0.printStackTrace();
-		}
-		
 	}
 }

@@ -4,8 +4,6 @@ import javax.swing.*;
 import java.util.*;
 import java.util.List;
 import java.awt.geom.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
 
 public class SystemPainter extends JPanel
 {

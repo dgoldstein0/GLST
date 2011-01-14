@@ -43,7 +43,8 @@ public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, S
 						}
 						break;
 					case TARGET_LOST:
-						orders.add(new ShipAttackOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].t /*target_t doesn't matter, because it is only used over network*/, saved_data[j].was_tgt));
+						if(saved_data[i].md != Ship.MODES.ATTACKING) //if statement necessary to avoid order duplication
+							orders.add(new ShipAttackOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].t /*target_t doesn't matter, because it is only used over network*/, saved_data[j].was_tgt));
 						break;
 					case ATTACKING:
 						orders.add(new ShipAttackOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].t /*target_t doesn't matter, because it is only used over network*/, (Targetable<?>)saved_data[j].dest));

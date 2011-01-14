@@ -14,6 +14,7 @@ public strictfp class Player
 	Color color;
 	int id; //id is used to identify players.  These are assigned by the host of the game.
 	boolean ready;
+	boolean hosting; //true if running as server, false if running as client
 	ArrayList<Ship> ships_in_transit;
 	
 	//used for exploration.  specific to each player
@@ -21,7 +22,7 @@ public strictfp class Player
 	ArrayList<Satellite<?>> known_satellites;
 	
 	//this constructor prompts for the user to name the player himself
-	public static Player createPlayer() throws CancelException
+	public static Player createPlayer(boolean hosting) throws CancelException
 	{
 		String name;
 		do
@@ -32,13 +33,14 @@ public strictfp class Player
 		}
 		while(name.equals(""));
 		
-		return new Player(name);
+		return new Player(name, hosting);
 	}
 	
 	//used if the name of the player is already known to the program
-	public Player(String nm)
+	public Player(String nm, boolean is_host)
 	{
 		name = nm;
+		hosting = is_host;
 		setDefaultValues();
 	}
 	

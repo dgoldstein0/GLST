@@ -39,6 +39,8 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 	Integer[] color_nums;
 	JFrame frame;
 	
+	boolean is_hosting;
+	
 	GameControl GC;
 	
 	public GameLobby(JFrame f, GameControl gc)
@@ -59,9 +61,11 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 		map_label = new JLabel(LOAD_MAP_MSG); //BOOKMARK!  should check with GC to see if map_file is already choosen.   
 		map_panel.add(map_label);
 		
+		is_hosting = GC.players[GC.player_id].hosting;
+		
 		choose_map = new JButton("Select Map");
 		choose_map.addActionListener(this);
-		choose_map.setEnabled(GC.hosting);
+		choose_map.setEnabled(is_hosting);
 		map_panel.add(choose_map);
 		
 		main_panel.add(map_panel, BorderLayout.NORTH);
@@ -129,7 +133,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 		
 		JPanel p2 = new JPanel();
 		
-		if(GC.hosting)
+		if(is_hosting)
 			start_game = new JButton("Start Game");
 		else
 			start_game = new JButton("Ready!");
@@ -157,9 +161,9 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 	public void updateNames()
 	{
 		for(int i=0; i<GC.players.length; i++){
-			if(GC.players[i] instanceof Player){
+			if(GC.players[i] != null){
 				player_names[i].setText(GC.players[i].getName());
-				if(!(color_nums[i] instanceof Integer)){
+				if(!(color_nums[i] != null)){
 					color_samples[i].setBackground(GC.players[i].getColor()); //player.getColor() returns the default color here, since color is not yet set
 					color_nums[i]=i;
 				}
@@ -179,7 +183,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 	{
 		if(e.getSource()==start_game)
 		{
-			if(GC.hosting)
+			if(is_hosting)
 			{
 				GC.startGameViaThread();
 				//dispose();
@@ -234,7 +238,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 	
 	public void leaveGame(boolean swing_thread)
 	{
-		if(GC.hosting)
+		if(is_hosting)
 			GC.endHost();
 		GC.leavingLobby();
 		
@@ -256,14 +260,14 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 				
 				//check colors
 				for(int i=0; i<GC.players.length; i++){
-					if(color_nums[i] instanceof Integer){ 
+					if(color_nums[i] != null){ 
 						for(int j=i+1; j<GC.players.length; j++){
-							if(color_nums[j] instanceof Integer){
-								if(color_nums[i]==color_nums[j])
+							if(color_nums[j] != null){
+								if(color_nums[i].equals(color_nums[j]))
 									return false; //two colors match
 							}
 						}
-						if(i != 0 && GC.hosting && !GC.players[i].ready)//color_nums[i] instanceof Integer iff players[i] instanceof Player... else error here...
+						if(i != 0 && is_hosting && !GC.players[i].ready)//color_nums[i] instanceof Integer iff players[i] instanceof Player... else error here...
 							return false; //host can't start until all clients are ready
 					}
 				}
@@ -280,7 +284,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 		if(!GC.players[GC.player_id].ready){ //once ready is clicked by a client, the colors cannot be altered
 			for(int i=0; i<color_samples.length; i++){
 				if(e.getSource() == color_samples[i]){
-					if(GC.players[i] instanceof Player){
+					if(GC.players[i] != null){
 						if(e.getButton() == MouseEvent.BUTTON1){
 							color_nums[i]++;
 							if(color_nums[i] >= GalacticStrategyConstants.DEFAULT_COLORS.length)

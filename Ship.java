@@ -72,7 +72,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			location = (GSystem) ((Planet)builder.location.orbit.boss).orbit.boss;
 		
 		location.fleets[owner.getId()].add(this, t);
-		time = GameInterface.GC.TC.getTimeGrainAfter(t);
+		time = TimeControl.getTimeGrainAfter(t);
 		orderToMove(time, builder.location); //this call does not go via the game Order handling system.  all computers should issue these orders on their own.
 	}
 	
@@ -142,7 +142,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			{
 				//System.out.println("arriving...")
 				disengageWarpDrive(ship_it);
-				time = GameInterface.GC.TC.getTimeGrainAfter(arrival_time);
+				time = TimeControl.getTimeGrainAfter(arrival_time);
 				return true;
 			}
 			else
@@ -261,7 +261,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 						if(sat.the_base == null) //if base isn't finished being built, player can take over without a fight
 							sat.setOwnerAtTime(getOwner(), t);
 						else
-							sat.the_base.attackedByTroops(GameInterface.GC.TC.getNextTimeGrain(), this);
+							sat.the_base.attackedByTroops(GameInterface.GC.updater.TC.getNextTimeGrain(), this);
 					}
 				}
 				else
@@ -480,7 +480,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		//TODO: player notification - THIS SHOULD USE LOST_REASON
 	}
 	
-	private class DestUpdater implements Runnable
+	private static class DestUpdater implements Runnable
 	{
 		final Ship the_ship;
 		

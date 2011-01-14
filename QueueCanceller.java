@@ -15,7 +15,7 @@ public class QueueCanceller implements ActionListener
 	
 	public void actionPerformed(ActionEvent e)
 	{
-		yard.removeFromQueue(the_ship, GameInterface.GC.TC.getTime(), true);
+		yard.removeFromQueue(the_ship, GameInterface.GC.updater.getTime(), true);
 		panel.displayQueue();
 	}
 }

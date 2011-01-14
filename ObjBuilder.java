@@ -1,7 +1,6 @@
 import java.awt.event.*;
 import java.awt.Color;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 public class ObjBuilder<ObjType, ObjMaker> implements MouseListener
 {
@@ -43,7 +42,7 @@ public class ObjBuilder<ObjType, ObjMaker> implements MouseListener
 		{
 			public boolean manufacture(Shipyard maker, ShipType type, PlanetMoonCommandPanel p)
 			{
-				return maker.addToQueue(new Ship(type), GameInterface.GC.TC.getTime(), true);
+				return maker.addToQueue(new Ship(type), GameInterface.GC.updater.getTime(), true);
 			}
 			public void doneBuilding(PlanetMoonCommandPanel p)
 			{
@@ -55,7 +54,7 @@ public class ObjBuilder<ObjType, ObjMaker> implements MouseListener
 		{
 			public boolean manufacture(OwnableSatellite<?> maker, FacilityType type, PlanetMoonCommandPanel p)
 			{
-				p.need_to_reset = maker.scheduleConstruction(type, GameInterface.GC.TC.getTime(), true);
+				p.need_to_reset = maker.scheduleConstruction(type, GameInterface.GC.updater.getTime(), true);
 				return p.need_to_reset;
 			}
 			

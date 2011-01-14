@@ -21,7 +21,7 @@ public strictfp class TimeControl
 		time_elapsed=offset;
 	}
 	
-	public long getTimeGrainAfter(long t)
+	public static long getTimeGrainAfter(long t)
 	{
 		return (long)(Math.ceil((double)(t)/(double)(GalacticStrategyConstants.TIME_GRANULARITY))*GalacticStrategyConstants.TIME_GRANULARITY);
 	}

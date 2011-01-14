@@ -175,16 +175,16 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		}
 		else if(e.getSource() == attack)
 		{
-			long time = GameInterface.GC.TC.getTime();
-			GameInterface.GC.scheduleOrder(new ShipAttackOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.TC.getTimeGrainAfter(time) /*this may be on delay in the future*/, time, (Targetable<?>)the_ship.destination));
+			long time = GameInterface.GC.updater.getTime();
+			GameInterface.GC.scheduleOrder(new ShipAttackOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, TimeControl.getTimeGrainAfter(time) /*this may be on delay in the future*/, time, (Targetable<?>)the_ship.destination));
 		}
 		else if(e.getSource() == invade)
 		{
-			GameInterface.GC.scheduleOrder(new ShipInvadeOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.TC.getNextTimeGrain()));
+			GameInterface.GC.scheduleOrder(new ShipInvadeOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.updater.TC.getNextTimeGrain()));
 		}
 		else if(e.getSource() == pickup_troops)
 		{
-			GameInterface.GC.scheduleOrder(new ShipPickupTroopsOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.TC.getNextTimeGrain()));
+			GameInterface.GC.scheduleOrder(new ShipPickupTroopsOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.updater.TC.getNextTimeGrain()));
 		}
 	}
 }

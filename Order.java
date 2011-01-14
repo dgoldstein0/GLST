@@ -36,7 +36,7 @@ public strictfp abstract class Order implements Comparable<Order>
 	
 	public void orderDropped()
 	{
-		if(GameControl.DEBUGGING)
+		if(GameUpdater.DEBUGGING)
 			throw new OrderDroppedException();
 	}
 	

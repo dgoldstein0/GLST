@@ -676,7 +676,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 								{
 									//set this as the ship's warp destination
 									some_warped=true;
-									GC.scheduleOrder(new ShipWarpOrder(GC.players[GC.player_id], (Ship)s, GC.TC.getNextTimeGrain(), the_sys));
+									GC.scheduleOrder(new ShipWarpOrder(GC.players[GC.player_id], (Ship)s, GC.updater.TC.getNextTimeGrain(), the_sys));
 								}
 							}
 							
@@ -938,17 +938,17 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 			}
 		}
 		
-		long time = GC.TC.getTime();
+		long time = GC.updater.getTime();
 		for(Selectable the_ship : selected_in_sys)
 		{
-			GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], (Ship)the_ship, GC.TC.getTimeGrainAfter(time), dest));
+			GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));
 	
 			//TODO: work on correct updating
 			ShipPanel.updateDestDisplay(dest);
 			
 			if(dest instanceof Ship && dest != ShipPanel.the_ship)
 			{
-				GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, GC.TC.getTimeGrainAfter(time), time, (Targetable<?>)dest));
+				GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), time, (Targetable<?>)dest));
 			}
 		}
 	}
@@ -987,7 +987,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	
 	private void moveCenter()
 	{
-		long cur_time = GC.TC.getTime();
+		long cur_time = GC.updater.getTime();
 		double old_center_x = sys_center_x;
 		double old_center_y = sys_center_y;
 		if(recenter_delay == 0)

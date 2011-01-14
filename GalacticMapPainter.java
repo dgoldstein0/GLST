@@ -43,7 +43,7 @@ public class GalacticMapPainter extends JPanel
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
-		long time = (GameInterface.GC != null) ? GameInterface.GC.TC.getTime() : 0;
+		long time = (GameInterface.GC != null) ? GameInterface.GC.updater.getTime() : 0;
 		
 		Graphics2D g2 = (Graphics2D)g;
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

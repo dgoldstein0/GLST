@@ -7,7 +7,6 @@ import java.awt.Transparency;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 import javax.swing.ImageIcon;
 
@@ -29,7 +28,7 @@ public strictfp enum ShipType
 	ImageIcon icon;
 	
 	//used to cache paint of the scaled image of the ship type
-	final private HashMap<Color, shipPaintCache> paint_cache;
+	final private HashMap<Color, ShipPaintCache> paint_cache;
 	
 	int width;
 	int height;
@@ -64,11 +63,11 @@ public strictfp enum ShipType
 		warp_range = wrange;
 		this.tooltip = tooltip;
 		
-		paint_cache = new HashMap<Color, shipPaintCache>(11);
+		paint_cache = new HashMap<Color, ShipPaintCache>(11);
 		for(int i =0; i< GalacticStrategyConstants.DEFAULT_COLORS.length; ++i)
 		{
 			Color c = GalacticStrategyConstants.DEFAULT_COLORS[i];
-			paint_cache.put(c, new shipPaintCache(c));
+			paint_cache.put(c, new ShipPaintCache(c));
 		}
 	}
 	
@@ -77,13 +76,13 @@ public strictfp enum ShipType
 		return paint_cache.get(c).getScaledImage(scale);
 	}
 	
-	public class shipPaintCache
+	public class ShipPaintCache
 	{
 		private double last_scale;
 		private TexturePaint scaled_img_as_paint;
 		final private ColorTintFilter tint_op;
 		
-		public shipPaintCache(Color c)
+		public ShipPaintCache(Color c)
 		{
 			last_scale=0.0; //will never have a value of zero, so this indicates an invalid cache
 			scaled_img_as_paint=null;
