@@ -33,7 +33,7 @@ public strictfp class CancelFacilityBuildOrder extends Order {
 				if(data.t_finish < cur_time)
 				{
 					//need to "recall" facility and everything it has done
-					synchronized(the_sat.facilities_lock)
+					synchronized(the_sat.facilities)
 					{
 						/*don't add these orders to the returned Set - we are, after all, canceling the facility,
 						so all orders that go along with it thus become void*/

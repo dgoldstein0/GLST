@@ -111,7 +111,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 			
 			addPopulation();
 			
-			if(((OwnableSatellite<?>)s).getOwner() instanceof Player)
+			if(((OwnableSatellite<?>)s).getOwner() != null)
 			{
 				//color if there is an owner
 				name_panel.setBackground(((OwnableSatellite<?>)s).getOwner().getColor());
@@ -197,7 +197,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 	
 	public void displayAllFacilities()
 	{
-		synchronized(((OwnableSatellite<?>)the_sat).facilities_lock)
+		synchronized(((OwnableSatellite<?>)the_sat).facilities)
 		{
 			for(Integer i : new TreeSet<Integer>(((OwnableSatellite<?>)the_sat).facilities.keySet()))
 				displayFacility(((OwnableSatellite<?>)the_sat).facilities.get(i));
@@ -359,7 +359,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 			fac_panel.setToolTipText(fTypes[i].tooltip);
 			fac_panel.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 			fac_panel.setMinimumSize(new Dimension(65,130));
-			fac_panel.addMouseListener(new ObjBuilder<FacilityType, OwnableSatellite<?>>((OwnableSatellite<?>)the_sat, fTypes[i], ObjBuilder.FacilityManufactureFuncs, fac_panel, false, this));
+			fac_panel.addMouseListener(new ObjBuilder<FacilityType, OwnableSatellite<?>>((OwnableSatellite<?>)the_sat, fTypes[i], ObjBuilder.facilityManufactureFuncs, fac_panel, false, this));
 			GroupLayout gl = new GroupLayout(fac_panel);
 			fac_panel.setLayout(gl);
 			
@@ -441,7 +441,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 			JPanel ship_panel = new JPanel();
 			ship_panel.setToolTipText(sTypes[i].tooltip);
 			ship_panel.setBorder(BorderFactory.createLineBorder(Color.BLUE));
-			ship_panel.addMouseListener(new ObjBuilder<ShipType, Shipyard>(the_shipyard, sTypes[i], ObjBuilder.ShipManufactureFuncs, ship_panel, true, this));
+			ship_panel.addMouseListener(new ObjBuilder<ShipType, Shipyard>(the_shipyard, sTypes[i], ObjBuilder.shipManufactureFuncs, ship_panel, true, this));
 			GroupLayout gl = new GroupLayout(ship_panel);
 			ship_panel.setLayout(gl);
 			

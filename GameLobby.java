@@ -105,7 +105,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 			
 			player_names[i] = new JLabel();
 			color_samples[i] = new JPanel();
-			if(GC.players[i] instanceof Player){
+			if(GC.players[i] != null){
 				player_names[i].setText(GC.players[i].getName());
 				if(GC.players[i].ready)
 					player_names[i].setForeground(Color.GREEN);
@@ -208,7 +208,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 				try{
 					GC.loadMap(map_file); //parsing errors render the map invalid, causing one of the messages in the catch statements.
 					//the existence of the name is the second line of defense.
-					if(GC.map.getName() instanceof String){
+					if(GC.map.getName() != null){
 						map_label.setText(GC.map.getName());
 					}
 					else{
@@ -242,7 +242,7 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 			GC.endHost();
 		GC.leavingLobby();
 		
-		if(GC.startThread instanceof Thread)
+		if(GC.startThread != null)
 			GC.startThread.interrupt();
 		
 		GC.endConnection();

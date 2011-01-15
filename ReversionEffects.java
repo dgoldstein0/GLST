@@ -30,14 +30,15 @@ public strictfp class ReversionEffects {
 		}
 		
 		//equals ignores time_to_revert: 2 RevertObj's are equal if their obj's are equal
-		public boolean equals(RevertObj o)
+		@Override
+		public boolean equals(Object o)
 		{
 			if(o != null)
 			{
-				if(obj != null)
-					return obj.equals(o.obj);
+				if(obj != null && o instanceof RevertObj)
+					return obj.equals(((RevertObj)o).obj);
 				else
-					return (o==null);
+					return false;
 			}
 			else
 				return false;

@@ -5,7 +5,7 @@ public strictfp class MissileList implements RelaxedSaveable<MissileList> {
 	
 	HashMap<Missile.MissileId, Missile> table;
 	MissileListDataControl data_control;
-	long time;
+	volatile long time;
 	
 	public MissileList()
 	{
@@ -61,6 +61,6 @@ public strictfp class MissileList implements RelaxedSaveable<MissileList> {
 		System.out.println("Impossible: MissileList.handleDataNotSaved has been invoked.");
 	}
 	
-	public HashMap<Missile.MissileId, Missile> getTable(){return table;}
+	public synchronized HashMap<Missile.MissileId, Missile> getTable(){return table;}
 	public synchronized void setTable(HashMap<Missile.MissileId, Missile> t){table=t;}
 }

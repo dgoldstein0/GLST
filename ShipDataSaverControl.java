@@ -23,13 +23,16 @@ public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, S
 			//add aggressors
 			for(Targetter<?> t : saved_data[j].aggr)
 			{
-				if(!objs.contains(t))
-					objs.add(new ReversionEffects.RevertObj(t, saved_data[j].t));
+				ReversionEffects.RevertObj o = new ReversionEffects.RevertObj(t, saved_data[j].t);
+				objs.add(o);
 			}
 			
 			//add the target
-			if(!objs.contains(saved_data[j].tgt) && saved_data[j].tgt != null)
-				objs.add(new ReversionEffects.RevertObj(saved_data[j].tgt, saved_data[j].t));
+			if(saved_data[j].tgt != null)
+			{
+				ReversionEffects.RevertObj obj = new ReversionEffects.RevertObj(saved_data[j].tgt, saved_data[j].t);
+				objs.add(obj);
+			}
 				
 			if(saved_data[i].md != saved_data[j].md)
 			{
@@ -77,7 +80,7 @@ public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, S
 						}
 						/*note lack of break here.  This is for future compatibility.  It may sometime be possible to
 						 fly and attack at the same time, and switch destinations while moving.  This is interface
-						 dependent, but is supported here.*/
+						 dependent, but is supported here.  Also, this is necessary since right now, move->attack transition usually means a move and an attack order*/
 					case MOVING:
 						if(saved_data[i].dest != saved_data[j].dest) //destination has changed
 						{

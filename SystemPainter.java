@@ -7,8 +7,8 @@ import java.awt.geom.*;
 
 public class SystemPainter extends JPanel
 {
-	final int GHOST_NONE=0;
-	final int GHOST_OBJ=1;
+	static final int GHOST_NONE=0;
+	static final int GHOST_OBJ=1;
 	
 	GSystem system;
 	List<Selectable> selected;
@@ -66,7 +66,7 @@ public class SystemPainter extends JPanel
 		if(design_view) {
 			//star zone
 			g2.setColor(new Color(255,255,0,100));
-			g2.draw(new Ellipse2D.Double(drawX((getWidth()-100)/2),drawY((getHeight()-100)/2),100*scale,100*scale));
+			g2.draw(new Ellipse2D.Double(drawX((getWidth()-100)/2.0),drawY((getHeight()-100)/2.0),100*scale,100*scale));
 			
 			//cross marking center of screen
 			g2.setColor(Color.RED);
@@ -351,14 +351,21 @@ public class SystemPainter extends JPanel
 		double focus1_x = obj.orbit.boss.absoluteCurX();
 		double focus1_y = obj.orbit.boss.absoluteCurY();
 		
-		double focus2_x = drawX(obj.orbit.focus2.getX()+focus1_x);
-		double focus2_y = drawY(obj.orbit.focus2.getY()+focus1_y);
+		double focus2_x, focus2_y, a,b,x,y;
+		synchronized(obj.orbit)
+		{
+			focus2_x = drawX(obj.orbit.focus2.getX()+focus1_x);
+			focus2_y = drawY(obj.orbit.focus2.getY()+focus1_y);
+			
+			a = obj.orbit.a*scale;
+			b = obj.orbit.b*scale;
+			
+			x = drawX(obj.absoluteCurX());
+			y = drawY(obj.absoluteCurY());
+		}
 		
 		focus1_x=drawX(focus1_x);
 		focus1_y=drawY(focus1_y);
-		
-		double x = drawX(obj.absoluteCurX());
-		double y = drawY(obj.absoluteCurY());
 		
 		if(selected.contains(obj) && !game_mode)
 		{
@@ -368,9 +375,7 @@ public class SystemPainter extends JPanel
 			g2.draw(new Ellipse2D.Double(focus2_x-1.0, focus2_y-1.0, 3.0,3.0));
 		}
 		
-		double a = obj.orbit.a*scale;
-		//double c = obj.orbit.c*scale;
-		double b = obj.orbit.b*scale;
+		
 		
 		double theta;
 		if(focus2_x != focus1_x)

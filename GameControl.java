@@ -44,7 +44,7 @@ public strictfp class GameControl
 	{
 		GI = gi;
 		try {
-			Resources.Preload(); //preload images
+			Resources.preload(); //preload images
 		} catch (IOException e) {
 			System.out.println("trouble reading images");
 			e.printStackTrace();
@@ -62,7 +62,7 @@ public strictfp class GameControl
 	public GameControl()
 	{
 		try {
-			Resources.Preload(); //preload images
+			Resources.preload(); //preload images
 		} catch (IOException e) {
 			System.out.println("trouble reading images");
 			e.printStackTrace();
@@ -215,7 +215,7 @@ public strictfp class GameControl
 				//System.out.println("estimate sent");
 				
 				//Start time
-				updater.startClock(0);
+				updater.setTimeManager(new TimeControl(0));
 				//System.out.println("time started!");
 				
 				//send start signal
@@ -269,7 +269,7 @@ public strictfp class GameControl
 				
 				//start time when start signal is received
 				reader.readLine();
-				updater.startClock(offset);
+				updater.setTimeManager(new TimeControl(offset));
 			}
 		}
 		catch(IOException ioe)
@@ -321,68 +321,105 @@ public strictfp class GameControl
 		startThread.start();
 	}
 	
-	public void startSinglePlayerTest()
+	public void startTest(int num_players, boolean automate, File map_file)
 	{
-		try{
-			Player the_player = createThePlayer(true);
-			player_id=0;
-			the_player.setId(0);
-			the_player.setColor(Color.GREEN);
-			players[0] = the_player;
-		} catch(CancelException e){
-			startupDialog();
-			return;
+		if(!automate)
+		{
+			try{
+				Player the_player = createThePlayer(true);
+				player_id=0;
+				the_player.setId(0);
+				the_player.setColor(Color.GREEN);
+				players[0] = the_player;
+			} catch(CancelException e){
+				startupDialog();
+				return;
+			}
+		}
+		else
+		{
+			for(int i=0; i<num_players; ++i)
+			{
+				players[i] = new Player("Player"+i, i==0); //Player0 is always the host
+				players[i].setColor(GalacticStrategyConstants.DEFAULT_COLORS[i]);
+				players[i].setId(i);
+			}
 		}
 		
 		//CHOOSE AND LOAD MAP
 		
 		//stolen from GameLobby.actionPreformed
-		int val = filechooser.showOpenDialog(GI.frame);
-		if(val==JFileChooser.APPROVE_OPTION){
-			File map_file = filechooser.getSelectedFile();
-			
-			//load the map.  notify if errors.  This is supposed to validate the map by attempting to load it
-			
-			try{
-				loadMap(map_file); //parsing errors render the map invalid, causing one of the messages in the catch statements.
-				//the existence of the name is the second line of defense.
-				if(!(map.getName() != null)){
-					map=null;
-					JOptionPane.showMessageDialog(GI.frame, "The selected file is not a completed map.  Please pick a different map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
-				}
-			} catch(FileNotFoundException fnfe) {
-				JOptionPane.showMessageDialog(GI.frame, "The file was not found.  Please choose another file.", "Error - File not Found", JOptionPane.ERROR_MESSAGE);
-				return;
-			} catch(ClassCastException cce) {
-				JOptionPane.showMessageDialog(GI.frame, "The file you have selected is not a map", "Class Casting Error", JOptionPane.ERROR_MESSAGE);
-				return;
-			} catch(NullPointerException npe) {
-				JOptionPane.showMessageDialog(GI.frame, "Map loading failed.  The selected file is not a valid map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
+		if(map_file == null)
+		{
+			int val = filechooser.showOpenDialog(GI.frame);
+			if(val==JFileChooser.APPROVE_OPTION){
+				map_file = filechooser.getSelectedFile();
+			} else {
+				startupDialog();
 				return;
 			}
-			
-			updater.startClock(0);
-			
-			//set up systems for the game
-			for(GSystem sys : map.systems)
-				sys.setUpForGame(this);
-			
-			//start the player in assigned location
-			OwnableSatellite<?> p = map.start_locations.get(player_id);
-			p.setOwner(players[player_id]);
-			Base b = new Base(p, p.next_facility_id++, (long)0);
-			p.facilities.put(b.id,b);
-			p.the_base = b;
-			
-			map.saveOwnablesData();
-			
+		}
+		
+		//load the map.  notify if errors.  This is supposed to validate the map by attempting to load it
+		
+		try{
+			loadMap(map_file); //parsing errors render the map invalid, causing one of the messages in the catch statements.
+			//the existence of the name is the second line of defense.
+			if(!(map.getName() != null)){
+				map=null;
+				
+				handleError("Map Load Error", "The selected file is not a completed map.  Please pick a different map.", !automate);
+			}
+		} catch(FileNotFoundException fnfe) {
+			handleError("Error - File not Found", "The file was not found.  Please choose another file.", !automate);
+			return;
+		} catch(ClassCastException cce) {
+			handleError("Class Casting Error", "The file you have selected is not a map", !automate);
+			return;
+		} catch(NullPointerException npe) {
+			handleError("Map Load Error", "Map loading failed.  The selected file is not a valid map.", !automate);
+			return;
+		}
+		
+		
+		
+		//set up systems for the game
+		for(GSystem sys : map.systems)
+			sys.setUpForGame(this);
+		
+		//start the player in assigned location
+		OwnableSatellite<?> p = map.start_locations.get(player_id);
+		p.setOwner(players[player_id]);
+		Base b = new Base(p, p.next_facility_id++, (long)0);
+		p.facilities.put(b.id,b);
+		p.the_base = b;
+		
+		map.saveOwnablesData();
+		
+		if(!automate)
+		{
+			updater.setTimeManager(new TimeControl(0));
 			//display the Galaxy
 			GI.drawGalaxy();
-			
+		
 			//set game to update itself
 			updater.startUpdating();
-		} else {
-			startupDialog();
+		}
+		else
+		{
+			updater.setTimeManager(new GameSimulator.SimulatedTimeControl());
+		}
+	}
+	
+	public void handleError(String header, String message, boolean do_gui)
+	{
+		if(do_gui)
+		{
+			JOptionPane.showMessageDialog(GI.frame, message, header, JOptionPane.ERROR_MESSAGE);
+		}
+		else
+		{
+			System.err.println(header + ": " + message);
 		}
 	}
 	
@@ -750,6 +787,9 @@ public strictfp class GameControl
 	
 	public void notifyAllPlayers(Order o)
 	{
+		//TODO: move debugging code
+		updater.log("local order @time=" + updater.getTime() + ":\n", o);
+		
 		//notify other players
 		if(OS != null)
 		{
@@ -844,6 +884,10 @@ public strictfp class GameControl
 						XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(sr));
 						Order o =(Order) decoder.readObject(); //TODO: add in leaving message, which will need to be handled differently here
 						decoder.close();
+						
+						//TODO: move debugging code
+						updater.log("remote order @time=" + updater.getTime() + ":\n", o);
+						
 						System.out.println("\t" + o.getClass().getName());
 						updater.scheduleOrder(o);
 					}
@@ -863,9 +907,18 @@ public strictfp class GameControl
 	
 	public void endConnection()
 	{
-		try{OS.close();}catch(IOException e){}
-		try{IS.close();}catch(IOException e){}
-		try{the_socket.close();}catch(IOException e){}
+		try{
+			if(OS != null)
+				OS.close();
+		}catch(IOException e){e.printStackTrace();}
+		try{
+			if(IS != null)
+				IS.close();
+		}catch(IOException e){e.printStackTrace();}
+		try{
+			if(the_socket != null)
+				the_socket.close();
+		}catch(IOException e){e.printStackTrace();}
 	}
 	
 	public void endAllThreads()
@@ -906,15 +959,19 @@ public strictfp class GameControl
 	
 	public void updateInterface(long time_elapsed)
 	{
-		GI.update();
-			
-		if(GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP)
-			GI.SatellitePanel.update(time_elapsed);
-		else if(GI.sat_or_ship_disp == GameInterface.SHIP_PANEL_DISP)
-			GI.ShipPanel.update();
-		GI.time.setText("Time: " + time_elapsed/1000);
-		GI.metal.setText("Metal: " + Math.round(players[player_id].metal));
-		GI.money.setText(GI.indentation + "Money: " + Math.round(players[player_id].money));
-		GI.redraw();
+		//if statement only necessary for GameSimulator
+		if(GI != null)
+		{
+			GI.update();
+				
+			if(GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP)
+				GI.SatellitePanel.update(time_elapsed);
+			else if(GI.sat_or_ship_disp == GameInterface.SHIP_PANEL_DISP)
+				GI.ShipPanel.update();
+			GI.time.setText("Time: " + time_elapsed/1000);
+			GI.metal.setText("Metal: " + Math.round(players[player_id].metal));
+			GI.money.setText(GameInterface.indentation + "Money: " + Math.round(players[player_id].money));
+			GI.redraw();
+		}
 	}
 }

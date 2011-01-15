@@ -18,7 +18,7 @@ public class TimeTester
 			int time;
 			int index;
 			
-			while((line = theinput.readLine()) instanceof String)
+			while((line = theinput.readLine()) != null)
 			{
 				if(line.indexOf("saving time") != -1)
 				{

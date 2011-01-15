@@ -113,7 +113,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 						mode=MODES.MOVING;
 					break;
 				case PICKUP_TROOPS:
-					if(!doTransferTroops() || soldier == type.soldier_capacity)
+					if(!doTransferTroops() || soldier >= type.soldier_capacity)
 						mode=MODES.MOVING;
 					break;
 			}
@@ -256,7 +256,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			{
 				if(sat.getOwner() != null)
 				{
-					synchronized(sat.facilities_lock)
+					synchronized(sat.facilities)
 					{
 						if(sat.the_base == null) //if base isn't finished being built, player can take over without a fight
 							sat.setOwnerAtTime(getOwner(), t);
@@ -297,7 +297,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			if(dif_x*dif_x + dif_y*dif_y <= GalacticStrategyConstants.LANDING_RANGE*GalacticStrategyConstants.LANDING_RANGE)
 			{
 				float get_soldiers = Math.min(type.soldier_capacity - soldier, GalacticStrategyConstants.troop_transfer_rate*GalacticStrategyConstants.TIME_GRANULARITY);
-				synchronized(((OwnableSatellite<?>)destination).facilities_lock)
+				synchronized(((OwnableSatellite<?>)destination).facilities)
 				{
 					soldier += ((OwnableSatellite<?>)destination).the_base.retrieveSoldiers(time+GalacticStrategyConstants.TIME_GRANULARITY, get_soldiers, this);
 				}

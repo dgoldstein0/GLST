@@ -86,7 +86,7 @@ public class GameStartupDialog implements ActionListener
 		else if(e.getSource() == o_screen_test)
 		{
 			open_screen_dialog.dispose();
-			GC.startSinglePlayerTest();
+			GC.startTest(0, false, null);
 		}
 	}
 }

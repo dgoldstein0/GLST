@@ -110,10 +110,10 @@ public strictfp class Base extends Facility<Base>{
 	
 	public void destroyed()
 	{
-		synchronized(location.facilities_lock)
+		synchronized(location.facilities)
 		{
 			is_alive=false;
-			location.facilities.remove(this);
+			location.facilities.remove(id);
 			location.setOwner(null);
 			location.the_base = null;
 		}

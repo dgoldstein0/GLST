@@ -10,7 +10,7 @@ public class Tester
 		{
 			BufferedReader theinput = new BufferedReader(new FileReader("input.txt"));
 			String line;
-			while((line = theinput.readLine()) instanceof String)
+			while((line = theinput.readLine()) != null)
 			{
 				if(line.indexOf("TIME is") != -1)
 				{

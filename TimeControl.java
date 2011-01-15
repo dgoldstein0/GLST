@@ -1,18 +1,13 @@
 import java.util.*;
 
-public strictfp class TimeControl
+public strictfp class TimeControl implements TimeManager
 {
-	long time_elapsed; //can support over 292 years
-	long last_time_updated;
-	long start_time;
-	Timer timer;
-	TimerTask task;
+	volatile long time_elapsed; 
+	volatile long start_time;
 	
 	public TimeControl(int offset)
 	{
 		resetTime(offset);
-		timer=new java.util.Timer(true);
-		last_time_updated = 0l;
 	}
 	
 	public void resetTime(int offset)
@@ -23,7 +18,11 @@ public strictfp class TimeControl
 	
 	public static long getTimeGrainAfter(long t)
 	{
-		return (long)(Math.ceil((double)(t)/(double)(GalacticStrategyConstants.TIME_GRANULARITY))*GalacticStrategyConstants.TIME_GRANULARITY);
+		long remainder = t % GalacticStrategyConstants.TIME_GRANULARITY;
+		if(remainder != 0)
+			return t + GalacticStrategyConstants.TIME_GRANULARITY - remainder;
+		else
+			return t;
 	}
 	
 	public long getNextTimeGrain()
@@ -43,21 +42,6 @@ public strictfp class TimeControl
 		return time_elapsed;
 	}
 	
-	public void startConstIntervalTask(TimerTask t, int repeatrate)
-	{
-		stopTask();
-		task=t;
-		timer.scheduleAtFixedRate(t,0, repeatrate);
-	}
-	
-	public void stopTask()
-	{
-		if(task instanceof TimerTask)
-			task.cancel();
-	}
-	
 	public long gettime_elapsed(){return time_elapsed;}
 	public void settime_elapsed(long t){time_elapsed=t;}
-	public long getLast_time_updated(){return last_time_updated;}
-	public void setLast_time_updated(long t){last_time_updated=t;}
 }

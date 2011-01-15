@@ -26,7 +26,7 @@ public strictfp enum FacilityType
 		this.tooltip = tooltip;
 		creator = fc;
 		
-		if(icon_path != "")
+		if(!icon_path.equals(""))
 			icon = new ImageIcon(icon_path);
 		else
 			icon=null;

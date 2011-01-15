@@ -41,7 +41,7 @@ public strictfp abstract class Order implements Comparable<Order>
 	}
 	
 	/**the following nested class is for debugging purposes only*/
-	public class OrderDroppedException extends RuntimeException
+	public static class OrderDroppedException extends RuntimeException
 	{
 	}
 }

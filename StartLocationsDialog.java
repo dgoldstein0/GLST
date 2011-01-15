@@ -2,14 +2,14 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.awt.Color;
 
-public class startLocationsDialog extends JDialog implements ActionListener, MouseListener
+public class StartLocationsDialog extends JDialog implements ActionListener, MouseListener
 {
 	JButton add_place, remove_place;
 	JPanel the_list;
 	SatelliteLabel selected;
 	GDFrame GDF;
 	
-	public startLocationsDialog(GDFrame gdf, JFrame frame)
+	public StartLocationsDialog(GDFrame gdf, JFrame frame)
 	{
 		super(frame, "Starting Locations", false);
 		GDF=gdf;
@@ -78,7 +78,7 @@ public class startLocationsDialog extends JDialog implements ActionListener, Mou
 	}
 	
 	public void removeItem() {
-		if(selected instanceof SatelliteLabel)
+		if(selected != null)
 		{
 			GDF.map.start_locations.remove(selected.the_sat);
 			the_list.remove(selected);
@@ -89,7 +89,7 @@ public class startLocationsDialog extends JDialog implements ActionListener, Mou
 	
 	private void select(SatelliteLabel l)
 	{
-		if(selected instanceof SatelliteLabel)
+		if(selected != null)
 			selected.setForeground(Color.BLACK);
 		selected=l;
 		selected.setForeground(Color.RED);

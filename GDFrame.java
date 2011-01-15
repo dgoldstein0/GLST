@@ -393,7 +393,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		
 		//load resources
 		try {
-			Resources.Preload();
+			Resources.preload();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -626,15 +626,15 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	//file specific functions
 	private void save(boolean save_as)
 	{
-		if(map instanceof Galaxy)
+		if(map != null)
 		{
-			if(!(map.name instanceof String) || map.name =="")
+			if(map.name != null || map.name =="")
 			{
 				String temp_name="";
 
 				do{
 					temp_name = JOptionPane.showInputDialog(frame, "The map does not have a name yet.  What would you like to name it?", "Please name the map", JOptionPane.QUESTION_MESSAGE);
-					if(!(temp_name instanceof String)){
+					if(temp_name == null){
 						JOptionPane.showMessageDialog(frame, "Saving cancelled.  The map must be given a valid name to be able to be saved.", "Nota Bene", JOptionPane.INFORMATION_MESSAGE);
 						return;
 					}
@@ -645,7 +645,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			
 
 			
-			boolean ask=(save_as||!(cur_file instanceof File));
+			boolean ask=(save_as||(cur_file == null));
 			
 			int returnVal=0;
 			if(ask)
@@ -703,7 +703,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private void close()
 	{
-		if(map instanceof Galaxy)
+		if(map != null)
 		{
 			if(confirmClose())
 			{
@@ -724,7 +724,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	public void exitProgram()
 	{
-		if(map instanceof Galaxy)
+		if(map != null)
 		{
 			int val = JOptionPane.showConfirmDialog(frame, "Do you want to save your file before closing the program?\nAll unsaved data will be lost.", "Exit Without Save?", JOptionPane.YES_NO_CANCEL_OPTION);
 			switch(val)
@@ -747,11 +747,11 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		String temp_name="";
 
 		do{
-			if(!(map.name instanceof String))
+			if(map.name == null)
 				temp_name = JOptionPane.showInputDialog(frame, "The map does not have a name yet.  What would you like to name it?", "Please name the map", JOptionPane.QUESTION_MESSAGE);
 			else
 				temp_name = JOptionPane.showInputDialog(frame, "The map's name is: " + map.name + "\nType a new name below and click OK, or\n click CANCEL to keep the current name", map.name);
-			if(!(temp_name instanceof String))
+			if(temp_name == null)
 				return; //the user clicked cancel
 		}while(temp_name.matches("\\s+") || temp_name =="");
 		
@@ -787,19 +787,21 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	{		
 		LinkedHashSet<String> name_choices = new LinkedHashSet<String>(225); //set the initial capacity of the hashset, so it doesn't waste time expanding
 		
+		BufferedReader r = null;
 		try{
-			BufferedReader r = new BufferedReader(new FileReader("star names.txt"));
+			r = new BufferedReader(new FileReader("star names.txt"));
 			
 			String temp;
 			boolean end=false;
 			while(!end)
 			{
 				temp = r.readLine();
-				if(temp instanceof String)
+				if(temp != null)
 					name_choices.add(temp);
 				else
 					end=true;
 			}
+			
 		} catch(FileNotFoundException fnfe) {
 			System.out.println("star names.txt not found!");
 			return;
@@ -807,16 +809,25 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			System.out.println("IO error loading star names.");
 			return;
 		}
+		finally
+		{
+			if(r != null)
+			{
+				try {
+					r.close();
+				} catch (IOException e) {e.printStackTrace();}
+			}
+		}
 		
 		for(GSystem sys : map.systems){
-			if(sys.name instanceof String)
+			if(sys.name != null)
 				name_choices.remove(sys.name);
 		}
 		
 		int i, choice;
 		Random generator= new Random(System.nanoTime());
 		for(GSystem sys : map.systems){
-			if(!(sys.name instanceof String))
+			if(sys.name == null)
 			{
 				//pick random name from name_choices
 				choice = generator.nextInt(name_choices.size());
@@ -838,15 +849,16 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	{		
 		LinkedHashSet<String> name_choices = new LinkedHashSet<String>(13805); //set the initial capacity of the hashset, so it doesn't waste time expanding
 		
+		BufferedReader r = null;
 		try{
-			BufferedReader r = new BufferedReader(new FileReader("planet names.txt"));
+			r = new BufferedReader(new FileReader("planet names.txt"));
 			
 			String temp;
 			boolean end=false;
 			while(!end)
 			{
 				temp = r.readLine();
-				if(temp instanceof String)
+				if(temp != null)
 					name_choices.add(temp);
 				else
 					end=true;
@@ -858,9 +870,17 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			System.out.println("IO error loading planet names.");
 			return;
 		}
+		finally
+		{
+			try {
+				if(r != null)
+					r.close();
+			}
+			catch(IOException e){e.printStackTrace();}
+		}
 		
 		for(GSystem sys : map.systems){
-			if(sys.name instanceof String)
+			if(sys.name != null)
 				name_choices.remove(sys.name);
 		}
 		
@@ -951,7 +971,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 			if(!e.isShiftDown() && !e.isAltDown())
 			{
 				selected_systems=null;
-				if(map instanceof Galaxy)
+				if(map != null)
 					noSystemSelected();
 			}
 			drag_start=false; //insures that the select box behavior is viable
@@ -982,7 +1002,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 					selected_systems=null;
 					drawGalaxy();
 					
-					if(map instanceof Galaxy)
+					if(map != null)
 						noSystemSelected();
 					else
 						fileIsNotOpen();
@@ -1053,7 +1073,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	//start drag-and-move system code
 	public void mouseDragged(MouseEvent e)
 	{
-		if(!wait_to_add_sys && map instanceof Galaxy)
+		if(!wait_to_add_sys && map != null)
 		{
 			if(selected_systems != null && drag_start)
 			{
@@ -1160,7 +1180,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private GSystem locateSystem(int x_pos, int y_pos) throws NoSystemLocatedException
 	{
-		if(map instanceof Galaxy && map.systems != null)
+		if(map != null && map.systems != null)
 		{
 			for(GSystem sys : map.systems)
 			{
@@ -1228,7 +1248,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		panel.paintGalaxy(map, selected_systems, drag_options, current_nav_level, nav_display, display_unnavigable, null, 1.0d);
 	}
 	
-	private class NoSystemLocatedException extends Exception
+	private static class NoSystemLocatedException extends Exception
 	{
 		int x;
 		int y;
@@ -1290,7 +1310,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		//EDIT HERE FOR VARIABLE MAX AND MIN **************************BOOKMARK
 		String[] choices={"10","9","8","7","6","5","4","3","2","1"};
 		String val=(String)JOptionPane.showInputDialog(frame,"Select the desired navigability level from the list.\nKeep in mind that 10 is easiest to navigate to and 1 is the hardest.", "Set Navigability", JOptionPane.QUESTION_MESSAGE, null, choices,"10");
-		if(val instanceof String)
+		if(val != null)
 		{
 			int nav=Integer.valueOf(val);
 			
@@ -1383,7 +1403,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private void enterStartLocationMode(){
 		//launch new dialog to keep track of selections
-		new startLocationsDialog(this, frame);
+		new StartLocationsDialog(this, frame);
 	}
 	
 	private void help()

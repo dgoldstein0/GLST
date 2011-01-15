@@ -27,8 +27,7 @@ public strictfp class OwnableSatelliteDataSaverControl<T extends OwnableSatellit
 			{
 				//role back facility to before it existed
 				ReversionEffects.RevertObj obj = new ReversionEffects.RevertObj(saved_data[j].fac.get(id), saved_data[j].t-1);
-				if(!objs.contains(obj))
-					objs.add(obj);
+				objs.add(obj);
 			}
 			
 			//can tell if something is built or canceled via this condition

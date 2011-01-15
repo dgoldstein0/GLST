@@ -1,5 +1,4 @@
-import java.util.Hashtable;
-
+import java.util.HashMap;
 
 public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> extends DataSaver<T> {
 
@@ -10,7 +9,7 @@ public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> e
 	int next_fac_id;
 	long last_tax_t;
 	Player own;
-	Hashtable<Integer, Facility<?>> fac; //save this in case facility gets destroyed, so we still have a reference to it
+	HashMap<Integer, Facility<?>> fac; //save this in case facility gets destroyed, so we still have a reference to it
 	Base base;
 	long mon_added;
 	
@@ -29,7 +28,10 @@ public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> e
 		sat.next_facility_id = next_fac_id;
 		sat.last_tax_time = last_tax_t;
 		sat.owner = own;
-		sat.facilities = (Hashtable<Integer, Facility<?>>) fac.clone(); //unchecked cast warning
+		synchronized(sat.facilities)
+		{
+			sat.facilities = (HashMap<Integer, Facility<?>>) fac.clone(); //unchecked cast warning
+		}
 		sat.the_base = base;
 		sat.time=t;
 		sat.tax_money = mon_added;
@@ -45,8 +47,11 @@ public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> e
 		next_fac_id = sat.next_facility_id;
 		last_tax_t = sat.last_tax_time;
 		own=sat.owner;
-		fac = (Hashtable<Integer, Facility<?>>) sat.facilities.clone(); //unchecked cast warning
-		base = sat.the_base;
+		synchronized(sat.facilities)
+		{
+			fac = (HashMap<Integer, Facility<?>>) sat.facilities.clone(); //unchecked cast warning
+			base = sat.the_base;
+		}
 		t=sat.time;
 		mon_added = sat.tax_money;
 	}

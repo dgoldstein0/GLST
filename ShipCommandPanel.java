@@ -21,8 +21,6 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 	JLabel dest_name;
 	JLabel dest_pic;
 	
-	JButton attack;
-	
 	public ShipCommandPanel()
 	{
 		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -128,7 +126,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		{
 			if(((OwnableSatellite<?>)the_ship.destination).getOwner() != null && ((OwnableSatellite<?>)the_ship.destination).getOwner().getId() == GameInterface.GC.player_id)
 			{
-				if(((OwnableSatellite<?>)the_ship.destination).the_base instanceof Base && the_ship.soldier < the_ship.type.soldier_capacity)
+				if(((OwnableSatellite<?>)the_ship.destination).the_base != null && the_ship.soldier < the_ship.type.soldier_capacity)
 					pickup_troops.setEnabled(true);
 				else
 					pickup_troops.setEnabled(false);
@@ -172,11 +170,6 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		{
 			GameInterface.GC.GI.galaxy_state= GameInterface.CHOOSE_WARP_DEST;
 			GameInterface.GC.GI.drawGalaxy();
-		}
-		else if(e.getSource() == attack)
-		{
-			long time = GameInterface.GC.updater.getTime();
-			GameInterface.GC.scheduleOrder(new ShipAttackOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, TimeControl.getTimeGrainAfter(time) /*this may be on delay in the future*/, time, (Targetable<?>)the_ship.destination));
 		}
 		else if(e.getSource() == invade)
 		{

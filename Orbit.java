@@ -1,20 +1,21 @@
 public strictfp class Orbit
 {
+	//equiv to 2pi/sqrt(G), where G is the gravity constant
 	final static double PERIOD_CONSTANT=GalacticStrategyConstants.PERIOD_CONSTANT;
 
 	final static int CLOCKWISE = 1;
 	final static int COUNTERCLOCKWISE=-1;
 
-	//equiv to 2pi/sqrt(G), where G is the gravity constant
-	double init_x;
-	double init_y;
+	
+	volatile double init_x;
+	volatile double init_y;
 	
 	Focus focus2;
 	
-	double cur_x;
-	double cur_y;
-	double vel_x;
-	double vel_y;
+	volatile double cur_x;
+	volatile double cur_y;
+	volatile double vel_x;
+	volatile double vel_y;
 	
 	double period;
 	double time_offset;
@@ -57,7 +58,7 @@ public strictfp class Orbit
 		calcTimeOffset();
 	}
 	
-	public void calcTimeOffset()
+	public synchronized void calcTimeOffset()
 	{
 		c=Math.hypot(focus2.getX(),focus2.getY())/2.0d;
 		b=Math.sqrt(a*a-c*c);
@@ -89,11 +90,11 @@ public strictfp class Orbit
 		time_offset = period/(2*Math.PI)*(theta-c/a*Math.sin(theta));
 	}
 	
-	public double absoluteCurX(){return cur_x + boss.absoluteCurX();}
-	public double absoluteCurY(){return cur_y + boss.absoluteCurY();}
+	public synchronized double absoluteCurX(){return cur_x + boss.absoluteCurX();}
+	public synchronized double absoluteCurY(){return cur_y + boss.absoluteCurY();}
 	
-	public double absoluteInitX(){return init_x + boss.absoluteInitX();}
-	public double absoluteInitY(){return init_y + boss.absoluteInitY();}
+	public synchronized double absoluteInitX(){return init_x + boss.absoluteInitX();}
+	public synchronized double absoluteInitY(){return init_y + boss.absoluteInitY();}
 	
 	public double getAbsVelX(){return vel_x + boss.getAbsVelX();}
 	public double getAbsVelY(){return vel_y + boss.getAbsVelY();}
@@ -147,8 +148,8 @@ public strictfp class Orbit
 		vel_x = dneeds_rot_x_dt*Math.cos(rot_angle) + dneeds_rot_y_dt*Math.sin(rot_angle);
 		vel_y = -dneeds_rot_x_dt*Math.sin(rot_angle) + dneeds_rot_y_dt*Math.cos(rot_angle);
 		
-		cur_x=needs_shift_x+focus2.getX()/2;
-		cur_y=needs_shift_y+focus2.getY()/2;
+		cur_x=needs_shift_x+focus2.getX()/2.0;
+		cur_y=needs_shift_y+focus2.getY()/2.0;
 	}
 	
 	//methods required for save/load
@@ -157,24 +158,24 @@ public strictfp class Orbit
 	public void setBoss(Orbitable<?> p){boss=p;}
 	public Satellite<?> getObj(){return obj;}
 	public void setObj(Satellite<?> o){obj=o;}
-	public double getInit_x(){return init_x;}
-	public void setInit_x(double x){init_x=x;}
-	public double getInit_y(){return init_y;}
-	public void setInit_y(double y){init_y=y;}
-	public Focus getFocus2(){return focus2;}
-	public void setFocus2(Focus x){focus2=x;}
+	public synchronized double getInit_x(){return init_x;}
+	public synchronized void setInit_x(double x){init_x=x;}
+	public synchronized double getInit_y(){return init_y;}
+	public synchronized void setInit_y(double y){init_y=y;}
+	public synchronized Focus getFocus2(){return focus2;}
+	public synchronized void setFocus2(Focus x){focus2=x;}
 	public double getCur_x(){return cur_x;}
 	public void setCur_x(double x){cur_x=x;}
 	public double getCur_y(){return cur_y;}
 	public void setCur_y(double y){cur_y=y;}
-	public double getPeriod(){return period;}
-	public void setPeriod(double d){period=d;}
+	public synchronized double getPeriod(){return period;}
+	public synchronized void setPeriod(double d){period=d;}
 	public int getDirection(){return direction;}
 	public void setDirection(int d){direction=d;}
-	public double getA(){return a;}
-	public void setA(double x){a=x;}
-	public double getB(){return b;}
-	public void setB(double y){b=y;}
-	public double getC(){return c;}
-	public void setC(double z){c=z;}
+	public synchronized double getA(){return a;}
+	public synchronized void setA(double x){a=x;}
+	public synchronized double getB(){return b;}
+	public synchronized void setB(double y){b=y;}
+	public synchronized double getC(){return c;}
+	public synchronized void setC(double z){c=z;}
 }

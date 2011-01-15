@@ -104,7 +104,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	boolean mode, prev_mode; //Galaxy=true, system=false.  reflected by isGalaxyDisplayed and isSystemDisplayed
 	boolean graphics_started; //used to indicate whether graphics have been started yet - that is, whether the Galaxy has been drawn yet.
 	
-	final String indentation="     ";
+	final static String indentation="     ";
 
 
 	public GameInterface()
@@ -278,8 +278,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		mouse_was_dragged=false;
 		drag_modifier=MODIFIER.NONE;
 		sys_scale = 1.0d;
-		sys_center_x = theinterface.getWidth()/2;
-		sys_center_y = theinterface.getHeight()/2;
+		sys_center_x = theinterface.getWidth()/2.0;
+		sys_center_y = theinterface.getHeight()/2.0;
 		
 		//frame.pack();
 		frame.setExtendedState(frame.getExtendedState()|JFrame.MAXIMIZED_BOTH); //auto-maximizes the game.  Pack() would set it to whatever fit preferred size
@@ -655,7 +655,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 				{
 					case GAL_NORMAL:
 						selectSystemAt(((double)e.getX())/gal_scale, ((double)e.getY())/gal_scale);
-						if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2 && sys instanceof GSystem)
+						if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2 && sys != null)
 							drawSystem();
 						else
 							redraw();
@@ -1008,10 +1008,10 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		last_time_recentered = cur_time;
 		
 		//enforce bounds
-		if(sysScreenToDataX(0)<(theinterface.getWidth()-SYS_WIDTH)/2 || sysScreenToDataX(theinterface.getWidth())>(theinterface.getWidth()+SYS_WIDTH)/2)
+		if(sysScreenToDataX(0)<(theinterface.getWidth()-SYS_WIDTH)/2.0 || sysScreenToDataX(theinterface.getWidth())>(theinterface.getWidth()+SYS_WIDTH)/2.0)
 			sys_center_x = old_center_x;
 		
-		if(sysScreenToDataY(0)<(theinterface.getHeight()-SYS_HEIGHT)/2 || sysScreenToDataY(theinterface.getHeight())>(theinterface.getHeight()+SYS_HEIGHT)/2)
+		if(sysScreenToDataY(0)<(theinterface.getHeight()-SYS_HEIGHT)/2.0 || sysScreenToDataY(theinterface.getHeight())>(theinterface.getHeight()+SYS_HEIGHT)/2.0)
 			sys_center_y = old_center_y;
 	}
 	
@@ -1045,15 +1045,15 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	private void enforceSystemBounds()
 	{
 		//adjust sys_center_x if necessary
-		if(sysScreenToDataX(0)<(theinterface.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2)
-			sys_center_x = (int)((theinterface.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2 + theinterface.getWidth()/(2*sys_scale));//this should be the value of center_x that makes screenToDataX equal to (SystemPanel.getWidth()-SYS_WIDTH)/2
-		else if(sysScreenToDataX(theinterface.getWidth())>(theinterface.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2)
-			sys_center_x = (int)((theinterface.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2 - theinterface.getWidth()/(2*sys_scale));
+		if(sysScreenToDataX(0)<(theinterface.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2.0)
+			sys_center_x = (int)((theinterface.getWidth()-GalacticStrategyConstants.SYS_WIDTH)/2.0 + theinterface.getWidth()/(2*sys_scale));//this should be the value of center_x that makes screenToDataX equal to (SystemPanel.getWidth()-SYS_WIDTH)/2
+		else if(sysScreenToDataX(theinterface.getWidth())>(theinterface.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2.0)
+			sys_center_x = (int)((theinterface.getWidth()+GalacticStrategyConstants.SYS_WIDTH)/2.0 - theinterface.getWidth()/(2*sys_scale));
 		//adjust sys_center_y if necessary
-		if(sysScreenToDataY(0)<(theinterface.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2)
-			sys_center_y = (int)((theinterface.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2 + theinterface.getHeight()/(2*sys_scale));
-		else if(sysScreenToDataY(theinterface.getHeight())>(theinterface.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2)
-			sys_center_y = (int)((theinterface.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2 - theinterface.getHeight()/(2*sys_scale));
+		if(sysScreenToDataY(0)<(theinterface.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2.0)
+			sys_center_y = (int)((theinterface.getHeight()-GalacticStrategyConstants.SYS_HEIGHT)/2.0 + theinterface.getHeight()/(2*sys_scale));
+		else if(sysScreenToDataY(theinterface.getHeight())>(theinterface.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2.0)
+			sys_center_y = (int)((theinterface.getHeight()+GalacticStrategyConstants.SYS_HEIGHT)/2.0 - theinterface.getHeight()/(2*sys_scale));
 	}
 	
 	@Override

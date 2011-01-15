@@ -3,7 +3,7 @@ import javax.swing.ImageIcon;
 
 public class Resources
 {
-	public static void Preload() throws IOException //GameControl calls this method when it is instantiated
+	public static void preload() throws IOException //GameControl calls this method when it is instantiated
 	{
 		//load Images
 		for(ImageResource r : ImageResource.values())

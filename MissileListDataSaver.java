@@ -12,14 +12,19 @@ public strictfp class MissileListDataSaver extends DataSaver<MissileList> {
 	@Override
 	protected void doSaveData(MissileList l) {
 		
-		tbl = (HashMap<Missile.MissileId, Missile>) l.table.clone();
-
+		synchronized(l)
+		{
+			tbl = (HashMap<Missile.MissileId, Missile>) l.table.clone();
+		}
 	}
 
 	@Override
 	protected void doLoadData(MissileList l) {
 		
-		l.table = (HashMap<Missile.MissileId, Missile>) tbl.clone();
+		synchronized(l)
+		{
+			l.table = (HashMap<Missile.MissileId, Missile>) tbl.clone();
+		}
 	}
 
 }

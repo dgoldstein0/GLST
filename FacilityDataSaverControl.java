@@ -11,8 +11,7 @@ public strictfp abstract class FacilityDataSaverControl<T extends Facility<T>, S
 	{
 		for(Targetter<?> t : saved_data[j].aggr)
 		{
-			if(!obj_container.contains(t))
-				obj_container.add(new ReversionEffects.RevertObj(t, saved_data[j].t));
+			obj_container.add(new ReversionEffects.RevertObj(t, saved_data[j].t));
 		}
 	}
 }

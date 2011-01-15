@@ -24,8 +24,8 @@ public strictfp class MissileDataSaverControl extends FlyerDataSaverControl<Miss
 		{
 			for(Targetter<?> t : saved_data[j].aggr)
 			{
-				if(!effected_objs.contains(t))
-					effected_objs.add(new ReversionEffects.RevertObj(t, saved_data[j].t));
+				ReversionEffects.RevertObj o = new ReversionEffects.RevertObj(t, saved_data[j].t);
+				effected_objs.add(o);
 			}
 		}
 		

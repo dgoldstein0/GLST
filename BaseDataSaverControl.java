@@ -21,8 +21,8 @@ public strictfp class BaseDataSaverControl extends FacilityDataSaverControl<Base
 			//add the troop takers
 			for(Saveable<?> troop_taker : saved_data[j].taker)
 			{
-				if(!effects.objects_to_revert.contains(troop_taker));
-					effects.objects_to_revert.add(new ReversionEffects.RevertObj(troop_taker, saved_data[j].t));
+				ReversionEffects.RevertObj o = new ReversionEffects.RevertObj(troop_taker, saved_data[j].t);
+				effects.objects_to_revert.add(o);
 			}
 		}
 		

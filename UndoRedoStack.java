@@ -85,7 +85,7 @@ public class UndoRedoStack
 	//use to enable/disable undo functionality
 	public boolean undoPossible()
 	{
-		return (stack[current+1] instanceof String);
+		return (stack[current+1] != null);
 	}
 	
 	private String ObjsToXML(Object[] obj)

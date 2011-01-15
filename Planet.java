@@ -18,7 +18,7 @@ public strictfp class Planet extends OwnableSatellite<Planet>
 		mass=m;
 		
 		orbiting=new ArrayList<Satellite<?>>();
-		facilities=new Hashtable<Integer, Facility<?>>();
+		facilities=new HashMap<Integer, Facility<?>>();
 		data_control.saveData();
 	}
 	

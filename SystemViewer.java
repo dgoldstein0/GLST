@@ -63,6 +63,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	//objects used to track time flow for time simulation
 	TimeControl TC;
+	TaskManager TM;
 	UpdateTask task;
 	java.util.Timer camera_timer;
 	centerMover recenter_task;
@@ -304,19 +305,21 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		}
 		else if(e.getSource()==t_time || e.getSource()==c_time)
 		{
-			if(TC instanceof TimeControl)
+			if(TC != null)
 				TC.resetTime(0);
 			else
 				TC = new TimeControl(0);
 
-			TC.startConstIntervalTask(new UpdateTask(),20);
+			if(TM == null)
+				TM = new TaskManager();
+			TM.startConstIntervalTask(new UpdateTask(),20);
 		}
 		else if(e.getSource()==t_reset_time || e.getSource() == c_reset_time)
 		{
 			//clear timer
-			if(TC instanceof TimeControl)
+			if(TM != null)
 			{
-				TC.stopTask();
+				TM.stopTask();
 				TimeUpdater(0);
 			}
 		}
@@ -429,13 +432,16 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			}
 			
 			if(selected_obj instanceof Satellite<?>) {//check to see if focus2 of the selected planet was just clicked on
-				if(((Satellite<?>)selected_obj).orbit.focus2.getX()+((Satellite<?>)selected_obj).orbit.boss.absoluteCurX() - OBJ_TOL <= x &&
-					x <= ((Satellite<?>)selected_obj).orbit.focus2.getX()+((Satellite<?>)selected_obj).orbit.boss.absoluteCurX()+OBJ_TOL &&
-					((Satellite<?>)selected_obj).orbit.focus2.getY()+((Satellite<?>)selected_obj).orbit.boss.absoluteCurY()-OBJ_TOL <= y &&
-					y <= ((Satellite<?>)selected_obj).orbit.focus2.getY()+((Satellite<?>)selected_obj).orbit.boss.absoluteCurY()+OBJ_TOL)
+				synchronized(((Satellite<?>)selected_obj).orbit)
 				{
-					selected_obj = ((Satellite<?>)selected_obj).orbit.focus2;//select the focus!
-					return;
+					if(((Satellite<?>)selected_obj).orbit.focus2.getX()+((Satellite<?>)selected_obj).orbit.boss.absoluteCurX() - OBJ_TOL <= x &&
+						x <= ((Satellite<?>)selected_obj).orbit.focus2.getX()+((Satellite<?>)selected_obj).orbit.boss.absoluteCurX()+OBJ_TOL &&
+						((Satellite<?>)selected_obj).orbit.focus2.getY()+((Satellite<?>)selected_obj).orbit.boss.absoluteCurY()-OBJ_TOL <= y &&
+						y <= ((Satellite<?>)selected_obj).orbit.focus2.getY()+((Satellite<?>)selected_obj).orbit.boss.absoluteCurY()+OBJ_TOL)
+					{
+						selected_obj = ((Satellite<?>)selected_obj).orbit.focus2;//select the focus!
+						return;
+					}
 				}
 			}
 			else if(selected_obj instanceof Focus) //if a focus is selected
@@ -453,7 +459,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		throw new NoObjectLocatedException(x, y);
 	}
 	
-	private class NoObjectLocatedException extends Exception
+	private static class NoObjectLocatedException extends Exception
 	{
 		int x;
 		int y;
@@ -587,15 +593,15 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			scale = GalacticStrategyConstants.MAX_SCALE;
 		
 		//adjust center if part of screen goes out of bounds ////BOOKMARK
-		if(screenToDataX(0)<(painter.getWidth()-SYS_WIDTH)/2)
-			center_x = (int)((painter.getWidth()-SYS_WIDTH)/2 + painter.getWidth()/(2*scale));//this should be the value of center_x that makes screenToDataX equal to (painter.getWidth()-SYS_WIDTH)/2
+		if(screenToDataX(0)<(painter.getWidth()-SYS_WIDTH)/2.0)
+			center_x = (int)((painter.getWidth()-SYS_WIDTH)/2.0 + painter.getWidth()/(2.0*scale));//this should be the value of center_x that makes screenToDataX equal to (painter.getWidth()-SYS_WIDTH)/2
 		else if(screenToDataX(painter.getWidth())>(painter.getWidth()+SYS_WIDTH)/2)
-			center_x = (int)((painter.getWidth()+SYS_WIDTH)/2 - painter.getWidth()/(2*scale));
+			center_x = (int)((painter.getWidth()+SYS_WIDTH)/2.0 - painter.getWidth()/(2.0*scale));
 		
-		if(screenToDataY(0)<(painter.getHeight()-SYS_HEIGHT)/2)
-			center_y = (int)((painter.getHeight()-SYS_HEIGHT)/2 + painter.getHeight()/(2*scale));
-		else if(screenToDataY(painter.getHeight())>(painter.getHeight()+SYS_HEIGHT)/2)
-			center_y = (int)((painter.getHeight()+SYS_HEIGHT)/2 - painter.getHeight()/(2*scale));
+		if(screenToDataY(0)<(painter.getHeight()-SYS_HEIGHT)/2.0)
+			center_y = (int)((painter.getHeight()-SYS_HEIGHT)/2.0 + painter.getHeight()/(2.0*scale));
+		else if(screenToDataY(painter.getHeight())>(painter.getHeight()+SYS_HEIGHT)/2.0)
+			center_y = (int)((painter.getHeight()+SYS_HEIGHT)/2.0 - painter.getHeight()/(2.0*scale));
 		
 		drawSystem();
 	}
@@ -707,7 +713,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	public void mouseDragged(MouseEvent e)
 	{
 		painter.setCursor(Cursor.getDefaultCursor());
-		if(selected_obj instanceof Selectable && drag_start)
+		if(selected_obj != null && drag_start)
 		{
 			if(selected_obj instanceof Star)
 			{
@@ -719,8 +725,8 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				}
 				else
 				{
-					((Star)selected_obj).x = (int)((screenToDataX(e.getX())-painter.getWidth()/2)/Math.hypot(screenToDataX(e.getX())-painter.getWidth()/2, screenToDataY(e.getY())-painter.getHeight()/2)*(50-((StellarObject)selected_obj).size/2) + painter.getWidth()/2);
-					((Star)selected_obj).y = (int)((screenToDataY(e.getY())-painter.getHeight()/2)/Math.hypot(screenToDataX(e.getX())-painter.getWidth()/2, screenToDataY(e.getY())-painter.getHeight()/2)*(50-((StellarObject)selected_obj).size/2) + painter.getHeight()/2);
+					((Star)selected_obj).x = (int)((screenToDataX(e.getX())-painter.getWidth()/2.0)/Math.hypot(screenToDataX(e.getX())-painter.getWidth()/2, screenToDataY(e.getY())-painter.getHeight()/2.0)*(GalacticStrategyConstants.DEFAULT_STAR_ZONE_SIZE-((StellarObject)selected_obj).size/2.0) + painter.getWidth()/2.0);
+					((Star)selected_obj).y = (int)((screenToDataY(e.getY())-painter.getHeight()/2.0)/Math.hypot(screenToDataX(e.getX())-painter.getWidth()/2, screenToDataY(e.getY())-painter.getHeight()/2.0)*(GalacticStrategyConstants.DEFAULT_STAR_ZONE_SIZE-((StellarObject)selected_obj).size/2.0) + painter.getHeight()/2.0);
 					drawSystem();
 				}
 			}
@@ -961,9 +967,9 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	public void windowClosing(WindowEvent e)
 	{
-		if(TC instanceof TimeControl)
+		if(TM != null)
 		{
-			TC.stopTask();
+			TM.stopTask();
 			TimeUpdater(0);
 		}
 	}

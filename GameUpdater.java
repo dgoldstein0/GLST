@@ -6,36 +6,39 @@ import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
-
 import javax.swing.SwingUtilities;
 
 public class GameUpdater {
 
 	static final boolean DEBUGGING = false;
 	
-	TimeControl TC;
+	TimeManager TC;
 	final GameControl GC;
 	final PriorityBlockingQueue<Order> pending_execution;
+	TaskManager TM;
+	long last_time_updated;
 	
 	public GameUpdater(GameControl ctrl)
 	{
 		pending_execution = new PriorityBlockingQueue<Order>();
+		TM = new TaskManager();
 		GC = ctrl;
+		last_time_updated = 0l;
 	}
 	
-	public void startClock(int starttime)
+	public void setTimeManager(TimeManager TM)
 	{
-		TC = new TimeControl(starttime);
+		TC=TM;
 	}
 	
 	public void startUpdating()
 	{
-		TC.startConstIntervalTask(new Updater(),(int)GalacticStrategyConstants.TIME_GRANULARITY);
+		TM.startConstIntervalTask(new Updater(),(int)GalacticStrategyConstants.TIME_GRANULARITY);
 	}
 	
 	public void stopUpdating()
 	{
-		TC.stopTask();
+		TM.stopTask();
 		
 		//TODO: debugging code, should later be removed
 		try {
@@ -85,7 +88,11 @@ public class GameUpdater {
 	public void updateGame() throws DataSaverControl.DataNotYetSavedException
 	{
 		long time_elapsed=TC.getTime();
-		long update_to=TC.getLast_time_updated();
+		
+		//TODO: Debugging code, remove later
+		log("updateGame with time_elapsed=" + time_elapsed,null);
+		
+		long update_to=getLast_time_updated();
 		//System.out.println("Updating to time_elapsed=" + Long.toString(time_elapsed));
 		//start events that need to occur before time_elapsed
 		
@@ -226,8 +233,12 @@ public class GameUpdater {
 			}
 		}
 		
-		TC.setLast_time_updated(update_to);
+		setLast_time_updated(update_to);
 		
+		//This can flare up in the case that time_elapsed >= order time, but the last time grain
+		//run here happens to be before order time since both don't have to land on a time grain
+		//(at least, for some orders).  I.e. time_elapsed=56, order @ 53, will only update through
+		// time 40 (time_grain is 20)
 		if(!local_pending_execution.isEmpty())
 		{
 			System.out.println("We still have orders in the local queue.  should not be possible!");
@@ -272,13 +283,16 @@ public class GameUpdater {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		XMLEncoder2 encoder = new XMLEncoder2(logFile);
-		encoder.setExceptionListener(new MyExceptionListener());
-		encoder.writeObject(o);
-		encoder.finish();
+		if(o != null)
+		{
+			XMLEncoder2 encoder = new XMLEncoder2(logFile);
+			encoder.setExceptionListener(new MyExceptionListener());
+			encoder.writeObject(o);
+			encoder.finish();
+		}
 	}
 	
-	private static class MyExceptionListener implements ExceptionListener
+	public static class MyExceptionListener implements ExceptionListener
 	{
 		@Override
 		public void exceptionThrown(Exception arg0) {
@@ -286,4 +300,7 @@ public class GameUpdater {
 			arg0.printStackTrace();
 		}
 	}
+	
+	public long getLast_time_updated(){return last_time_updated;}
+	public void setLast_time_updated(long t){last_time_updated=t;}
 }

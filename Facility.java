@@ -41,10 +41,10 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	
 	public void destroyed() //default option.  Base overrides this
 	{
-		synchronized(location.facilities_lock)
+		synchronized(location.facilities)
 		{
 			is_alive=false;
-			location.facilities.remove(this);
+			location.facilities.remove(id);
 		}
 	}
 	
@@ -58,10 +58,10 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	
 	public void removeFromGame(long t)
 	{
-		synchronized(location.facilities_lock)
+		synchronized(location.facilities)
 		{
 			//should probably cache the facility for recall... but anyway
-			location.facilities.remove(this);
+			location.facilities.remove(id);
 		}
 	}
 	

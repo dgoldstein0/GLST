@@ -1,14 +1,16 @@
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import javax.swing.SwingUtilities;
 
 public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Satellite<T> implements RelaxedSaveable<T>, Orbitable<T>
 {
 	ArrayList<Satellite<?>> orbiting;
 	
-	Object facilities_lock = new Object();
-	Hashtable<Integer, Facility<?> > facilities;
+	/**@GuardedBy facilities*/
+	HashMap<Integer, Facility<?> > facilities;
+	/**@GuardedBy facilities*/
 	Base the_base; //the base is a member of facilities.  As such, it should be governed by facilities_lock.
+	
 	Player owner;
 	
 	long time; //last time there was a change
@@ -39,7 +41,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	public OwnableSatellite()
 	{
 		next_facility_id=0;
-		facilities = new Hashtable<Integer, Facility<?>>();
+		facilities = new HashMap<Integer, Facility<?>>();
 		bldg_in_progress = FacilityType.NO_BLDG;
 		data_control = new OwnableSatelliteDataSaverControl<T>((T)this);
 		last_tax_time = 0;
@@ -52,7 +54,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	public void update(long time_elapsed)
 	{
 		time=time_elapsed;
-		synchronized(facilities_lock)
+		synchronized(facilities)
 		{
 			for(Integer i: facilities.keySet())
 				facilities.get(i).updateStatus(time_elapsed);
@@ -95,15 +97,12 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 			if(t >= time_finish) //if build is finished...
 			{
 				Facility<?> new_fac = bldg_in_progress.creator.create(this, next_facility_id++, time_finish);
-				if(bldg_in_progress == FacilityType.BASE)
-				{
-					synchronized(facilities_lock){
+				synchronized(facilities){
+					if(bldg_in_progress == FacilityType.BASE)
+					{
 						the_base = (Base)new_fac;
 					}
-				}
-
-				synchronized(facilities_lock)
-				{
+					
 					facilities.put(new_fac.id,new_fac);
 				}
 				SwingUtilities.invokeLater(new FacilityAdder(new_fac, GameInterface.GC.GI));
@@ -127,7 +126,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		
 		public void run() //this must run on the swing thread because we want to avoid running PlanetMoonCommandPanel.setSat() and this at the same time, because that can result in the same facility being displayed twice
 		{
-			synchronized(facilities_lock)
+			synchronized(facilities)
 			{
 				//notify interface
 				if(GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP && GI.SatellitePanel.the_sat == new_fac.location)
@@ -195,7 +194,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		else
 		{
 			this.time=time;
-			synchronized(facilities_lock)
+			synchronized(facilities)
 			{
 				for(Integer i: facilities.keySet())
 				{
@@ -218,8 +217,8 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	
 	public abstract GSystem getGSystem();
 	
-	public Hashtable<Integer, Facility<?>> getFacilities(){return facilities;}
-	public void setFacilities(Hashtable<Integer, Facility<?>> fac){facilities=fac;}
+	public HashMap<Integer, Facility<?>> getFacilities(){return facilities;}
+	public void setFacilities(HashMap<Integer, Facility<?>> fac){facilities=fac;}
 	public Player getOwner(){return owner;}
 	public void setOwner(Player p)
 	{

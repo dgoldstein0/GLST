@@ -111,7 +111,7 @@ public class GalacticMapPainter extends JPanel
 					}
 					else if(disp_names)
 					{
-						if(sys.name instanceof String) {
+						if(sys.name != null) {
 							if(sys.navigability < nav_level)
 								g2.setColor(Color.GRAY);
 							else

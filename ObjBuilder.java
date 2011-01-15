@@ -38,7 +38,7 @@ public class ObjBuilder<ObjType, ObjMaker> implements MouseListener
 		public abstract void doneBuilding(PlanetMoonCommandPanel p);
 	}
 	
-	public static ManufactureFuncs<ShipType, Shipyard> ShipManufactureFuncs = new ManufactureFuncs<ShipType, Shipyard>()
+	public static ManufactureFuncs<ShipType, Shipyard> shipManufactureFuncs = new ManufactureFuncs<ShipType, Shipyard>()
 		{
 			public boolean manufacture(Shipyard maker, ShipType type, PlanetMoonCommandPanel p)
 			{
@@ -50,7 +50,7 @@ public class ObjBuilder<ObjType, ObjMaker> implements MouseListener
 				p.displayQueue();
 			}
 		};
-	public static ManufactureFuncs<FacilityType, OwnableSatellite<?>> FacilityManufactureFuncs = new ManufactureFuncs<FacilityType,OwnableSatellite<?>>()
+	public static ManufactureFuncs<FacilityType, OwnableSatellite<?>> facilityManufactureFuncs = new ManufactureFuncs<FacilityType,OwnableSatellite<?>>()
 		{
 			public boolean manufacture(OwnableSatellite<?> maker, FacilityType type, PlanetMoonCommandPanel p)
 			{
