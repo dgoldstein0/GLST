@@ -7,11 +7,11 @@ public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> e
 	long t_finish;
 	long t_start;
 	int next_fac_id;
-	long last_tax_t;
+	//long last_tax_t;
 	Player own;
 	HashMap<Integer, Facility<?>> fac; //save this in case facility gets destroyed, so we still have a reference to it
 	Base base;
-	long mon_added;
+	//long mon_added;
 	
 	public OwnableSatelliteDataSaver()
 	{
@@ -26,7 +26,7 @@ public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> e
 		sat.time_finish = t_finish;
 		sat.time_start = t_start;
 		sat.next_facility_id = next_fac_id;
-		sat.last_tax_time = last_tax_t;
+		//sat.last_tax_time = last_tax_t;
 		sat.owner = own;
 		synchronized(sat.facilities)
 		{
@@ -34,7 +34,7 @@ public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> e
 		}
 		sat.the_base = base;
 		sat.time=t;
-		sat.tax_money = mon_added;
+		//sat.tax_money = mon_added;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -45,7 +45,7 @@ public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> e
 		t_finish = sat.time_finish;
 		t_start = sat.time_start;
 		next_fac_id = sat.next_facility_id;
-		last_tax_t = sat.last_tax_time;
+		//last_tax_t = sat.last_tax_time;
 		own=sat.owner;
 		synchronized(sat.facilities)
 		{
@@ -53,6 +53,6 @@ public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> e
 			base = sat.the_base;
 		}
 		t=sat.time;
-		mon_added = sat.tax_money;
+		//mon_added = sat.tax_money;
 	}
 }

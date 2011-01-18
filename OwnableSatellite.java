@@ -28,10 +28,10 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	double pop_growth_rate;
 	
 	//for taxation
-	long last_tax_time;
-	long tax_money;
-	final static int TAX_INTERVAL = 3000; //in milliseconds.  so taxes are compounded every three seconds.
-	final static double TAX_PER_PERSON = .03; //money per person per tax interval
+	//long last_tax_time;
+	//long tax_money;
+	//final static int TAX_INTERVAL = 3000; //in milliseconds.  so taxes are compounded every three seconds.
+	//final static double TAX_PER_PERSON = .03; //money per person per tax interval
 	
 	OwnableSatelliteDataSaverControl<T> data_control;
 	
@@ -44,7 +44,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		facilities = new HashMap<Integer, Facility<?>>();
 		bldg_in_progress = FacilityType.NO_BLDG;
 		data_control = new OwnableSatelliteDataSaverControl<T>((T)this);
-		last_tax_time = 0;
+		//last_tax_time = 0;
 		owner = null;
 	}
 	
@@ -61,9 +61,9 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		}
 		updateConstruction(time_elapsed);
 		
-		if(owner != null)
+	/*	if(owner != null)
 			owner.changeMoney(updatePopAndTax(time_elapsed));
-		else
+		else*/
 			updatePop(time_elapsed);
 	}
 	
@@ -74,13 +74,13 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		population = (long)(initial_pop*pop_capacity/(initial_pop+(pop_capacity-initial_pop)*Math.exp(-pop_growth_rate*((double)t))));
 	}
 	
-	private long updatePopAndTax(long t)
+	/*private long updatePopAndTax(long t)
 	{
 		//taxes are computed incrementally to prevent rounding inconsistencies
 		tax_money = 0;
 		
 		if(t-last_tax_time >= TAX_INTERVAL) //this will be called every every time grain, since it is now within the loop in UpdateGame, so to have it be a while instead of an if is misleading.
-		{
+	/*	{
 			last_tax_time += TAX_INTERVAL;
 			updatePop(last_tax_time);
 			tax_money = (long) (TAX_PER_PERSON*((double)population));
@@ -88,7 +88,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		}
 		
 		return tax_money;
-	}
+	}*/
 	
 	private void updateConstruction(long t)
 	{
@@ -207,7 +207,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		}
 		
 		//start counting taxes from here
-		last_tax_time = time;
+		//last_tax_time = time;
 		
 		setOwner(p);
 		data_control.saveData();

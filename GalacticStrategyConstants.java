@@ -81,7 +81,8 @@ public strictfp class GalacticStrategyConstants
 	
 	final static double LANDING_RANGE = 10.0d; //the max distance at which ships can get/send troops to planets
 	public final static float troop_transfer_rate = .1f;
-	
+	//Used by TaxOffice
+	static double DEFAULT_INCOME_RATE = .01;
 	//Used by Mine
 	static double DEFAULT_MINING_RATE=.002; //metal per mine per millisecond
 	//Used by Player
@@ -108,6 +109,7 @@ public strictfp class GalacticStrategyConstants
 	final static int initial_base_endu=500;
 	final static int initial_shipyard_endu = 250;
 	final static int initial_mine_endu = 150;
+	final static int initial_taxoffice_endu = 100;
 	final static int initial_research_building_endu = 200;
 	final static int max_soldier_upgraderate=100;
 	final static int endu_upgraderate=100;

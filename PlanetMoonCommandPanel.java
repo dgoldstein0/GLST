@@ -235,6 +235,9 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 				case MINE:
 					updater = new MineStatusUpdater(health_bar, (Mine)f);
 					break;
+				case TAXOFFICE:
+					updater = new TaxOfficeStatusUpdater(health_bar, (TaxOffice)f);
+					break;
 				case SHIPYARD:
 					//display objects in Queue and progress bar
 					JProgressBar manufac_bar = new JProgressBar(0,100);

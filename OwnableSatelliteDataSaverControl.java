@@ -50,11 +50,11 @@ public strictfp class OwnableSatelliteDataSaverControl<T extends OwnableSatellit
 		return new ReversionEffects(orders, objs);
 	}
 	
-	protected void doReversionPrep(int indx)
+/*	protected void doReversionPrep(int indx)
 	{
 		for(int i = getNextIndex(indx); i != index; i=getNextIndex(i))
 		{
 			saved_data[i].own.changeMoney(-saved_data[i].mon_added);
 		}
-	}
+	}*/
 }
