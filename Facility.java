@@ -45,12 +45,23 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 		{
 			is_alive=false;
 			location.facilities.remove(id);
+			decrementFacilityTracker();
 		}
 	}
 	
 	public FacilityDescriber<T> describer()
 	{
 		return new FacilityDescriber<T>((Facility<T>)this);
+	}
+	
+	public void decrementFacilityTracker(){
+		if(getType()==FacilityType.MINE){
+			location.number_mines--;
+		}
+		if(getType()==FacilityType.TAXOFFICE){
+			location.number_taxoffices--;
+		}
+		location.number_facilities--;
 	}
 	
 	@Override
@@ -62,6 +73,7 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 		{
 			//should probably cache the facility for recall... but anyway
 			location.facilities.remove(id);
+			decrementFacilityTracker();
 		}
 	}
 	
