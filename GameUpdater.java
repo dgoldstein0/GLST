@@ -117,7 +117,7 @@ public class GameUpdater {
 		{
 			long next_order_time = first_order.scheduled_time;
 			if(next_order_time < update_to)
-				update_to = next_order_time; //forces the main loop to reconsider below
+				update_to = TimeControl.roundDownToTimeGrain(next_order_time); //forces the main loop to reconsider below
 		}
 		
 		

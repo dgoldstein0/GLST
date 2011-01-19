@@ -1,11 +1,12 @@
 import java.beans.XMLEncoder;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.PriorityQueue;
 
 /**GameSimulator
  * This class is meant to simulate games, for testing purposes.  It will be tightly
@@ -15,16 +16,142 @@ public class GameSimulator {
 	
 	public static void main(String[] args)
 	{
-		//test case 1: time-independence of the game
-		long[] random_times = {39l,198l,235l,240l,400l,405l,509l,737l,801l,840l,874l,940l,1000l};
-		List<Long> update_times = new ArrayList<Long>();
-		for(long num : random_times)
-			update_times.add(num);
-		List<Long> save_times = new ArrayList<Long>();
-		save_times.add(1000l);
-		Simulation sim1 = new Simulation("simplemap.xml",1,new ArrayList<OrderSpec>(),update_times,save_times);
-		Simulation sim2 = new Simulation("simplemap.xml",1,new ArrayList<OrderSpec>(),save_times,save_times);
-		compareResults(1, sim1.simulate(), sim2.simulate());
+		{
+			//test case 1: time-independence of the game
+			System.out.println("Running Test 1...");
+			
+			long[] random_times = {39l,198l,235l,240l,400l,405l,509l,737l,801l,840l,874l,940l,1000l};
+			List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
+			for(long num : random_times)
+				actions1.add(new SimulateAction(num,SimulateAction.ACTION_TYPE.UPDATE));
+			actions1.add(new SimulateAction(1000l,SimulateAction.ACTION_TYPE.SAVE));
+			Simulation sim1 = new Simulation("simplemap.xml",1,actions1);
+			
+			List<SimulateAction> actions2 = new ArrayList<SimulateAction>();
+			actions2.add(new SimulateAction(1000l,SimulateAction.ACTION_TYPE.UPDATE));
+			actions2.add(new SimulateAction(1000l,SimulateAction.ACTION_TYPE.SAVE));
+			Simulation sim2 = new Simulation("simplemap.xml",1,actions2);
+			compareResults(1, sim1.simulate(), sim2.simulate());
+		}
+		
+		{
+			System.out.println("Running Test 2...");
+			//test case 2: verifying my orders-left-in-queue theory, and
+			
+			FacilityBuildOrder shipyard_build_order = new FacilityBuildOrder();
+			shipyard_build_order.setBldg_type(FacilityType.SHIPYARD);
+			shipyard_build_order.setPlayer_id(0);
+			SatelliteDescriber<Planet> eulenspiegel_desc = new SatelliteDescriber<Planet>();
+				GSystemDescriber azha_sys = new GSystemDescriber();
+					azha_sys.setId(1);
+				eulenspiegel_desc.setBoss_describer(azha_sys);
+				eulenspiegel_desc.setId(0);
+			shipyard_build_order.setSat_desc(eulenspiegel_desc);
+			
+			shipyard_build_order.setScheduled_time(73l); //note the time here
+			
+			List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
+			actions1.add(new SimulateAction(0l, shipyard_build_order));
+			actions1.add(new SimulateAction(75l,SimulateAction.ACTION_TYPE.UPDATE));
+			
+			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
+			sim1.simulate();
+		}
+		
+		{
+			System.out.println("Running Test 3...");
+			//test time-independence with FacilityBuildOrder
+			
+			FacilityBuildOrder shipyard_build_order = new FacilityBuildOrder();
+			shipyard_build_order.setBldg_type(FacilityType.SHIPYARD);
+			shipyard_build_order.setPlayer_id(0);
+			SatelliteDescriber<Planet> eulenspiegel_desc = new SatelliteDescriber<Planet>();
+				GSystemDescriber azha_sys = new GSystemDescriber();
+					azha_sys.setId(1);
+				eulenspiegel_desc.setBoss_describer(azha_sys);
+				eulenspiegel_desc.setId(0);
+			shipyard_build_order.setSat_desc(eulenspiegel_desc);
+			
+			shipyard_build_order.setScheduled_time(73l); //note the time here
+			
+			
+			List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
+			actions1.add(new SimulateAction(0l, shipyard_build_order));
+			actions1.add(new SimulateAction(85l,SimulateAction.ACTION_TYPE.UPDATE));
+			actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.UPDATE));
+			actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.SAVE));
+			long[] random_times = {198l,235l,240l,400l,405l,509l,737l,801l,840l,874l,940l,1000l};
+			for(long num : random_times)
+				actions1.add(new SimulateAction(num,SimulateAction.ACTION_TYPE.UPDATE));
+			actions1.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.SAVE));
+			
+			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
+			List<String> results1 = sim1.simulate();
+			
+			
+			
+			List<SimulateAction> actions2 = new ArrayList<SimulateAction>();
+			actions2.add(new SimulateAction(85l, SimulateAction.ACTION_TYPE.UPDATE));
+			actions2.add(new SimulateAction(86l, shipyard_build_order));
+			actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.UPDATE));
+			actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.SAVE));
+			actions2.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.UPDATE));
+			actions2.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.SAVE));
+			
+			Simulation sim2 = new Simulation("simplemap.xml", 1, actions2);
+			List<String> results2 = sim2.simulate();
+			
+			compareResults(3, results1, results2);
+			//saveResultsToFile(results1, "test3p1.txt");
+			//saveResultsToFile(results2, "test3p2.txt");
+		}
+		
+		{
+			//Test Case 4
+			System.out.println("Running Test 4...");
+			//test time-independence with FacilityBuildOrder
+			
+			FacilityBuildOrder shipyard_build_order = new FacilityBuildOrder();
+			shipyard_build_order.setBldg_type(FacilityType.SHIPYARD);
+			shipyard_build_order.setPlayer_id(0);
+			SatelliteDescriber<Planet> eulenspiegel_desc = new SatelliteDescriber<Planet>();
+				GSystemDescriber azha_sys = new GSystemDescriber();
+					azha_sys.setId(1);
+				eulenspiegel_desc.setBoss_describer(azha_sys);
+				eulenspiegel_desc.setId(0);
+			shipyard_build_order.setSat_desc(eulenspiegel_desc);
+			
+			shipyard_build_order.setScheduled_time(80l); //note the time here
+			
+			
+			List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
+			actions1.add(new SimulateAction(0l, shipyard_build_order));
+			actions1.add(new SimulateAction(80l,SimulateAction.ACTION_TYPE.UPDATE));
+			actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.UPDATE));
+			actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.SAVE));
+			long[] random_times = {198l,235l,240l,400l,405l,509l,737l,801l,840l,874l,940l,1000l};
+			for(long num : random_times)
+				actions1.add(new SimulateAction(num,SimulateAction.ACTION_TYPE.UPDATE));
+			actions1.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.SAVE));
+			
+			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
+			List<String> results1 = sim1.simulate();
+			
+			
+			
+			List<SimulateAction> actions2 = new ArrayList<SimulateAction>();
+			actions2.add(new SimulateAction(80l, SimulateAction.ACTION_TYPE.UPDATE));
+			actions2.add(new SimulateAction(80l, shipyard_build_order));
+			actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.UPDATE));
+			actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.SAVE));
+			actions2.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.UPDATE));
+			actions2.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.SAVE));
+			
+			Simulation sim2 = new Simulation("simplemap.xml", 1, actions2);
+			List<String> results2 = sim2.simulate();
+			
+			compareResults(4, results1, results2);
+		}
 	}
 	
 	public static void compareResults(int test_num, List<String> l1, List<String> l2)
@@ -42,7 +169,12 @@ public class GameSimulator {
 		{
 			for(int i=0; i < l1.size(); ++i)
 			{
-				identical = identical && l1.get(i).equals(l2.get(i));
+				boolean match = l1.get(i).equals(l2.get(i));
+				if(!match)
+					System.out.println("\tSave point " + i + " does not match");
+				else
+					System.out.println("\tSave point " + i + " matches");
+				identical = identical && match;
 			}
 			
 			if(identical)
@@ -52,89 +184,59 @@ public class GameSimulator {
 		}
 	}
 
+	public static void saveResultsToFile(List<String> results, String filename)
+	{
+		try {
+			PrintWriter writer = new PrintWriter(filename);
+			for(String s : results)
+			{
+				writer.print(s);
+				writer.println();
+			}
+			writer.close();
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	public static class Simulation
 	{
 		final int num_players;
-		PriorityQueue<OrderSpec> orders;
-		List<Long> update_times;
-		List<Long> save_times;
+		List<SimulateAction> actions;
 		String map_location;
 		
-		public Simulation(String map_location, int num_players, List<OrderSpec> orders, List<Long> update_times, List<Long> save_times)
+		public Simulation(String map_location, int num_players, List<SimulateAction> actions)
 		{
 			this.num_players = num_players;
-			this.orders = new PriorityQueue<OrderSpec>(32, new OrderSpec.Comparer());
-			this.orders.addAll(orders);
-			
-			this.update_times = update_times;
-			this.save_times = save_times;
+			this.actions = actions;
 			this.map_location = map_location;
 		}
-		
-		public enum TASK{UPDATE,ISSUE_ORDER,SAVE,NONE;}
-		
+				
 		List<String> simulate()
 		{
 			GameControl GC = new GameControl(null);
+			GameInterface.GC = GC;
 			GC.startTest(num_players, true, new File(map_location));
-			
-			int next_time_index = 0;
-			int next_save_index = 0;
-			OrderSpec next_order = null;
-			if(!orders.isEmpty())
-				next_order = orders.remove();
 			
 			ArrayList<String> results = new ArrayList<String>();
 			
-			boolean do_simulate =true;
-			
-			while(do_simulate)
+			for(SimulateAction action : actions)
 			{
-				//decide next task
-				TASK next_task= TASK.NONE;
-				long next_task_time = Long.MAX_VALUE;
-				
-				if(next_time_index < update_times.size() && update_times.get(next_time_index) < next_task_time)
+				((SimulatedTimeControl)GC.updater.TC).advanceTime(action.do_at_time);
+				switch(action.type)
 				{
-					next_task = TASK.UPDATE;
-					next_task_time = update_times.get(next_time_index);
-				}
-				
-				if(next_order != null && next_order.send_at_time < next_task_time)
-				{
-					next_task = TASK.ISSUE_ORDER;
-					next_task_time = next_order.send_at_time;
-				}
-				
-				if(next_save_index < save_times.size() && save_times.get(next_save_index) < next_task_time)
-				{
-					next_task = TASK.SAVE;
-					next_task_time = save_times.get(next_save_index);
-				}
-				
-				switch(next_task)
-				{
-					case NONE:
-						do_simulate=false;
-						break;
 					case UPDATE:
-						((SimulatedTimeControl)GC.updater.TC).advanceTime(next_task_time);
 						try {
 							GC.updater.updateGame();
 						} catch (DataSaverControl.DataNotYetSavedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						++next_time_index;
 						break;
-					case ISSUE_ORDER:
-						((SimulatedTimeControl)GC.updater.TC).advanceTime(next_task_time);
-						GC.updater.pending_execution.add(next_order.the_order);
-						if(!orders.isEmpty())
-							next_order = orders.remove();
-						else
-							next_order = null;
+					case SCHEDULE_ORDER:
+						GC.updater.pending_execution.add(action.the_order);
 						break;
 					case SAVE:
 						ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -146,7 +248,6 @@ public class GameSimulator {
 						String output = "Save @" + GC.updater.getTime() +"\n";
 						output += os.toString();
 						results.add(output);
-						++next_save_index;
 						break;
 				}
 			}
@@ -154,34 +255,45 @@ public class GameSimulator {
 		}
 	}
 	
-	public static class OrderSpec
+	public static class SimulateAction
 	{
-		final long send_at_time;
-		final Order the_order;
+		public static enum ACTION_TYPE{UPDATE,SCHEDULE_ORDER,SAVE;}
 		
-		public OrderSpec(long time, Order o)
+		final long do_at_time;
+		final Order the_order;
+		final ACTION_TYPE type;
+		
+		public SimulateAction(long time, Order o)
 		{
-			send_at_time = time;
+			do_at_time = time;
 			the_order = o;
+			type=ACTION_TYPE.SCHEDULE_ORDER;
 		}
 		
-		public static class Comparer implements Comparator<OrderSpec>, Serializable
+		public SimulateAction(long time, ACTION_TYPE t)
+		{
+			do_at_time = time;
+			type = t;
+			the_order = null;
+		}
+		
+		public static class Comparer implements Comparator<SimulateAction>, Serializable
 		{
 			private static final long serialVersionUID = 6664455814705885702L;
 
 			@Override
 			/**Compares OrderSpec's by comparing send_at_times*/
-			public int compare(OrderSpec o1, OrderSpec o2) {
+			public int compare(SimulateAction a1, SimulateAction a2) {
 				
-				if(o2 == null || o1==null)
+				if(a2 == null || a1==null)
 				{
 					throw new IllegalArgumentException();
 				}
 				else
 				{
-					if(o2.send_at_time > o1.send_at_time)
+					if(a2.do_at_time > a1.do_at_time)
 						return -1; //object is less than o
-					else if(o2.send_at_time == o1.send_at_time)
+					else if(a2.do_at_time == a1.do_at_time)
 						return 0; //object "equals" o
 					else
 						return 1; //object greater than o

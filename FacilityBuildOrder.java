@@ -26,7 +26,7 @@ public strictfp class FacilityBuildOrder extends Order
 		}
 		
 		//validate - check if owner is the same as orderer at the time the order should be executed
-		if(the_sat.data_control.saved_data[the_sat.data_control.getIndexForTime(scheduled_time)].own.getId() == player_id)
+		if(the_sat.data_control.saved_data[the_sat.data_control.getIndexForTime(scheduled_time)].own == GameInterface.GC.players[player_id])
 		{
 			Set<Order> need_to_reexecute = the_sat.data_control.revertToTime(scheduled_time); //TODO: will revert everything associated with the planet (via facilities).  necessary?		
 			

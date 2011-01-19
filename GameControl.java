@@ -936,7 +936,7 @@ public strictfp class GameControl
 			readThread.interrupt();
 		}
 		if(startThread != null)
-			startThread.interrupt(); //BOOKMARK - in this case, the other player needs to be able to detect if the person left the game.  perhaps modify this to send a notification, and StartGame function to recieve it.
+			startThread.interrupt(); //TODO: in this case, the other player needs to be able to detect if the person left the game.  perhaps modify this to send a notification, and StartGame function to receive it.
 		if(updater != null)
 		{
 			updater.stopUpdating();
