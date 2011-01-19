@@ -113,6 +113,9 @@ public strictfp class GalacticStrategyConstants
 	final static int initial_research_building_endu = 200;
 	final static int max_soldier_upgraderate=100;
 	final static int endu_upgraderate=100;
+	final static double additional_mine_penalty = .9;
+	final static double additional_taxoffice_penalty = .9;
+	final static int planet_building_limit = 7;
 	
 	//***************************************************************GENERAL DATA*******************************************//
 	

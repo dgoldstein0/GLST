@@ -27,7 +27,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	static int SYS_HEIGHT=GalacticStrategyConstants.SYS_HEIGHT; //the allowed height of a system
 	
 	//sets parameters for scrolling the system view around
-	int move_center_x_speed = 0; //left is negqtive, right is positive
+	int move_center_x_speed = 0; //left is negative, right is positive
 	int move_center_y_speed = 0; //up is negative, down is positive
 	
 	int wait_to_add = ADD_NOTHING;

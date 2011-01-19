@@ -26,6 +26,10 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	double initial_pop;
 	double pop_capacity;
 	double pop_growth_rate;
+	int number_facilities; //not counting base
+	int number_mines;
+	int number_taxoffices;
+	
 	
 	//for taxation
 	//long last_tax_time;
@@ -46,6 +50,9 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		data_control = new OwnableSatelliteDataSaverControl<T>((T)this);
 		//last_tax_time = 0;
 		owner = null;
+		number_facilities=0;
+		number_mines=0;
+		number_taxoffices=0;
 	}
 	
 	@Override
@@ -102,6 +109,17 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 					{
 						the_base = (Base)new_fac;
 					}
+					else{
+						if(bldg_in_progress==FacilityType.MINE)
+						{
+							number_mines++;
+						}
+						if(bldg_in_progress==FacilityType.TAXOFFICE)
+						{
+							number_taxoffices++;	
+						}
+						number_facilities++;
+					}
 					
 					facilities.put(new_fac.id,new_fac);
 				}
@@ -156,7 +174,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		
 		synchronized(owner.metal_lock){
 			synchronized(owner.money_lock){
-				if(owner.metal >= met && owner.money >= mon)
+				if(owner.metal >= met && owner.money >= mon && number_facilities<GalacticStrategyConstants.planet_building_limit)
 				{
 					owner.metal -= met;
 					owner.money -= mon; 
