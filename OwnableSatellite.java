@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
+
 import javax.swing.SwingUtilities;
 
 public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Satellite<T> implements RelaxedSaveable<T>, Orbitable<T>
@@ -109,22 +111,19 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 					{
 						the_base = (Base)new_fac;
 					}
-					else{
-						if(bldg_in_progress==FacilityType.MINE)
-						{
-							number_mines++;
-						}
-						if(bldg_in_progress==FacilityType.TAXOFFICE)
-						{
-							number_taxoffices++;	
-						}
-						number_facilities++;
+					if(bldg_in_progress==FacilityType.MINE)
+					{
+						number_mines++;
 					}
+					if(bldg_in_progress==FacilityType.TAXOFFICE)
+					{
+						number_taxoffices++;
+					}
+					number_facilities++;
 					
 					facilities.put(new_fac.id,new_fac);
 				}
 				SwingUtilities.invokeLater(new FacilityAdder(new_fac, GameInterface.GC.GI));
-				
 				bldg_in_progress = FacilityType.NO_BLDG;
 				data_control.saveData();
 			}
@@ -136,13 +135,13 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		Facility<?> new_fac;
 		GameInterface GI;
 		
-		public FacilityAdder(Facility<?> f, GameInterface gi)
-		{
-			new_fac = f;
-			GI=gi;
-		}
+	public FacilityAdder(Facility<?> f, GameInterface gi)
+	{
+		new_fac = f;
+		GI=gi;
+	}
 		
-		public void run() //this must run on the swing thread because we want to avoid running PlanetMoonCommandPanel.setSat() and this at the same time, because that can result in the same facility being displayed twice
+	public void run() //this must run on the swing thread because we want to avoid running PlanetMoonCommandPanel.setSat() and this at the same time, because that can result in the same facility being displayed twice
 		{
 			synchronized(facilities)
 			{
@@ -204,6 +203,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		if(notify)
 			GameInterface.GC.notifyAllPlayers(new CancelFacilityBuildOrder(this, t));
 	}
+	
 	
 	public void setOwnerAtTime(Player p, long time)
 	{
