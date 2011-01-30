@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
@@ -28,9 +27,9 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	double initial_pop;
 	double pop_capacity;
 	double pop_growth_rate;
-	int number_facilities; //not counting base
-	int number_mines;
-	int number_taxoffices;
+	
+	int number_mines; //cache number of mines on satellite
+	int number_taxoffices; //cache number of taxoffices on satellite
 	
 	
 	//for taxation
@@ -52,7 +51,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		data_control = new OwnableSatelliteDataSaverControl<T>((T)this);
 		//last_tax_time = 0;
 		owner = null;
-		number_facilities=0;
+		
 		number_mines=0;
 		number_taxoffices=0;
 	}
@@ -111,15 +110,6 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 					{
 						the_base = (Base)new_fac;
 					}
-					if(bldg_in_progress==FacilityType.MINE)
-					{
-						number_mines++;
-					}
-					if(bldg_in_progress==FacilityType.TAXOFFICE)
-					{
-						number_taxoffices++;
-					}
-					number_facilities++;
 					
 					facilities.put(new_fac.id,new_fac);
 				}
@@ -171,25 +161,27 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		
 		time_finish = start_time+build_time;
 		
-		synchronized(owner.metal_lock){
-			synchronized(owner.money_lock){
-				if(owner.metal >= met && owner.money >= mon && number_facilities<GalacticStrategyConstants.planet_building_limit)
-				{
-					owner.metal -= met;
-					owner.money -= mon; 
-					
-					time=start_time;
-					data_control.saveData();
-					//notify all players ***
-					if(notify)
-						GameInterface.GC.notifyAllPlayers(new FacilityBuildOrder(this, bldg_type, start_time));
-					
-					return true;
-				}
-				else
-				{
-					bldg_in_progress=FacilityType.NO_BLDG;
-					return false;
+		synchronized(facilities){
+			synchronized(owner.metal_lock){
+				synchronized(owner.money_lock){
+					if(owner.metal >= met && owner.money >= mon && facilities.size()<GalacticStrategyConstants.planet_building_limit)
+					{
+						owner.metal -= met;
+						owner.money -= mon; 
+						
+						time=start_time;
+						data_control.saveData();
+						//notify all players ***
+						if(notify)
+							GameInterface.GC.notifyAllPlayers(new FacilityBuildOrder(this, bldg_type, start_time));
+						
+						return true;
+					}
+					else
+					{
+						bldg_in_progress=FacilityType.NO_BLDG;
+						return false;
+					}
 				}
 			}
 		}

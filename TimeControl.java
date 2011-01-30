@@ -1,5 +1,3 @@
-import java.util.*;
-
 public strictfp class TimeControl implements TimeManager
 {
 	volatile long time_elapsed; 

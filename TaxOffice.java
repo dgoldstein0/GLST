@@ -15,11 +15,11 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 		data_control.saveData();
 	}
 	
-	public void setTaxing_rate(double tr)
+	public void setTax_rate(double tr)
 	{
 		tax_rate=tr;
 	}
-	public double getTaxrate()
+	public double getTax_rate()
 	{	
 		return tax_rate;
 	}
@@ -33,16 +33,37 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 	}
 	
 	@Override
+	public void destroyed()
+	{
+		synchronized(location.facilities)
+		{
+			is_alive=false;
+			location.facilities.remove(id);
+			location.number_taxoffices--;
+		}
+	}
+	
+	@Override
+	public void removeFromGame(long t)
+	{
+		synchronized(location.facilities)
+		{
+			location.facilities.remove(id);
+			location.number_taxoffices--;
+		}
+	}
+	
+	@Override
 	public String getName() {return "Tax Office";}
 
 	@Override
 	public FacilityType getType() {
-		// TODO Auto-generated method stub
+		
 		return FacilityType.TAXOFFICE;
 	}
 
 	@Override
-	public String imageLoc() {return "images/taxoffice.gif";}
+	public String imageLoc() {return "images/TaxOffice.gif";}
 
 	@Override
 	public void ownerChanged(long t) {

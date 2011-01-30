@@ -7,9 +7,10 @@ public class TaxOfficeDataSaverControl extends
 			public TaxOfficeDataSaver[] createArray(){return new TaxOfficeDataSaver[GalacticStrategyConstants.data_capacity];}
 		});
 	}
+	
 	@Override
 	protected ReversionEffects deduceEffectedAfterIndex(int i) {
-		// TODO Auto-generated method stub
+		
 		ReversionEffects effects = new ReversionEffects();
 		
 		for(int j=getNextIndex(i);j != index; j = getNextIndex(j))

@@ -28,6 +28,27 @@ public strictfp class Mine extends Facility<Mine>{
 		return modified_mining_rate;
 	}
 	
+	@Override
+	public void destroyed()
+	{
+		synchronized(location.facilities)
+		{
+			is_alive=false;
+			location.facilities.remove(id);
+			location.number_mines--;
+		}
+	}
+	
+	@Override
+	public void removeFromGame(long t)
+	{
+		synchronized(location.facilities)
+		{
+			location.facilities.remove(id);
+			location.number_mines--;
+		}
+	}
+	@Override
 	public void updateStatus(long t)
 	{
 		if(location.number_mines!=last_known_mine_amount)

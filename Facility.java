@@ -39,29 +39,18 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 		data_control.saveData();
 	}
 	
-	public void destroyed() //default option.  Base overrides this
+	public void destroyed() //default option.  Base, Mine and TaxOffice override
 	{
 		synchronized(location.facilities)
 		{
 			is_alive=false;
 			location.facilities.remove(id);
-			decrementFacilityTracker();
 		}
 	}
 	
 	public FacilityDescriber<T> describer()
 	{
 		return new FacilityDescriber<T>((Facility<T>)this);
-	}
-	
-	public void decrementFacilityTracker(){
-		if(getType()==FacilityType.MINE){
-			location.number_mines--;
-		}
-		if(getType()==FacilityType.TAXOFFICE){
-			location.number_taxoffices--;
-		}
-		location.number_facilities--;
 	}
 	
 	@Override
@@ -73,7 +62,6 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 		{
 			//should probably cache the facility for recall... but anyway
 			location.facilities.remove(id);
-			decrementFacilityTracker();
 		}
 	}
 	

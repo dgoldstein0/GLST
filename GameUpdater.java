@@ -107,7 +107,7 @@ public class GameUpdater {
 			else
 				break; /*small chance an order should be removed and executed this time around but isn't, 
 						if we don't see it with peek.  it will be executed next time through updateGame,
-						though with a bit of reversion*/
+						though potentially with a bit of reversion*/
 		} while(true);
 		
 		/*now figure out the earliest order in local_pending_execution, and make that time update_to,

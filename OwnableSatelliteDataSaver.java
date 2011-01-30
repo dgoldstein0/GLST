@@ -7,11 +7,12 @@ public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> e
 	long t_finish;
 	long t_start;
 	int next_fac_id;
-	//long last_tax_t;
+	
 	Player own;
 	HashMap<Integer, Facility<?>> fac; //save this in case facility gets destroyed, so we still have a reference to it
 	Base base;
-	//long mon_added;
+	//int num_mines;
+	//int num_taxoffices;
 	
 	public OwnableSatelliteDataSaver()
 	{
@@ -26,15 +27,15 @@ public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> e
 		sat.time_finish = t_finish;
 		sat.time_start = t_start;
 		sat.next_facility_id = next_fac_id;
-		//sat.last_tax_time = last_tax_t;
 		sat.owner = own;
 		synchronized(sat.facilities)
 		{
+			//sat.number_mines = num_mines;
+			//sat.number_taxoffices = num_taxoffices;
 			sat.facilities = (HashMap<Integer, Facility<?>>) fac.clone(); //unchecked cast warning
+			sat.the_base = base;
 		}
-		sat.the_base = base;
 		sat.time=t;
-		//sat.tax_money = mon_added;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -45,14 +46,15 @@ public strictfp class OwnableSatelliteDataSaver<T extends OwnableSatellite<T>> e
 		t_finish = sat.time_finish;
 		t_start = sat.time_start;
 		next_fac_id = sat.next_facility_id;
-		//last_tax_t = sat.last_tax_time;
+		
 		own=sat.owner;
 		synchronized(sat.facilities)
 		{
+			//num_mines = sat.number_mines;
+			//num_taxoffices = sat.number_taxoffices;
 			fac = (HashMap<Integer, Facility<?>>) sat.facilities.clone(); //unchecked cast warning
 			base = sat.the_base;
 		}
 		t=sat.time;
-		//mon_added = sat.tax_money;
 	}
 }
