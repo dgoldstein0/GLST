@@ -14,13 +14,15 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	static double DEFAULT_STAR_MASS = GalacticStrategyConstants.DEFAULT_STAR_MASS;
 	static double DEFAULT_MOON_MASS= GalacticStrategyConstants.DEFAULT_MOON_MASS;
 	
-	final static int ADD_NOTHING=0;
-	final static int ADD_STAR=1;
-	final static int ADD_PLANET=2;
-	final static int ADD_ASTEROID=3;
-	final static int ADD_MOON=4;
-	final static int ADD_FOCUS=5;
-	final static int RECENTER=6;
+	public enum AddSystem{
+		ADD_NOTHING,
+		ADD_STAR,
+		ADD_PLANET,
+		ADD_ASTEROID,
+		ADD_MOON,
+		ADD_FOCUS,
+		RECENTER;
+	}
 	
 	static int EDGE_BOUND=GalacticStrategyConstants.EDGE_BOUND; //this is the distance from the edge of the system, in pixels, at which the system will start to be scrolled
 	static int SYS_WIDTH=GalacticStrategyConstants.SYS_WIDTH; //the allowed width of a system
@@ -30,7 +32,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	int move_center_x_speed = 0; //left is negative, right is positive
 	int move_center_y_speed = 0; //up is negative, down is positive
 	
-	int wait_to_add = ADD_NOTHING;
+	AddSystem wait_to_add = AddSystem.ADD_NOTHING;
 	boolean drag_start;
 	
 	GSystem system;
@@ -219,13 +221,14 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			}
 			
 			if(obj_to_add=="Star")
-				wait_to_add=ADD_STAR;
-			else if(obj_to_add=="Planet")
-				wait_to_add=ADD_PLANET;
+				wait_to_add=AddSystem.ADD_STAR;
+			else if(obj_to_add=="Planet"){
+				wait_to_add=AddSystem.ADD_PLANET;
+			}
 			else if(obj_to_add=="Asteroid")
-				wait_to_add=ADD_ASTEROID;
+				wait_to_add=AddSystem.ADD_ASTEROID;
 			else if(obj_to_add=="Moon")
-				wait_to_add=ADD_MOON;
+				wait_to_add=AddSystem.ADD_MOON;
 			t_recenter.setEnabled(false);
 			c_recenter.setEnabled(false);
 		}
@@ -287,8 +290,8 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			//	;//no routine yet
 			else if(obj_to_add=="Moon")
 				addMoon(screenToDataX(c_x),screenToDataY(c_y));
-			if(wait_to_add != ADD_FOCUS)
-				wait_to_add=ADD_NOTHING;
+			if(wait_to_add != AddSystem.ADD_FOCUS)
+				wait_to_add=AddSystem.ADD_NOTHING;
 			drawSystem();
 		}
 		else if(e.getSource()==t_delete || e.getSource() == c_delete)
@@ -297,7 +300,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			editSelected();
 		else if(e.getSource()==t_recenter)
 		{
-			wait_to_add=RECENTER;
+			wait_to_add=AddSystem.RECENTER;
 		}
 		else if(e.getSource() == c_recenter)
 		{
@@ -500,7 +503,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	//mouselistener code
 	public void mousePressed(MouseEvent e)
 	{
-		if(wait_to_add==ADD_NOTHING)
+		if(wait_to_add==AddSystem.ADD_NOTHING)
 		{
 			try
 			{
@@ -525,7 +528,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		
 		if(!e.isPopupTrigger()) //(usually) left click
 		{
-			if(wait_to_add==ADD_NOTHING)
+			if(wait_to_add==AddSystem.ADD_NOTHING)
 			{
 				try
 				{
@@ -559,16 +562,16 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 						addMoon(screenToDataX(e.getX()),screenToDataY(e.getY()));
 						break;
 					case ADD_FOCUS:
-						wait_to_add=ADD_NOTHING;
+						wait_to_add=AddSystem.ADD_NOTHING;
 						setUndoPoint();
 						break;
 					case RECENTER:
 						setCenter(screenToDataX(e.getX()),screenToDataY(e.getY()));
 						break;
 				}
-				if(wait_to_add != ADD_FOCUS)
+				if(wait_to_add != AddSystem.ADD_FOCUS)
 				{
-					wait_to_add=ADD_NOTHING;
+					wait_to_add=AddSystem.ADD_NOTHING;
 					t_recenter.setEnabled(true);
 					c_recenter.setEnabled(true);
 				}
@@ -663,12 +666,30 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private void addPlanet(int x, int y)
 	{		
-		Planet theplanet = new Planet(system.orbiting.size(), "", 100.0, 10000.0, DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, .000005);
+		String planet_to_add;
+		OwnableSatelliteType typePlanet=OwnableSatelliteType.Void;
+		String[] new_options = {"Super Planet", "Paradise Planet", "Mountainous Planet", "Typical Planet", "Wasteland Planet"};
+		planet_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of Planet to add", "Add Planet", JOptionPane.QUESTION_MESSAGE, null, new_options, new_options[0]);
+		if(planet_to_add=="Super Planet"){
+			typePlanet = OwnableSatelliteType.SuperPlanet;
+		}
+		else if(planet_to_add == "Paradise Planet"){
+			typePlanet = OwnableSatelliteType.Paradise;
+		}
+		else if(planet_to_add == "Mountainous Planet"){
+			typePlanet = OwnableSatelliteType.MineralRich;
+		}
+		else if(planet_to_add == "Typical Planet"){
+			typePlanet = OwnableSatelliteType.Average;
+		}
+		else if(planet_to_add== "Wasteland Planet"){
+			typePlanet = OwnableSatelliteType.DesertPlanet;
+		}
+		Planet theplanet = new Planet(system.orbiting.size(), "", typePlanet.initial_pop, typePlanet.pop_capacity, DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, typePlanet.PopGrowthRate, typePlanet.building_Num, typePlanet.mining_rate);
 		theplanet.orbit = new Orbit((Satellite<Planet>)theplanet, (Orbitable<GSystem>)system, x, y, x, y, 1);
 		system.orbiting.add(theplanet);
-		
 		selected_obj = theplanet;
-		wait_to_add = ADD_FOCUS;
+		wait_to_add = AddSystem.ADD_FOCUS;
 		drawSystem();
 	}
 	
@@ -679,7 +700,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		((Planet)selected_obj).orbiting.add(themoon);
 		
 		selected_obj = themoon;
-		wait_to_add=ADD_FOCUS;
+		wait_to_add=AddSystem.ADD_FOCUS;
 		drawSystem();
 	}
 	
@@ -750,7 +771,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	public void mouseMoved(MouseEvent e)
 	{
-		if(wait_to_add != ADD_NOTHING)
+		if(wait_to_add != AddSystem.ADD_NOTHING)
 		{
 			switch(wait_to_add)
 			{

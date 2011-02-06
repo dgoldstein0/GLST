@@ -628,7 +628,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	{
 		if(map != null)
 		{
-			if(map.name != null || map.name =="")
+			if(map.name == null || map.name =="")
 			{
 				String temp_name="";
 

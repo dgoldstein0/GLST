@@ -27,9 +27,11 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	double initial_pop;
 	double pop_capacity;
 	double pop_growth_rate;
+	int building_limit;
 	
 	int number_mines; //cache number of mines on satellite
 	int number_taxoffices; //cache number of taxoffices on satellite
+	double mining_r;
 	
 	
 	//for taxation
@@ -164,7 +166,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		synchronized(facilities){
 			synchronized(owner.metal_lock){
 				synchronized(owner.money_lock){
-					if(owner.metal >= met && owner.money >= mon && facilities.size()<GalacticStrategyConstants.planet_building_limit)
+					if(owner.metal >= met && owner.money >= mon && facilities.size()<building_limit)
 					{
 						owner.metal -= met;
 						owner.money -= mon; 

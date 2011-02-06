@@ -10,7 +10,7 @@ public strictfp class Mine extends Facility<Mine>{
 		super(loc, i, t, GalacticStrategyConstants.initial_mine_endu);
 		location.number_mines++;
 		last_known_mine_amount=-1;
-		mining_rate = GalacticStrategyConstants.DEFAULT_MINING_RATE;
+		mining_rate = location.mining_r;
 		data_control = new MineDataSaverControl(this);
 		data_control.saveData();
 	}
