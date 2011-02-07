@@ -74,4 +74,9 @@ public strictfp class ShipMoveOrder extends Order
 	public void setDest_desc(Describer<? extends Destination<?>> d){dest_desc=d;}
 	public int getPlayer_id(){return player_id;}
 	public void setPlayer_id(int id){player_id = id;}
+
+	@Override
+	public void doInstantly(Galaxy g) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
+	}
 }

@@ -46,4 +46,9 @@ public strictfp class ShipInvadeOrder extends Order {
 	public ShipInvadeOrder(){mode=Order.NETWORK;}
 	public ShipDescriber getShip_desc(){return ship_desc;}
 	public void setShip_desc(ShipDescriber sd){ship_desc=sd;}
+
+	@Override
+	public void doInstantly(Galaxy g) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
+	}
 }

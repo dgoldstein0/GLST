@@ -51,7 +51,7 @@ public class GameSimulator {
 			shipyard_build_order.setScheduled_time(73l); //note the time here
 			
 			List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
-			actions1.add(new SimulateAction(0l, shipyard_build_order));
+			actions1.add(new SimulateAction(0l, shipyard_build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
 			actions1.add(new SimulateAction(75l,SimulateAction.ACTION_TYPE.UPDATE));
 			
 			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
@@ -76,7 +76,7 @@ public class GameSimulator {
 			
 			
 			List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
-			actions1.add(new SimulateAction(0l, shipyard_build_order));
+			actions1.add(new SimulateAction(0l, shipyard_build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
 			actions1.add(new SimulateAction(85l,SimulateAction.ACTION_TYPE.UPDATE));
 			actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.UPDATE));
 			actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.SAVE));
@@ -92,7 +92,7 @@ public class GameSimulator {
 			
 			List<SimulateAction> actions2 = new ArrayList<SimulateAction>();
 			actions2.add(new SimulateAction(85l, SimulateAction.ACTION_TYPE.UPDATE));
-			actions2.add(new SimulateAction(86l, shipyard_build_order));
+			actions2.add(new SimulateAction(86l, shipyard_build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
 			actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.UPDATE));
 			actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.SAVE));
 			actions2.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.UPDATE));
@@ -125,7 +125,7 @@ public class GameSimulator {
 			
 			
 			List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
-			actions1.add(new SimulateAction(0l, shipyard_build_order));
+			actions1.add(new SimulateAction(0l, shipyard_build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
 			actions1.add(new SimulateAction(80l,SimulateAction.ACTION_TYPE.UPDATE));
 			actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.UPDATE));
 			actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.SAVE));
@@ -141,7 +141,7 @@ public class GameSimulator {
 			
 			List<SimulateAction> actions2 = new ArrayList<SimulateAction>();
 			actions2.add(new SimulateAction(80l, SimulateAction.ACTION_TYPE.UPDATE));
-			actions2.add(new SimulateAction(80l, shipyard_build_order));
+			actions2.add(new SimulateAction(80l, shipyard_build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
 			actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.UPDATE));
 			actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.SAVE));
 			actions2.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.UPDATE));
@@ -238,6 +238,8 @@ public class GameSimulator {
 					case SCHEDULE_ORDER:
 						GC.updater.pending_execution.add(action.the_order);
 						break;
+					case INSTANT_ORDER:
+						action.the_order.doInstantly(GC.map);
 					case SAVE:
 						ByteArrayOutputStream os = new ByteArrayOutputStream();
 						XMLEncoder encoder = new XMLEncoder(os);
@@ -257,17 +259,17 @@ public class GameSimulator {
 	
 	public static class SimulateAction
 	{
-		public static enum ACTION_TYPE{UPDATE,SCHEDULE_ORDER,SAVE;}
+		public static enum ACTION_TYPE{UPDATE,SCHEDULE_ORDER,INSTANT_ORDER,SAVE;}
 		
 		final long do_at_time;
 		final Order the_order;
 		final ACTION_TYPE type;
 		
-		public SimulateAction(long time, Order o)
+		public SimulateAction(long time, Order o, ACTION_TYPE t)
 		{
 			do_at_time = time;
 			the_order = o;
-			type=ACTION_TYPE.SCHEDULE_ORDER;
+			type=t;
 		}
 		
 		public SimulateAction(long time, ACTION_TYPE t)

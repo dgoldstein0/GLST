@@ -91,7 +91,7 @@ public strictfp class GSystem implements Orbitable<GSystem>
 			if(player_claims[p.getId()]==0 && owner_id == OWNER_CONFLICTED)
 			{
 				int claimers=0;
-				int claimer_id=-2;
+				int claimer_id=NO_OWNER;
 				for(int i=0; i<player_claims.length; i++)
 				{
 					if(player_claims[i] > 0)
@@ -103,6 +103,8 @@ public strictfp class GSystem implements Orbitable<GSystem>
 				
 				if(claimers == 1)
 					owner_id = claimer_id;
+				else if(claimers==0)
+					System.err.println("conflicted -> No One in "+ getName() + " system - BUG!");
 				//else - still conflicted, so no change
 			}
 			else if(player_claims[p.getId()]==0) //decreasing claim in a non-conflicted system to 0 -> no owner

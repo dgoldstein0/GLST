@@ -48,4 +48,12 @@ public strictfp class FacilityBuildOrder extends Order
 	public void setBldg_type(FacilityType b){bldg_type=b;}
 	public int getPlayer_id(){return player_id;}
 	public void setPlayer_id(int id){player_id=id;}
+
+	@Override
+	public void doInstantly(Galaxy g) {
+		if(the_sat==null)
+			the_sat = sat_desc.retrieveObject(g, scheduled_time);
+		
+		the_sat.scheduleConstruction(bldg_type, scheduled_time, true);
+	}
 }
