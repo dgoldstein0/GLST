@@ -11,6 +11,7 @@ import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import javax.swing.JOptionPane;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -206,7 +207,16 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 				//load the map.  notify if errors.  This is supposed to validate the map by attempting to load it
 				
 				try{
-					GC.loadMap(map_file); //parsing errors render the map invalid, causing one of the messages in the catch statements.
+					try{
+						GC.loadMap(map_file); //parsing errors render the map invalid, causing one of the messages in the catch statements.
+					} catch(GameControl.MapLoadException mle)
+					{
+						JOptionPane.showMessageDialog(frame,	"The map was loaded, but errors occured during the load,\n" +
+																"which likely mean that the map is not compatible with this\n" +
+																"version of the game.  It is recommended that you choose a\n" +
+																"different map.", "Map Load Exception", JOptionPane.ERROR_MESSAGE);
+					}
+					
 					//the existence of the name is the second line of defense.
 					if(GC.map.getName() != null){
 						map_label.setText(GC.map.getName());

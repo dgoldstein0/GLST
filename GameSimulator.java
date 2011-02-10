@@ -240,6 +240,7 @@ public class GameSimulator {
 						break;
 					case INSTANT_ORDER:
 						action.the_order.doInstantly(GC.map);
+						break;
 					case SAVE:
 						ByteArrayOutputStream os = new ByteArrayOutputStream();
 						XMLEncoder encoder = new XMLEncoder(os);

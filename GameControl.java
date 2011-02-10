@@ -362,52 +362,71 @@ public strictfp class GameControl
 		
 		//load the map.  notify if errors.  This is supposed to validate the map by attempting to load it
 		
-		try{
-			loadMap(map_file); //parsing errors render the map invalid, causing one of the messages in the catch statements.
-			//the existence of the name is the second line of defense.
-			if(!(map.getName() != null)){
-				map=null;
+		boolean map_loaded = false;
+		while(!map_loaded)
+		{
+			try{
+				try{
+					loadMap(map_file); //parsing errors render the map invalid, causing one of the messages in the catch statements.
+				} catch(MapLoadException mle)
+				{
+					handleError("Map Load Error",	"The map was loaded, but exceptions occured during the load,\n" +
+													"which most likely means that the map is not compatible with\n" +
+													"this version of the game. Attempting to use the map anyway...", !automate);
+				}
 				
-				handleError("Map Load Error", "The selected file is not a completed map.  Please pick a different map.", !automate);
+				//the existence of the name is the second line of defense.
+				if(!(map.getName() != null)){
+					map=null;
+					
+					handleError("Map Load Error", "The selected file is not a completed map.  Please pick a different map.", !automate);
+				}
+				else
+					map_loaded=true;
+				
+			} catch(FileNotFoundException fnfe) {
+				handleError("Error - File not Found", "The file was not found.  Please choose another file.", !automate);
+			} catch(ClassCastException cce) {
+				handleError("Map Load: Class Casting Error", "The file you have selected is not a map", !automate);
+			} catch(NullPointerException npe) {
+				handleError("Map Load Error", "Map loading failed.  The selected file is not a valid map.", !automate);
 			}
-		} catch(FileNotFoundException fnfe) {
-			handleError("Error - File not Found", "The file was not found.  Please choose another file.", !automate);
-			return;
-		} catch(ClassCastException cce) {
-			handleError("Class Casting Error", "The file you have selected is not a map", !automate);
-			return;
-		} catch(NullPointerException npe) {
-			handleError("Map Load Error", "Map loading failed.  The selected file is not a valid map.", !automate);
-			return;
 		}
 		
 		
-		
-		//set up systems for the game
-		for(GSystem sys : map.systems)
-			sys.setUpForGame(this);
-		
-		//start the player in assigned location
-		OwnableSatellite<?> p = map.start_locations.get(player_id);
-		p.setOwner(players[player_id]);
-		Base b = new Base(p, p.next_facility_id++, (long)0);
-		p.facilities.put(b.id,b);
-		p.the_base = b;
-		
-		map.saveOwnablesData();
-		
-		if(!automate)
+		try
 		{
-			updater.setTimeManager(new TimeControl(0));
-			//display the Galaxy
-			GI.drawGalaxy();
-		
-			//set game to update itself
-			updater.startUpdating();
-		}
-		else
+			//set up systems for the game
+			for(GSystem sys : map.systems)
+				sys.setUpForGame(this);
+			
+			//start the player in assigned location
+			OwnableSatellite<?> p = map.start_locations.get(player_id);
+			p.setOwner(players[player_id]);
+			Base b = new Base(p, p.next_facility_id++, (long)0);
+			p.facilities.put(b.id,b);
+			p.the_base = b;
+			
+			map.saveOwnablesData();
+			
+			if(!automate)
+			{
+				updater.setTimeManager(new TimeControl(0));
+				//display the Galaxy
+				GI.drawGalaxy();
+			
+				//set game to update itself
+				updater.startUpdating();
+			}
+			else
+			{
+				updater.setTimeManager(new GameSimulator.SimulatedTimeControl());
+			}
+		}catch(Exception e)
 		{
-			updater.setTimeManager(new GameSimulator.SimulatedTimeControl());
+			handleError("Start game failed", "Start game has failed, potentially due to a MapLoadException.", !automate);
+			startupDialog();
+			return;
 		}
 	}
 	
@@ -817,8 +836,15 @@ public strictfp class GameControl
 		
 		ByteArrayInputStream sr = new ByteArrayInputStream(str.toString().getBytes("UTF-8"));
 		XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(sr));
+		XMLErrorDetector error_checker = new XMLErrorDetector();
+		decoder.setExceptionListener(error_checker);
 		map =(Galaxy) decoder.readObject();
 		decoder.close();
+		
+		if(error_checker.isError())
+		{
+			JOptionPane.showMessageDialog(GI.frame, "Warning: exceptions occured while loading the map.  The map is probably not a valid file.", "Map Load Exception", JOptionPane.ERROR_MESSAGE);
+		}
 		
 		if(SAVE)
 		{
@@ -828,14 +854,25 @@ public strictfp class GameControl
 		}
 	}
 	
-	public void loadMap(File f) throws FileNotFoundException, ClassCastException, NullPointerException //for the server
+	/**for the server*/
+	public void loadMap(File f) throws FileNotFoundException, ClassCastException, NullPointerException, MapLoadException
 	{
 		XMLDecoder d=new XMLDecoder(new BufferedInputStream(new FileInputStream(f)));
+		XMLErrorDetector error_check = new XMLErrorDetector();
+		d.setExceptionListener(error_check);
 		map = (Galaxy)d.readObject();
 		d.close();
 		
-		if(map == null) //TODO: NEEDS BETTER VALIDITY TESTS.  empty galaxies still pass this test... but it is a start.
+		if(map == null)
 			throw new NullPointerException();
+		if(error_check.isError())
+			throw new MapLoadException();
+	}
+	
+	static class MapLoadException extends Exception
+	{
+		private static final long serialVersionUID = -8337192629730659561L;
+		
 	}
 	
 	public void sendMap() //for the server
