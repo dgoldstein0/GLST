@@ -15,7 +15,14 @@ public strictfp class Moon extends OwnableSatellite<Moon>
 		data_control.saveData();
 	}
 	
-	public Moon(){super();}
+	public Moon(){
+		super();
+		initial_pop=0;
+		pop_capacity=0;
+		pop_growth_rate=0;
+		building_limit=2;
+		mining_r=0;
+	}
 	
 	@Override
 	public GSystem getGSystem()

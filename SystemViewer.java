@@ -670,19 +670,19 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		OwnableSatelliteType typePlanet=OwnableSatelliteType.Void;
 		String[] new_options = {"Super Planet", "Paradise Planet", "Mountainous Planet", "Typical Planet", "Wasteland Planet"};
 		planet_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of Planet to add", "Add Planet", JOptionPane.QUESTION_MESSAGE, null, new_options, new_options[0]);
-		if(planet_to_add=="Super Planet"){
+		if(planet_to_add.equals("Super Planet")){
 			typePlanet = OwnableSatelliteType.SuperPlanet;
 		}
-		else if(planet_to_add == "Paradise Planet"){
+		else if(planet_to_add.equals("Paradise Planet")){
 			typePlanet = OwnableSatelliteType.Paradise;
 		}
-		else if(planet_to_add == "Mountainous Planet"){
+		else if(planet_to_add.equals("Mountainous Planet")){
 			typePlanet = OwnableSatelliteType.MineralRich;
 		}
-		else if(planet_to_add == "Typical Planet"){
+		else if(planet_to_add.equals( "Typical Planet")){
 			typePlanet = OwnableSatelliteType.Average;
 		}
-		else if(planet_to_add== "Wasteland Planet"){
+		else if(planet_to_add.equals("Wasteland Planet")){
 			typePlanet = OwnableSatelliteType.DesertPlanet;
 		}
 		Planet theplanet = new Planet(system.orbiting.size(), "", 
@@ -690,9 +690,6 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				(int)MathFormula.randomize(typePlanet.pop_capacity), 
 				DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, typePlanet.PopGrowthRate, typePlanet.building_Num, 
 				MathFormula.randomize(typePlanet.mining_rate));
-		System.out.println(theplanet.initial_pop);
-		System.out.println(theplanet.mining_r);
-		System.out.println(theplanet.pop_capacity);
 		theplanet.orbit = new Orbit((Satellite<Planet>)theplanet, (Orbitable<GSystem>)system, x, y, x, y, 1);
 		system.orbiting.add(theplanet);
 		selected_obj = theplanet;

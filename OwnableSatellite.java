@@ -161,8 +161,6 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		int met = bldg_type.metal_cost, mon=bldg_type.money_cost; //metal and money costs
 		
 		time_finish = start_time+build_time;
-		System.out.println(building_limit);
-		System.out.println(facilities.size());
 		synchronized(facilities){
 			synchronized(owner.metal_lock){
 				synchronized(owner.money_lock){
@@ -239,7 +237,10 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		owner=p;
 		getGSystem().increaseClaim(p);
 	}
-	
+	public double getMining_rate(){return mining_r;}
+	public void setMining_rate(double r){mining_r = r;}
+	public int getBuilding_limit(){return building_limit;}
+	public void setBuilding_limit(int b){building_limit=b;}
 	public long getPopulation(){return population;}
 	public void setPopulation(long pop){population=pop;}
 	public double getInitial_pop(){return initial_pop;}

@@ -31,7 +31,7 @@ public strictfp class Planet extends OwnableSatellite<Planet>
 		pop_capacity = 10000;
 		pop_growth_rate = .000005;
 		building_limit = 5;
-		mining_r = .002;
+		mining_r = .02;
 	}
 	
 	@Override
