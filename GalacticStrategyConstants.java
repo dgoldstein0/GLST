@@ -116,6 +116,8 @@ public strictfp class GalacticStrategyConstants
 	final static double additional_mine_penalty = .9;
 	final static double additional_taxoffice_penalty = .9;
 	final static int planet_building_limit = 7;
+	//For MathFormula
+	final static double rand_mod = .05;
 	
 	//***************************************************************GENERAL DATA*******************************************//
 	

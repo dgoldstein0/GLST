@@ -7,7 +7,11 @@ public strictfp class Moon extends OwnableSatellite<Moon>
 		this.mass=m;
 		this.name=nm;
 		this.size=sz;
-		
+		initial_pop = OwnableSatelliteType.Moon.initial_pop;
+		pop_capacity = OwnableSatelliteType.Moon.pop_capacity;
+		pop_growth_rate = OwnableSatelliteType.Moon.PopGrowthRate;
+		building_limit = OwnableSatelliteType.Moon.building_Num;
+		mining_r = OwnableSatelliteType.Moon.mining_rate;
 		data_control.saveData();
 	}
 	

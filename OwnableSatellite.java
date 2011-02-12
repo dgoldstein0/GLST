@@ -57,7 +57,6 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		number_mines=0;
 		number_taxoffices=0;
 	}
-	
 	@Override
 	public void handleDataNotSaved(long t){System.out.println("OwnableSatellite data not saved.  Ridiculous!");}
 	
@@ -162,11 +161,12 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		int met = bldg_type.metal_cost, mon=bldg_type.money_cost; //metal and money costs
 		
 		time_finish = start_time+build_time;
-		
+		System.out.println(building_limit);
+		System.out.println(facilities.size());
 		synchronized(facilities){
 			synchronized(owner.metal_lock){
 				synchronized(owner.money_lock){
-					if(owner.metal >= met && owner.money >= mon && facilities.size()<building_limit)
+					if(owner.metal >= met && owner.money >= mon && facilities.size()<=building_limit)
 					{
 						owner.metal -= met;
 						owner.money -= mon; 

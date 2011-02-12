@@ -685,7 +685,14 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		else if(planet_to_add== "Wasteland Planet"){
 			typePlanet = OwnableSatelliteType.DesertPlanet;
 		}
-		Planet theplanet = new Planet(system.orbiting.size(), "", typePlanet.initial_pop, typePlanet.pop_capacity, DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, typePlanet.PopGrowthRate, typePlanet.building_Num, typePlanet.mining_rate);
+		Planet theplanet = new Planet(system.orbiting.size(), "", 
+				(int)MathFormula.randomize(typePlanet.initial_pop), 
+				(int)MathFormula.randomize(typePlanet.pop_capacity), 
+				DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, typePlanet.PopGrowthRate, typePlanet.building_Num, 
+				MathFormula.randomize(typePlanet.mining_rate));
+		System.out.println(theplanet.initial_pop);
+		System.out.println(theplanet.mining_r);
+		System.out.println(theplanet.pop_capacity);
 		theplanet.orbit = new Orbit((Satellite<Planet>)theplanet, (Orbitable<GSystem>)system, x, y, x, y, 1);
 		system.orbiting.add(theplanet);
 		selected_obj = theplanet;
