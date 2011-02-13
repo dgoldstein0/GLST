@@ -7,8 +7,7 @@ import java.awt.geom.*;
 
 public class SystemPainter extends JPanel
 {
-	static final int GHOST_NONE=0;
-	static final int GHOST_OBJ=1;
+	static enum GHOST_OBJS{NO, YES;}
 	
 	GSystem system;
 	List<Selectable> selected;
@@ -19,7 +18,7 @@ public class SystemPainter extends JPanel
 	int x;
 	int y;
 	
-	int ghost_obj;
+	GHOST_OBJS ghost_obj;
 	int ghost_x;
 	int ghost_y;
 	int ghost_size;
@@ -35,10 +34,6 @@ public class SystemPainter extends JPanel
 		double select_x2;
 		double select_y2;
 	
-	Image return_arrow;
-	
-	final static int arrow_size = 25;
-	
 	//cache for mouseover effects
 	Selectable mouseover_obj;
 	
@@ -46,8 +41,7 @@ public class SystemPainter extends JPanel
 	{
 		setMinimumSize(new Dimension(800,600));
 		design_view=design;
-		ghost_obj=GHOST_NONE;
-		return_arrow=Toolkit.getDefaultToolkit().getImage("images/return_arrow.jpg");
+		ghost_obj=GHOST_OBJS.NO;
 		draw_select_box=false;
 		selected = new ArrayList<Selectable>();
 		scale = 1.0d;
@@ -215,14 +209,17 @@ public class SystemPainter extends JPanel
 			}
 		}
 		
-		if(ghost_obj==GHOST_OBJ)
+		if(ghost_obj==GHOST_OBJS.YES)
 		{
 			g2.setColor(Color.GRAY);
 			g2.draw(new Ellipse2D.Double(drawX(ghost_x-ghost_size/2.0), drawY(ghost_y-ghost_size/2.0), ghost_size*scale, ghost_size*scale));
 		}
 		
 		if(game_mode)
-			g2.drawImage(return_arrow, getWidth()-arrow_size, 0, arrow_size, arrow_size, this);
+		{
+			ImageResource ret_arrow = ImageResource.RETURN_ARROW;
+			g2.drawImage(ret_arrow.image, getWidth()-ret_arrow.getWidth(), 0, ret_arrow.getWidth(), ret_arrow.getHeight(), this);
+		}
 	}
 	
 	private void drawFlyer(Graphics2D g2, Flyer<?,?,?> s, Color c)
@@ -272,7 +269,7 @@ public class SystemPainter extends JPanel
 	{
 		this.system=system;
 		this.selected=selected;
-		ghost_obj=GHOST_NONE;
+		ghost_obj=GHOST_OBJS.NO;
 		center_x=centerx;
 		center_y=centery;
 		scale=sc;
@@ -304,7 +301,7 @@ public class SystemPainter extends JPanel
 	{
 		this.system=system;
 		this.selected=selected;
-		ghost_obj=GHOST_OBJ;
+		ghost_obj=GHOST_OBJS.YES;
 		ghost_x=x;
 		ghost_y=y;
 		ghost_size=size;

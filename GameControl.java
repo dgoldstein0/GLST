@@ -306,7 +306,7 @@ public strictfp class GameControl
 		map.saveOwnablesData();
 		
 		//start game graphics...
-		GI.drawGalaxy();
+		GI.drawGalaxy(GameInterface.GALAXY_STATE.NORMAL);
 		
 		//set game to update itself
 		updater.startUpdating();
@@ -413,7 +413,7 @@ public strictfp class GameControl
 			{
 				updater.setTimeManager(new TimeControl(0));
 				//display the Galaxy
-				GI.drawGalaxy();
+				GI.drawGalaxy(GameInterface.GALAXY_STATE.NORMAL);
 			
 				//set game to update itself
 				updater.startUpdating();
@@ -1000,11 +1000,17 @@ public strictfp class GameControl
 		if(GI != null)
 		{
 			GI.update();
-				
-			if(GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP)
-				GI.SatellitePanel.update(time_elapsed);
-			else if(GI.sat_or_ship_disp == GameInterface.SHIP_PANEL_DISP)
-				GI.ShipPanel.update();
+			
+			switch(GI.sat_or_ship_disp)
+			{
+				case SAT_PANEL:
+					GI.SatellitePanel.update(time_elapsed);
+					break;
+				case SHIP_PANEL:
+					GI.ShipPanel.update();
+					break;
+			}
+			
 			GI.time.setText("Time: " + time_elapsed/1000);
 			GI.metal.setText("Metal: " + Math.round(players[player_id].metal));
 			GI.money.setText(GameInterface.indentation + "Money: " + Math.round(players[player_id].money));

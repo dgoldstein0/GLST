@@ -168,8 +168,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		}
 		else if(e.getSource() == warp)
 		{
-			GameInterface.GC.GI.galaxy_state= GameInterface.CHOOSE_WARP_DEST;
-			GameInterface.GC.GI.drawGalaxy();
+			GameInterface.GC.GI.drawGalaxy(GameInterface.GALAXY_STATE.CHOOSE_WARP_DEST);
 		}
 		else if(e.getSource() == invade)
 		{

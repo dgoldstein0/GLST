@@ -52,9 +52,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	double gal_scale; //the scale which the galaxy is painted at.
 	Set<GSystem> selected_sys; //stores a set of currently selected systems - that is, a set of one item.  This is necessary because multiple selection is possible in GDFrame
 	
-	int galaxy_state;
-		static final int GAL_NORMAL=0;
-		static final int CHOOSE_WARP_DEST=1;
+	GALAXY_STATE galaxy_state;
+	static enum GALAXY_STATE{NORMAL, CHOOSE_WARP_DEST, PREVIEW;}
 	
 	
 	SystemPainter SystemPanel;
@@ -66,7 +65,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	//for multi-selection in systems
 	int button_down; //the button pressed in mousePressed
 	boolean mouse_was_dragged; //whether we ever had any dragging between mousePressed and mouseReleased
-	enum MODIFIER {ALT, SHIFT, NONE};
+	static enum MODIFIER {ALT, SHIFT, NONE};
 	MODIFIER drag_modifier;
 		double mouse_down_x;
 		double mouse_down_y;
@@ -92,16 +91,16 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	static int SYS_HEIGHT=GalacticStrategyConstants.SYS_HEIGHT; //the allowed height of a system
 	
 	JPanel system_list;
-	JPanel satellites_list;
 	
-	int sat_or_ship_disp;
-		static final int SAT_PANEL_DISP = 0;
-		static final int SHIP_PANEL_DISP=1;
-		static final int NO_PANEL_DISP = -1;
+	enum PANEL_DISP{SAT_PANEL, SHIP_PANEL, NONE};
+	PANEL_DISP sat_or_ship_disp;
+	
 	PlanetMoonCommandPanel SatellitePanel;
 	ShipCommandPanel ShipPanel;
 	
-	boolean mode, prev_mode; //Galaxy=true, system=false.  reflected by isGalaxyDisplayed and isSystemDisplayed
+	enum GalaxyOrSystem{Galaxy, System;}
+	
+	GalaxyOrSystem mode, prev_mode;
 	boolean graphics_started; //used to indicate whether graphics have been started yet - that is, whether the Galaxy has been drawn yet.
 	
 	final static String indentation="     ";
@@ -194,18 +193,12 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		//create the tabbed pane
 		tabbedPane = new JTabbedPane();
 		//tabbedPane.setSize(200, 700);
-		system_list = new JPanel();//makeTextPanel("System");
+		system_list = new JPanel();
 		system_list.setLayout(new BoxLayout(system_list,BoxLayout.Y_AXIS));
 		pane1 = new JScrollPane(system_list);		
 		pane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		tabbedPane.addTab("System", pane1);
+		tabbedPane.addTab("Systems", pane1);
 		tabbedPane.setSelectedIndex(0);
-		satellites_list = new JPanel();//makeTextPanel("Planets");
-		satellites_list.setLayout(new BoxLayout(satellites_list,BoxLayout.Y_AXIS));
-		
-		pane2 = new JScrollPane(satellites_list);		
-		pane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		tabbedPane.addTab("Planets", pane2);
 		
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor=GridBagConstraints.EAST;
@@ -264,7 +257,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		GC = new GameControl(this);
 		
 		system_state = SYS_NORMAL;
-		galaxy_state = GAL_NORMAL;
+		galaxy_state = GALAXY_STATE.NORMAL;
 		setupGraphics();
 		
 		//set up in-game menu for later display
@@ -298,38 +291,44 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	private void setupGraphics()
 	{
 		//sets up GalacticMapPainter, SystemPainter
-		GalaxyPanel = new GalacticMapPainter();
+		GalaxyPanel = new GalacticMapPainter(true);
 		SystemPanel = new SystemPainter(false);
 		
 		SatellitePanel = new PlanetMoonCommandPanel();
 		ShipPanel = new ShipCommandPanel();
 		
 		graphics_started=false;
-		sat_or_ship_disp = NO_PANEL_DISP;
+		sat_or_ship_disp = PANEL_DISP.NONE;
 	}
 	
-	public void drawGalaxy()
+	/**call to switch the view to the galaxy
+	 * @param state the GALAXY_STATE we should load up with
+	 * */
+	public void drawGalaxy(GALAXY_STATE state)
 	{
 		System.out.println("Draw Galaxy!");
+		galaxy_state = state;
+		
 		//this method shows the GalacticMapPainter in the main viewspace
 		if(isSystemDisplayed() || !graphics_started)
 		{
 			theinterface.removeAll();
 			theinterface.add(GalaxyPanel); //automatically adds to center
-			mode=true;
-			prev_mode=true;
+			mode=GalaxyOrSystem.Galaxy;
+			prev_mode=GalaxyOrSystem.Galaxy;
 			graphics_started=true;
 			
 			//make sure to change cursor back to normal
-			if(galaxy_state == GAL_NORMAL)
-			{
-				theinterface.setCursor(Cursor.getDefaultCursor());
+			theinterface.setCursor(Cursor.getDefaultCursor());
+			
+			if(galaxy_state == GALAXY_STATE.NORMAL)
+			{	
 				selected_in_sys.clear();
 				displayNoPanel();
 			}
 		}
 		gal_scale =  Math.min(((double)theinterface.getWidth())/((double)GalacticStrategyConstants.GALAXY_WIDTH), ((double)theinterface.getHeight())/((double)GalacticStrategyConstants.GALAXY_HEIGHT));
-		GalaxyPanel.paintGalaxy(GC.map, selected_sys, (galaxy_state== GAL_NORMAL) ? GDFrame.DRAG_NONE : GDFrame.DRAG_RANGE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, GC.players[GC.player_id].ships_in_transit, gal_scale);
+		GalaxyPanel.paintGalaxy(GC.map, selected_sys, (galaxy_state == GALAXY_STATE.CHOOSE_WARP_DEST) ? GDFrame.DRAG_RANGE : GDFrame.DRAG_NONE, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, GC.players[GC.player_id].ships_in_transit, gal_scale);
 		frame.setVisible(true); //makes all components within the frame displayable.  frame.pack() does this too, but pack resizes the frame to fit all components in their preferred sizes
 	}
 	
@@ -344,7 +343,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		{
 			theinterface.removeAll();
 			theinterface.add(SystemPanel); //automatically adds to center
-			mode=false;
+			mode=GalaxyOrSystem.System;
 		}
 /*		sys_scale = 1.0d;
 		sys_center_x = theinterface.getWidth()/2;
@@ -364,7 +363,9 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 				int options=GDFrame.DRAG_NONE;
 				switch(galaxy_state)
 				{
-					case GAL_NORMAL:
+					case PREVIEW:
+						break;
+					case NORMAL:
 						options=GDFrame.DRAG_NONE;
 						break;
 					case CHOOSE_WARP_DEST:
@@ -372,7 +373,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 						GalaxyPanel.setMaxDistShown(ShipPanel.the_ship.warpRange());
 						break;
 					default:
-						System.out.println("redraw doesn't support galaxy_state " + Integer.toString(galaxy_state));
+						System.out.println("redraw doesn't support galaxy_state " + galaxy_state.name());
 						break;
 				}
 				GalaxyPanel.paintGalaxy(GC.map, selected_sys, options, GalacticStrategyConstants.MAX_NAV_LEVEL, GDFrame.NAV_DISP_NONE, false, GC.players[GC.player_id].ships_in_transit, gal_scale);
@@ -397,12 +398,12 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	{
 		SatellitePanel.setSat(s);
 		
-		if(sat_or_ship_disp != SAT_PANEL_DISP)
+		if(sat_or_ship_disp != PANEL_DISP.SAT_PANEL)
 		{
 			stat_and_order.removeAll();
 			stat_and_order.repaint();
 			stat_and_order.add(SatellitePanel);
-			sat_or_ship_disp = SAT_PANEL_DISP;
+			sat_or_ship_disp = PANEL_DISP.SAT_PANEL;
 		}
 		
 		frame.setVisible(true);
@@ -410,12 +411,12 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	
 	public void displayShipPanel(Ship s)
 	{
-		if(sat_or_ship_disp != SHIP_PANEL_DISP)
+		if(sat_or_ship_disp != PANEL_DISP.SHIP_PANEL)
 		{
 			stat_and_order.removeAll();
 			stat_and_order.repaint();
 			stat_and_order.add(ShipPanel);
-			sat_or_ship_disp = SHIP_PANEL_DISP;
+			sat_or_ship_disp = PANEL_DISP.SHIP_PANEL;
 		}
 		
 		ShipPanel.setShip(s);
@@ -425,11 +426,11 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	
 	public void displayNoPanel()
 	{
-		if(sat_or_ship_disp != NO_PANEL_DISP)
+		if(sat_or_ship_disp != PANEL_DISP.NONE)
 		{
 			stat_and_order.removeAll();
 			stat_and_order.repaint();
-			sat_or_ship_disp = NO_PANEL_DISP;
+			sat_or_ship_disp = PANEL_DISP.NONE;
 			SatellitePanel.state=-1; //this is necessary to remove the bug
 				//that when a facility finishes being built, and the player has nothing in the system selected,
 				//and then selects a planet with no facilities, the newly built facility appears in the interface
@@ -446,19 +447,19 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		system_state = SELECT_DESTINATION;
 	}
 	
-	public boolean isGalaxyDisplayed(){return mode;}
-	public boolean isSystemDisplayed(){return !mode;}
+	public boolean isGalaxyDisplayed(){return mode == GalaxyOrSystem.Galaxy;}
+	public boolean isSystemDisplayed(){return mode == GalaxyOrSystem.System;}
 
 	//this is ONLY invoked by MOUSE MOTION EVENTS, and is in charge of deciding how fast to move the view of the system
 	public void eventDispatched(AWTEvent a)
 	{
+		MouseEvent e=(MouseEvent)a;
+		
 		if(isSystemDisplayed())
 		{
-			MouseEvent e=(MouseEvent)a;
-			
+			//handle drag on System
 			if((MouseEvent.BUTTON1_MASK & e.getModifiers()) == MouseEvent.BUTTON1_MASK && e.getSource() == theinterface && button_down == MouseEvent.BUTTON1)
 			{
-				//handle MouseDragged event here
 				if(drag_modifier == MODIFIER.NONE)
 				{
 					selected_in_sys.clear();
@@ -527,11 +528,14 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 					}
 				}
 			}
-			else if(e.getSource() == theinterface) //just a mouse-move or drag event
+			else if(e.getSource() == theinterface) //just a mouse-move event
 			{
 				//update mouse coords for the mouse-over highlight effect
 				cur_x = sysScreenToDataX(e.getX());
 				cur_y = sysScreenToDataY(e.getY());
+				
+				if(isSystemDisplayed() && e.getX() >= theinterface.getWidth() - ImageResource.RETURN_ARROW.getWidth() && e.getY() <= ImageResource.RETURN_ARROW.getHeight())
+					drawGalaxy(GALAXY_STATE.PREVIEW); //back arrow mouseovered
 			}
 				
 			Point corner;
@@ -615,6 +619,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 			
 			frame.getGlassPane().setVisible(move_screen);
 		}
+		else if(galaxy_state == GALAXY_STATE.PREVIEW && e.getSource()==theinterface && !(e.getX() >= theinterface.getWidth() - ImageResource.RETURN_ARROW.getWidth() && e.getY() <= ImageResource.RETURN_ARROW.getHeight()))
+				drawSystem();
 	}
 
 	@Override
@@ -653,7 +659,12 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 			{
 				switch(galaxy_state)
 				{
-					case GAL_NORMAL:
+					case PREVIEW:
+						galaxy_state = GALAXY_STATE.NORMAL;
+						selected_in_sys.clear();
+						displayNoPanel();
+						break;
+					case NORMAL:
 						selectSystemAt(((double)e.getX())/gal_scale, ((double)e.getY())/gal_scale);
 						if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2 && sys != null)
 							drawSystem();
@@ -683,12 +694,11 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 							if(some_warped)
 							{
 								drawSystem();
-								galaxy_state=GAL_NORMAL;
 							}
 						}
 						break;
 					default:
-						System.out.println("galaxy state " + Integer.toString(galaxy_state) +" not supported in GameInterface.mouseReleased :(");
+						System.out.println("galaxy state " + galaxy_state.name() +" not supported in GameInterface.mouseReleased :(");
 						break;
 				}
 			}
@@ -721,8 +731,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 				}
 				else
 				{
-					if(e.getX() >= theinterface.getWidth() - SystemPainter.arrow_size && e.getY() <= SystemPainter.arrow_size)
-						drawGalaxy(); //back arrow clicked
+					if(e.getX() >= theinterface.getWidth() - ImageResource.RETURN_ARROW.getWidth() && e.getY() <= ImageResource.RETURN_ARROW.getHeight())
+						drawGalaxy(GALAXY_STATE.NORMAL); //back arrow clicked
 					else
 					{
 						if(system_state == SYS_NORMAL && e.getButton() == MouseEvent.BUTTON1)

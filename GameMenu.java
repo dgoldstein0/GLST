@@ -74,13 +74,11 @@ public class GameMenu extends JDialog implements ActionListener
 			setVisible(false); //hide the menu
 			//destroy the graphics.
 			GC.GI.graphics_started=false;
-			GC.GI.sat_or_ship_disp = GameInterface.NO_PANEL_DISP;
+			GC.GI.sat_or_ship_disp = GameInterface.PANEL_DISP.NONE;
 			GC.GI.theinterface.removeAll(); //removes the system/galaxy display
 			GC.GI.theinterface.repaint();
 			GC.GI.stat_and_order.removeAll();
 			GC.GI.stat_and_order.repaint();
-			GC.GI.satellites_list.removeAll();
-			GC.GI.satellites_list.repaint();
 			GC.GI.system_list.removeAll();
 			GC.GI.system_list.repaint();
 			GC.GI.selected_sys.clear();

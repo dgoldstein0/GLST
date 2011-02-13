@@ -218,7 +218,7 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 		
 		
 		
-		panel=new GalacticMapPainter();
+		panel=new GalacticMapPainter(false);
 		panel.setMinimumSize(new Dimension(800,600));
 		panel.setPreferredSize(new Dimension(800,600));
 		panel.setMaximumSize(new Dimension(800,600));

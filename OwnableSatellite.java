@@ -137,7 +137,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 			synchronized(facilities)
 			{
 				//notify interface
-				if(GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP && GI.SatellitePanel.the_sat == new_fac.location)
+				if(GI.sat_or_ship_disp == GameInterface.PANEL_DISP.SAT_PANEL && GI.SatellitePanel.the_sat == new_fac.location)
 				{
 					GI.SatellitePanel.displayFacility(new_fac);
 				}

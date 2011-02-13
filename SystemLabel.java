@@ -8,6 +8,8 @@ import javax.swing.JLabel;
 
 public class SystemLabel extends JLabel implements MouseListener
 {
+	private static final long serialVersionUID = -6685546432555351721L;
+	
 	GSystem the_sys;
 	GameInterface the_interface;
 	
@@ -23,18 +25,11 @@ public class SystemLabel extends JLabel implements MouseListener
 		// TODO Auto-generated method stub		
 		if (arg0.getClickCount()>=1)
 		{			
-			the_interface.prev_sys=the_sys;
-			//the_interface.sys=the_sys;
-			the_interface.satellites_list.removeAll();
-			for (Satellite<?> satellite: the_sys.orbiting)
-			{
-				SatelliteLabel label=new SatelliteLabel(satellite);
-				the_interface.satellites_list.add(label);			
-			}			
+			the_interface.prev_sys=the_sys;	
 			the_interface.selected_sys.clear();
 			the_interface.selected_sys.add(the_sys);		
 			the_interface.prev_selected=the_interface.selected_in_sys;
-			//the_interface.selected_in_sys=null;
+			
 			the_interface.displayNoPanel();
 		}	
 		if (arg0.getClickCount()==2)
@@ -57,7 +52,7 @@ public class SystemLabel extends JLabel implements MouseListener
 			the_interface.prev_selected=the_interface.selected_in_sys;
 		}		
 		
-		if (!the_interface.mode)
+		if (the_interface.isSystemDisplayed())
 		{
 			the_interface.prev_sys=the_interface.sys;
 			the_interface.prev_scale=the_interface.sys_scale;
@@ -68,7 +63,7 @@ public class SystemLabel extends JLabel implements MouseListener
 		}
 		else
 		{
-			the_interface.prev_mode=true;
+			the_interface.prev_mode=GameInterface.GalaxyOrSystem.Galaxy;
 			the_interface.sys=the_sys;
 			the_interface.drawSystem();
 		}
@@ -103,7 +98,7 @@ public class SystemLabel extends JLabel implements MouseListener
 		}
 		else
 		{
-			the_interface.drawGalaxy();
+			the_interface.drawGalaxy(GameInterface.GALAXY_STATE.NORMAL);
 		}
 	}
 

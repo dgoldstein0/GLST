@@ -124,7 +124,7 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 						produce(t-time_on_current_ship);
 						
 						//update the queue display... if it is being displayed.
-						if(location.owner.getId() == GameInterface.GC.player_id && GameInterface.GC.GI.sat_or_ship_disp == GameInterface.SAT_PANEL_DISP
+						if(location.owner.getId() == GameInterface.GC.player_id && GameInterface.GC.GI.sat_or_ship_disp == GameInterface.PANEL_DISP.SAT_PANEL
 							&& GameInterface.GC.GI.SatellitePanel.the_sat.equals(location) && GameInterface.GC.GI.SatellitePanel.state == PlanetMoonCommandPanel.SHIP_QUEUE_DISPLAYED
 							&& GameInterface.GC.GI.SatellitePanel.the_shipyard == this)
 							GameInterface.GC.GI.SatellitePanel.displayQueue();

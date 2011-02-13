@@ -30,14 +30,16 @@ public class GalacticMapPainter extends JPanel
 	int ghost_y;
 	
 	double scale;
+	private final boolean game_mode;
 	
-	public GalacticMapPainter()
+	public GalacticMapPainter(boolean game_mode)
 	{
 		super(new FlowLayout(FlowLayout.LEFT));
 		drag_options=GDFrame.DRAG_NONE;
 		max_dist_shown=GalacticStrategyConstants.DEFAULT_DIST;
 		nav_level=GalacticStrategyConstants.DEFAULT_NAV_LEVEL;
 		scale=1.0d;
+		this.game_mode = game_mode;
 	}
 	
 	public void paintComponent(Graphics g)
@@ -176,6 +178,13 @@ public class GalacticMapPainter extends JPanel
 			g2.fill(new Ellipse2D.Double(scaleNum(ghost_x-2),scaleNum(ghost_y-2),scaleNum(5),scaleNum(5)));
 		}
 		
+		if(game_mode && GameInterface.GC.GI.galaxy_state == GameInterface.GALAXY_STATE.PREVIEW)
+		{
+			ImageResource ret_arrow = ImageResource.RETURN_ARROW;
+			g2.drawImage(ret_arrow.image, getWidth()-ret_arrow.getWidth(), 0, ret_arrow.getWidth(), ret_arrow.getHeight(), this);
+		}
+		
+		//TODO: perhaps remove this box
 		g2.setColor(Color.WHITE);
 		g2.draw(new Rectangle2D.Double(0,0,scaleNum(GalacticStrategyConstants.GALAXY_WIDTH), scaleNum(GalacticStrategyConstants.GALAXY_HEIGHT)));
 	}
