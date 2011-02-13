@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import javax.swing.JLabel;
 
 
-
 public class SystemLabel extends JLabel implements MouseListener
 {
 	private static final long serialVersionUID = -6685546432555351721L;
@@ -22,22 +21,24 @@ public class SystemLabel extends JLabel implements MouseListener
 	}
 
 	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub		
+			
 		if (arg0.getClickCount()>=1)
 		{			
+			the_interface.prev_mode=GameInterface.GalaxyOrSystem.System;
 			the_interface.prev_sys=the_sys;	
 			the_interface.selected_sys.clear();
 			the_interface.selected_sys.add(the_sys);		
 			the_interface.prev_selected=the_interface.selected_in_sys;
 			
 			the_interface.displayNoPanel();
-		}	
-		if (arg0.getClickCount()==2)
-		{
 			
-			the_interface.tabbedPane.setSelectedIndex(1);			
-			the_interface.sys=the_sys;					
-		}
+			if (arg0.getClickCount()==2)
+			{
+				
+				the_interface.tabbedPane.setSelectedIndex(1);			
+				the_interface.sys=the_sys;					
+			}
+		}	
 	}
 	
 	public void mouseEntered(MouseEvent arg0) {
@@ -52,48 +53,37 @@ public class SystemLabel extends JLabel implements MouseListener
 			the_interface.prev_selected=the_interface.selected_in_sys;
 		}		
 		
-		if (the_interface.isSystemDisplayed())
-		{
-			the_interface.prev_sys=the_interface.sys;
-			the_interface.prev_scale=the_interface.sys_scale;
-			the_interface.prev_x=the_interface.sys_center_x;;
-			the_interface.prev_y=the_interface.sys_center_y;
-			the_interface.sys=the_sys;		
-			the_interface.drawSystem();
-		}
-		else
-		{
-			the_interface.prev_mode=GameInterface.GalaxyOrSystem.Galaxy;
-			the_interface.sys=the_sys;
-			the_interface.drawSystem();
-		}
+		the_interface.prev_mode = the_interface.mode;
+		the_interface.prev_sys=the_interface.sys;
+		the_interface.sys=the_sys;
+		the_interface.prev_scale=the_interface.sys_scale;
+		the_interface.prev_x=the_interface.sys_center_x;;
+		the_interface.prev_y=the_interface.sys_center_y;
+		the_interface.drawSystem(the_interface.prev_mode == GameInterface.GalaxyOrSystem.System);
 	}
 
 
 	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	/*	if (!the_interface.prev_mode)
-		{
-			the_interface.sys=the_interface.prev_sys;
-			the_interface.drawSystem();
-		}
-		else
-		{
-			the_interface.drawGalaxy();
-		}*/		
-		
+				
 		the_interface.selected_in_sys=the_interface.prev_selected;
 				
 		if (the_interface.prev_sys!=null)
 		{
-			if(the_interface.sys != the_interface.prev_sys)
+			switch(the_interface.prev_mode)
 			{
-				the_interface.sys=the_interface.prev_sys;
-				the_interface.sys_scale=the_interface.prev_scale;
-				the_interface.sys_center_x=the_interface.prev_x;
-				the_interface.sys_center_y=the_interface.prev_y;
-				the_interface.drawSystem();
+				case System:
+					if(the_interface.sys != the_interface.prev_sys)
+					{
+						the_interface.sys=the_interface.prev_sys;
+						the_interface.sys_scale=the_interface.prev_scale;
+						the_interface.sys_center_x=the_interface.prev_x;
+						the_interface.sys_center_y=the_interface.prev_y;
+					}
+					the_interface.drawSystem(true);
+					break;
+				case Galaxy:
+					the_interface.drawGalaxy(GameInterface.GALAXY_STATE.NORMAL);
+					break;
 			}
 		}
 		else

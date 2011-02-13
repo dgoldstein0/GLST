@@ -27,7 +27,8 @@ public class SystemPainter extends JPanel
 	double center_x;
 	double center_y;
 	
-	boolean game_mode=false;
+	boolean game_mode;
+	boolean draw_arrow;
 	boolean draw_select_box;
 		double select_x1;
 		double select_y1;
@@ -45,6 +46,9 @@ public class SystemPainter extends JPanel
 		draw_select_box=false;
 		selected = new ArrayList<Selectable>();
 		scale = 1.0d;
+		
+		game_mode=false;
+		draw_arrow=false;
 		
 		mouseover_obj = null;
 	}
@@ -215,7 +219,7 @@ public class SystemPainter extends JPanel
 			g2.draw(new Ellipse2D.Double(drawX(ghost_x-ghost_size/2.0), drawY(ghost_y-ghost_size/2.0), ghost_size*scale, ghost_size*scale));
 		}
 		
-		if(game_mode)
+		if(draw_arrow)
 		{
 			ImageResource ret_arrow = ImageResource.RETURN_ARROW;
 			g2.drawImage(ret_arrow.image, getWidth()-ret_arrow.getWidth(), 0, ret_arrow.getWidth(), ret_arrow.getHeight(), this);
@@ -286,15 +290,20 @@ public class SystemPainter extends JPanel
 	}
 	
 	//for multi-select box
-	public void paintSystem(GSystem system, List<Selectable> selected, double centerx, double centery, double sc, boolean back, boolean select_box, double x1, double y1, double x2, double y2, Selectable mouseovered)
+	public void paintSystem(GSystem system, List<Selectable> selected, double centerx, double centery, double sc, boolean game_mode, boolean select_box, double x1, double y1, double x2, double y2, Selectable mouseovered)
 	{
-		game_mode = back;
+		this.game_mode = game_mode;
 		draw_select_box = select_box;
 		select_x1 = x1;
 		select_y1 = y1;
 		select_x2 = x2;
 		select_y2 = y2;
 		paintSystem(system, selected, centerx, centery, sc, mouseovered);
+	}
+	
+	public void setArrow(boolean arrow)
+	{
+		draw_arrow=arrow;
 	}
 	
 	public void paintGhostObj(GSystem system, List<Selectable> selected, int x, int y, int size, double centerx, double centery, double sc)

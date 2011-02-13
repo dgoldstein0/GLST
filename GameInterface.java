@@ -335,7 +335,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	
 	//before calling this function, sys should be specified
 	//note that this function makes selected_in_sys null if it is used to switch from the galaxy to a system
-	public void drawSystem()
+	public void drawSystem(boolean arrow)
 	{
 		System.out.println("Draw System!");
 		//this method shows the GalacticMapPainter in the main viewspace
@@ -348,6 +348,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 /*		sys_scale = 1.0d;
 		sys_center_x = theinterface.getWidth()/2;
 		sys_center_y = theinterface.getHeight()/2;*/
+		SystemPanel.setArrow(arrow);
 		SystemPanel.paintSystem(sys, combineSelectedInSys(), sys_center_x, sys_center_y, sys_scale, true, mouse_was_dragged, mouse_down_x, mouse_down_y, cur_x, cur_y, mouseover_obj);
 		frame.setVisible(true); //makes all components within the frame displayable.  frame.pack() does this too, but pack resizes the frame to fit all components in their preferred sizes
 	}
@@ -364,6 +365,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 				switch(galaxy_state)
 				{
 					case PREVIEW:
+						//TODO: should something go here?
 						break;
 					case NORMAL:
 						options=GDFrame.DRAG_NONE;
@@ -620,7 +622,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 			frame.getGlassPane().setVisible(move_screen);
 		}
 		else if(galaxy_state == GALAXY_STATE.PREVIEW && e.getSource()==theinterface && !(e.getX() >= theinterface.getWidth() - ImageResource.RETURN_ARROW.getWidth() && e.getY() <= ImageResource.RETURN_ARROW.getHeight()))
-				drawSystem();
+				drawSystem(true);
 	}
 
 	@Override
@@ -667,7 +669,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 					case NORMAL:
 						selectSystemAt(((double)e.getX())/gal_scale, ((double)e.getY())/gal_scale);
 						if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2 && sys != null)
-							drawSystem();
+							drawSystem(true);
 						else
 							redraw();
 						break;
@@ -693,7 +695,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 							
 							if(some_warped)
 							{
-								drawSystem();
+								drawSystem(true);
 							}
 						}
 						break;
