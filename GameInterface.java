@@ -294,6 +294,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		GalaxyPanel = new GalacticMapPainter(true);
 		SystemPanel = new SystemPainter(false);
 		
+		new KeyboardHandler(SystemPanel);
+		
 		SatellitePanel = new PlanetMoonCommandPanel();
 		ShipPanel = new ShipCommandPanel();
 		
