@@ -8,10 +8,9 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 	Satellite<?> the_sat;
 	JButton build;
 	JButton cancel;
-	JLabel pop;
 	JPanel stats_panel;
-	//JPanel choices_panel;
-	//JLabel cost_label;
+		JLabel pop;
+		JLabel building_limit;
 	
 	JPanel facilities_panel;
 	GroupLayout.ParallelGroup vgroup;
@@ -109,7 +108,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 			//cancel any half-started build.
 			cur_fac_in_prog_panel.removeAll();
 			
-			addPopulation();
+			addStats();
 			
 			if(((OwnableSatellite<?>)s).getOwner() != null)
 			{
@@ -130,11 +129,15 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		add(facilities_panel);
 	}
 	
-	private void addPopulation()
+	private void addStats()
 	{
 		pop = new JLabel("Population: " + ((OwnableSatellite<?>)the_sat).getPopulation());
 		pop.setAlignmentX(JPanel.RIGHT_ALIGNMENT);
 		stats_panel.add(pop);
+		
+		building_limit = new JLabel("Max Buildings: " + ((OwnableSatellite<?>)the_sat).getBuilding_limit());
+		building_limit.setAlignmentX(JPanel.RIGHT_ALIGNMENT);
+		stats_panel.add(building_limit);
 	}
 	
 	private void setUpFacilityBuilding()
@@ -168,6 +171,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		{
 			//update population reading
 			pop.setText("Population: " + ((OwnableSatellite<?>)the_sat).getPopulation());
+			building_limit.setText("Max Buildings: " + ((OwnableSatellite<?>)the_sat).getBuilding_limit());
 			
 			if(((OwnableSatellite<?>) the_sat).owner == GameInterface.GC.players[GameInterface.GC.player_id])
 			{
@@ -267,7 +271,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		
 		//clear facility_panel, and make space in the stats_panel.
 		stats_panel.removeAll();
-		addPopulation();
+		addStats();
 		stats_panel.add(progress_bar);
 		
 		state=SHIP_QUEUE_DISPLAYED;

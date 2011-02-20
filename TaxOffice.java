@@ -52,18 +52,12 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 			location.number_taxoffices--;
 		}
 	}
-	
-	@Override
-	public String getName() {return "Tax Office";}
 
 	@Override
 	public FacilityType getType() {
 		
 		return FacilityType.TAXOFFICE;
 	}
-
-	@Override
-	public String imageLoc() {return "images/TaxOffice.gif";}
 
 	@Override
 	public void ownerChanged(long t) {

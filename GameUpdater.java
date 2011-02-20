@@ -128,7 +128,7 @@ public class GameUpdater {
 			for(Satellite<?> sat : sys.orbiting)
 			{
 				if(sat instanceof Planet)
-				{
+				{ //TODO: recursive move?
 					for(Satellite<?> sat2 : ((Planet)sat).orbiting)
 					{
 						sat2.orbit.move(time_elapsed);
@@ -223,6 +223,8 @@ public class GameUpdater {
 						sys.missiles.get(i).update(update_to, missile_iteration); //returns true if the missile detonates
 					}
 				}
+				
+				//TODO: collision detect?
 			}
 			
 			//TODO: debuging code, should later be removed
@@ -241,7 +243,7 @@ public class GameUpdater {
 		// time 40 (time_grain is 20)
 		if(!local_pending_execution.isEmpty())
 		{
-			System.out.println("We still have orders in the local queue.  should not be possible!");
+			System.out.println("We still have orders in the local queue.");
 			pending_execution.addAll(local_pending_execution);
 		}
 		

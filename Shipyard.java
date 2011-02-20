@@ -146,8 +146,6 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 	public int indexOfFirstShipInQueue(){return Collections.min(manufac_queue.keySet());}
 	
 	public FacilityType getType(){return FacilityType.SHIPYARD;}
-	public String imageLoc(){return "images/shipyard.gif";}
-	public String getName(){return "Shipyard";}
 
 	@Override
 	public void ownerChanged(long t) {

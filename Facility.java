@@ -108,9 +108,9 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 		data_control.saveData();
 	}
 	public abstract void updateStatus(long t);
-	public abstract String getName();
+	public final String getName(){return getType().name;}
 	public abstract FacilityType getType();
-	public abstract String imageLoc();
+	public final String imageLoc(){return getType().image_path;}
 	
 	public int getDamage(){return damage;}
 	public void setDamage(int d){damage=d;}

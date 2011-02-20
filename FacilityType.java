@@ -7,14 +7,15 @@ public strictfp enum FacilityType
 	BASE				("Base",				500,	500,	15000l,		"images/Base.gif",				"Recruits troops and protects the planet from invading armies", new FacilityCreator<Base>(){public Base create(OwnableSatellite<?> o, int i, long t){return new Base(o,i,t);}}),
 	MINE				("Mine",				0,		200,	10000l,		"images/Mine.gif",				"Extracts metal for use in future manufacturing",				new FacilityCreator<Mine>(){public Mine create(OwnableSatellite<?> o, int i, long t){return new Mine(o,i,t);}}),
 	SHIPYARD			("Shipyard",			200,	300,	10000l,		"images/Shipyard.gif",			"Builds spaceships",											new FacilityCreator<Shipyard>(){public Shipyard create(OwnableSatellite<?> o, int i, long t){return new Shipyard(o,i,t);}}),
-	RESEARCH_BUILDING	("Research Building",	400,	400,	35000l,		"images/ResearchBuilding.gif",	"Research new technologies to extend your capabilities",		new FacilityCreator<ResearchBuilding>(){public ResearchBuilding create(OwnableSatellite<?> o, int i, long t){return new ResearchBuilding(o,i,t);}}),
 	TAXOFFICE 			("Tax Office",			200,	0,		10001,		"images/TaxOffice.gif",			"Taxes population for income",									new FacilityCreator<TaxOffice> () {public TaxOffice create(OwnableSatellite<?> o, int i, long t){return new TaxOffice(o,i,t);}});
+	//RESEARCH_BUILDING	("Research Building",	400,	400,	35000l,		"images/ResearchBuilding.gif",	"Research new technologies to extend your capabilities",		new FacilityCreator<ResearchBuilding>(){public ResearchBuilding create(OwnableSatellite<?> o, int i, long t){return new ResearchBuilding(o,i,t);}}),
 	
 	final String name;
 	final int metal_cost;
 	final int money_cost;
 	final long build_time;
 	final ImageIcon icon;
+	final String image_path;
 	final FacilityCreator<?> creator;
 	final String tooltip;
 	
@@ -25,6 +26,7 @@ public strictfp enum FacilityType
 		money_cost=mon;
 		build_time=bt;
 		this.tooltip = tooltip;
+		image_path = icon_path;
 		creator = fc;
 		
 		if(!icon_path.equals(""))

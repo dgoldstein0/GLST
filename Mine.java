@@ -68,8 +68,6 @@ public strictfp class Mine extends Facility<Mine>{
 	}
 	
 	public FacilityType getType(){return FacilityType.MINE;}
-	public String imageLoc(){return "images/mine.gif";}
-	public String getName(){return "Mine";}
 	
 	public Mine(){}
 	public void setMining_rate(double mr){mining_rate = mr;}

@@ -999,7 +999,7 @@ public strictfp class GameControl
 		//if statement only necessary for GameSimulator
 		if(GI != null)
 		{
-			GI.update();
+			GI.update(time_elapsed);
 			
 			switch(GI.sat_or_ship_disp)
 			{

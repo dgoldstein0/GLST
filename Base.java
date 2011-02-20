@@ -134,6 +134,4 @@ public strictfp class Base extends Facility<Base>{
 	public void setTime_soldiers_taken(long t){time_soldiers_taken=t;}
 	
 	public FacilityType getType(){return FacilityType.BASE;}
-	public String imageLoc(){return "images/Base.gif";}
-	public String getName(){return "Base";}
 }

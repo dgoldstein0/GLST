@@ -164,7 +164,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		synchronized(facilities){
 			synchronized(owner.metal_lock){
 				synchronized(owner.money_lock){
-					if(owner.metal >= met && owner.money >= mon && facilities.size()<=building_limit)
+					if(owner.metal >= met && owner.money >= mon && facilities.size() < building_limit)
 					{
 						owner.metal -= met;
 						owner.money -= mon; 

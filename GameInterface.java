@@ -38,6 +38,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	JScrollPane pane1;
 	JScrollPane pane2;
 	boolean labels_made=false; //check if the labels have been made 
+	HashSet<SystemLabel> label_list;
 	JTextArea log;
 	JPanel stat_and_order;
 	JPanel theinterface;
@@ -199,6 +200,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		pane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		tabbedPane.addTab("Systems", pane1);
 		tabbedPane.setSelectedIndex(0);
+		label_list = new HashSet<SystemLabel>();
+		
 		
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor=GridBagConstraints.EAST;
@@ -640,6 +643,11 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 			move_center_x_speed=0;
 			move_center_y_speed=0;
 		}
+		else if(galaxy_state == GALAXY_STATE.PREVIEW)
+		{
+			//if we are previewing the galaxy, revert back to system view on mouse exit
+			drawSystem(true);
+		}
 	}
 
 	public void mousePressed(MouseEvent e) {
@@ -967,21 +975,28 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		}
 	}
 	
-	public void update()      					//subject to change
+	public void update(long t)      					//TODO: use only known systems
 	{		
 		if (!labels_made)
 		{
 			System.out.println("made");
 			known_sys=GC.map.systems;//GC.players[GC.player_id].known_systems;
-			known_sate=GC.players[GC.player_id].known_satellites;		
+				
 			labels_made=true;									
 			system_list.removeAll();		
 			for (GSystem system :known_sys)
 			{
 				SystemLabel label=new SystemLabel(system,this);
-				system_list.add(label);			
+				system_list.add(label);
+				label_list.add(label);
 			}
-		
+		}
+		else
+		{
+			for(SystemLabel l : label_list)
+			{
+				l.update(t);
+			}
 		}
 		
 		if(isSystemDisplayed())

@@ -16,9 +16,7 @@ public strictfp class ResearchBuilding extends Facility<ResearchBuilding>{
 	
 	public void updateStatus(long t){}
 	
-	public String imageLoc(){return "images/researchbldg.gif";}
 	public FacilityType getType(){return FacilityType.RESEARCH_BUILDING;}
-	public String getName(){return "Research Building";}
 
 	@Override
 	public void ownerChanged(long t) {

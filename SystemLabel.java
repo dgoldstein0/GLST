@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -34,7 +35,6 @@ public class SystemLabel extends JLabel implements MouseListener
 			
 			if (arg0.getClickCount()==2)
 			{
-				
 				the_interface.tabbedPane.setSelectedIndex(1);			
 				the_interface.sys=the_sys;					
 			}
@@ -102,5 +102,18 @@ public class SystemLabel extends JLabel implements MouseListener
 	public void mouseReleased(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void update(long t) {
+		
+		setForeground(replaceWhiteWithBlack(the_sys.currentColor(t)));
+	}
+	
+	public static Color replaceWhiteWithBlack(Color in)
+	{
+		if(in.equals(Color.WHITE))
+			return Color.BLACK;
+		else
+			return in;
 	}
 }
