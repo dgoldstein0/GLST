@@ -347,26 +347,25 @@ public strictfp class GameControl
 		}
 		
 		//CHOOSE AND LOAD MAP
-		
-		//stolen from GameLobby.actionPreformed
-		if(map_file == null)
-		{
-			int val = filechooser.showOpenDialog(GI.frame);
-			if(val==JFileChooser.APPROVE_OPTION){
-				map_file = filechooser.getSelectedFile();
-			} else {
-				startupDialog();
-				return;
-			}
-		}
-		
 		//load the map.  notify if errors.  This is supposed to validate the map by attempting to load it
 		
 		boolean map_loaded = false;
+		boolean map_valid = (map_file != null);
 		while(!map_loaded)
 		{
 			try{
 				try{
+					//stolen from GameLobby.actionPreformed
+					if(!map_valid)
+					{
+						int val = filechooser.showOpenDialog(GI.frame);
+						if(val==JFileChooser.APPROVE_OPTION){
+							map_file = filechooser.getSelectedFile();
+						} else {
+							startupDialog();
+							return;
+						}
+					}
 					loadMap(map_file); //parsing errors render the map invalid, causing one of the messages in the catch statements.
 				} catch(MapLoadException mle)
 				{
@@ -386,6 +385,7 @@ public strictfp class GameControl
 				
 			} catch(FileNotFoundException fnfe) {
 				handleError("Error - File not Found", "The file was not found.  Please choose another file.", !automate);
+				map_valid=false;
 			} catch(ClassCastException cce) {
 				handleError("Map Load: Class Casting Error", "The file you have selected is not a map", !automate);
 			} catch(NullPointerException npe) {

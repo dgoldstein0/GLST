@@ -13,6 +13,9 @@ public class TaxOfficeDataSaverControl extends
 		
 		ReversionEffects effects = new ReversionEffects();
 		
+		//revert whole planet
+		effects.objects_to_revert.add(new ReversionEffects.RevertObj(the_obj.location, saved_data[i].t));
+		
 		for(int j=getNextIndex(i);j != index; j = getNextIndex(j))
 		{
 			addAggressorsAtIndex(j, effects.objects_to_revert);
