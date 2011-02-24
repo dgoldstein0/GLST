@@ -31,7 +31,7 @@ public class GameSimulator {
 			actions2.add(new SimulateAction(1000l,SimulateAction.ACTION_TYPE.UPDATE));
 			actions2.add(new SimulateAction(1000l,SimulateAction.ACTION_TYPE.SAVE));
 			Simulation sim2 = new Simulation("simplemap.xml",1,actions2);
-			compareResults(1, sim1.simulate(), sim2.simulate());
+			compareResults(1, sim1.simulate(null), sim2.simulate(null));
 		}
 		
 		{
@@ -55,7 +55,7 @@ public class GameSimulator {
 			actions1.add(new SimulateAction(75l,SimulateAction.ACTION_TYPE.UPDATE));
 			
 			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
-			sim1.simulate();
+			sim1.simulate(null);
 		}
 		
 		{
@@ -86,7 +86,7 @@ public class GameSimulator {
 			actions1.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.SAVE));
 			
 			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
-			List<String> results1 = sim1.simulate();
+			List<String> results1 = sim1.simulate(null);
 			
 			
 			
@@ -99,7 +99,7 @@ public class GameSimulator {
 			actions2.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.SAVE));
 			
 			Simulation sim2 = new Simulation("simplemap.xml", 1, actions2);
-			List<String> results2 = sim2.simulate();
+			List<String> results2 = sim2.simulate(null);
 			
 			compareResults(3, results1, results2);
 			//saveResultsToFile(results1, "test3p1.txt");
@@ -107,50 +107,70 @@ public class GameSimulator {
 		}
 		
 		{
-			//Test Case 4
+			//Test case 4
 			System.out.println("Running Test 4...");
 			//test time-independence with FacilityBuildOrder
-			
-			FacilityBuildOrder shipyard_build_order = new FacilityBuildOrder();
-			shipyard_build_order.setBldg_type(FacilityType.SHIPYARD);
-			shipyard_build_order.setPlayer_id(0);
-			SatelliteDescriber<Planet> eulenspiegel_desc = new SatelliteDescriber<Planet>();
-				GSystemDescriber azha_sys = new GSystemDescriber();
-					azha_sys.setId(1);
-				eulenspiegel_desc.setBoss_describer(azha_sys);
-				eulenspiegel_desc.setId(0);
-			shipyard_build_order.setSat_desc(eulenspiegel_desc);
-			
-			shipyard_build_order.setScheduled_time(80l); //note the time here
-			
-			
-			List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
-			actions1.add(new SimulateAction(0l, shipyard_build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
-			actions1.add(new SimulateAction(80l,SimulateAction.ACTION_TYPE.UPDATE));
-			actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.UPDATE));
-			actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.SAVE));
-			long[] random_times = {198l,235l,240l,400l,405l,509l,737l,801l,840l,874l,940l,1000l};
-			for(long num : random_times)
-				actions1.add(new SimulateAction(num,SimulateAction.ACTION_TYPE.UPDATE));
-			actions1.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.SAVE));
-			
-			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
-			List<String> results1 = sim1.simulate();
-			
-			
-			
-			List<SimulateAction> actions2 = new ArrayList<SimulateAction>();
-			actions2.add(new SimulateAction(80l, SimulateAction.ACTION_TYPE.UPDATE));
-			actions2.add(new SimulateAction(80l, shipyard_build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
-			actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.UPDATE));
-			actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.SAVE));
-			actions2.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.UPDATE));
-			actions2.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.SAVE));
-			
-			Simulation sim2 = new Simulation("simplemap.xml", 1, actions2);
-			List<String> results2 = sim2.simulate();
-			
-			compareResults(4, results1, results2);
+			for(FacilityType t : FacilityType.values())
+			{
+				FacilityBuildOrder build_order = new FacilityBuildOrder();
+				build_order.setBldg_type(t);
+				build_order.setPlayer_id(0);
+				SatelliteDescriber<Planet> eulenspiegel_desc = new SatelliteDescriber<Planet>();
+					GSystemDescriber azha_sys = new GSystemDescriber();
+						azha_sys.setId(1);
+					eulenspiegel_desc.setBoss_describer(azha_sys);
+					eulenspiegel_desc.setId(0);
+				build_order.setSat_desc(eulenspiegel_desc);
+				
+				build_order.setScheduled_time(73l); //note the time here
+				
+				
+				List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
+				actions1.add(new SimulateAction(0l, build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
+				actions1.add(new SimulateAction(80l,SimulateAction.ACTION_TYPE.UPDATE));
+				actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.UPDATE));
+				actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.SAVE));
+				long[] random_times = {198l,235l,240l,400l,405l,509l,737l,801l,840l,874l,940l,50000l};
+				for(long num : random_times)
+					actions1.add(new SimulateAction(num,SimulateAction.ACTION_TYPE.UPDATE));
+				actions1.add(new SimulateAction(50000l, SimulateAction.ACTION_TYPE.SAVE));
+				
+				Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
+				List<String> results1 = sim1.simulate("log1.txt");
+				
+				
+				
+				List<SimulateAction> actions2 = new ArrayList<SimulateAction>();
+				actions2.add(new SimulateAction(80l, SimulateAction.ACTION_TYPE.UPDATE));
+				actions2.add(new SimulateAction(85l, build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
+				actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.UPDATE));
+				actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.SAVE));
+				actions2.add(new SimulateAction(50000l, SimulateAction.ACTION_TYPE.UPDATE));
+				actions2.add(new SimulateAction(50000l, SimulateAction.ACTION_TYPE.SAVE));
+				
+				Simulation sim2 = new Simulation("simplemap.xml", 1, actions2);
+				List<String> results2 = sim2.simulate("log2.txt");
+				
+				
+				List<SimulateAction> actions3 = new ArrayList<SimulateAction>();
+				actions3.add(new SimulateAction(40l, SimulateAction.ACTION_TYPE.UPDATE));
+				actions3.add(new SimulateAction(73l, build_order, SimulateAction.ACTION_TYPE.INSTANT_ORDER));
+				actions3.add(new SimulateAction(80l,SimulateAction.ACTION_TYPE.UPDATE));
+				actions3.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.UPDATE));
+				actions3.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.SAVE));
+				long[] random_times2 = {200l,270l,402l,408l,519l,787l,803l,856l,874l,940l,50000l};
+				for(long num : random_times2)
+					actions3.add(new SimulateAction(num,SimulateAction.ACTION_TYPE.UPDATE));
+				actions3.add(new SimulateAction(50000l, SimulateAction.ACTION_TYPE.SAVE));
+				
+				Simulation sim3 = new Simulation("simplemap.xml", 1, actions3);
+				List<String> results3 = sim3.simulate("log3.txt");
+				
+				saveResultsToFile(results2, "results2.txt");
+				saveResultsToFile(results3, "results3.txt");
+				compareResults(4, results1, results2);
+				compareResults(4, results2, results3);
+			}
 		}
 	}
 	
@@ -214,11 +234,12 @@ public class GameSimulator {
 			this.map_location = map_location;
 		}
 				
-		List<String> simulate()
+		List<String> simulate(String logfile_name)
 		{
 			GameControl GC = new GameControl(null);
 			GameInterface.GC = GC;
 			GC.startTest(num_players, true, new File(map_location));
+			GC.updater.setupLogFile((logfile_name == null) ? "log.txt" : logfile_name);
 			
 			ArrayList<String> results = new ArrayList<String>();
 			

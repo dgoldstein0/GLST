@@ -72,10 +72,8 @@ public strictfp class ShipyardCancelBuildOrder extends Order {
 
 	@Override
 	public void doInstantly(Galaxy g) {
-		if(the_yard == null)
-			the_yard = shipyard_describer.retrieveObject(g, scheduled_time);
-		if(the_ship == null)
-			the_ship = the_yard.manufac_queue.get(ship_id);
+		the_yard = shipyard_describer.retrieveObject(g, scheduled_time);
+		the_ship = the_yard.manufac_queue.get(ship_id);
 		
 		the_yard.removeFromQueue(the_ship, GameInterface.GC.updater.getTime(), true);
 	}

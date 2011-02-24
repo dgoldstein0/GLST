@@ -51,8 +51,7 @@ public strictfp class ShipyardBuildShipOrder extends Order {
 	@Override
 	public void doInstantly(Galaxy g) {
 		
-		if(the_yard == null)
-			the_yard = shipyard_describer.retrieveObject(g, scheduled_time);
+		the_yard = shipyard_describer.retrieveObject(g, scheduled_time);
 		
 		the_yard.addToQueue(new Ship(type), scheduled_time, true);
 	}

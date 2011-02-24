@@ -10,7 +10,7 @@ import javax.swing.SwingUtilities;
 
 public class GameUpdater {
 
-	static final boolean DEBUGGING = false;
+	static final boolean DEBUGGING = true;
 	
 	TimeManager TC;
 	final GameControl GC;
@@ -227,12 +227,13 @@ public class GameUpdater {
 				//TODO: collision detect?
 			}
 			
+			/*
 			//TODO: debuging code, should later be removed
 			if(DEBUGGING)
 			{
 				log("\r\nUpdated to " + update_to, GC.map);
 				log("\n",GC.players);
-			}
+			}*/
 		}
 		
 		setLast_time_updated(update_to);
@@ -264,10 +265,10 @@ public class GameUpdater {
 	
 	BufferedOutputStream logFile;
 	
-	public void setupLogFile()
+	public void setupLogFile(String logname)
 	{
 		try {
-			logFile = new BufferedOutputStream(new FileOutputStream("log.txt"));
+			logFile = new BufferedOutputStream(new FileOutputStream(logname));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -277,7 +278,7 @@ public class GameUpdater {
 	public void log(String message, Object o)
 	{
 		if(logFile == null)
-			setupLogFile();
+			setupLogFile("log.txt");
 		
 		try {
 			logFile.write(("\n"+message).getBytes());

@@ -126,20 +126,23 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		Facility<?> new_fac;
 		GameInterface GI;
 		
-	public FacilityAdder(Facility<?> f, GameInterface gi)
-	{
-		new_fac = f;
-		GI=gi;
-	}
-		
-	public void run() //this must run on the swing thread because we want to avoid running PlanetMoonCommandPanel.setSat() and this at the same time, because that can result in the same facility being displayed twice
+		public FacilityAdder(Facility<?> f, GameInterface gi)
 		{
-			synchronized(facilities)
+			new_fac = f;
+			GI=gi;
+		}
+		
+		public void run() //this must run on the swing thread because we want to avoid running PlanetMoonCommandPanel.setSat() and this at the same time, because that can result in the same facility being displayed twice
+		{
+			if(GI != null) //to satisfy testing framework
 			{
-				//notify interface
-				if(GI.sat_or_ship_disp == GameInterface.PANEL_DISP.SAT_PANEL && GI.SatellitePanel.the_sat == new_fac.location)
+				synchronized(facilities)
 				{
-					GI.SatellitePanel.displayFacility(new_fac);
+					//notify interface
+					if(GI.sat_or_ship_disp == GameInterface.PANEL_DISP.SAT_PANEL && GI.SatellitePanel.the_sat == new_fac.location)
+					{
+						GI.SatellitePanel.displayFacility(new_fac);
+					}
 				}
 			}
 		}
@@ -173,8 +176,10 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 						data_control.saveData();
 						//notify all players ***
 						if(notify)
+						{
 							GameInterface.GC.notifyAllPlayers(new FacilityBuildOrder(this, bldg_type, start_time));
-						
+						}
+							
 						return true;
 					}
 					else

@@ -57,8 +57,7 @@ public strictfp class CancelFacilityBuildOrder extends Order {
 	
 	@Override
 	public void doInstantly(Galaxy g) {
-		if(the_sat == null)
-			the_sat = sat_desc.retrieveObject(g, scheduled_time);
+		the_sat = sat_desc.retrieveObject(g, scheduled_time);
 		the_sat.cancelConstruction(scheduled_time, true);
 	}
 	
