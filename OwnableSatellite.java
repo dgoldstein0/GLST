@@ -192,13 +192,22 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		}
 	}
 	
-	public void cancelConstruction(long t, boolean notify)
+	//Cannot do instantly - getting back resources early would be problematic
+	public void cancelConstruction(long t)
 	{
+		double frac_remaining = (time_finish - t)/((double)bldg_in_progress.build_time);
+		
+		synchronized(owner.metal_lock)
+		{
+			synchronized(owner.money_lock)
+			{
+				owner.changeMoney((long)(frac_remaining*bldg_in_progress.money_cost));
+				owner.changeMetal((long)(frac_remaining*bldg_in_progress.metal_cost));
+			}
+		}
+		
 		bldg_in_progress=FacilityType.NO_BLDG;
 		data_control.saveData();
-		
-		if(notify)
-			GameInterface.GC.notifyAllPlayers(new CancelFacilityBuildOrder(this, t));
 	}
 	
 	

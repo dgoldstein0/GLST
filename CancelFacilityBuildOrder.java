@@ -48,7 +48,7 @@ public strictfp class CancelFacilityBuildOrder extends Order {
 			}
 			
 			//the actual execution of the order.
-			the_sat.cancelConstruction(scheduled_time, false); //(bldg_type, scheduled_time);
+			the_sat.cancelConstruction(scheduled_time); //(bldg_type, scheduled_time);
 		}
 		else
 			orderDropped();
@@ -56,9 +56,8 @@ public strictfp class CancelFacilityBuildOrder extends Order {
 	}
 	
 	@Override
-	public void doInstantly(Galaxy g) {
-		the_sat = sat_desc.retrieveObject(g, scheduled_time);
-		the_sat.cancelConstruction(scheduled_time, true);
+	public void doInstantly(Galaxy g) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
 	}
 	
 	public CancelFacilityBuildOrder(){mode = Order.NETWORK;}
