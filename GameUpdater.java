@@ -90,7 +90,7 @@ public class GameUpdater {
 		long time_elapsed=TC.getTime();
 		
 		//TODO: Debugging code, remove later
-		log("updateGame with time_elapsed=" + time_elapsed,null);
+		log(new GameSimulator.SimulateAction(time_elapsed, GameSimulator.SimulateAction.ACTION_TYPE.UPDATE));
 		
 		long update_to=getLast_time_updated();
 		//System.out.println("Updating to time_elapsed=" + Long.toString(time_elapsed));
@@ -275,17 +275,11 @@ public class GameUpdater {
 		}
 	}
 	
-	public void log(String message, Object o)
+	public void log(Object o)
 	{
 		if(logFile == null)
 			setupLogFile("log.txt");
 		
-		try {
-			logFile.write(("\n"+message).getBytes());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		if(o != null)
 		{
 			XMLEncoder2 encoder = new XMLEncoder2(logFile);

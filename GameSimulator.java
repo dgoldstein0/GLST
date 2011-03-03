@@ -263,23 +263,37 @@ public class GameSimulator {
 	public static class SimulateAction
 	{
 		public static enum ACTION_TYPE{UPDATE,SCHEDULE_ORDER,SAVE;}
+		public static enum ORDER_TYPE{NONE_SPECIFIED,LOCAL,REMOTE;}
 		
-		final long do_at_time;
-		final Order the_order;
-		final ACTION_TYPE type;
+		long do_at_time;
+		Order the_order;
+		ACTION_TYPE type;
+		ORDER_TYPE order_type;
+		
+		public SimulateAction(long time, Order o, ACTION_TYPE t, ORDER_TYPE ot)
+		{
+			do_at_time = time;
+			the_order = o;
+			type=t;
+			order_type=ot;
+		}
 		
 		public SimulateAction(long time, Order o, ACTION_TYPE t)
 		{
 			do_at_time = time;
 			the_order = o;
 			type=t;
+			order_type=ORDER_TYPE.NONE_SPECIFIED;
 		}
 		
 		public SimulateAction(long time, ACTION_TYPE t)
 		{
 			do_at_time = time;
 			type = t;
+			if(type == ACTION_TYPE.SCHEDULE_ORDER)
+				throw new IllegalArgumentException();
 			the_order = null;
+			order_type = ORDER_TYPE.NONE_SPECIFIED;
 		}
 		
 		public static class Comparer implements Comparator<SimulateAction>, Serializable
@@ -305,6 +319,21 @@ public class GameSimulator {
 				}
 			}
 		}
+		
+		@Deprecated
+		public SimulateAction()
+		{
+			order_type=ORDER_TYPE.NONE_SPECIFIED;
+		}
+		
+		public long getDo_at_time(){return do_at_time;}
+		public ORDER_TYPE getOrder_type(){return order_type;}
+		public void setOrder_type(ORDER_TYPE ot){order_type=ot;}
+		public void setDo_at_time(long t){do_at_time=t;}
+		public Order getThe_order(){return the_order;}
+		public void setThe_order(Order o){the_order = o;}
+		public ACTION_TYPE getType(){return type;}
+		public void setType(ACTION_TYPE t){type=t;}
 	}
 	
 	public static class SimulatedTimeControl implements TimeManager

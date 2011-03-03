@@ -807,7 +807,9 @@ public strictfp class GameControl
 	public void notifyAllPlayers(Order o)
 	{
 		//TODO: move debugging code
-		updater.log("local order @time=" + updater.getTime() + ":\n", o);
+		updater.log(new GameSimulator.SimulateAction(updater.getTime(), o,
+				GameSimulator.SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
+				GameSimulator.SimulateAction.ORDER_TYPE.LOCAL));
 		
 		//notify other players
 		if(OS != null)
@@ -923,7 +925,9 @@ public strictfp class GameControl
 						decoder.close();
 						
 						//TODO: move debugging code
-						updater.log("remote order @time=" + updater.getTime() + ":\n", o);
+						updater.log(new GameSimulator.SimulateAction(updater.getTime(), o,
+								GameSimulator.SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
+								GameSimulator.SimulateAction.ORDER_TYPE.REMOTE));
 						
 						System.out.println("\t" + o.getClass().getName());
 						updater.scheduleOrder(o);

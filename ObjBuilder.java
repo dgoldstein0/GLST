@@ -107,16 +107,19 @@ public class ObjBuilder<ObjType, ObjMaker> implements MouseListener
 				
 				public void run()
 				{
-					PlanetMoonCommandPanel p = GameInterface.GC.GI.SatellitePanel;
-					if(sat == p.the_sat
-							&& (p.state == PlanetMoonCommandPanel.PANEL_STATE.FACILITIES_DISPLAYED 
-									|| p.state == PlanetMoonCommandPanel.PANEL_STATE.FACILITY_CHOICES_DISPLAYED)  //TODO: if we ever have a queue of facilities to build, this won't work right
-							)
+					if(GameInterface.GC.GI != null)
 					{
-						p.setSat(sat); //TODO: this seems like a bit overkill... but I can't get the facilities to reappear
-						/*p.facilities_panel.removeAll();
-						p.displayAllFacilities();
-						p.facilities_panel.repaint();*/
+						PlanetMoonCommandPanel p = GameInterface.GC.GI.SatellitePanel;
+						if(p != null && sat == p.the_sat
+								&& (p.state == PlanetMoonCommandPanel.PANEL_STATE.FACILITIES_DISPLAYED 
+										|| p.state == PlanetMoonCommandPanel.PANEL_STATE.FACILITY_CHOICES_DISPLAYED)  //TODO: if we ever have a queue of facilities to build, this won't work right
+								)
+						{
+							p.setSat(sat); //TODO: this seems like a bit overkill... but I can't get the facilities to reappear
+							/*p.facilities_panel.removeAll();
+							p.displayAllFacilities();
+							p.facilities_panel.repaint();*/
+						}
 					}
 				}
 			}

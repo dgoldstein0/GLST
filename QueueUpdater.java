@@ -13,7 +13,7 @@ public class QueueUpdater implements Runnable {
 	{
 		System.out.println("update queue");
 		PlanetMoonCommandPanel panel = GameInterface.GC.GI.SatellitePanel;
-		if(yard.location.owner.getId() == GameInterface.GC.player_id
+		if(panel != null && yard.location.owner.getId() == GameInterface.GC.player_id
 				&& GameInterface.GC.GI.sat_or_ship_disp == GameInterface.PANEL_DISP.SAT_PANEL
 				&& panel.the_sat == yard.location
 				&& (panel.state == PlanetMoonCommandPanel.PANEL_STATE.SHIP_QUEUE_DISPLAYED || 

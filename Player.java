@@ -151,7 +151,7 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	public long getTime() {
 		return last_time;
 	}
-
+	
 	@Override
 	public void handleDataNotSaved(long time) {
 		// TODO Auto-generated method stub
@@ -159,7 +159,8 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	}
 
 	@Override
-	public void setTime(long t) {
-		last_time=t;
-	}
+	public void setTime(long t) {last_time=t;}
+	
+	public List<Saveable<?>> getResource_users(){return resource_users;}
+	public void setResource_users(List<Saveable<?>> l){resource_users=l;}
 }
