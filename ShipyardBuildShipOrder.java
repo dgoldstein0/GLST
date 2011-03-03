@@ -30,7 +30,7 @@ public strictfp class ShipyardBuildShipOrder extends Order {
 			{
 				Set<Order> orders = the_yard.data_control.revertToTime(scheduled_time);
 				orders.addAll(the_yard.location.data_control.revertToTime(scheduled_time)); //make sure it uses the right owner
-				the_yard.addToQueue(new Ship(type), scheduled_time, false);
+				the_yard.addToQueue(new Ship(type), scheduled_time);
 				return orders;
 			}
 			else orderDropped();
@@ -47,12 +47,4 @@ public strictfp class ShipyardBuildShipOrder extends Order {
 	public void setType(ShipType t){type=t;}
 	public int getPlayer_id(){return player_id;}
 	public void setPlayer_id(int pid){player_id=pid;}
-
-	@Override
-	public void doInstantly(Galaxy g) {
-		
-		the_yard = shipyard_describer.retrieveObject(g, scheduled_time);
-		
-		the_yard.addToQueue(new Ship(type), scheduled_time, true);
-	}
 }

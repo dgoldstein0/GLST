@@ -11,6 +11,12 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 		tax_rate = GalacticStrategyConstants.DEFAULT_INCOME_RATE;
 		data_control = new TaxOfficeDataSaverControl(this);
 		data_control.saveData();
+		
+		//set time to the next resource change, and save.  Need to align ourselves to the
+		//timing of resource updates, but can't do it via super() call because then our first
+		//record doesn't correspond to the time the TaxOffice was built
+		last_time = TimeControl.roundUpToNextResourceChange(t);
+		data_control.saveData();
 	}
 	
 	public double calcTaxingrate(){
@@ -59,12 +65,12 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 		tax_rate = calcTaxingrate();
 		add_money=0;
 		
-		if(t-last_time >= 3000 && location.owner != null) //do nothing unless the location has an owner
+		if(t-last_time >= GalacticStrategyConstants.TIME_BETWEEN_RESOURCES && location.owner != null) //do nothing unless the location has an owner
 		{
 			add_money += tax_rate*location.population;
-			last_time += 3000;
+			last_time += GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
 		}
-		location.owner.changeMoney(add_money);
+		location.owner.changeMoney(add_money, last_time, this);
 		data_control.saveData();
 	}
 	

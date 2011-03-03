@@ -20,8 +20,8 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 			saved_data[i] = c.create();
 	}
 	
-	//loading and saving data functions.  This is overridden in RelaxedDataSaverControl.
-	public void saveData()
+	//loading and saving data functions.
+	final public void saveData()
 	{
 		//if(the_obj instanceof Ship)
 		//	System.out.println(Integer.toString(((Ship)the_obj).id.queue_id) + " saving time " + Long.toString(((Ship)the_obj).time) + " at index " + Integer.toString(index));

@@ -47,4 +47,20 @@ public strictfp class TimeControl implements TimeManager
 	
 	public long gettime_elapsed(){return time_elapsed;}
 	public void settime_elapsed(long t){time_elapsed=t;}
+
+	/**roundUpToNextResourceChange
+	 * returns t rounded up to the next multiple of TIME_BETWEEN_RESOURCES.
+	 * if t is a multiple of TIME_BETWEEN_RESOURCES, then t is returned.
+	 * 
+	 * This is used to set the TaxOffice and Mine timing, since we want to make
+	 * sure they update on schedule and that they skip their first update,
+	 * since this would mean getting resources without putting in the actual time.
+	 * */
+	public static long roundUpToNextResourceChange(long t) {
+		long remainder = t % GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
+		if(remainder != 0)
+			return t + GalacticStrategyConstants.TIME_BETWEEN_RESOURCES - remainder;
+		else
+			return t;
+	}
 }

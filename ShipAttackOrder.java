@@ -88,9 +88,4 @@ public strictfp class ShipAttackOrder extends Order
 	public void setTgt_desc(Describer<? extends Targetable<?>> t){tgt_desc=t;}
 	public long getTarget_t(){return target_t;}
 	public void setTarget_t(long t){target_t=t;}
-
-	@Override
-	public void doInstantly(Galaxy g) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
-	}
 }

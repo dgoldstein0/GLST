@@ -13,8 +13,11 @@ public class TaxOfficeDataSaverControl extends
 		
 		ReversionEffects effects = new ReversionEffects();
 		
-		//revert whole planet
+		//revert whole planet - in case # of tax offices changed
 		effects.objects_to_revert.add(new ReversionEffects.RevertObj(the_obj.location, saved_data[i].t));
+		
+		//revert Player to adjust to correct amount of money
+		effects.objects_to_revert.add(new ReversionEffects.RevertObj(the_obj.location.owner, saved_data[i].t));
 		
 		for(int j=getNextIndex(i);j != index; j = getNextIndex(j))
 		{
@@ -22,12 +25,5 @@ public class TaxOfficeDataSaverControl extends
 		}
 		
 		return effects;
-	}
-	protected void doReversionPrep(int indx)
-	{
-		for(int i = getNextIndex(indx); i != index; i++)
-		{
-			the_obj.location.data_control.saved_data[the_obj.location.data_control.getIndexForTime(saved_data[i].t)].own.changeMoney(-saved_data[i].money_added);
-		}
 	}
 }

@@ -30,7 +30,7 @@ public strictfp class FacilityBuildOrder extends Order
 		{
 			Set<Order> need_to_reexecute = the_sat.data_control.revertToTime(scheduled_time); //TODO: will revert everything associated with the planet (via facilities).  necessary?		
 			
-			the_sat.scheduleConstruction(bldg_type, scheduled_time, false);
+			the_sat.scheduleConstruction(bldg_type, scheduled_time);
 			
 			return need_to_reexecute;
 		}
@@ -48,11 +48,4 @@ public strictfp class FacilityBuildOrder extends Order
 	public void setBldg_type(FacilityType b){bldg_type=b;}
 	public int getPlayer_id(){return player_id;}
 	public void setPlayer_id(int id){player_id=id;}
-
-	@Override
-	public void doInstantly(Galaxy g) {
-		the_sat = sat_desc.retrieveObject(g, scheduled_time);
-		
-		the_sat.scheduleConstruction(bldg_type, scheduled_time, true);
-	}
 }

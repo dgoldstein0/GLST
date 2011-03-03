@@ -9,6 +9,7 @@ public strictfp class GalacticStrategyConstants
 	
 	//time_granularity is the amount of time, in ms, between updates of the game.  Used as a time increment in ship physics.
 	final static long TIME_GRANULARITY = 20; //20ms -> 50 fps
+	final static long TIME_BETWEEN_RESOURCES = 3000; //you get resources every 3 seconds.
 	final static int data_capacity=50; //amount of time grains to save data from.  50 grains at 20ms per grain = 1 second
 	
 	//******************************************PHYSICS TO PROGRAM CONVERSIONS*******************************************//

@@ -1,6 +1,8 @@
 
 import java.util.*;
 
+import javax.swing.SwingUtilities;
+
 public strictfp class Shipyard extends Facility<Shipyard>{
 
 	Hashtable<Integer, Ship> manufac_queue;      //manufacturing queue - the list of ships to build
@@ -35,7 +37,24 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 	public long getTime_on_current_ship(){return time_on_current_ship;}
 	public void setTime_on_current_ship(long t){time_on_current_ship=t;}
 	
-	public boolean addToQueue(Ship ship, long t, boolean notify)
+	/**has same return value as addToQueue, but called by interface to predict whether order will be valid*/
+	public boolean canBuild(ShipType type)
+	{
+		int met = type.metal_cost;
+		int mon = type.money_cost;
+		
+		synchronized(location.owner.metal_lock){
+			synchronized(location.owner.money_lock){
+				if(location.owner.getMetal() >= met && location.owner.getMoney() >= mon)
+					return true;
+				else
+					return false;
+			}
+		}
+	}
+	
+	/**has same return value as canBuild, but this is called to actually start building the ship*/
+	public boolean addToQueue(Ship ship, long t)
 	{
 		boolean ret;
 		int met = ship.type.metal_cost;
@@ -43,22 +62,21 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 		
 		synchronized(location.owner.metal_lock){
 			synchronized(location.owner.money_lock){
-				if(location.owner.metal >= met && location.owner.money >= mon)
+				if(location.owner.getMetal() >= met && location.owner.getMoney() >= mon)
 				{
-					location.owner.metal -= met;
-					location.owner.money -= mon;
+					location.owner.changeMetal(-met, t, this);
+					location.owner.changeMoney(-mon, t, this);
 					
 					ship.id = new Ship.ShipId(next_queue_id, this);
 					synchronized(queue_lock)
 					{
 						manufac_queue.put(next_queue_id++,ship);
-						if(manufac_queue.size() == 1) //the ship must start production immediately.  This marks the start time.
-							last_time=t;
 					}
+					last_time=t;
 					data_control.saveData();
-					if(notify)
-						GameInterface.GC.notifyAllPlayers(new ShipyardBuildShipOrder(this, ship.type, t));
 					ret=true;
+					
+					SwingUtilities.invokeLater(ObjBuilder.shipManufactureFuncs.getCallback(this));
 				}
 				else
 					ret=false;
@@ -67,7 +85,7 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 		return ret;
 	}
 	
-	public void removeFromQueue(Ship ship, long t, boolean notify)
+	public void removeFromQueue(Ship ship, long t)
 	{
 		synchronized(queue_lock)
 		{
@@ -80,13 +98,19 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 			else
 			{
 				//refund money and metal
-				location.owner.changeMoney(ship.type.money_cost);
-				location.owner.changeMetal(ship.type.metal_cost);
+				synchronized(location.owner.metal_lock)
+				{
+					synchronized(location.owner.money_lock)
+					{
+						location.owner.changeMoney(ship.type.money_cost, t, this);
+						location.owner.changeMetal(ship.type.metal_cost, t, this);
+					}
+				}
 			}
+			last_time=t;
 			data_control.saveData();
 			
-			if(notify)
-				GameInterface.GC.notifyAllPlayers(new ShipyardCancelBuildOrder(this, ship, t));
+			SwingUtilities.invokeLater(new QueueUpdater(this));
 			
 			return;
 		}
@@ -124,10 +148,7 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 						produce(t-time_on_current_ship);
 						
 						//update the queue display... if it is being displayed.
-						if(location.owner.getId() == GameInterface.GC.player_id && GameInterface.GC.GI.sat_or_ship_disp == GameInterface.PANEL_DISP.SAT_PANEL
-							&& GameInterface.GC.GI.SatellitePanel.the_sat.equals(location) && GameInterface.GC.GI.SatellitePanel.state == PlanetMoonCommandPanel.SHIP_QUEUE_DISPLAYED
-							&& GameInterface.GC.GI.SatellitePanel.the_shipyard == this)
-							GameInterface.GC.GI.SatellitePanel.displayQueue();
+						SwingUtilities.invokeLater(new QueueUpdater(this));
 						
 						if(manufac_queue.size() == 0)
 							time_on_current_ship = 0;

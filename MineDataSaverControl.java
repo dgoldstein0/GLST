@@ -1,5 +1,3 @@
-import java.util.HashMap;
-
 public strictfp class MineDataSaverControl extends FacilityDataSaverControl<Mine, MineDataSaver> {
 	
 	public MineDataSaverControl(Mine m) {
@@ -15,8 +13,11 @@ public strictfp class MineDataSaverControl extends FacilityDataSaverControl<Mine
 		
 		ReversionEffects effects = new ReversionEffects();
 		
-		//revert whole planet
+		//revert whole planet - in case the number of mines changed
 		effects.objects_to_revert.add(new ReversionEffects.RevertObj(the_obj.location, saved_data[indx].t));
+		
+		//revert Player too
+		effects.objects_to_revert.add(new ReversionEffects.RevertObj(the_obj.location.owner, saved_data[indx].t));
 		
 		//revert all other mines too
 		/*OwnableSatelliteDataSaverControl<?> loc_ctrl = the_obj.location.data_control;
@@ -36,13 +37,5 @@ public strictfp class MineDataSaverControl extends FacilityDataSaverControl<Mine
 		}
 		
 		return effects;
-	}
-	
-	protected void doReversionPrep(int indx)
-	{
-		for(int i = getNextIndex(indx); i != index; i++)
-		{
-			the_obj.location.data_control.saved_data[the_obj.location.data_control.getIndexForTime(saved_data[i].t)].own.changeMetal(-saved_data[i].met_added);
-		}
 	}
 }

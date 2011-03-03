@@ -13,6 +13,12 @@ public strictfp class Mine extends Facility<Mine>{
 		mining_rate = location.mining_r;
 		data_control = new MineDataSaverControl(this);
 		data_control.saveData();
+		
+		//set time to the next resource change, and save.  Need to align ourselves to the
+		//timing of resource updates, but can't do it via super() call because then our first
+		//record doesn't correspond to the time the Mine was built
+		last_time = TimeControl.roundUpToNextResourceChange(t);
+		data_control.saveData();
 	}
 
 	public void setMiningrate(int r)             //possibly upgrade mining speed through research
@@ -58,12 +64,12 @@ public strictfp class Mine extends Facility<Mine>{
 			
 		}
 		add_met=0;
-		if(t-last_time >= 3000 && location.owner != null) //do nothing unless the location has an owner
+		if(t-last_time >= GalacticStrategyConstants.TIME_BETWEEN_RESOURCES && location.owner != null) //do nothing unless the location has an owner
 		{
-			add_met += mining_rate*3000;
-			last_time += 3000;
+			add_met += mining_rate*GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
+			last_time += GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
 		}
-		location.owner.changeMetal(add_met);
+		location.owner.changeMetal(add_met, last_time, this);
 		data_control.saveData();
 	}
 	

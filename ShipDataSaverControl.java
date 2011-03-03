@@ -110,6 +110,7 @@ public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, S
 	public void doReversionPrep(int indx)
 	{
 		//this is responsible for reverting the ship into warp or out of warp
+		//effectively, this avoids a data saver for ships in warp.  Pretty efficient.
 		if(saved_data[indx].md == Ship.MODES.IN_WARP)
 		{
 			the_obj.owner.ships_in_transit.add(the_obj);

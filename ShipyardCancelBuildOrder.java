@@ -45,7 +45,7 @@ public strictfp class ShipyardCancelBuildOrder extends Order {
 					orders.addAll(the_ship.data_control.revertToTime(scheduled_time));
 					orders.addAll(ctrl.revertToTime(scheduled_time)); //make sure it uses the right owner
 					
-					the_yard.removeFromQueue(the_ship, scheduled_time, false);
+					the_yard.removeFromQueue(the_ship, scheduled_time);
 				}
 				else
 					orderDropped();
@@ -69,12 +69,4 @@ public strictfp class ShipyardCancelBuildOrder extends Order {
 	public void setShip_id(int i){ship_id=i;}
 	public int getPlayer_id(){return player_id;}
 	public void setPlayer_id(int id){player_id=id;}
-
-	@Override
-	public void doInstantly(Galaxy g) {
-		the_yard = shipyard_describer.retrieveObject(g, scheduled_time);
-		the_ship = the_yard.manufac_queue.get(ship_id);
-		
-		the_yard.removeFromQueue(the_ship, GameInterface.GC.updater.getTime(), true);
-	}
 }

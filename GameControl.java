@@ -1012,8 +1012,8 @@ public strictfp class GameControl
 			}
 			
 			GI.time.setText("Time: " + time_elapsed/1000);
-			GI.metal.setText("Metal: " + Math.round(players[player_id].metal));
-			GI.money.setText(GameInterface.indentation + "Money: " + Math.round(players[player_id].money));
+			GI.metal.setText("Metal: " + Math.round(players[player_id].getMetal()));
+			GI.money.setText(GameInterface.indentation + "Money: " + Math.round(players[player_id].getMoney()));
 			GI.redraw();
 		}
 	}

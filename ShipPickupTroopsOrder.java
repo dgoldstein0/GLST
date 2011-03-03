@@ -63,9 +63,4 @@ public strictfp class ShipPickupTroopsOrder extends Order {
 	public void setShip_desc(Describer<Ship> sd){ship_desc=sd;}
 	public int getPlayer_id(){return player_id;}
 	public void setPlayer_id(int id){player_id=id;}
-
-	@Override
-	public void doInstantly(Galaxy g) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
-	}
 }

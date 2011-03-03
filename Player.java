@@ -1,15 +1,26 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 import java.util.ArrayList;
 
-public strictfp class Player
+public strictfp class Player implements RelaxedSaveable<Player>
 {
 	String name;
 	
 	Object metal_lock = new Object();
 	Object money_lock = new Object();
-	double money;
-	double metal;
+	
+	/**any function updating both metal and money should grab metal_lock before money_lock
+	 * @GaurdedBy money_lock*/
+	private double money;
+	
+	/**any function updating both metal and money should grab metal_lock before money_lock
+	 * @GaurdedBy metal_lock*/
+	private double metal;
+	
+	long last_time;
+	List<Saveable<?>> resource_users;
+	PlayerDataSaverControl data_control;
 	
 	Color color;
 	int id; //id is used to identify players.  These are assigned by the host of the game.
@@ -41,6 +52,7 @@ public strictfp class Player
 	{
 		name = nm;
 		hosting = is_host;
+		data_control = new PlayerDataSaverControl(this);
 		setDefaultValues();
 	}
 	
@@ -52,6 +64,8 @@ public strictfp class Player
 		known_systems = new ArrayList<GSystem>();
 		known_satellites = new ArrayList<Satellite<?>>();
 		ready=false;
+		resource_users = new ArrayList<Saveable<?>>();
+		last_time=0;
 	}
 	
 	public Color getColor()
@@ -67,7 +81,7 @@ public strictfp class Player
 	}
 	
 	//return true = successfully changed, return false = player doesn't have enough money.
-	public boolean changeMoney(double m)
+	public boolean changeMoney(double m, long t, Saveable<?> requester)
 	{
 		boolean ret=false;
 		synchronized(money_lock){
@@ -76,12 +90,19 @@ public strictfp class Player
 				money += m;
 				ret=true;
 			}
+			
+			//if request fails, a roll-back might cause it to succeed, so still save the requester
+			if(t != last_time)
+					resource_users.clear();
+			last_time=t;
+			resource_users.add(requester);
+			data_control.saveData();
 		}
 		return ret;
 	}
 	
 	//return true = successfully changed, return false = player doesn't have enough money.
-	public boolean changeMetal(double m)
+	public boolean changeMetal(double m, long t, Saveable<?> requester)
 	{
 		boolean ret=false;
 		synchronized(metal_lock){
@@ -90,6 +111,13 @@ public strictfp class Player
 				metal += m;
 				ret=true;
 			}
+			
+			//if request fails, a roll-back might cause it to succeed, so still save the requester
+			if(t != last_time)
+				resource_users.clear();
+			last_time=t;
+			resource_users.add(requester);
+			data_control.saveData();
 		}
 		return ret;
 	}
@@ -103,9 +131,9 @@ public strictfp class Player
 
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
-	public double getMoney(){return money;}
+	public double getMoney(){synchronized(money_lock){return money;}}
 	public void setMoney(double m){money=m;}
-	public double getMetal(){return metal;}
+	public double getMetal(){synchronized(metal_lock){return metal;}}
 	public void setMetal(double m){metal=m;}
 	public int getId(){return id;}
 	public void setId(int x){id=x;}
@@ -113,4 +141,25 @@ public strictfp class Player
 	public void setReady(boolean r){ready=r;}
 	public ArrayList<Ship> getShips_in_transit(){return ships_in_transit;}
 	public void setShips_in_transit(ArrayList<Ship> s){ships_in_transit=s;}
+
+	@Override
+	public PlayerDataSaverControl getDataControl() {
+		return data_control;
+	}
+
+	@Override
+	public long getTime() {
+		return last_time;
+	}
+
+	@Override
+	public void handleDataNotSaved(long time) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setTime(long t) {
+		last_time=t;
+	}
 }

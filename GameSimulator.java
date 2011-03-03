@@ -152,24 +152,8 @@ public class GameSimulator {
 				List<String> results2 = sim2.simulate("log2.txt");
 				
 				
-				List<SimulateAction> actions3 = new ArrayList<SimulateAction>();
-				actions3.add(new SimulateAction(40l, SimulateAction.ACTION_TYPE.UPDATE));
-				actions3.add(new SimulateAction(73l, build_order, SimulateAction.ACTION_TYPE.INSTANT_ORDER));
-				actions3.add(new SimulateAction(80l,SimulateAction.ACTION_TYPE.UPDATE));
-				actions3.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.UPDATE));
-				actions3.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.SAVE));
-				long[] random_times2 = {200l,270l,402l,408l,519l,787l,803l,856l,874l,940l,50000l};
-				for(long num : random_times2)
-					actions3.add(new SimulateAction(num,SimulateAction.ACTION_TYPE.UPDATE));
-				actions3.add(new SimulateAction(50000l, SimulateAction.ACTION_TYPE.SAVE));
-				
-				Simulation sim3 = new Simulation("simplemap.xml", 1, actions3);
-				List<String> results3 = sim3.simulate("log3.txt");
-				
-				saveResultsToFile(results2, "results2.txt");
-				saveResultsToFile(results3, "results3.txt");
+				//saveResultsToFile(results2, "results2.txt");
 				compareResults(4, results1, results2);
-				compareResults(4, results2, results3);
 			}
 		}
 	}
@@ -259,9 +243,6 @@ public class GameSimulator {
 					case SCHEDULE_ORDER:
 						GC.updater.pending_execution.add(action.the_order);
 						break;
-					case INSTANT_ORDER:
-						action.the_order.doInstantly(GC.map);
-						break;
 					case SAVE:
 						ByteArrayOutputStream os = new ByteArrayOutputStream();
 						XMLEncoder encoder = new XMLEncoder(os);
@@ -281,7 +262,7 @@ public class GameSimulator {
 	
 	public static class SimulateAction
 	{
-		public static enum ACTION_TYPE{UPDATE,SCHEDULE_ORDER,INSTANT_ORDER,SAVE;}
+		public static enum ACTION_TYPE{UPDATE,SCHEDULE_ORDER,SAVE;}
 		
 		final long do_at_time;
 		final Order the_order;

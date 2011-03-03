@@ -55,11 +55,6 @@ public strictfp class CancelFacilityBuildOrder extends Order {
 		return orders_to_reexecute;
 	}
 	
-	@Override
-	public void doInstantly(Galaxy g) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
-	}
-	
 	public CancelFacilityBuildOrder(){mode = Order.NETWORK;}
 	public SatelliteDescriber<? extends OwnableSatellite<?>> getSat_desc(){return sat_desc;}
 	public void setSat_desc(SatelliteDescriber<? extends OwnableSatellite<?>> s){sat_desc=s;}

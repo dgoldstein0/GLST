@@ -154,8 +154,31 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		return ((double)(t-time_start))/((double)(time_finish-time_start));
 	}
 	
-	//return value is true if the building will be built, and false if the player does not have enough money/metal to build it
-	public boolean scheduleConstruction(FacilityType bldg_type, long start_time, boolean notify)
+	/**@return true if the building could be built right now, false otherwise.
+	 * this will return the same value as scheduleConstruction, but is meant
+	 * to be called by GUI code to check if an order makes sense before scheduling it.*/
+	public boolean canBuild(FacilityType bldg_type)
+	{
+		int met = bldg_type.metal_cost, mon=bldg_type.money_cost; //metal and money costs
+		
+		synchronized(facilities){
+			synchronized(owner.metal_lock){
+				synchronized(owner.money_lock){
+					if(owner.getMetal() >= met && owner.getMoney() >= mon && facilities.size() < building_limit)
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			}
+		}
+	}
+	
+	/**@return true if the building will be built, false if not successful*/
+	public boolean scheduleConstruction(FacilityType bldg_type, long start_time)
 	{
 		bldg_in_progress = bldg_type;
 		time_start = start_time;
@@ -167,19 +190,16 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		synchronized(facilities){
 			synchronized(owner.metal_lock){
 				synchronized(owner.money_lock){
-					if(owner.metal >= met && owner.money >= mon && facilities.size() < building_limit)
+					if(owner.getMetal() >= met && owner.getMoney() >= mon && facilities.size() < building_limit)
 					{
-						owner.metal -= met;
-						owner.money -= mon; 
+						owner.changeMetal(-met, start_time, this);
+						owner.changeMoney(-mon, start_time, this); 
 						
 						time=start_time;
 						data_control.saveData();
-						//notify all players ***
-						if(notify)
-						{
-							GameInterface.GC.notifyAllPlayers(new FacilityBuildOrder(this, bldg_type, start_time));
-						}
-							
+						
+						SwingUtilities.invokeLater(ObjBuilder.facilityManufactureFuncs.getCallback(this));
+						
 						return true;
 					}
 					else
@@ -201,8 +221,8 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		{
 			synchronized(owner.money_lock)
 			{
-				owner.changeMoney((long)(frac_remaining*bldg_in_progress.money_cost));
-				owner.changeMetal((long)(frac_remaining*bldg_in_progress.metal_cost));
+				owner.changeMoney((long)(frac_remaining*bldg_in_progress.money_cost), t, this);
+				owner.changeMetal((long)(frac_remaining*bldg_in_progress.metal_cost), t, this);
 			}
 		}
 		

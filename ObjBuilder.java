@@ -32,38 +32,93 @@ public class ObjBuilder<ObjType, ObjMaker> implements MouseListener
 	/**Client code should not directly instantiate a version of this inner class,
 	 * but should rather use one of the static variables ShipManufactureFuncs or
 	 * FacilityManufactureFuncs*/
-	private static abstract class ManufactureFuncs<ObjType, ObjMaker>
+	public static abstract class ManufactureFuncs<ObjType, ObjMaker>
 	{
+		private ManufactureFuncs(){}
 		public abstract boolean manufacture(ObjMaker maker, ObjType type, PlanetMoonCommandPanel p);
+		public abstract Runnable getCallback(ObjMaker maker);
 		public abstract void doneBuilding(PlanetMoonCommandPanel p);
 	}
 	
 	public static ManufactureFuncs<ShipType, Shipyard> shipManufactureFuncs = new ManufactureFuncs<ShipType, Shipyard>()
 		{
+			@Override
 			public boolean manufacture(Shipyard maker, ShipType type, PlanetMoonCommandPanel p)
 			{
-				return maker.addToQueue(new Ship(type), GameInterface.GC.updater.getTime(), true);
+				boolean order_is_valid = maker.canBuild(type);
+				if(order_is_valid)
+				{
+					GameInterface.GC.scheduleOrder(new ShipyardBuildShipOrder(maker, type, GameInterface.GC.updater.getTime()));
+				}
+				return order_is_valid;
 			}
+			
+			@Override
 			public void doneBuilding(PlanetMoonCommandPanel p)
 			{
-				p.build_ship.setEnabled(true);
-				p.displayQueue();
+				p.return_to_queue = true;
+				//p.build_ship.setEnabled(true);
+				//p.displayQueue();
+			}
+
+			@Override
+			public Runnable getCallback(Shipyard maker) {
+				return new QueueUpdater(maker);
 			}
 		};
 	public static ManufactureFuncs<FacilityType, OwnableSatellite<?>> facilityManufactureFuncs = new ManufactureFuncs<FacilityType,OwnableSatellite<?>>()
 		{
+			@Override
 			public boolean manufacture(OwnableSatellite<?> maker, FacilityType type, PlanetMoonCommandPanel p)
 			{
-				p.need_to_reset = maker.scheduleConstruction(type, GameInterface.GC.updater.getTime(), true);
+				p.need_to_reset = maker.canBuild(type);
+				if(p.need_to_reset)
+				{
+					GameInterface.GC.scheduleOrder(new FacilityBuildOrder(maker, type, GameInterface.GC.updater.getTime()));
+				}
 				return p.need_to_reset;
 			}
 			
+			@Override
 			public void doneBuilding(PlanetMoonCommandPanel p)
 			{
-				p.setSat(p.the_sat); //TODO: this seems like a bit overkill... but I can't get the facilities to reappear
+				//DO NOTHING!  callback should be enough
+				
+				//p.setSat(p.the_sat);
 				/*p.facilities_panel.removeAll();
 				p.displayAllFacilities();
 				p.facilities_panel.repaint();*/
+			}
+			
+			@Override
+			public Runnable getCallback(OwnableSatellite<?> maker)
+			{
+				return new Callback(maker);
+			}
+			
+			class Callback implements Runnable
+			{
+				OwnableSatellite<?> sat;
+				
+				public Callback(OwnableSatellite<?> s)
+				{
+					sat = s;
+				}
+				
+				public void run()
+				{
+					PlanetMoonCommandPanel p = GameInterface.GC.GI.SatellitePanel;
+					if(sat == p.the_sat
+							&& (p.state == PlanetMoonCommandPanel.PANEL_STATE.FACILITIES_DISPLAYED 
+									|| p.state == PlanetMoonCommandPanel.PANEL_STATE.FACILITY_CHOICES_DISPLAYED)  //TODO: if we ever have a queue of facilities to build, this won't work right
+							)
+					{
+						p.setSat(sat); //TODO: this seems like a bit overkill... but I can't get the facilities to reappear
+						/*p.facilities_panel.removeAll();
+						p.displayAllFacilities();
+						p.facilities_panel.repaint();*/
+					}
+				}
 			}
 		};
 	

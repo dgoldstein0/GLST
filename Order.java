@@ -45,7 +45,4 @@ public strictfp abstract class Order implements Comparable<Order>
 	{
 		private static final long serialVersionUID = 2332552748374034863L;
 	}
-
-	/**Used for debugging to instantly execute an order, like the UI might do*/
-	public abstract void doInstantly(Galaxy g) throws UnsupportedOperationException;
 }

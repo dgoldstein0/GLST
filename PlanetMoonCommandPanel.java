@@ -27,14 +27,13 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 	
 	boolean no_base_mode;
 	
-	int state;
-		final static int FACILITIES_DISPLAYED = 0;
-		final static int SHIP_QUEUE_DISPLAYED = 1;
-		final static int SHIP_CHOICES_DISPLAYED = 2;
-		final static int FACILITY_CHOICES_DISPLAYED = 3;
+	static enum PANEL_STATE{NOT_DISPLAYED, FACILITIES_DISPLAYED, SHIP_QUEUE_DISPLAYED, SHIP_CHOICES_DISPLAYED, FACILITY_CHOICES_DISPLAYED;};
 	
+	PANEL_STATE state;
+			
 	
 	HashSet<FacilityStatusUpdater> facility_updaters;
+	public boolean return_to_queue;
 	
 	public PlanetMoonCommandPanel()
 	{
@@ -71,12 +70,13 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		stats_panel.setLayout(stats_layout);
 		
 		no_base_mode = false;
+		the_shipyard = null;
 	}
 	
 	public void setSat(Satellite<?> s)
 	{
 		the_sat=s;
-		state = FACILITIES_DISPLAYED;
+		state = PANEL_STATE.FACILITIES_DISPLAYED;
 		
 		//now update the panel
 		removeAll();
@@ -210,7 +210,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 	
 	public void displayFacility(Facility<?> f)
 	{
-		if(state == FACILITIES_DISPLAYED)
+		if(state == PANEL_STATE.FACILITIES_DISPLAYED)
 		{
 			JPanel the_panel = new JPanel();
 			BoxLayout bl = new BoxLayout(the_panel, BoxLayout.Y_AXIS);
@@ -274,7 +274,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		addStats();
 		stats_panel.add(progress_bar);
 		
-		state=SHIP_QUEUE_DISPLAYED;
+		state=PANEL_STATE.SHIP_QUEUE_DISPLAYED;
 		facility_updaters.clear();
 		
 		//set up the basic attributes section.  This includes the text "shipyard", picture, and health progress bar
@@ -344,7 +344,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 	private void facilityChoices()
 	{
 		facilities_panel.removeAll();
-		state = FACILITY_CHOICES_DISPLAYED;
+		state = PANEL_STATE.FACILITY_CHOICES_DISPLAYED;
 		FacilityType[] fTypes = FacilityType.values();
 		
 		int first_fac;
@@ -400,7 +400,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 	
 	public void displayQueue()
 	{
-		state = SHIP_QUEUE_DISPLAYED;
+		state = PANEL_STATE.SHIP_QUEUE_DISPLAYED;
 		facilities_panel.removeAll();
 		synchronized(the_shipyard.queue_lock)
 		{
@@ -441,7 +441,10 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 	private void displayShipTypes()
 	{
 		facilities_panel.removeAll();
-		state = SHIP_CHOICES_DISPLAYED;
+		
+		state = PANEL_STATE.SHIP_CHOICES_DISPLAYED;
+		return_to_queue = false;
+		
 		ShipType[] sTypes = ShipType.values();
 		for(int i=1; i < sTypes.length; i++) //start at 1 since MISSILE is type 0
 		{
@@ -490,7 +493,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		}
 		else if(e.getSource() == cancel)
 		{
-			if(state == FACILITY_CHOICES_DISPLAYED)
+			if(state == PANEL_STATE.FACILITY_CHOICES_DISPLAYED)
 			{
 				build.setEnabled(true);
 				cancel.setEnabled(false);
@@ -508,7 +511,7 @@ public class PlanetMoonCommandPanel extends JPanel implements ActionListener
 		}
 		else if(e.getSource() == cancel_build_ship)
 		{
-			if(state == SHIP_CHOICES_DISPLAYED)
+			if(state == PANEL_STATE.SHIP_CHOICES_DISPLAYED)
 			{
 				build_ship.setEnabled(true);
 				displayQueue();
