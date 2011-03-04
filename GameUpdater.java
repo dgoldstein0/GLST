@@ -1,4 +1,5 @@
 import java.beans.ExceptionListener;
+import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,13 +42,8 @@ public class GameUpdater {
 		TM.stopTask();
 		
 		//TODO: debugging code, should later be removed
-		try {
-			if(logFile != null)
-				logFile.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		if(logFile != null)
+			logFile.close();
 	}
 	
 	public long getTime()
@@ -263,12 +259,13 @@ public class GameUpdater {
 		}
 	}
 	
-	BufferedOutputStream logFile;
+	XMLEncoder logFile;
 	
 	public void setupLogFile(String logname)
 	{
 		try {
-			logFile = new BufferedOutputStream(new FileOutputStream(logname));
+			logFile = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(logname)));
+			logFile.setExceptionListener(new MyExceptionListener());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -282,10 +279,10 @@ public class GameUpdater {
 		
 		if(o != null)
 		{
-			XMLEncoder2 encoder = new XMLEncoder2(logFile);
-			encoder.setExceptionListener(new MyExceptionListener());
-			encoder.writeObject(o);
-			encoder.finish();
+			synchronized(logFile)
+			{
+				logFile.writeObject(o);
+			}
 		}
 	}
 	

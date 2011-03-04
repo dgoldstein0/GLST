@@ -1,7 +1,10 @@
+import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -156,6 +159,15 @@ public class GameSimulator {
 				compareResults(4, results1, results2);
 			}
 		}
+		
+		{
+			//Test Case 5
+			System.out.println("Running Test 5...");
+			try{
+				Simulation sim1 = loadSimFromFile("simplemap.xml", 2, new FileInputStream(new File("testcases/test5-1.txt")));
+				sim1.simulate("newlog.txt");
+			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 5");}
+		}
 	}
 	
 	public static void compareResults(int test_num, List<String> l1, List<String> l2)
@@ -203,6 +215,20 @@ public class GameSimulator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static Simulation loadSimFromFile(String map, int num_players, InputStream file)
+	{
+		List<SimulateAction> actions = new ArrayList<SimulateAction>();
+		XMLDecoder d = new XMLDecoder(file);
+		d.setExceptionListener(new XMLErrorDetector());
+		try{
+			while(true)
+				actions.add((SimulateAction)d.readObject());
+		}catch(ArrayIndexOutOfBoundsException e){}
+		d.close();
+		
+		return new Simulation(map, num_players, actions);
 	}
 	
 	public static class Simulation
