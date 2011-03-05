@@ -528,7 +528,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		return type.img;
 	}
 	
-	public static class ShipId extends FlyerId<ShipId>
+	public static class ShipId extends Flyer.FlyerId<ShipId>
 	{
 		Shipyard manufacturer;
 		int queue_id;

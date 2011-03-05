@@ -142,7 +142,7 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 	public boolean getTarget_alive(){return target_alive;}
 	public void setTarget_alive(boolean b){target_alive=b;}
 	
-	public static class MissileId extends FlyerId<MissileId>
+	public static class MissileId extends Flyer.FlyerId<MissileId>
 	{
 		private Ship shooter;
 		private int m_id;
