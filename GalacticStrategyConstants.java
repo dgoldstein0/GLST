@@ -91,10 +91,12 @@ public strictfp class GalacticStrategyConstants
 	static long DEFAULT_METAL=1000;
 	
 	//ship attacking range
+	static final double Detection_Range_Sq = 44100.0;
 	static final double Attacking_Range_Sq=40000.0;
 	static final double Attacking_Range=200.0;
 	static final long Attacking_cooldown=1200;
 	static final double WARP_EXIT_SPEED = .75; //px/ms
+	static final double CloseEnoughDistance = 100.0;
 	
 	//missile setup
 	final static int MISSILE_DAMAGE = 10;

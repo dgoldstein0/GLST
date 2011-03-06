@@ -9,6 +9,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 	JProgressBar health;
 	
 	JPanel button_panel;
+	JButton attack;
 	JButton move;
 	JButton warp;
 	JButton invade;
@@ -27,6 +28,10 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		
 		//build the buttons
 		button_panel = new JPanel(new GridLayout(5,1));
+		
+		attack=new JButton("Attack");
+		attack.addActionListener(this);
+		button_panel.add(attack);
 		
 		move=new JButton("Move");
 		move.addActionListener(this);
@@ -161,10 +166,13 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 	
 	public void actionPerformed(ActionEvent e)
 	{
-		if(e.getSource() == move)
+		if(e.getSource() == attack)
+		{
+			GameInterface.GC.GI.switchSystemToAttackDestinationMode();
+		}
+		else if(e.getSource() == move)
 		{
 			GameInterface.GC.GI.switchSystemToDestinationMode();
-			the_ship.mode=Ship.MODES.MOVING;
 		}
 		else if(e.getSource() == warp)
 		{

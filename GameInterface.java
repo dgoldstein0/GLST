@@ -86,6 +86,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	int system_state;
 		final static int SYS_NORMAL=0;
 		final static int SELECT_DESTINATION=1;
+		final static int ATTACK_DESTINATION=2;
 		
 	static int EDGE_BOUND=20; //this is the distance from the edge of the system, in pixels, at which the system will start to be scrolled
 	static int SYS_WIDTH=GalacticStrategyConstants.SYS_WIDTH; //the allowed width of a system
@@ -454,6 +455,11 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		system_state = SELECT_DESTINATION;
 	}
 	
+	public void switchSystemToAttackDestinationMode()
+	{
+		system_state= ATTACK_DESTINATION;
+	}
+	
 	public boolean isGalaxyDisplayed(){return mode == GalaxyOrSystem.Galaxy;}
 	public boolean isSystemDisplayed(){return mode == GalaxyOrSystem.System;}
 
@@ -657,7 +663,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 			cur_y = mouse_down_y = sysScreenToDataY(e.getY());
 			
 			button_down = e.getButton();
-			
+
 			if(e.getButton() == MouseEvent.BUTTON1)
 			{
 				drag_modifier = (e.isShiftDown()) ? MODIFIER.SHIFT : ((e.isAltDown()) ? MODIFIER.ALT : MODIFIER.NONE);
@@ -755,12 +761,17 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 						}
 						else if(system_state == SELECT_DESTINATION)
 						{
-							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
+							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),false);
+							system_state = SYS_NORMAL;
+						}
+						else if(system_state == ATTACK_DESTINATION)
+						{
+							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),true);
 							system_state = SYS_NORMAL;
 						}
 						else if(selected_in_sys.size() != 0 && selected_in_sys.get(0) instanceof Ship && e.getButton() == MouseEvent.BUTTON3 && ((Ship)selected_in_sys.get(0)).owner.getId() == GC.player_id)
 						{
-							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()));
+							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),false);
 						}
 					}
 				}
@@ -911,7 +922,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		select_menu.show(theinterface,x,y);
 	}
 	
-	private void setDestination(double x, double y)
+	private void setDestination(double x, double y, boolean AttackMove)
 	{
 		Destination<?> dest = new DestinationPoint(x,y);
 		
@@ -962,15 +973,27 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		
 		long time = GC.updater.getTime();
 		for(Selectable the_ship : selected_in_sys)
-		{
-			GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));
-	
-			//TODO: work on correct updating
-			ShipPanel.updateDestDisplay(dest);
-			
+		{	if(AttackMove)
+			{
 			if(dest instanceof Ship && dest != ShipPanel.the_ship)
 			{
 				GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), time, (Targetable<?>)dest));
+			}
+			else{
+				GC.scheduleOrder(new ShipAttackMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));
+			}
+			}
+			else{
+				GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));
+				
+				//TODO: work on correct updating
+				ShipPanel.updateDestDisplay(dest);
+				
+				//TODO: fix if more than one team or more than two players to only target enemy
+				if(dest instanceof Ship && dest != ShipPanel.the_ship&&((Ship)dest).owner != GC.players[GC.player_id])
+				{
+					GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), time, (Targetable<?>)dest));
+				}
 			}
 		}
 	}

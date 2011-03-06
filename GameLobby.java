@@ -236,7 +236,6 @@ public class GameLobby extends JDialog implements ActionListener, WindowListener
 					map_label.setText(LOAD_MAP_MSG); //just in case switching from valid to invalid map
 					JOptionPane.showMessageDialog(frame, "Map loading failed.  The selected file is not a valid map.", "Map Load Error", JOptionPane.ERROR_MESSAGE);
 				}
-				
 				//notify other players - send the text in map_label
 				GC.mapChosen();
 				start_game.setEnabled(readyToStart()); //after chosing a valid map, the host could choose an invalid one, thus making the game not ready to start.  For this reason, the setEnabled of start_game belongs down here

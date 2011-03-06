@@ -16,7 +16,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	int next_missile_id;
 	
 	float soldier;
-	public static enum MODES {MOVING, ATTACKING, TARGET_LOST, TRAVEL_TO_WARP, ENTER_WARP, IN_WARP, EXIT_WARP, PICKUP_TROOPS;}
+	public static enum MODES {IDLE, MOVING, ORBITING, USERATTACKING, ATTACKING, ATTACKMOVE, TARGET_LOST, TRAVEL_TO_WARP, 
+		ENTER_WARP, IN_WARP, EXIT_WARP, PICKUP_TROOPS;}
 	MODES mode;
 	
 	/**this enum is for cases where targets warp/are destroyed/are lost for some reason
@@ -31,6 +32,9 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	double exit_vec_len;
 	double exit_direction;
 	long arrival_time;
+	Destination<?> SecondDest;
+	
+	
 	
 	public Ship(ShipType t)
 	{
@@ -43,6 +47,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		soldier=t.soldier_capacity;//assume ships are fully loaded when built
 		nextAttackingtime=0;
 		next_missile_id=0;
+		SecondDest = null;
 	}
 	
 	public Describer<Ship> describer(){return new ShipDescriber(owner, this);}
@@ -89,12 +94,46 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			moveIncrement();
 			switch(mode)
 			{
+			/*TODO change attack if there are teams or other factors*/
+				case IDLE:
+					Ship targettoattack = identifyClosestEnemy();
+					if(targettoattack != null){
+						SecondDest = new DestinationPoint(pos_x,pos_y);
+						setupAttack(targettoattack);
+						mode = MODES.ATTACKING;
+					} 
+					break;
+				case MOVING:
+					if(reachedDest(destination)){
+						if(destination instanceof OwnableSatellite<?>){mode = MODES.ORBITING;}
+						else mode = MODES.IDLE;
+					}
+					break;
 				case TARGET_LOST:
-					mode = MODES.MOVING;
+					if(SecondDest!=null){
+						destination = SecondDest;
+						mode = MODES.ATTACKMOVE;
+					}
+					else{mode=MODES.IDLE;}
 					was_target=null;
 					break;
 				case ATTACKING:
 					attack(time);
+					
+					break;
+				case USERATTACKING:
+					attack(time);
+					break;
+				case ATTACKMOVE:
+					Ship atkMoveTarget = identifyClosestEnemy();
+					if(atkMoveTarget != null){
+						setupAttack(atkMoveTarget);
+						mode = MODES.ATTACKING;
+					} 
+					if(reachedDest(destination)){
+						if(destination instanceof OwnableSatellite<?>){mode = MODES.ORBITING;}
+						else mode = MODES.IDLE;
+					}
 					break;
 				case TRAVEL_TO_WARP:
 					if(isClearToWarp())
@@ -114,7 +153,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					break;
 				case PICKUP_TROOPS:
 					if(!doTransferTroops() || soldier >= type.soldier_capacity)
-						mode=MODES.MOVING;
+						mode=MODES.ORBITING;
 					break;
 			}
 			time += GalacticStrategyConstants.TIME_GRANULARITY;
@@ -123,10 +162,71 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		return false;
 	}
 	
+
+	public boolean reachedDest(Destination<?> s){
+		boolean isClose =GalacticStrategyConstants.CloseEnoughDistance > findDestinationDistance(s);
+		return isClose;
+	}
+	
+	public 	Ship identifyClosestEnemy(){
+		Ship currentShip=null;
+		Ship closestShip=null;
+		double closestDistance,currentDistance;
+		closestDistance = -1;
+		for(int i=0;i<GalacticStrategyConstants.MAX_PLAYERS;i++){
+			if(i!=owner.getId()){
+				for(Fleet.ShipIterator j=location.fleets[i].iterator();j.hasNext();){
+					currentShip = location.fleets[i].ships.get(j.next());
+					currentDistance = findDestinationDistance(currentShip);
+					if(currentDistance < GalacticStrategyConstants.Detection_Range_Sq){
+						if(closestShip==null||closestDistance>currentDistance){
+							closestShip = currentShip;
+							closestDistance=currentDistance;
+						}
+					}
+				}	
+			}	
+		}
+	return closestShip;
+	}
+	public void setupAttack(Targetable<?> tgt){
+		target= tgt;
+		destination = tgt;
+		target.addAggressor(this);
+		nextAttackingtime = time;
+		nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
+		
+		//TODO: get constant 5 out of here
+		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.Attacking_Range-5, TrackingAI.STOP);
+		data_control.saveData();
+	}
+	
+	public void userOverride(){
+		SecondDest = null;
+		if(target != null)
+		{
+			target.removeAggressor(this);
+			target=null;
+		}
+	}
+	
+	
+	
+	public double findDestinationDistance(Destination<?> Dest){
+		double deltaX = Dest.getXCoord(time)-pos_x;
+		double deltaY = Dest.getYCoord(time)-pos_y;
+		return MathFormula.SumofSquares(deltaX, deltaY);
+		
+	}
+	
 	//this function is called when time is rolled back to before the ship existed
 	@Override
 	public void removeFromGame(long t)
 	{
+		if(target != null)
+		{
+			target.removeAggressor(this);
+		}
 		location.fleets[owner.getId()].remove(this, t);
 	}
 	
@@ -181,21 +281,31 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		{
 			destination = d;
 			
-			if(target != null)
-			{
-				target.removeAggressor(this);
-				target=null;
-			}
+			userOverride();
 			
 			//System.out.println(Integer.toString(id) + " orderToMove: t is " + Long.toString(t) + " and time is " + Long.toString(time));
 			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
-			
 			mode=MODES.MOVING;
 			data_control.saveData();
 			//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 		}
+	}
+	public void orderToAttackMove(long t, Destination<?> d){
+		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP)
+		{
+			destination = d;
+			SecondDest = d;
+			userOverride();
+			
+			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
+			mode = MODES.ATTACKMOVE;
+			data_control.saveData();
+		}
+		
 	}
 	
 	public void orderToAttack(long t, Targetable<?> tgt)
@@ -203,16 +313,9 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP)
 		{
 			//System.out.println(Integer.toString(id) + "orderToAttack: t is " + Long.toString(t));
-			
-			target= tgt;
-			destination = tgt;
-			mode=MODES.ATTACKING;
-			target.addAggressor(this);
-			nextAttackingtime = time;
-			nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
-			
-			//TODO: get constant 5 out of here
-			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.Attacking_Range-5, TrackingAI.STOP);
+			userOverride();
+			mode=MODES.USERATTACKING;
+			setupAttack(tgt);
 			data_control.saveData();
 		}
 	}
@@ -221,12 +324,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	{
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP && sys != location) //if sys == location, user means to cancel warp command.
 		{
-			if(target != null)
-			{
-				target.removeAggressor(this);
-				target=null;
-			}
-			
+			userOverride();
 			mode=MODES.TRAVEL_TO_WARP;
 			warp_destination=sys;
 			
@@ -248,7 +346,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	public void orderToInvade(OwnableSatellite<?> sat, long t)
 	{
-		if(mode == MODES.MOVING || mode == MODES.ATTACKING)
+		if(mode == MODES.ORBITING||mode==MODES.MOVING)
 		{
 			double x_dif = pos_x-sat.getXCoord(t);
 			double y_dif = pos_y-sat.getYCoord(t);
@@ -275,7 +373,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	public void orderToPickupTroops(long t) {
 		
-		if(mode == MODES.MOVING &&
+		if(mode == MODES.ORBITING &&
 				destination instanceof OwnableSatellite<?> &&
 				((OwnableSatellite<?>)destination).getOwner() == owner &&
 				((OwnableSatellite<?>)destination).the_base != null &&
@@ -412,11 +510,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		return false;
 	}
 	
-	public void attack(long t)
-	{
-		double dx = destinationX() - pos_x;
-		double dy = destinationY() - pos_y;
-		if ((dx*dx+dy*dy<GalacticStrategyConstants.Attacking_Range*GalacticStrategyConstants.Attacking_Range)&&(nextAttackingtime<=t))
+	public void shootMissile(long t, double dx, double dy){
+		if (MathFormula.SumofSquares(dx,dy) < GalacticStrategyConstants.Attacking_Range_Sq &&(nextAttackingtime<=t))
 		{
 			Missile m=new Missile(this, target, time+GalacticStrategyConstants.TIME_GRANULARITY); 
 			location.missiles.put(m.id, m, t);
@@ -424,6 +519,12 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		}
 	}
 	
+	public void attack(long t)
+	{
+		double dx = destinationX() - pos_x;
+		double dy = destinationY() - pos_y;
+		shootMissile(t,dx,dy);
+	}
 	
 	public void destroyed()
 	{
@@ -462,7 +563,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	private void targetLost(LOST_REASON reason, long t, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
 	{
 		//System.out.println("target lost");
-		if (destination==(Destination<?>)target)
+		if (destination==(Destination<?>)target&&mode==MODES.USERATTACKING)
 		{
 			//System.out.println("\tchanging destination...");
 			destination=new DestinationPoint(target.getXCoord(t),target.getYCoord(t));
@@ -474,8 +575,11 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			was_target = target;
 		else
 			was_target = tgt;
-		
-		target=null;
+		if(target != null)
+		{
+			target.removeAggressor(this);
+			target=null;
+		}
 		data_control.saveData();
 		//TODO: player notification - THIS SHOULD USE LOST_REASON
 	}
@@ -510,6 +614,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public void setEnergy(int f){energy=f;}
 	public int getMax_energy(){return max_energy;}
 	public void setMax_energy(int mf){max_energy=mf;}
+	public Destination<?> getSecondDest(){return SecondDest;}
+	public void setsecondaryDestination(Destination<?> dest){SecondDest=dest;}
 	
 	public float getSoldier() {return soldier;}
 	public MODES getMode(){return mode;}
