@@ -33,6 +33,8 @@ public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, S
 				ReversionEffects.RevertObj obj = new ReversionEffects.RevertObj(saved_data[j].tgt, saved_data[j].t);
 				objs.add(obj);
 			}
+			
+			//TODO: should second_dest be reverted?
 				
 			if(saved_data[i].md != saved_data[j].md)
 			{

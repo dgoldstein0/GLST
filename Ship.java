@@ -98,14 +98,15 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 				case IDLE:
 					Ship targettoattack = identifyClosestEnemy();
 					if(targettoattack != null){
-						SecondDest = new DestinationPoint(pos_x,pos_y);
+						SecondDest = destination;
 						setupAttack(targettoattack);
 						mode = MODES.ATTACKING;
 					} 
 					break;
 				case MOVING:
 					if(reachedDest(destination)){
-						if(destination instanceof OwnableSatellite<?>){mode = MODES.ORBITING;}
+						if(destination instanceof Satellite<?>)
+							{mode = MODES.ORBITING;}
 						else mode = MODES.IDLE;
 					}
 					break;
@@ -223,10 +224,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	@Override
 	public void removeFromGame(long t)
 	{
-		if(target != null)
-		{
-			target.removeAggressor(this);
-		}
 		location.fleets[owner.getId()].remove(this, t);
 	}
 	
@@ -346,7 +343,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	public void orderToInvade(OwnableSatellite<?> sat, long t)
 	{
-		if(mode == MODES.ORBITING||mode==MODES.MOVING)
+		if(mode == MODES.ORBITING || mode==MODES.MOVING || mode == MODES.USERATTACKING || mode == MODES.ATTACKING) //TODO: what modes is this valid in?
 		{
 			double x_dif = pos_x-sat.getXCoord(t);
 			double y_dif = pos_y-sat.getYCoord(t);
@@ -537,6 +534,9 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			for(Targetter<?> t : aggressors)
 				t.targetIsDestroyed(time);
 			
+			if(target != null)
+				target.removeAggressor(this);
+			
 			//notify interface
 			SwingUtilities.invokeLater(new ShipDeselector(this));
 				
@@ -563,7 +563,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	private void targetLost(LOST_REASON reason, long t, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
 	{
 		//System.out.println("target lost");
-		if (destination==(Destination<?>)target&&mode==MODES.USERATTACKING)
+		if (destination==(Destination<?>)target && mode==MODES.USERATTACKING)
 		{
 			//System.out.println("\tchanging destination...");
 			destination=new DestinationPoint(target.getXCoord(t),target.getYCoord(t));
@@ -575,6 +575,9 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			was_target = target;
 		else
 			was_target = tgt;
+		
+		target=null;
+			
 		data_control.saveData();
 		//TODO: player notification - THIS SHOULD USE LOST_REASON
 	}
@@ -610,7 +613,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public int getMax_energy(){return max_energy;}
 	public void setMax_energy(int mf){max_energy=mf;}
 	public Destination<?> getSecondDest(){return SecondDest;}
-	public void setsecondaryDestination(Destination<?> dest){SecondDest=dest;}
+	public void setSecondDest(Destination<?> dest){SecondDest=dest;}
 	
 	public float getSoldier() {return soldier;}
 	public MODES getMode(){return mode;}

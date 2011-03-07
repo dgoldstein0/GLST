@@ -28,6 +28,7 @@ public strictfp class ShipDataSaver extends FlyerDataSaver<Ship> {
 	GSystem loc; //like the exit_vec_len issue, in order for location to get corrupted you have to turn back time
 					//from after a warp to before it.
 	Targetable<?> was_tgt;
+	Destination<?> second_dest;
 	
 	public ShipDataSaver()
 	{
@@ -48,6 +49,7 @@ public strictfp class ShipDataSaver extends FlyerDataSaver<Ship> {
 		ex_v_len = s.exit_vec_len; //necessary? see above note
 		loc = s.location;
 		was_tgt = s.was_target;
+		second_dest = s.SecondDest;
 	}
 	
 	@Override
@@ -64,5 +66,6 @@ public strictfp class ShipDataSaver extends FlyerDataSaver<Ship> {
 		s.exit_vec_len = ex_v_len; //necessary? see above note
 		s.location = loc;
 		s.was_target = was_tgt;
+		s.SecondDest = second_dest;
 	}
 }
