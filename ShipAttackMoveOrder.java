@@ -26,11 +26,6 @@ public class ShipAttackMoveOrder extends Order {
 		
 		scheduled_time=t;
 	}
-	@Override
-	public void doInstantly(Galaxy g) throws UnsupportedOperationException {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
