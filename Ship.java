@@ -115,7 +115,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 						destination = SecondDest;
 						mode = MODES.ATTACKMOVE;
 					}
-					else{mode=MODES.IDLE;}
+					else{mode=MODES.MOVING;}
 					was_target=null;
 					break;
 				case ATTACKING:
