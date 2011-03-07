@@ -150,7 +150,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					break;
 				case EXIT_WARP:
 					if(speed <= type.max_speed)
-						mode=MODES.MOVING;
+						mode=MODES.ATTACKMOVE;
 					break;
 				case PICKUP_TROOPS:
 					if(!doTransferTroops() || soldier >= type.soldier_capacity)
@@ -165,7 +165,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 
 	public boolean reachedDest(Destination<?> s){
-		boolean isClose =GalacticStrategyConstants.CloseEnoughDistance > findDestinationDistance(s);
+		boolean isClose =GalacticStrategyConstants.CloseEnoughDistance > findSqDestinationDistance(s);
 		return isClose;
 	}
 	
@@ -178,7 +178,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			if(i!=owner.getId()){
 				for(Fleet.ShipIterator j=location.fleets[i].iterator();j.hasNext();){
 					currentShip = location.fleets[i].ships.get(j.next());
-					currentDistance = findDestinationDistance(currentShip);
+					currentDistance = findSqDestinationDistance(currentShip);
 					if(currentDistance < GalacticStrategyConstants.Detection_Range_Sq){
 						if(closestShip==null||closestDistance>currentDistance){
 							closestShip = currentShip;
@@ -213,7 +213,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	
 	
-	public double findDestinationDistance(Destination<?> Dest){
+	public double findSqDestinationDistance(Destination<?> Dest){
 		double deltaX = Dest.getXCoord(time)-pos_x;
 		double deltaY = Dest.getYCoord(time)-pos_y;
 		return MathFormula.SumofSquares(deltaX, deltaY);
