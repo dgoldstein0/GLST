@@ -575,11 +575,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			was_target = target;
 		else
 			was_target = tgt;
-		if(target != null)
-		{
-			target.removeAggressor(this);
-			target=null;
-		}
 		data_control.saveData();
 		//TODO: player notification - THIS SHOULD USE LOST_REASON
 	}
