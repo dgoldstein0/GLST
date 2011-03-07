@@ -86,7 +86,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	int system_state;
 		final static int SYS_NORMAL=0;
 		final static int SELECT_DESTINATION=1;
-		final static int ATTACK_DESTINATION=2;
+		final static int ATTACK_MOVE_DESTINATION=2;
 		
 	static int EDGE_BOUND=20; //this is the distance from the edge of the system, in pixels, at which the system will start to be scrolled
 	static int SYS_WIDTH=GalacticStrategyConstants.SYS_WIDTH; //the allowed width of a system
@@ -454,11 +454,12 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	{
 		system_state = SELECT_DESTINATION;
 	}
-	
-	public void switchSystemToAttackDestinationMode()
+	public void switchSystemToAttackMoveDestinationMode()
 	{
-		system_state= ATTACK_DESTINATION;
+		system_state = ATTACK_MOVE_DESTINATION;
 	}
+	
+
 	
 	public boolean isGalaxyDisplayed(){return mode == GalaxyOrSystem.Galaxy;}
 	public boolean isSystemDisplayed(){return mode == GalaxyOrSystem.System;}
@@ -764,7 +765,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),false);
 							system_state = SYS_NORMAL;
 						}
-						else if(system_state == ATTACK_DESTINATION)
+						else if(system_state == ATTACK_MOVE_DESTINATION)
 						{
 							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),true);
 							system_state = SYS_NORMAL;
@@ -975,13 +976,14 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		for(Selectable the_ship : selected_in_sys)
 		{	if(AttackMove)
 			{
-			if(dest instanceof Ship && dest != ShipPanel.the_ship)
-			{
-				GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), time, (Targetable<?>)dest));
-			}
-			else{
-				GC.scheduleOrder(new ShipAttackMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));
-			}
+				if(dest instanceof Ship && dest != ShipPanel.the_ship)
+				{
+					GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), time, (Targetable<?>)dest));
+				}	
+				else{
+					GC.scheduleOrder(new ShipAttackMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));
+				}
+				ShipPanel.updateDestDisplay(dest);
 			}
 			else{
 				GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));

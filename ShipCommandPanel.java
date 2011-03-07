@@ -168,7 +168,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 	{
 		if(e.getSource() == attack)
 		{
-			GameInterface.GC.GI.switchSystemToAttackDestinationMode();
+			GameInterface.GC.GI.switchSystemToAttackMoveDestinationMode();
 		}
 		else if(e.getSource() == move)
 		{
