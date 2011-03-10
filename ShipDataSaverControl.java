@@ -42,17 +42,20 @@ public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, S
 				switch(saved_data[j].md)
 				{
 					case MOVING:
-						if(saved_data[i].md != Ship.MODES.EXIT_WARP) //transition from EXIT_WARP to MOVING is automatic
-						{
 							orders.add(new ShipMoveOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].dest));
-						}
 						break;
 					case TARGET_LOST:
-						if(saved_data[i].md != Ship.MODES.ATTACKING) //if statement necessary to avoid order duplication
+						if(saved_data[i].md != Ship.MODES.ATTACKING||saved_data[i].md !=Ship.MODES.ATTACKMOVE) //if statement necessary to avoid order duplication
 							orders.add(new ShipAttackOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].t /*target_t doesn't matter, because it is only used over network*/, saved_data[j].was_tgt));
 						break;
-					case ATTACKING:
+					case USERATTACKING:
 						orders.add(new ShipAttackOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].t /*target_t doesn't matter, because it is only used over network*/, (Targetable<?>)saved_data[j].dest));
+						break;
+					case ATTACKMOVE:
+						if(saved_data[j].md != Ship.MODES.EXIT_WARP)
+						{
+							orders.add(new ShipAttackMoveOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].dest));
+						}
 						break;
 					case TRAVEL_TO_WARP:
 						orders.add(new ShipWarpOrder(the_obj.owner, the_obj, saved_data[j].t, the_obj.warp_destination));
@@ -75,7 +78,7 @@ public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, S
 				//could ship have been ordered to do same thing but on different object?
 				switch(saved_data[j].md)
 				{
-					case ATTACKING:
+					case USERATTACKING:
 						if(saved_data[i].tgt != saved_data[j].tgt)
 						{
 							orders.add(new ShipAttackOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].t, saved_data[j].tgt));
