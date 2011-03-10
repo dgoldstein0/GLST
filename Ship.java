@@ -150,7 +150,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					break;
 				case EXIT_WARP:
 					if(speed <= type.max_speed)
-						mode=MODES.ATTACKMOVE;
+						mode=MODES.IDLE;
 					break;
 				case PICKUP_TROOPS:
 					if(!doTransferTroops() || soldier >= type.soldier_capacity)
