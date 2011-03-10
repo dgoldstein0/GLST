@@ -96,23 +96,28 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			{
 			/*TODO change attack if there are teams or other factors*/
 				case IDLE:
+					SecondDest=null;
 					Ship targettoattack = identifyClosestEnemy();
 					if(targettoattack != null){
 						SecondDest = destination;
 						setupAttack(targettoattack);
 						mode = MODES.ATTACKING;
 					} 
+
 					break;
 				case MOVING:
+					SecondDest = null;
 					if(reachedDest(destination)){
 						if(destination instanceof Satellite<?>)
 							{mode = MODES.ORBITING;}
 						else mode = MODES.IDLE;
 					}
 					break;
+				case ORBITING:
+					SecondDest=null;
 				case TARGET_LOST:
 					if(SecondDest!=null){
-						destination = SecondDest;
+						AIMove(SecondDest);
 						mode = MODES.ATTACKMOVE;
 					}
 					else{mode=MODES.MOVING;}
@@ -302,7 +307,17 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 		}
 	}
-	public void orderToAttackMove(long t, Destination<?> d){
+	public void AIMove(Destination<?> d)
+	{
+		destination = d;
+		dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+		dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
+		data_control.saveData();
+
+	}
+	public void orderToAttackMove(long t, Destination<?> d)
+	{
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP)
 		{
 			destination = d;
