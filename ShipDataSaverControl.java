@@ -51,7 +51,7 @@ public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, S
 					case USERATTACKING:
 						orders.add(new ShipAttackOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].t /*target_t doesn't matter, because it is only used over network*/, (Targetable<?>)saved_data[j].dest));
 						break;
-					case ATTACKMOVE:
+					case USERATTACKMOVE:
 						if(saved_data[j].md != Ship.MODES.EXIT_WARP)
 						{
 							orders.add(new ShipAttackMoveOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].dest));
@@ -87,6 +87,12 @@ public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, S
 						 fly and attack at the same time, and switch destinations while moving.  This is interface
 						 dependent, but is supported here.  Also, this is necessary since right now, move->attack transition usually means a move and an attack order*/
 					case MOVING:
+						if(saved_data[i].dest != saved_data[j].dest) //destination has changed
+						{
+							orders.add(new ShipMoveOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].dest));
+						}
+						break;
+					case USERATTACKMOVE:
 						if(saved_data[i].dest != saved_data[j].dest) //destination has changed
 						{
 							orders.add(new ShipMoveOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].dest));

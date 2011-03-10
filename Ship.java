@@ -16,7 +16,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	int next_missile_id;
 	
 	float soldier;
-	public static enum MODES {IDLE, MOVING, ORBITING, USERATTACKING, ATTACKING, ATTACKMOVE, TARGET_LOST, TRAVEL_TO_WARP, 
+	public static enum MODES {IDLE, MOVING, ORBITING, USERATTACKING, ATTACKING, USERATTACKMOVE, ATTACKMOVE, TARGET_LOST, TRAVEL_TO_WARP, 
 		ENTER_WARP, IN_WARP, EXIT_WARP, PICKUP_TROOPS;}
 	MODES mode;
 	
@@ -128,7 +128,20 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 				case ATTACKMOVE:
 					Ship atkMoveTarget = identifyClosestEnemy();
 					if(atkMoveTarget != null){
+						SecondDest = destination;
 						setupAttack(atkMoveTarget);
+						mode = MODES.ATTACKING;
+					} 
+					if(reachedDest(destination)){
+						if(destination instanceof OwnableSatellite<?>){mode = MODES.ORBITING;}
+						else mode = MODES.IDLE;
+					}
+					break;
+				case USERATTACKMOVE:
+					Ship UserAtkMoveTarget = identifyClosestEnemy();
+					if(UserAtkMoveTarget != null){
+						SecondDest = destination;
+						setupAttack(UserAtkMoveTarget);
 						mode = MODES.ATTACKING;
 					} 
 					if(reachedDest(destination)){
@@ -150,7 +163,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					break;
 				case EXIT_WARP:
 					if(speed <= type.max_speed)
-						mode=MODES.IDLE;
+						mode=MODES.ATTACKMOVE;
 					break;
 				case PICKUP_TROOPS:
 					if(!doTransferTroops() || soldier >= type.soldier_capacity)
@@ -299,7 +312,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
-			mode = MODES.ATTACKMOVE;
+			mode = MODES.USERATTACKMOVE;
 			data_control.saveData();
 		}
 		

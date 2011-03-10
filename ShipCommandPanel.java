@@ -80,6 +80,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		//toggle buttons
 		boolean enable = (the_ship.owner.getId() == GameInterface.GC.player_id);
 		
+		attack.setEnabled(enable);
 		move.setEnabled(enable);
 		warp.setEnabled(enable);
 		
@@ -127,7 +128,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		health.setString(Integer.toString(the_ship.type.hull - the_ship.damage));
 		soldier_label.setText("    " + Integer.toString(the_ship.getSoldierInt()) + " soldiers");
 		
-		if(the_ship.destination instanceof OwnableSatellite<?> && Math.hypot(the_ship.dest_x_coord-the_ship.pos_x, the_ship.dest_y_coord-the_ship.pos_y) <= GalacticStrategyConstants.LANDING_RANGE)
+		if(the_ship.destination instanceof OwnableSatellite<?>&& the_ship.owner.getId() == GameInterface.GC.player_id && Math.hypot(the_ship.dest_x_coord-the_ship.pos_x, the_ship.dest_y_coord-the_ship.pos_y) <= GalacticStrategyConstants.LANDING_RANGE)
 		{
 			if(((OwnableSatellite<?>)the_ship.destination).getOwner() != null && ((OwnableSatellite<?>)the_ship.destination).getOwner().getId() == GameInterface.GC.player_id)
 			{
