@@ -983,7 +983,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 				else{
 					GC.scheduleOrder(new ShipAttackMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));
 				}
-				ShipPanel.updateDestDisplay(dest);
+				//ShipPanel.updateDestDisplay(dest); //not a bad idea, but its a no-op, since we just only scheduled the order
 			}
 			else{
 				GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));

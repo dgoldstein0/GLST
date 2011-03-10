@@ -44,7 +44,7 @@ public strictfp class ShipPickupTroopsOrder extends Order {
 							picking up troops or not.  POTENTIALLY can ignore reverting other objects... but lets not*/
 					
 					orders.addAll(b.data_control.revertToTime(scheduled_time));
-								
+					
 					the_ship.orderToPickupTroops(scheduled_time);
 					
 					return orders;

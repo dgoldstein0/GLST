@@ -50,6 +50,11 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 				
 				doReversionPrep(indx);
 				saved_data[indx].loadData(the_obj);
+				
+				//make sure we revert by the right amount
+				if(GameInterface.GC.updater.getLast_time_updated() > the_obj.getTime())
+					GameInterface.GC.updater.setLast_time_updated(the_obj.getTime());
+				
 				index = getNextIndex(indx); //index points to NEXT DataSaver
 				
 				//must loadData before recursion, else risk of recursion trying to revert something that is already being reverted
@@ -59,7 +64,8 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 				{
 					ReversionEffects.RevertObj revertable = objs_it.next();					
 					
-					orders.addAll(revertable.obj.getDataControl().revertToTime(Math.max(t, revertable.time_to_revert)));
+					Set<Order> more_orders = revertable.obj.getDataControl().revertToTime(Math.max(revertable.time_to_revert, t));
+					orders.addAll(more_orders);
 				}
 				
 				return orders;

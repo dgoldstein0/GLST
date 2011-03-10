@@ -924,13 +924,15 @@ public strictfp class GameControl
 						Order o =(Order) decoder.readObject(); //TODO: add in leaving message, which will need to be handled differently here
 						decoder.close();
 						
+						System.out.println("\t" + o.getClass().getName());
+						
+						updater.scheduleOrder(o);
+						
 						//TODO: move debugging code
-						updater.log(new GameSimulator.SimulateAction(updater.getTime(), o,
+						long time = updater.getTime();
+						updater.log(new GameSimulator.SimulateAction(time, o,
 								GameSimulator.SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
 								GameSimulator.SimulateAction.ORDER_TYPE.REMOTE));
-						
-						System.out.println("\t" + o.getClass().getName());
-						updater.scheduleOrder(o);
 					}
 				}
 				

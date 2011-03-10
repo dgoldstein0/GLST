@@ -33,7 +33,7 @@ public strictfp class ShipyardDataSaverControl extends FacilityDataSaverControl<
 				{
 					Ship ship_in_prog = saved_data[i].queue.get(Collections.min(saved_data[i].queue.keySet()));
 					
-					if(saved_data[j].t - saved_data[i].t + saved_data[i].time_on_cur_s < ship_in_prog.type.time_to_build)
+					if(saved_data[j].t - saved_data[i].t + saved_data[i].time_on_cur_s <= ship_in_prog.type.time_to_build) //if an order lands on the time grain, it would get done, hence "<="
 						orders.add(new ShipyardCancelBuildOrder(the_obj, saved_data[i].queue.get(k), saved_data[i].t));
 					else
 						objs.add(new ReversionEffects.RevertObj(ship_in_prog, saved_data[j].t-1));
@@ -45,7 +45,7 @@ public strictfp class ShipyardDataSaverControl extends FacilityDataSaverControl<
 				//anything in this set was ordered to be built
 				for(Integer k : new_remove_old)
 				{
-					orders.add(new ShipyardBuildShipOrder(the_obj, saved_data[j].queue.get(k).type, saved_data[j].t));
+					orders.add(new ShipyardBuildShipOrder(the_obj, saved_data[j].queue.get(k).type, saved_data[j].t)); //assumption that the order happened on the time grain
 				}
 			}
 		}
