@@ -34,8 +34,7 @@ public class SystemLabel extends JLabel implements MouseListener
 			the_interface.displayNoPanel();
 			
 			if (arg0.getClickCount()==2)
-			{
-				the_interface.tabbedPane.setSelectedIndex(1);			
+			{		
 				the_interface.sys=the_sys;					
 			}
 		}	
