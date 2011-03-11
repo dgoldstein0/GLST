@@ -107,9 +107,10 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 						SecondDest=null;
 						Ship targettoattack = identifyClosestEnemy();
 						if(targettoattack != null){
-							SecondDest = destination;
+							setOtherDest(destination);
 							setupAttack(targettoattack);
 							mode = MODES.ATTACKING;
+	
 						} 
 						break;
 					case MOVING:
@@ -126,6 +127,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					case TARGET_LOST:
 						if(SecondDest!=null){
 							AIMove(SecondDest);
+							SecondDest=null;
 							mode = MODES.ATTACKMOVE;
 						}
 						else{mode=MODES.IDLE;}
@@ -140,7 +142,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					case ATTACKMOVE:
 						Ship atkMoveTarget = identifyClosestEnemy();
 						if(atkMoveTarget != null){
-							SecondDest = destination;
+							setOtherDest(destination);
 							setupAttack(atkMoveTarget);
 							mode = MODES.ATTACKING;
 						} 
@@ -154,7 +156,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					case USERATTACKMOVE:
 						Ship UserAtkMoveTarget = identifyClosestEnemy();
 						if(UserAtkMoveTarget != null){
-							SecondDest = destination;
+							setOtherDest(destination);
 							setupAttack(UserAtkMoveTarget);
 							mode = MODES.ATTACKING;
 						} 
@@ -192,6 +194,13 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		return false;
 	}
 	
+	private void setOtherDest(Destination<?> d)
+	{
+		if(d instanceof Flyer<?,?,?>)
+			SecondDest = new DestinationPoint(d.getXCoord(time), d.getYCoord(time));
+		else
+			SecondDest = d;
+	}
 
 	public boolean reachedDest(Destination<?> s){
 		boolean isClose =GalacticStrategyConstants.CloseEnoughDistance > findSqDestinationDistance(s);
