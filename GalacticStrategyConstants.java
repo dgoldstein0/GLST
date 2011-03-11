@@ -83,7 +83,7 @@ public strictfp class GalacticStrategyConstants
 	final static double LANDING_RANGE = 10.0d; //the max distance at which ships can get/send troops to planets
 	public final static float troop_transfer_rate = .1f;
 	//Used by TaxOffice
-	static double DEFAULT_INCOME_RATE = .05; //$ per tax update per person
+	static double DEFAULT_INCOME_RATE = .01; //$ per tax update per person
 	//Used by Player
 	static long DEFAULT_MONEY=1000;
 	static long DEFAULT_METAL=1000;
