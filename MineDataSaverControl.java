@@ -19,18 +19,6 @@ public strictfp class MineDataSaverControl extends FacilityDataSaverControl<Mine
 		//revert Player too
 		effects.objects_to_revert.add(new ReversionEffects.RevertObj(the_obj.location.owner, saved_data[indx].t));
 		
-		//revert all other mines too
-		/*OwnableSatelliteDataSaverControl<?> loc_ctrl = the_obj.location.data_control;
-		HashMap<Integer, Facility<?>> facilities = loc_ctrl.saved_data[loc_ctrl.getIndexForTime(saved_data[indx].t)].fac;
-		for(Integer i : facilities.keySet())
-		{
-			Facility<?> f = facilities.get(i);
-			if(f.getType() == FacilityType.MINE)
-			{
-				effects.objects_to_revert.add(new ReversionEffects.RevertObj(f, saved_data[indx].t));
-			}
-		}*/
-		
 		for(int j=getNextIndex(indx); j != index; j=getNextIndex(j))
 		{
 			addAggressorsAtIndex(j, effects.objects_to_revert);

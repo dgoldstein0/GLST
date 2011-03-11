@@ -5,12 +5,14 @@ public strictfp class ShipInvadeOrder extends Order {
 
 	Ship the_ship;
 	ShipDescriber ship_desc;
+	int player_id;
 	
 	public ShipInvadeOrder(Player p, Ship s, long t)
 	{
 		mode = Order.ORIGIN;
 		the_ship = s;
 		ship_desc=new ShipDescriber(p,s);
+		player_id = p.getId();
 		scheduled_time=t;
 	}
 	
@@ -25,7 +27,7 @@ public strictfp class ShipInvadeOrder extends Order {
 		{
 			the_ship.update(scheduled_time, null); //update by one increment - this will do nothing if we are already past up to date/in need of reversion
 			ShipDataSaver data = (ShipDataSaver)the_ship.data_control.saved_data[the_ship.data_control.getIndexForTime(scheduled_time)];
-			if(the_ship.isAliveAt(scheduled_time) && data.dest instanceof OwnableSatellite<?>)
+			if(the_ship.isAliveAt(scheduled_time) && data.dest instanceof OwnableSatellite<?> && the_ship.owner.getId() == player_id)
 			{
 				Set<Order> orders = the_ship.data_control.revertToTime(scheduled_time);
 				orders.addAll(((OwnableSatellite<?>)the_ship.destination).getDataControl().revertToTime(scheduled_time));
@@ -46,4 +48,6 @@ public strictfp class ShipInvadeOrder extends Order {
 	public ShipInvadeOrder(){mode=Order.NETWORK;}
 	public ShipDescriber getShip_desc(){return ship_desc;}
 	public void setShip_desc(ShipDescriber sd){ship_desc=sd;}
+	public int getPlayer_id(){return player_id;}
+	public void setPlayer_id(int i){player_id = i;}
 }

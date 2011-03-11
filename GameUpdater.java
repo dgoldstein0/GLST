@@ -145,6 +145,9 @@ public class GameUpdater {
 				local_pending_execution.addAll(local_pending_execution.remove().execute(GC.map));
 			}
 			
+			if(getLast_time_updated() > update_to)
+				update_to = getLast_time_updated();
+			
 			/**update all intersystem data.  This is must be within the loop in case ships are reverted back
 			 * into warp or something of the sort*/
 			for(int i=0; i<GC.players.length; i++)
