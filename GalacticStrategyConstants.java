@@ -84,8 +84,6 @@ public strictfp class GalacticStrategyConstants
 	public final static float troop_transfer_rate = .1f;
 	//Used by TaxOffice
 	static double DEFAULT_INCOME_RATE = .05; //$ per tax update per person
-	//Used by Mine
-	static double DEFAULT_MINING_RATE=.002; //metal per mine per millisecond
 	//Used by Player
 	static long DEFAULT_MONEY=1000;
 	static long DEFAULT_METAL=1000;

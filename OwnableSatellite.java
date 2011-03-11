@@ -30,8 +30,10 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	int building_limit;
 	
 	int number_mines; //cache number of mines on satellite
+	int last_number_mines;
 	int number_taxoffices; //cache number of taxoffices on satellite
-	double mining_r;
+	double base_mining_r;
+	double current_mining_r;
 	
 	
 	//for taxation
@@ -55,6 +57,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		owner = null;
 		
 		number_mines=0;
+		last_number_mines=0;
 		number_taxoffices=0;
 	}
 	@Override
@@ -75,6 +78,18 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		else*/
 			updatePop(time_elapsed);
 	}
+	
+	public double calcMiningrate(){
+		if(last_number_mines!=number_mines){
+			last_number_mines=number_mines;
+			current_mining_r = base_mining_r;
+			for(int j=1;j<number_mines;j++){
+				current_mining_r*=GalacticStrategyConstants.additional_mine_penalty;
+			}
+		}
+		return current_mining_r;
+	}
+	
 	
 	//this is called when calculating taxes.
 	private void updatePop(long t)
@@ -271,8 +286,8 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		owner=p;
 		getGSystem().increaseClaim(p);
 	}
-	public double getMining_rate(){return mining_r;}
-	public void setMining_rate(double r){mining_r = r;}
+	public double getBase_mining_rate(){return base_mining_r;}
+	public void setBase_mining_rate(double r){base_mining_r = r;}
 	public int getBuilding_limit(){return building_limit;}
 	public void setBuilding_limit(int b){building_limit=b;}
 	public long getPopulation(){return population;}

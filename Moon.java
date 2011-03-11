@@ -11,7 +11,8 @@ public strictfp class Moon extends OwnableSatellite<Moon>
 		pop_capacity = OwnableSatelliteType.Moon.pop_capacity;
 		pop_growth_rate = OwnableSatelliteType.Moon.PopGrowthRate;
 		building_limit = OwnableSatelliteType.Moon.building_Num;
-		mining_r = OwnableSatelliteType.Moon.mining_rate;
+		base_mining_r = OwnableSatelliteType.Moon.mining_rate;
+		current_mining_r = OwnableSatelliteType.Moon.mining_rate;
 		data_control.saveData();
 	}
 	
@@ -20,8 +21,9 @@ public strictfp class Moon extends OwnableSatellite<Moon>
 		initial_pop=0;
 		pop_capacity=0;
 		pop_growth_rate=0;
-		building_limit=2;
-		mining_r=0;
+		building_limit=3;
+		base_mining_r=0;
+		current_mining_r=0;
 	}
 	
 	@Override
