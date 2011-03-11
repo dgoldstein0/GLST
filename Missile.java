@@ -78,10 +78,11 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		return retval;
 	}
 	
-	//BOOKMARK: POTENTIAL COORDINATION HAZARD - if missile/ship update order is changed, this won't work
+	//TODO: POTENTIAL COORDINATION HAZARD - if missile/ship update order is changed, this won't work
 	public boolean collidedWithTarget()
 	{
 		//can use current x/y coords for ships because ship positions are updated first
+		//TODO: when is target not alive, and destination not a DestinationPoint?
 		if(target_alive)
 		{
 			double x_dif=this.pos_x-target.getXCoord(time);
@@ -90,9 +91,16 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		}
 		else
 		{
-			double x_dif=this.pos_x-((DestinationPoint)destination).getX();
-			double y_dif=this.pos_y-((DestinationPoint)destination).getY();
-			return (x_dif*x_dif+y_dif*y_dif<Collide_Range*Collide_Range);
+			if(destination instanceof DestinationPoint)
+			{
+				double x_dif=this.pos_x-((DestinationPoint)destination).getX();
+				double y_dif=this.pos_y-((DestinationPoint)destination).getY();
+				return (x_dif*x_dif+y_dif*y_dif<Collide_Range*Collide_Range);
+			}
+			else
+			{
+				return true;
+			}
 		}
 	}
 	
