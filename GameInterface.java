@@ -747,6 +747,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 					}
 					else
 						displayNoPanel();
+					
+					system_state = SYS_NORMAL;
 				}
 				else
 				{

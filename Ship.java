@@ -115,6 +115,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					break;
 				case ORBITING:
 					SecondDest=null;
+					break;
 				case TARGET_LOST:
 					if(SecondDest!=null){
 						AIMove(SecondDest);
