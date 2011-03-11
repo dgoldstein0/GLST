@@ -219,8 +219,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					currentDistance = findSqDestinationDistance(currentShip);
 					if(currentDistance < GalacticStrategyConstants.Detection_Range_Sq){
 						if(closestShip==null||closestDistance>currentDistance){
-							closestShip = currentShip;
-							closestDistance=currentDistance;
+								closestShip = currentShip;
+								closestDistance=currentDistance;
 						}
 					}
 				}	
