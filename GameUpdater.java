@@ -137,6 +137,7 @@ public class GameUpdater {
 		//update all planets, facilities, ships and missiles
 		for(; update_to <= time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
 		{
+			setLast_time_updated(time_elapsed);
 			Order o;
 			while( (o = local_pending_execution.peek()) != null && o.scheduled_time <= update_to)
 			{
@@ -211,6 +212,9 @@ public class GameUpdater {
 					}
 				}
 				
+				//TODO: collision detection
+				
+				
 				//NOTE: Missile collision detection relies on Missiles being updated after ships.  See Missile.collidedWithTarget
 				//update all missiles AND save data
 				synchronized(sys.missiles)
@@ -222,8 +226,6 @@ public class GameUpdater {
 						sys.missiles.get(i).update(update_to, missile_iteration); //returns true if the missile detonates
 					}
 				}
-				
-				//TODO: collision detect?
 			}
 			
 			/*
