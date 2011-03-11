@@ -137,7 +137,7 @@ public class GameUpdater {
 		//update all planets, facilities, ships and missiles
 		for(; update_to <= time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
 		{
-			setLast_time_updated(time_elapsed);
+			setLast_time_updated(update_to);
 			Order o;
 			while( (o = local_pending_execution.peek()) != null && o.scheduled_time <= update_to)
 			{
