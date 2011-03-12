@@ -17,7 +17,12 @@ public class GameUpdater {
 	final GameControl GC;
 	final PriorityBlockingQueue<Order> pending_execution;
 	TaskManager TM;
+	
 	long last_time_updated;
+	
+	boolean is_closing;
+	XMLEncoder logFile;
+	Object log_lock;
 	
 	public GameUpdater(GameControl ctrl)
 	{
@@ -25,6 +30,7 @@ public class GameUpdater {
 		TM = new TaskManager();
 		GC = ctrl;
 		last_time_updated = 0l;
+		log_lock = new Object();
 	}
 	
 	public void setTimeManager(TimeManager TM)
@@ -34,6 +40,7 @@ public class GameUpdater {
 	
 	public void startUpdating()
 	{
+		is_closing=false;
 		TM.startConstIntervalTask(new Updater(),(int)GalacticStrategyConstants.TIME_GRANULARITY);
 	}
 	
@@ -42,8 +49,15 @@ public class GameUpdater {
 		TM.stopTask();
 		
 		//TODO: debugging code, should later be removed
-		if(logFile != null)
-			logFile.close();
+		synchronized(log_lock)
+		{
+			if(logFile != null)
+			{
+				logFile.close();
+				logFile = null;
+				is_closing = true;
+			}
+		}
 	}
 	
 	public long getTime()
@@ -264,8 +278,6 @@ public class GameUpdater {
 		}
 	}
 	
-	XMLEncoder logFile;
-	
 	public void setupLogFile(String logname)
 	{
 		try {
@@ -279,14 +291,17 @@ public class GameUpdater {
 	
 	public void log(Object o)
 	{
-		if(logFile == null)
-			setupLogFile("log.txt");
-		
-		if(o != null)
+		synchronized(log_lock)
 		{
-			synchronized(logFile)
+			if(!is_closing)
 			{
-				logFile.writeObject(o);
+				if(logFile == null)
+					setupLogFile("log.txt");
+				
+				if(o != null)
+				{
+					logFile.writeObject(o);
+				}
 			}
 		}
 	}
