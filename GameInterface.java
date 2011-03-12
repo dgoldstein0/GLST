@@ -700,14 +700,20 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 							
 							for(Selectable s : selected_in_sys)
 							{
-								int range = ShipPanel.the_ship.warpRange();
-								
-								if(x_dif*x_dif + y_dif*y_dif <= range*range)
+								if(s != null) //TODO: why is it null?
 								{
-									//set this as the ship's warp destination
-									some_warped=true;
-									GC.scheduleOrder(new ShipWarpOrder(GC.players[GC.player_id], (Ship)s, GC.updater.TC.getNextTimeGrain(), the_sys));
+									//TODO: draw the correct range
+									int range = ShipPanel.the_ship.warpRange();
+									
+									if(x_dif*x_dif + y_dif*y_dif <= range*range)
+									{
+										//set this as the ship's warp destination
+										some_warped=true;
+										GC.scheduleOrder(new ShipWarpOrder(GC.players[GC.player_id], (Ship)s, GC.updater.TC.getNextTimeGrain(), the_sys));
+									}
 								}
+								else
+									some_warped = true;
 							}
 							
 							if(some_warped)
@@ -976,27 +982,34 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		
 		long time = GC.updater.getTime();
 		for(Selectable the_ship : selected_in_sys)
-		{	if(AttackMove)
+		{
+			if(the_ship == null)
+				System.out.println("null object in selected");
+			
+			if(the_ship != null)
 			{
-				if(dest instanceof Ship && dest != ShipPanel.the_ship)
+				if(AttackMove)
 				{
-					GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), time, (Targetable<?>)dest));
-				}	
-				else{
-					GC.scheduleOrder(new ShipAttackMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));
+					if(dest instanceof Ship && dest != ShipPanel.the_ship)
+					{
+						GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), time, (Targetable<?>)dest));
+					}	
+					else{
+						GC.scheduleOrder(new ShipAttackMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));
+					}
+					//ShipPanel.updateDestDisplay(dest); //not a bad idea, but its a no-op, since we just only scheduled the order
 				}
-				//ShipPanel.updateDestDisplay(dest); //not a bad idea, but its a no-op, since we just only scheduled the order
-			}
-			else{
-				GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));
-				
-				//TODO: work on correct updating
-				ShipPanel.updateDestDisplay(dest);
-				
-				//TODO: fix if more than one team or more than two players to only target enemy
-				if(dest instanceof Ship && dest != ShipPanel.the_ship&&((Ship)dest).owner != GC.players[GC.player_id])
-				{
-					GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), time, (Targetable<?>)dest));
+				else{
+					GC.scheduleOrder(new ShipMoveOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), dest));
+					
+					//TODO: work on correct updating
+					ShipPanel.updateDestDisplay(dest);
+					
+					//TODO: fix if more than one team or more than two players to only target enemy
+					if(dest instanceof Ship && dest != ShipPanel.the_ship&&((Ship)dest).owner != GC.players[GC.player_id])
+					{
+						GC.scheduleOrder(new ShipAttackOrder(GC.players[GC.player_id], (Ship)the_ship, TimeControl.getTimeGrainAfter(time), time, (Targetable<?>)dest));
+					}
 				}
 			}
 		}
