@@ -16,7 +16,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	int next_missile_id;
 	
 	float soldier;
-	public static enum MODES {IDLE, MOVING, ORBITING, USERATTACKING, ATTACKING, USERATTACKMOVE, ATTACKMOVE, TARGET_LOST, TRAVEL_TO_WARP, 
+	public static enum MODES {IDLE, MOVING, ORBITING, PROTECTORBIT, USERATTACKING, ATTACKING, USERATTACKMOVE, ATTACKMOVE, TARGET_LOST, TRAVEL_TO_WARP, 
 		ENTER_WARP, IN_WARP, EXIT_WARP, PICKUP_TROOPS;}
 	MODES mode;
 	
@@ -78,7 +78,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		
 		location.fleets[owner.getId()].add(this, t);
 		time = TimeControl.getTimeGrainAfter(t);
-		orderToMove(time, builder.location); //this call does not go via the game Order handling system.  all computers should issue these orders on their own.
+		orderToAttackMove(time, builder.location); //this call does not go via the game Order handling system.  all computers should issue these orders on their own.
 	}
 	
 	//updates the ship an increment towards time t - moving and attacking.  return value is meaningless/ignored
@@ -92,7 +92,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		if(time < t)
 		{
 			moveIncrement();
-			
 			MODES orig_mode;
 			
 			/* this do-while is necessary because if we revert the ship to this state,
@@ -115,7 +114,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 						break;
 					case MOVING:
 						SecondDest = null;
-						if(reachedDest(destination)){
+						if((!(destination instanceof Ship))&&reachedDest(destination)){
 							if(destination instanceof Satellite<?>)
 								{mode = MODES.ORBITING;}
 							else mode = MODES.IDLE;
@@ -123,6 +122,15 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 						break;
 					case ORBITING:
 						SecondDest=null;
+						break;
+					case PROTECTORBIT:
+						SecondDest=null;
+						Ship possibletarget = identifyClosestEnemy();
+						if(possibletarget != null){
+							setOtherDest(destination);
+							setupAttack(possibletarget);
+							mode = MODES.ATTACKING;
+						} 
 						break;
 					case TARGET_LOST:
 						if(SecondDest!=null){
@@ -148,7 +156,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 						} 
 						if(reachedDest(destination)){
 							if(destination instanceof OwnableSatellite<?>)
-								{mode = MODES.ORBITING;}
+								{mode = MODES.PROTECTORBIT;}
 							else
 								mode = MODES.IDLE;
 						}
@@ -161,7 +169,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 							mode = MODES.ATTACKING;
 						} 
 						if(reachedDest(destination)){
-							if(destination instanceof OwnableSatellite<?>){mode = MODES.ORBITING;}
+							if(destination instanceof OwnableSatellite<?>){mode = MODES.PROTECTORBIT;}
 							else mode = MODES.IDLE;
 						}
 						break;
@@ -391,7 +399,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	public void orderToInvade(OwnableSatellite<?> sat, long t)
 	{
-		if(mode == MODES.ORBITING || mode==MODES.MOVING || mode == MODES.USERATTACKING || mode == MODES.ATTACKING) //TODO: what modes is this valid in?
+		if(mode == MODES.ORBITING|| mode==MODES.PROTECTORBIT || mode==MODES.MOVING || mode == MODES.USERATTACKING || mode == MODES.ATTACKING) //TODO: what modes is this valid in?
 		{
 			double x_dif = pos_x-sat.getXCoord(t);
 			double y_dif = pos_y-sat.getYCoord(t);
@@ -418,7 +426,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	public void orderToPickupTroops(long t) {
 		
-		if(mode == MODES.ORBITING &&
+		if((mode == MODES.ORBITING||mode == MODES.PROTECTORBIT )&&
 				destination instanceof OwnableSatellite<?> &&
 				((OwnableSatellite<?>)destination).getOwner() == owner &&
 				((OwnableSatellite<?>)destination).the_base != null &&

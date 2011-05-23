@@ -751,6 +751,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 							displayShipPanel((Ship) selected_in_sys.get(0));
 						else if(selected_in_sys.get(0) instanceof Satellite<?>)
 							displaySatellitePanel((Satellite<?>) selected_in_sys.get(0));
+						else displayNoPanel();
 					}
 					else if(selected_in_sys.size() > 1)
 					{
