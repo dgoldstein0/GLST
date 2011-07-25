@@ -160,12 +160,22 @@ public class GameSimulator {
 			}
 		}
 		
-		{
+		/*{
 			//Test Case 5
 			System.out.println("Running Test 5...");
 			try{
 				Simulation sim1 = loadSimFromFile("simplemap.xml", 2, new FileInputStream(new File("testcases/test5-1.txt")));
 				sim1.simulate("newlog.txt");
+			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 5");}
+		}*/
+		
+		{
+			//Test Case 6
+			System.out.println("Running Test 6...");
+			try{
+				Simulation sim1 = loadSimFromFile("simplemap.xml", 2, new FileInputStream(new File("testcases/testcase6-1.txt")));
+				Simulation sim2 = loadSimFromFile("simplemap.xml", 2, new FileInputStream(new File("testcases/testcase6-2.txt")));
+				compareResults(6,sim1.simulate("newlog1.txt"),sim2.simulate("newlog2.txt"));
 			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 5");}
 		}
 	}

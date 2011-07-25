@@ -295,7 +295,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 				pos_y += dist_moved*exit_vec_y;
 				time=t;
 			}
-			data_control.saveData();
+			data_control.saveData(); //TODO: I think we should keep this saveData... but should double-check
 		}
 		return false;
 	}
@@ -331,10 +331,11 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
 			mode=MODES.MOVING;
-			data_control.saveData();
 			//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
+			data_control.saveData();
 		}
 	}
+	
 	public void AIMove(Destination<?> d)
 	{
 		destination = d;
@@ -342,8 +343,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
 		data_control.saveData();
-
 	}
+	
 	public void orderToAttackMove(long t, Destination<?> d)
 	{
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP)
@@ -358,7 +359,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			mode = MODES.USERATTACKMOVE;
 			data_control.saveData();
 		}
-		
 	}
 	
 	public void orderToAttack(long t, Targetable<?> tgt)
@@ -490,7 +490,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		
 		mode=MODES.IN_WARP;
 		owner.ships_in_transit.add(this);
-		data_control.saveData();
+		data_control.saveData(); //TODO: I think I should keep this... but should double-check this is a good idea
 	}
 	
 	private void disengageWarpDrive(Iterator<Ship> ship_it)
@@ -513,7 +513,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		ship_it.remove();//owner.ships_in_transit.remove(this);
 		location.fleets[owner.getId()].add(this, arrival_time);
 		
-		//no data_control.saveData() here since this method is only called from moveDuringWarp and that does the saveData
+		//TODO: should we do data_control.saveData() here?
+		//since this method is only called from moveDuringWarp (and that does the saveData... or used to, at some point)
 	}
 	
 	/*this function returns true IF:
@@ -633,8 +634,9 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			was_target = tgt;
 		
 		target=null;
-			
+		
 		data_control.saveData();
+		
 		//TODO: player notification - THIS SHOULD USE LOST_REASON
 	}
 	

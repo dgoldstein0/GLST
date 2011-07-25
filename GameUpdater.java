@@ -3,8 +3,10 @@ import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
 import javax.swing.SwingUtilities;
@@ -130,8 +132,11 @@ public class GameUpdater {
 				update_to = TimeControl.roundDownToTimeGrain(next_order_time); //forces the main loop to reconsider below
 		}
 		
+		/**TODO: Revert here!*/
 		
-		//update data in all systems
+		
+		/* update positions of all planets/moons/etc.  These are time-independent, and
+		 * will also be calculated for other times that we need to know*/
 		for(GSystem sys : GC.map.systems)
 		{
 			//move all planets
@@ -152,16 +157,9 @@ public class GameUpdater {
 		for(; update_to <= time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
 		{
 			setLast_time_updated(update_to);
-			Order o;
-			while( (o = local_pending_execution.peek()) != null && o.scheduled_time <= update_to)
-			{
-				/**execute does all the necessary reversion itself.  It never reverts anything to earlier than
-				 * scheduled_time, which should be within one time grain less than update_to*/
-				local_pending_execution.addAll(local_pending_execution.remove().execute(GC.map));
-			}
 			
-			if(getLast_time_updated() > update_to)
-				update_to = getLast_time_updated();
+			/**TODO: Save Everything here!*/
+			
 			
 			/**update all intersystem data.  This is must be within the loop in case ships are reverted back
 			 * into warp or something of the sort*/
@@ -226,9 +224,6 @@ public class GameUpdater {
 					}
 				}
 				
-				//TODO: collision detection
-				
-				
 				//NOTE: Missile collision detection relies on Missiles being updated after ships.  See Missile.collidedWithTarget
 				//update all missiles AND save data
 				synchronized(sys.missiles)
@@ -240,10 +235,23 @@ public class GameUpdater {
 						sys.missiles.get(i).update(update_to, missile_iteration); //returns true if the missile detonates
 					}
 				}
+				
+				//collision processing... (FAIL)
+				detectCollisions(sys, update_to, local_pending_execution);
 			}
 			
-			/*
-			//TODO: debuging code, should later be removed
+			Order o;
+			while( (o = local_pending_execution.peek()) != null && o.scheduled_time <= update_to)
+			{
+				/**execute does all the necessary reversion itself.  It never reverts anything to earlier than
+				 * scheduled_time, which should be within one time grain less than update_to*/
+				local_pending_execution.addAll(local_pending_execution.remove().execute(GC.map));
+			}
+			
+			if(getLast_time_updated() > update_to)
+				update_to = getLast_time_updated();
+			
+			/* debuging code, should later be removed
 			if(DEBUGGING)
 			{
 				log("\r\nUpdated to " + update_to, GC.map);
@@ -266,6 +274,99 @@ public class GameUpdater {
 		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));
 	}
 	
+	private void detectCollisions(GSystem sys, long t, PriorityQueue<Order> local_pending_execution) throws DataSaverControl.DataNotYetSavedException
+	{
+		for(int i=0; i<sys.fleets.length; i++)
+		{
+			synchronized(sys.fleets[i].lock)
+			{
+				Fleet.ShipIterator ship_iterator1 = sys.fleets[i].iterator();
+				for(Ship.ShipId id1; ship_iterator1.hasNext();)
+				{
+					id1=ship_iterator1.next();
+					for(int j=i; j<sys.fleets.length; j++)
+					{
+						synchronized(sys.fleets[j].lock)
+						{
+							Fleet.ShipIterator ship_iterator2 = sys.fleets[i].iterator();
+							for(Ship.ShipId id2; ship_iterator2.hasNext();)
+							{
+								id2=ship_iterator2.next();
+								if(!id1.equals(id2))
+								{
+									Ship a = sys.fleets[i].ships.get(id1);
+									Ship b = sys.fleets[j].ships.get(id2);
+									
+									if(a != null && b != null)
+										local_pending_execution.addAll(doCollision(a,b,t-GalacticStrategyConstants.TIME_GRANULARITY));
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public Set<Order> doCollision(Ship a, Ship b, long t) throws DataSaverControl.DataNotYetSavedException
+	{
+		double x_a = a.getXCoord(t);
+		double y_a = a.getYCoord(t);
+		
+		double x_b = b.getXCoord(t);
+		double y_b = b.getYCoord(t);
+		
+		double dif_x = x_a - x_b;
+		double dif_y = y_a - y_b;
+		double len_sq_dif = dif_x*dif_x + dif_y*dif_y;
+		
+		double a_dim = a.type.dim * a.type.img.scale;
+		double b_dim = b.type.dim * b.type.img.scale;
+		double collision_dist = (a_dim + b_dim) / 2.0;
+		
+		if(len_sq_dif < collision_dist*collision_dist)
+		{
+			//do collision
+			Set<Order> orders = new HashSet<Order>();
+			orders.addAll(a.data_control.revertToTime(t));
+			orders.addAll(b.data_control.revertToTime(t));
+			
+			//velocity a -= 2*projection onto dif
+			double v_x_a = a.getXVel(t);
+			double v_y_a = a.getYVel(t);
+			
+			double new_v_x_a, new_v_y_a, proj_frac_a;
+			proj_frac_a = (v_x_a*dif_x + v_y_a*dif_y)/len_sq_dif;
+			if (proj_frac_a < 0.0)
+			{
+				new_v_x_a = 0.0;//v_x_a - proj_frac_a*dif_x;
+				new_v_y_a = 0.0;//v_y_a - proj_frac_a*dif_y;
+				
+				a.speed = Math.hypot(new_v_x_a, new_v_y_a);
+				if (new_v_y_a != 0.0 || new_v_x_a != 0.0)
+					a.direction = Math.atan2(new_v_y_a, new_v_x_a);
+			}
+			
+			//velocity b += 2*projection onto dif
+			double v_x_b = b.getXVel(t);
+			double v_y_b = b.getYVel(t);
+			
+			double new_v_x_b, new_v_y_b, proj_frac_b;
+			proj_frac_b = (v_x_b*dif_x + v_y_b*dif_y)/len_sq_dif;
+			if(proj_frac_b > 0.0)
+			{
+				new_v_x_b = 0.0;//v_x_b - proj_frac_b*dif_x;
+				new_v_y_b = 0.0;//v_y_b - proj_frac_b*dif_y;
+				
+				b.speed = Math.hypot(new_v_x_b, new_v_y_b);
+				if (new_v_x_b != 0.0 || new_v_y_b != 0.0)
+					b.direction = Math.atan2(new_v_y_b, new_v_x_b);
+			}
+			return orders;
+		}
+		return new HashSet<Order>();
+	}
+	
 	public class InterfaceUpdater implements Runnable
 	{
 		long time;
@@ -284,7 +385,6 @@ public class GameUpdater {
 			logFile = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(logname)));
 			logFile.setExceptionListener(new MyExceptionListener());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -310,7 +410,6 @@ public class GameUpdater {
 	{
 		@Override
 		public void exceptionThrown(Exception arg0) {
-			// TODO Auto-generated method stub
 			arg0.printStackTrace();
 		}
 	}

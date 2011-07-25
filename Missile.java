@@ -64,7 +64,7 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 			if (collidedWithTarget())
 			{
 				detonate(missileIteration);
-				data_control.saveData();
+				data_control.saveData(); //TODO: should this be here?
 				retval = true;
 			}
 			else
