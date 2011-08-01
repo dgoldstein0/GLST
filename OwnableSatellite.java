@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -13,6 +14,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	Base the_base; //the base is a member of facilities.  As such, it should be governed by facilities_lock.
 	
 	Player owner;
+	Color lastcolor;
 	
 	long time; //last time there was a change
 	
@@ -55,6 +57,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		data_control = new OwnableSatelliteDataSaverControl<T>((T)this);
 		//last_tax_time = 0;
 		owner = null;
+		lastcolor=Color.WHITE;
 		
 		number_mines=0;
 		last_number_mines=0;
@@ -286,6 +289,8 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		owner=p;
 		getGSystem().increaseClaim(p);
 	}
+	public void setlastcolor(Color color){lastcolor=color;}
+	public Color getlastcolor(){return lastcolor;}
 	public double getBase_mining_rate(){return base_mining_r;}
 	public void setBase_mining_rate(double r){base_mining_r = r;}
 	public int getBuilding_limit(){return building_limit;}

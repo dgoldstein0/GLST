@@ -665,14 +665,17 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	public void mousePressed(MouseEvent e) {
 		if(isSystemDisplayed())
 		{
-			cur_x = mouse_down_x = sysScreenToDataX(e.getX());
-			cur_y = mouse_down_y = sysScreenToDataY(e.getY());
-			
-			button_down = e.getButton();
-
-			if(e.getButton() == MouseEvent.BUTTON1)
+			if(sys.owner_id==GC.player_id||sys.owner_id==-1||!ToggleControls.fogofwar)
 			{
-				drag_modifier = (e.isShiftDown()) ? MODIFIER.SHIFT : ((e.isAltDown()) ? MODIFIER.ALT : MODIFIER.NONE);
+				cur_x = mouse_down_x = sysScreenToDataX(e.getX());
+				cur_y = mouse_down_y = sysScreenToDataY(e.getY());
+				
+				button_down = e.getButton();
+				
+				if(e.getButton() == MouseEvent.BUTTON1)
+				{
+					drag_modifier = (e.isShiftDown()) ? MODIFIER.SHIFT : ((e.isAltDown()) ? MODIFIER.ALT : MODIFIER.NONE);
+				}
 			}
 		}
 	}
@@ -734,60 +737,62 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 			}
 			else
 			{ //system is displayed
-				if(mouse_was_dragged)
-				{
-					doMouseDragged(e);
-					mouse_was_dragged=false;
-					
-					//combine selection permanently
-					selected_in_sys.addAll(maybe_select_in_sys);
-					selected_in_sys.removeAll(maybe_deselect_in_sys);
-					maybe_select_in_sys.clear();
-					maybe_deselect_in_sys.clear();
-					
-					if(selected_in_sys.size() == 1)
+				if(sys.owner_id==GC.player_id||sys.owner_id==-1||!ToggleControls.fogofwar){
+					if(mouse_was_dragged)
 					{
-						if(selected_in_sys.get(0) instanceof Ship)
+						doMouseDragged(e);
+						mouse_was_dragged=false;
+						
+						//combine selection permanently
+						selected_in_sys.addAll(maybe_select_in_sys);
+						selected_in_sys.removeAll(maybe_deselect_in_sys);
+						maybe_select_in_sys.clear();
+						maybe_deselect_in_sys.clear();
+						
+						if(selected_in_sys.size() == 1)
+						{
+							if(selected_in_sys.get(0) instanceof Ship)
+								displayShipPanel((Ship) selected_in_sys.get(0));
+							else if(selected_in_sys.get(0) instanceof Satellite<?>)
+								displaySatellitePanel((Satellite<?>) selected_in_sys.get(0));
+							else displayNoPanel();
+						}
+						else if(selected_in_sys.size() > 1)
+						{
+							//mass ship selection
 							displayShipPanel((Ship) selected_in_sys.get(0));
-						else if(selected_in_sys.get(0) instanceof Satellite<?>)
-							displaySatellitePanel((Satellite<?>) selected_in_sys.get(0));
-						else displayNoPanel();
-					}
-					else if(selected_in_sys.size() > 1)
-					{
-						//mass ship selection
-						displayShipPanel((Ship) selected_in_sys.get(0));
-					}
-					else
-						displayNoPanel();
+						}
+						else
+							displayNoPanel();
 					
-					system_state = SYS_NORMAL;
-				}
-				else
-				{
-					if(e.getX() >= theinterface.getWidth() - ImageResource.RETURN_ARROW.getWidth() && e.getY() <= ImageResource.RETURN_ARROW.getHeight())
-						drawGalaxy(GALAXY_STATE.NORMAL); //back arrow clicked
+						system_state = SYS_NORMAL;
+					}
 					else
 					{
-						if(system_state == SYS_NORMAL && e.getButton() == MouseEvent.BUTTON1)
+						if(e.getX() >= theinterface.getWidth() - ImageResource.RETURN_ARROW.getWidth() && e.getY() <= ImageResource.RETURN_ARROW.getHeight())
+							drawGalaxy(GALAXY_STATE.NORMAL); //back arrow clicked
+						else
 						{
-							//look for object to select
-							selectInSystemAt(e.getX(), e.getY());
-							redraw();
-						}
-						else if(system_state == SELECT_DESTINATION)
-						{
-							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),false);
-							system_state = SYS_NORMAL;
-						}
-						else if(system_state == ATTACK_MOVE_DESTINATION)
-						{
-							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),true);
-							system_state = SYS_NORMAL;
-						}
-						else if(selected_in_sys.size() != 0 && selected_in_sys.get(0) instanceof Ship && e.getButton() == MouseEvent.BUTTON3 && ((Ship)selected_in_sys.get(0)).owner.getId() == GC.player_id)
-						{
-							setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),false);
+							if(system_state == SYS_NORMAL && e.getButton() == MouseEvent.BUTTON1)
+							{
+								//look for object to select
+								selectInSystemAt(e.getX(), e.getY());
+								redraw();
+							}
+							else if(system_state == SELECT_DESTINATION)
+							{
+								setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),false);
+								system_state = SYS_NORMAL;
+							}
+							else if(system_state == ATTACK_MOVE_DESTINATION)
+							{
+								setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),true);
+								system_state = SYS_NORMAL;
+							}
+							else if(selected_in_sys.size() != 0 && selected_in_sys.get(0) instanceof Ship && e.getButton() == MouseEvent.BUTTON3 && ((Ship)selected_in_sys.get(0)).owner.getId() == GC.player_id)
+							{
+								setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),false);
+							}
 						}
 					}
 				}

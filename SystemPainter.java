@@ -59,8 +59,8 @@ public class SystemPainter extends JPanel
 		g2.setRenderingHints(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
 		
 		super.paintComponent(g);
-		setBackground(Color.BLACK);
-		
+		if(design_view || !ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1)){setBackground(Color.BLACK);}
+		else{setBackground(Color.darkGray);}
 		if(design_view) {
 			//star zone
 			g2.setColor(new Color(255,255,0,100));
@@ -95,11 +95,24 @@ public class SystemPainter extends JPanel
 				{
 					//draw object
 					drawOrbit(orbiting, g2);
-					if(orbiting instanceof Planet && ((Planet)orbiting).getOwner() != null)
-						g2.setColor(((Planet)orbiting).getOwner().getColor());
-					else
-						g2.setColor(Color.WHITE);
 					
+					if(!ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1))
+					{
+						if(orbiting instanceof Planet && ((Planet)orbiting).getOwner() != null)
+						{
+							g2.setColor(((Planet)orbiting).getOwner().getColor());
+							((Planet)orbiting).setlastcolor(((Planet)orbiting).getOwner().getColor());
+						}
+						else
+						{
+							g2.setColor(Color.WHITE);
+							((Planet)orbiting).setlastcolor(Color.WHITE);
+						}
+					}
+					else
+					{
+						g2.setColor(((Planet) orbiting).getlastcolor());
+					}
 					g2.fill(new Ellipse2D.Double(drawX(orbiting.absoluteCurX()-(orbiting.size/2.0)), drawY(orbiting.absoluteCurY()-(orbiting.size/2.0)), orbiting.size*scale, orbiting.size*scale));
 					
 					//draw name
@@ -118,10 +131,23 @@ public class SystemPainter extends JPanel
 						for(Satellite<?> sat : planet_sats)
 						{
 							drawOrbit(sat, g2);
-							if(sat instanceof Moon && ((Moon)sat).getOwner() != null)
-								g2.setColor(((Moon)sat).getOwner().getColor());
+							if(!ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1))
+							{
+								if(sat instanceof Moon && ((Moon)sat).getOwner() != null)
+								{
+									g2.setColor(((Moon)sat).getOwner().getColor());
+									((Moon)sat).setlastcolor(((Moon)sat).getOwner().getColor());
+								}
+								else
+								{
+									g2.setColor(Color.WHITE);
+									((Moon)sat).setlastcolor(Color.WHITE);
+								}
+							}
 							else
-								g2.setColor(Color.WHITE);
+							{
+								g2.setColor(((Moon)sat).getlastcolor());
+							}
 							g2.fill(new Ellipse2D.Double(drawX(sat.absoluteCurX()-sat.size/2), drawY(sat.absoluteCurY()-sat.size/2), sat.size*scale, sat.size*scale));
 							
 							if(sat.name.length() == 0) {
@@ -134,89 +160,92 @@ public class SystemPainter extends JPanel
 					}
 				}
 			}
-			
 			//draw all ships
-			for(int i=0; i<system.fleets.length; i++)
+			if(design_view || !ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1))
 			{
-				if(system.fleets[i] != null)
+				for(int i=0; i<system.fleets.length; i++)
 				{
-					synchronized(system.fleets[i].lock)
+					if(system.fleets[i] != null)
 					{
-						for(Ship.ShipId j : system.fleets[i].ships.keySet())
+						synchronized(system.fleets[i].lock)
 						{
-							Flyer<?,?,?> f = system.fleets[i].ships.get(j);
-							drawFlyer(g2,f,system.fleets[i].owner.getColor());
+							for(Ship.ShipId j : system.fleets[i].ships.keySet())
+							{
+								Flyer<?,?,?> f = system.fleets[i].ships.get(j);
+								drawFlyer(g2,f,system.fleets[i].owner.getColor());
+							}
 						}
 					}
 				}
-			}
-			
-			synchronized(system.missiles)
-			{
-				for(Missile.MissileId i : system.missiles.keySet())
+				
+				synchronized(system.missiles)
 				{
-					drawFlyer(g2,(Flyer<Missile, Missile.MissileId, Iterator<Missile.MissileId>>)system.missiles.get(i),null);
+					for(Missile.MissileId i : system.missiles.keySet())
+					{
+						drawFlyer(g2,(Flyer<Missile, Missile.MissileId, Iterator<Missile.MissileId>>)system.missiles.get(i),null);
+					}
+				}
+			
+				g2.setColor(Color.WHITE);
+				if(system.name != null)
+					g2.drawString(system.name + " System", 10, 20);
+				
+				if(draw_select_box)
+				{
+					g2.setColor(Color.GRAY);
+					g2.draw(new Rectangle2D.Double(drawX(Math.min(select_x1, select_x2)), drawY(Math.min(select_y1, select_y2)), scale*Math.abs(select_x1-select_x2), scale*Math.abs(select_y1-select_y2)));
 				}
 			}
-			
-			g2.setColor(Color.WHITE);
-			if(system.name != null)
-				g2.drawString(system.name + " System", 10, 20);
-			
-			if(draw_select_box)
+		}
+		if(!ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1))
+		{
+			for(Selectable obj : selected)
+			{
+				g2.setColor(Color.WHITE);
+				if(obj instanceof Satellite<?>) {
+					if(game_mode){
+						g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)obj).absoluteCurX()-((StellarObject)obj).size/2.0)-2.0, drawY(((Satellite<?>)obj).absoluteCurY()-((StellarObject)obj).size/2.0)-2.0, ((StellarObject)obj).size*scale+4.0, ((StellarObject)obj).size*scale+4.0));
+					} else {
+						g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)obj).absoluteInitX()-((StellarObject)obj).size/2.0)-2.0, drawY(((Satellite<?>)obj).absoluteInitY()-((StellarObject)obj).size/2.0)-2.0, ((StellarObject)obj).size*scale+4.0, ((StellarObject)obj).size*scale+4.0));
+					}
+				} else if(obj instanceof Star) {
+					//select a star
+					g2.draw(new Ellipse2D.Double(drawX(((Star)obj).x-((StellarObject)obj).size/2.0), drawY(((Star)obj).y-((StellarObject)obj).size/2.0), ((StellarObject)obj).size*scale, ((StellarObject)obj).size*scale));
+				} else if(obj instanceof Focus) {
+					g2.draw(new Ellipse2D.Double(drawX(((Focus)obj).getX()+(((Focus)obj).owner.boss.absoluteCurX()))-2.0, drawY(((Focus)obj).getY()+(((Focus)obj).owner.boss.absoluteCurY()))-2.0, 5.0,5.0));
+				} else if(obj instanceof Ship) {
+					Ship s = (Ship)obj;
+					g2.draw(new Ellipse2D.Double(drawX(s.pos_x - s.type.dim*s.type.img.scale/2.0), drawY(s.pos_y - s.type.dim*s.type.img.scale/2.0), s.type.dim*s.type.img.scale*scale, s.type.dim*s.type.img.scale*scale));
+					g2.setColor(Color.ORANGE);
+					g2.drawLine(drawXInt(s.dest_x_coord)-3, drawYInt(s.dest_y_coord), drawXInt(s.dest_x_coord)+3, drawYInt(s.dest_y_coord));
+					g2.drawLine(drawXInt(s.dest_x_coord), drawYInt(s.dest_y_coord)-3, drawXInt(s.dest_x_coord), drawYInt(s.dest_y_coord)+3);
+				}
+			}
+			if(mouseover_obj != null)
+			{
+				g2.setColor(Color.YELLOW);
+				if(mouseover_obj instanceof Satellite<?>) {
+					if(game_mode){
+						g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)mouseover_obj).absoluteCurX()-((StellarObject)mouseover_obj).size/2.0)-2.0, drawY(((Satellite<?>)mouseover_obj).absoluteCurY()-((StellarObject)mouseover_obj).size/2.0)-2.0, ((StellarObject)mouseover_obj).size*scale+4.0, ((StellarObject)mouseover_obj).size*scale+4.0));
+					} else {
+						g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)mouseover_obj).absoluteInitX()-((StellarObject)mouseover_obj).size/2.0)-2.0, drawY(((Satellite<?>)mouseover_obj).absoluteInitY()-((StellarObject)mouseover_obj).size/2.0)-2.0, ((StellarObject)mouseover_obj).size*scale+4.0, ((StellarObject)mouseover_obj).size*scale+4.0));
+					}
+				} else if(mouseover_obj instanceof Star) {
+					//select a star
+					g2.draw(new Ellipse2D.Double(drawX(((Star)mouseover_obj).x-((StellarObject)mouseover_obj).size/2.0), drawY(((Star)mouseover_obj).y-((StellarObject)mouseover_obj).size/2.0), ((StellarObject)mouseover_obj).size*scale, ((StellarObject)mouseover_obj).size*scale));
+				} else if(mouseover_obj instanceof Focus) {
+					g2.draw(new Ellipse2D.Double(drawX(((Focus)mouseover_obj).getX()+(((Focus)mouseover_obj).owner.boss.absoluteCurX()))-2.0, drawY(((Focus)mouseover_obj).getY()+(((Focus)mouseover_obj).owner.boss.absoluteCurY()))-2.0, 5.0,5.0));
+				} else if(mouseover_obj instanceof Ship) {
+					Ship s = (Ship)mouseover_obj;
+					g2.draw(new Ellipse2D.Double(drawX(s.pos_x - s.type.dim*s.type.img.scale/2.0), drawY(s.pos_y - s.type.dim*s.type.img.scale/2.0), s.type.dim*s.type.img.scale*scale, s.type.dim*s.type.img.scale*scale));
+				}
+			}
+		
+			if(ghost_obj==GHOST_OBJS.YES)
 			{
 				g2.setColor(Color.GRAY);
-				g2.draw(new Rectangle2D.Double(drawX(Math.min(select_x1, select_x2)), drawY(Math.min(select_y1, select_y2)), scale*Math.abs(select_x1-select_x2), scale*Math.abs(select_y1-select_y2)));
+				g2.draw(new Ellipse2D.Double(drawX(ghost_x-ghost_size/2.0), drawY(ghost_y-ghost_size/2.0), ghost_size*scale, ghost_size*scale));
 			}
-		}
-		
-		for(Selectable obj : selected)
-		{
-			g2.setColor(Color.WHITE);
-			if(obj instanceof Satellite<?>) {
-				if(game_mode){
-					g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)obj).absoluteCurX()-((StellarObject)obj).size/2.0)-2.0, drawY(((Satellite<?>)obj).absoluteCurY()-((StellarObject)obj).size/2.0)-2.0, ((StellarObject)obj).size*scale+4.0, ((StellarObject)obj).size*scale+4.0));
-				} else {
-					g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)obj).absoluteInitX()-((StellarObject)obj).size/2.0)-2.0, drawY(((Satellite<?>)obj).absoluteInitY()-((StellarObject)obj).size/2.0)-2.0, ((StellarObject)obj).size*scale+4.0, ((StellarObject)obj).size*scale+4.0));
-				}
-			} else if(obj instanceof Star) {
-				//select a star
-				g2.draw(new Ellipse2D.Double(drawX(((Star)obj).x-((StellarObject)obj).size/2.0), drawY(((Star)obj).y-((StellarObject)obj).size/2.0), ((StellarObject)obj).size*scale, ((StellarObject)obj).size*scale));
-			} else if(obj instanceof Focus) {
-				g2.draw(new Ellipse2D.Double(drawX(((Focus)obj).getX()+(((Focus)obj).owner.boss.absoluteCurX()))-2.0, drawY(((Focus)obj).getY()+(((Focus)obj).owner.boss.absoluteCurY()))-2.0, 5.0,5.0));
-			} else if(obj instanceof Ship) {
-				Ship s = (Ship)obj;
-				g2.draw(new Ellipse2D.Double(drawX(s.pos_x - s.type.dim*s.type.img.scale/2.0), drawY(s.pos_y - s.type.dim*s.type.img.scale/2.0), s.type.dim*s.type.img.scale*scale, s.type.dim*s.type.img.scale*scale));
-				g2.setColor(Color.ORANGE);
-				g2.drawLine(drawXInt(s.dest_x_coord)-3, drawYInt(s.dest_y_coord), drawXInt(s.dest_x_coord)+3, drawYInt(s.dest_y_coord));
-				g2.drawLine(drawXInt(s.dest_x_coord), drawYInt(s.dest_y_coord)-3, drawXInt(s.dest_x_coord), drawYInt(s.dest_y_coord)+3);
-			}
-		}
-		
-		if(mouseover_obj != null)
-		{
-			g2.setColor(Color.YELLOW);
-			if(mouseover_obj instanceof Satellite<?>) {
-				if(game_mode){
-					g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)mouseover_obj).absoluteCurX()-((StellarObject)mouseover_obj).size/2.0)-2.0, drawY(((Satellite<?>)mouseover_obj).absoluteCurY()-((StellarObject)mouseover_obj).size/2.0)-2.0, ((StellarObject)mouseover_obj).size*scale+4.0, ((StellarObject)mouseover_obj).size*scale+4.0));
-				} else {
-					g2.draw(new Ellipse2D.Double(drawX(((Satellite<?>)mouseover_obj).absoluteInitX()-((StellarObject)mouseover_obj).size/2.0)-2.0, drawY(((Satellite<?>)mouseover_obj).absoluteInitY()-((StellarObject)mouseover_obj).size/2.0)-2.0, ((StellarObject)mouseover_obj).size*scale+4.0, ((StellarObject)mouseover_obj).size*scale+4.0));
-				}
-			} else if(mouseover_obj instanceof Star) {
-				//select a star
-				g2.draw(new Ellipse2D.Double(drawX(((Star)mouseover_obj).x-((StellarObject)mouseover_obj).size/2.0), drawY(((Star)mouseover_obj).y-((StellarObject)mouseover_obj).size/2.0), ((StellarObject)mouseover_obj).size*scale, ((StellarObject)mouseover_obj).size*scale));
-			} else if(mouseover_obj instanceof Focus) {
-				g2.draw(new Ellipse2D.Double(drawX(((Focus)mouseover_obj).getX()+(((Focus)mouseover_obj).owner.boss.absoluteCurX()))-2.0, drawY(((Focus)mouseover_obj).getY()+(((Focus)mouseover_obj).owner.boss.absoluteCurY()))-2.0, 5.0,5.0));
-			} else if(mouseover_obj instanceof Ship) {
-				Ship s = (Ship)mouseover_obj;
-				g2.draw(new Ellipse2D.Double(drawX(s.pos_x - s.type.dim*s.type.img.scale/2.0), drawY(s.pos_y - s.type.dim*s.type.img.scale/2.0), s.type.dim*s.type.img.scale*scale, s.type.dim*s.type.img.scale*scale));
-			}
-		}
-		
-		if(ghost_obj==GHOST_OBJS.YES)
-		{
-			g2.setColor(Color.GRAY);
-			g2.draw(new Ellipse2D.Double(drawX(ghost_x-ghost_size/2.0), drawY(ghost_y-ghost_size/2.0), ghost_size*scale, ghost_size*scale));
 		}
 		
 		if(draw_arrow)
