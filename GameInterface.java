@@ -579,65 +579,68 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 
 	private void doMouseDragged(MouseEvent e)
 	{
-		cur_x = sysScreenToDataX(e.getX());
-		cur_y = sysScreenToDataY(e.getY());
-		
-		Selectable first_maybe_select = null;
-		if(maybe_select_in_sys.size() != 0)
-			first_maybe_select = maybe_select_in_sys.get(0);
-		
-		List<Selectable> mod_selection = (drag_modifier == MODIFIER.ALT) ? maybe_deselect_in_sys : maybe_select_in_sys;
-		mod_selection.clear();
-		selectInSystemInRange(mod_selection,	Math.min(mouse_down_x, cur_x), Math.min(mouse_down_y, cur_y),
-												Math.max(mouse_down_x, cur_x), Math.max(mouse_down_y,cur_y));
-		
-		if(!mod_selection.contains(first_maybe_select))
+		if(sys.owner_id==GC.player_id||sys.owner_id==-1||!ToggleControls.fogofwar)
 		{
-			if(mod_selection.size() != 0)
-				first_maybe_select=mod_selection.get(0);
+			cur_x = sysScreenToDataX(e.getX());
+			cur_y = sysScreenToDataY(e.getY());
+			
+			Selectable first_maybe_select = null;
+			if(maybe_select_in_sys.size() != 0)
+				first_maybe_select = maybe_select_in_sys.get(0);
+				
+			List<Selectable> mod_selection = (drag_modifier == MODIFIER.ALT) ? maybe_deselect_in_sys : maybe_select_in_sys;
+			mod_selection.clear();
+			selectInSystemInRange(mod_selection,	Math.min(mouse_down_x, cur_x), Math.min(mouse_down_y, cur_y),
+													Math.max(mouse_down_x, cur_x), Math.max(mouse_down_y,cur_y));
+		
+			if(!mod_selection.contains(first_maybe_select))
+			{
+				if(mod_selection.size() != 0)
+					first_maybe_select=mod_selection.get(0);
+				else
+					first_maybe_select=null;
+			}
+			
+			List<Selectable> overall_view_ships = combineSelectedInSys();
+			for(Iterator<Selectable> select_it = overall_view_ships.iterator();select_it.hasNext();)
+			{
+				Selectable obj = select_it.next();
+				if(!(obj instanceof Ship) || ((Ship)obj).owner.getId() != GC.player_id)
+				{
+					select_it.remove();
+				}
+			}
+		
+			if(overall_view_ships.size() == 0) //everything is non-ship
+			{
+				switch(drag_modifier)
+				{
+					case SHIFT:
+					case NONE:
+						maybe_deselect_in_sys.clear();
+						maybe_select_in_sys.clear();
+						if(selected_in_sys.size() == 0)
+							maybe_select_in_sys.add(first_maybe_select);
+						break;
+					case ALT:
+						break;
+				}
+			}
 			else
-				first_maybe_select=null;
-		}
-		
-		List<Selectable> overall_view_ships = combineSelectedInSys();
-		for(Iterator<Selectable> select_it = overall_view_ships.iterator();select_it.hasNext();)
-		{
-			Selectable obj = select_it.next();
-			if(!(obj instanceof Ship) || ((Ship)obj).owner.getId() != GC.player_id)
 			{
-				select_it.remove();
-			}
-		}
-		
-		if(overall_view_ships.size() == 0) //everything is non-ship
-		{
-			switch(drag_modifier)
-			{
-				case SHIFT:
-				case NONE:
-					maybe_deselect_in_sys.clear();
-					maybe_select_in_sys.clear();
-					if(selected_in_sys.size() == 0)
-						maybe_select_in_sys.add(first_maybe_select);
-					break;
-				case ALT:
-					break;
-			}
-		}
-		else
-		{
-			switch(drag_modifier)
-			{
-				case NONE:
-				case SHIFT:
-					maybe_deselect_in_sys = new ArrayList<Selectable>();
-					maybe_deselect_in_sys.addAll(selected_in_sys);
-					maybe_deselect_in_sys.removeAll(overall_view_ships);
-					maybe_select_in_sys = overall_view_ships;
-					maybe_select_in_sys.removeAll(selected_in_sys);
-					break;
-				case ALT:
-					break;
+				switch(drag_modifier)
+				{
+					case NONE:
+					case SHIFT:
+						maybe_deselect_in_sys = new ArrayList<Selectable>();
+						maybe_deselect_in_sys.addAll(selected_in_sys);
+						maybe_deselect_in_sys.removeAll(overall_view_ships);
+						maybe_select_in_sys = overall_view_ships;
+						maybe_select_in_sys.removeAll(selected_in_sys);
+						break;
+					case ALT:
+						break;
+				}
 			}
 		}
 	}
@@ -796,6 +799,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 						}
 					}
 				}
+				else
+					mouse_was_dragged=false;
 			}
 		}
 	}
