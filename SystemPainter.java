@@ -60,7 +60,7 @@ public class SystemPainter extends JPanel
 		
 		super.paintComponent(g);
 		if(design_view || !ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1)){setBackground(Color.BLACK);}
-		else{setBackground(Color.darkGray);}
+		else{if(design_view)setBackground(Color.darkGray);}
 		if(design_view) {
 			//star zone
 			g2.setColor(new Color(255,255,0,100));
@@ -96,7 +96,7 @@ public class SystemPainter extends JPanel
 					//draw object
 					drawOrbit(orbiting, g2);
 					
-					if(!ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1))
+					if(design_view||!ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1))
 					{
 						if(orbiting instanceof Planet && ((Planet)orbiting).getOwner() != null)
 						{
@@ -131,7 +131,7 @@ public class SystemPainter extends JPanel
 						for(Satellite<?> sat : planet_sats)
 						{
 							drawOrbit(sat, g2);
-							if(!ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1))
+							if(design_view||!ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1))
 							{
 								if(sat instanceof Moon && ((Moon)sat).getOwner() != null)
 								{
@@ -197,7 +197,7 @@ public class SystemPainter extends JPanel
 				}
 			}
 		}
-		if(!ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1))
+		if(design_view||!ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1))
 		{
 			for(Selectable obj : selected)
 			{
