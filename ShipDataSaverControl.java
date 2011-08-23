@@ -45,13 +45,13 @@ public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, S
 							orders.add(new ShipMoveOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].dest));
 						break;
 					case TARGET_LOST:
-						if(saved_data[i].md != Ship.MODES.USERATTACKING && saved_data[i].md != Ship.MODES.ATTACKING) //if statement necessary to avoid order duplication
+						if(saved_data[i].md != Ship.MODES.ATTACKING) //if statement necessary to avoid order duplication
 							orders.add(new ShipAttackOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].t /*target_t doesn't matter, because it is only used over network*/, saved_data[j].was_tgt));
 						break;
-					case USERATTACKING:
+					case ATTACKING:
 						orders.add(new ShipAttackOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].t /*target_t doesn't matter, because it is only used over network*/, (Targetable<?>)saved_data[j].dest));
 						break;
-					case USERATTACKMOVE:
+					case ATTACKMOVE:
 
 						orders.add(new ShipAttackMoveOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].dest));
 						break;
@@ -76,7 +76,7 @@ public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, S
 				//could ship have been ordered to do same thing but on different object?
 				switch(saved_data[j].md)
 				{
-					case USERATTACKING:
+					case ATTACKING:
 						if(saved_data[i].tgt != saved_data[j].tgt)
 						{
 							orders.add(new ShipAttackOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].t, saved_data[j].tgt));
@@ -90,7 +90,7 @@ public strictfp class ShipDataSaverControl extends FlyerDataSaverControl<Ship, S
 							orders.add(new ShipMoveOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].dest));
 						}
 						break;
-					case USERATTACKMOVE:
+					case ATTACKMOVE:
 						if(saved_data[i].dest != saved_data[j].dest || saved_data[i].second_dest != saved_data[j].second_dest) //destination has changed
 						{
 							orders.add(new ShipAttackMoveOrder(the_obj.owner, the_obj, saved_data[j].t, saved_data[j].dest));

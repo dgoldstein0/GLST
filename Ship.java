@@ -16,7 +16,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	int next_missile_id;
 	
 	float soldier;
-	public static enum MODES {IDLE, MOVING, ORBITING, PROTECTORBIT, USERATTACKING, ATTACKING, USERATTACKMOVE, ATTACKMOVE, TARGET_LOST, TRAVEL_TO_WARP, 
+	public static enum MODES {IDLE, MOVING, ORBITING, PROTECTORBIT, ATTACKING, ATTACKMOVE, TARGET_LOST, TRAVEL_TO_WARP, 
 		ENTER_WARP, IN_WARP, EXIT_WARP, PICKUP_TROOPS;}
 	MODES mode;
 	
@@ -144,9 +144,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					case ATTACKING:
 						attack(time);
 						break;
-					case USERATTACKING:
-						attack(time);
-						break;
 					case ATTACKMOVE:
 						Ship atkMoveTarget = identifyClosestEnemy();
 						if(atkMoveTarget != null){
@@ -159,18 +156,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 								{mode = MODES.PROTECTORBIT;}
 							else
 								mode = MODES.IDLE;
-						}
-						break;
-					case USERATTACKMOVE:
-						Ship UserAtkMoveTarget = identifyClosestEnemy();
-						if(UserAtkMoveTarget != null){
-							setOtherDest(destination);
-							setupAttack(UserAtkMoveTarget);
-							mode = MODES.ATTACKING;
-						} 
-						if(reachedDest(destination)){
-							if(destination instanceof OwnableSatellite<?>){mode = MODES.PROTECTORBIT;}
-							else mode = MODES.IDLE;
 						}
 						break;
 					case TRAVEL_TO_WARP:
@@ -356,7 +341,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
-			mode = MODES.USERATTACKMOVE;
+			mode = MODES.ATTACKMOVE;
 			data_control.saveData();
 		}
 	}
@@ -367,7 +352,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		{
 			//System.out.println(Integer.toString(id) + "orderToAttack: t is " + Long.toString(t));
 			userOverride();
-			mode=MODES.USERATTACKING;
+			mode=MODES.ATTACKING;
 			setupAttack(tgt);
 			data_control.saveData();
 		}
@@ -399,7 +384,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	public void orderToInvade(OwnableSatellite<?> sat, long t)
 	{
-		if(mode == MODES.ORBITING|| mode==MODES.PROTECTORBIT || mode==MODES.MOVING || mode == MODES.USERATTACKING || mode == MODES.ATTACKING) //TODO: what modes is this valid in?
+		if(mode == MODES.ORBITING|| mode==MODES.PROTECTORBIT || mode==MODES.MOVING  || mode == MODES.ATTACKING) //TODO: what modes is this valid in?
 		{
 			double x_dif = pos_x-sat.getXCoord(t);
 			double y_dif = pos_y-sat.getYCoord(t);
@@ -620,7 +605,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	private void targetLost(LOST_REASON reason, long t, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
 	{
 		//System.out.println("target lost");
-		if (destination==(Destination<?>)target && mode==MODES.USERATTACKING)
+		if (destination==(Destination<?>)target && mode==MODES.ATTACKING)
 		{
 			//System.out.println("\tchanging destination...");
 			destination=new DestinationPoint(target.getXCoord(t),target.getYCoord(t));
