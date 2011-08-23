@@ -150,6 +150,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 							setOtherDest(destination);
 							setupAttack(atkMoveTarget);
 							mode = MODES.ATTACKING;
+							break;
 						} 
 						if(reachedDest(destination)){
 							if(destination instanceof OwnableSatellite<?>)
