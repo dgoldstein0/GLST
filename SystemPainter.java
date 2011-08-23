@@ -60,7 +60,7 @@ public class SystemPainter extends JPanel
 		
 		super.paintComponent(g);
 		if(design_view || !ToggleControls.fogofwar||(system.owner_id==GameInterface.GC.player_id||system.owner_id==-1)){setBackground(Color.BLACK);}
-		else{if(design_view)setBackground(Color.darkGray);}
+		else{setBackground(Color.darkGray);}
 		if(design_view) {
 			//star zone
 			g2.setColor(new Color(255,255,0,100));
