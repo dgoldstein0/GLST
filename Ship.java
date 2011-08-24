@@ -190,8 +190,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	private void setOtherDest(Destination<?> d)
 	{
-		if(d==null)
-			{SecondDest= new DestinationPoint(pos_x,pos_y);}
+		if(d instanceof Flyer<?,?,?>)
+			SecondDest = new DestinationPoint(d.getXCoord(time), d.getYCoord(time));
 		else
 			SecondDest = d;
 	}
@@ -206,19 +206,15 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		Ship closestShip=null;
 		double closestDistance,currentDistance;
 		closestDistance = -1;
-		for(int i=0;i<location.fleets.length;i++){
+		for(int i=0;i<GalacticStrategyConstants.MAX_PLAYERS;i++){
 			if(i!=owner.getId()){
 				for(Fleet.ShipIterator j=location.fleets[i].iterator();j.hasNext();){
 					currentShip = location.fleets[i].ships.get(j.next());
-					if(currentShip!=null)
-					{
-						currentDistance = findSqDestinationDistance(currentShip);
-						if(currentDistance < GalacticStrategyConstants.Detection_Range_Sq)
-						{
-							if(closestShip==null||closestDistance>currentDistance){
-									closestShip = currentShip;
-									closestDistance=currentDistance;
-							}	
+					currentDistance = findSqDestinationDistance(currentShip);
+					if(currentDistance < GalacticStrategyConstants.Detection_Range_Sq){
+						if(closestShip==null||closestDistance>currentDistance){
+								closestShip = currentShip;
+								closestDistance=currentDistance;
 						}
 					}
 				}	
@@ -250,8 +246,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	
 	public double findSqDestinationDistance(Destination<?> Dest){
-		double deltaX = Dest.getXCoord(time) - getXCoord(time);
-		double deltaY = Dest.getYCoord(time)-getYCoord(time);
+		double deltaX = Dest.getXCoord(time)-pos_x;
+		double deltaY = Dest.getYCoord(time)-pos_y;
 		return MathFormula.SumofSquares(deltaX, deltaY);
 		
 	}
@@ -317,8 +313,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			userOverride();
 			
 			//System.out.println(Integer.toString(id) + " orderToMove: t is " + Long.toString(t) + " and time is " + Long.toString(time));
-			dest_x_coord = d.getXCoord(time/*-GalacticStrategyConstants.TIME_GRANULARITY*/);
-			dest_y_coord = d.getYCoord(time/*-GalacticStrategyConstants.TIME_GRANULARITY*/);
+			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
 			mode=MODES.MOVING;
 			//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
@@ -329,8 +325,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public void AIMove(Destination<?> d)
 	{
 		destination = d;
-		dest_x_coord = d.getXCoord(time/*-GalacticStrategyConstants.TIME_GRANULARITY*/);
-		dest_y_coord = d.getYCoord(time/*-GalacticStrategyConstants.TIME_GRANULARITY*/);
+		dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+		dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
 		data_control.saveData();
 	}
@@ -343,8 +339,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			SecondDest = d;
 			userOverride();
 			
-			dest_x_coord = d.getXCoord(time/*-GalacticStrategyConstants.TIME_GRANULARITY*/);
-			dest_y_coord = d.getYCoord(time/*-GalacticStrategyConstants.TIME_GRANULARITY*/);
+			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
 			mode = MODES.ATTACKMOVE;
 			data_control.saveData();
@@ -498,9 +494,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		direction = exit_direction + EXIT_DIRECTION_JITTER*generator.nextGaussian(); //should already be true, but just in case
 		
 		mode=MODES.EXIT_WARP;
-
 		current_flying_AI = new StopAI();
-		destination = new DestinationPoint(pos_x,pos_y);
 		
 		ship_it.remove();//owner.ships_in_transit.remove(this);
 		location.fleets[owner.getId()].add(this, arrival_time);
