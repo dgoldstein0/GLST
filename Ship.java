@@ -16,7 +16,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	int next_missile_id;
 	
 	float soldier;
-	public static enum MODES {IDLE, MOVING, ORBITING, PROTECTORBIT, ATTACKING, ATTACKMOVE, TARGET_LOST, TRAVEL_TO_WARP, 
+	public static enum MODES {IDLE, MOVING, ORBITING, PROTECTORBIT, ATTACKING, USERATTACKING, ATTACKMOVE, USERATTACKMOVE, TARGET_LOST, TRAVEL_TO_WARP, 
 		ENTER_WARP, IN_WARP, EXIT_WARP, PICKUP_TROOPS;}
 	MODES mode;
 	
@@ -144,11 +144,29 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					case ATTACKING:
 						attack(time);
 						break;
+					case USERATTACKING:
+						attack(time);
+						break;
 					case ATTACKMOVE:
 						Ship atkMoveTarget = identifyClosestEnemy();
 						if(atkMoveTarget != null){
 							setOtherDest(destination);
 							setupAttack(atkMoveTarget);
+							mode = MODES.ATTACKING;
+							break;
+						} 
+						if(reachedDest(destination)){
+							if(destination instanceof OwnableSatellite<?>)
+								{mode = MODES.PROTECTORBIT;}
+							else
+								mode = MODES.IDLE;
+						}
+						break;
+					case USERATTACKMOVE:
+						Ship useratkMoveTarget = identifyClosestEnemy();
+						if(useratkMoveTarget != null){
+							setOtherDest(destination);
+							setupAttack(useratkMoveTarget);
 							mode = MODES.ATTACKING;
 							break;
 						} 
@@ -342,7 +360,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
-			mode = MODES.ATTACKMOVE;
+			mode = MODES.USERATTACKMOVE;
 			data_control.saveData();
 		}
 	}
@@ -353,7 +371,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		{
 			//System.out.println(Integer.toString(id) + "orderToAttack: t is " + Long.toString(t));
 			userOverride();
-			mode=MODES.ATTACKING;
+			mode=MODES.USERATTACKING;
 			setupAttack(tgt);
 			data_control.saveData();
 		}
