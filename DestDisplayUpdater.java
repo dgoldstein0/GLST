@@ -9,10 +9,13 @@ public class DestDisplayUpdater implements Runnable
 	
 	public void run()
 	{
-		ShipCommandPanel panel = GameInterface.GC.GI.ShipPanel;
-		if(panel.the_ship != null && panel.the_ship.destination == the_sat)
+		if (GameInterface.GC.GI != null)
 		{
-			panel.updateDestDisplay(panel.the_ship.destination);
+			ShipCommandPanel panel = GameInterface.GC.GI.ShipPanel;
+			if(panel.the_ship != null && panel.the_ship.destination == the_sat)
+			{
+				panel.updateDestDisplay(panel.the_ship.destination);
+			}
 		}
 	}
 }

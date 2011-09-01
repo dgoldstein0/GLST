@@ -425,7 +425,8 @@ public strictfp class GameControl
 		}catch(Exception e)
 		{
 			handleError("Start game failed", "Start game has failed, potentially due to a MapLoadException.", !automate);
-			startupDialog();
+			if (!automate)
+				startupDialog();
 			return;
 		}
 	}
@@ -806,11 +807,6 @@ public strictfp class GameControl
 	
 	public void notifyAllPlayers(Order o)
 	{
-		//TODO: move debugging code
-		updater.log(new GameSimulator.SimulateAction(updater.getTime(), o,
-				GameSimulator.SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
-				GameSimulator.SimulateAction.ORDER_TYPE.LOCAL));
-		
 		//notify other players
 		if(OS != null)
 		{
@@ -926,13 +922,17 @@ public strictfp class GameControl
 						
 						System.out.println("\t" + o.getClass().getName());
 						
-						updater.scheduleOrder(o);
-						
-						//TODO: move debugging code
-						long time = updater.getTime();
-						updater.log(new GameSimulator.SimulateAction(time, o,
-								GameSimulator.SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
-								GameSimulator.SimulateAction.ORDER_TYPE.REMOTE));
+						//atomically queue and log the new order
+						synchronized(updater.log_lock)
+						{
+							updater.scheduleOrder(o);
+							
+							//TODO: move debugging code
+							long time = updater.getTime();
+							updater.log(new GameSimulator.SimulateAction(time, o,
+									GameSimulator.SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
+									GameSimulator.SimulateAction.ORDER_TYPE.REMOTE));
+						}
 					}
 				}
 				
@@ -988,16 +988,26 @@ public strictfp class GameControl
 	}
 	
 	/**scheduleOrder
+	 * 
 	 * calls GameUpdater.scheduleOrder and notifyAllPlayers
 	 * i.e. should be used to schedule an order AND tell other computers too
 	 * 
 	 * @param o the order to schedule for execution
-	 * */
+	 */
 	public void scheduleOrder(Order o)
 	{
-		updater.scheduleOrder(o);
-		
-		notifyAllPlayers(o);
+		//atomically queue and log current user's order
+		//TODO: move debugging code
+		synchronized(updater.log_lock)
+		{
+			updater.log(new GameSimulator.SimulateAction(updater.getTime(), o,
+					GameSimulator.SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
+					GameSimulator.SimulateAction.ORDER_TYPE.LOCAL));
+			
+			updater.scheduleOrder(o);
+			
+			notifyAllPlayers(o);
+		}
 	}
 	
 	public void updateInterface(long time_elapsed)

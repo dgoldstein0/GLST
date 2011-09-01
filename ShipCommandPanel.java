@@ -181,11 +181,15 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		}
 		else if(e.getSource() == invade)
 		{
-			GameInterface.GC.scheduleOrder(new ShipInvadeOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.updater.TC.getNextTimeGrain()));
+			GameInterface.GC.scheduleOrder(
+				new ShipInvadeOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.updater.TC.getNextTimeGrain())
+			);
 		}
 		else if(e.getSource() == pickup_troops)
 		{
-			GameInterface.GC.scheduleOrder(new ShipPickupTroopsOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.updater.TC.getNextTimeGrain()));
+			GameInterface.GC.scheduleOrder(
+				new ShipPickupTroopsOrder(GameInterface.GC.players[GameInterface.GC.player_id], the_ship, GameInterface.GC.updater.TC.getNextTimeGrain())
+			);
 		}
 	}
 }

@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 /**GameSimulator
@@ -160,24 +161,79 @@ public class GameSimulator {
 			}
 		}
 		
-		/*{
+		{
 			//Test Case 5
 			System.out.println("Running Test 5...");
 			try{
-				Simulation sim1 = loadSimFromFile("simplemap.xml", 2, new FileInputStream(new File("testcases/test5-1.txt")));
-				sim1.simulate("newlog.txt");
+				
+				System.out.println("\tRunning part 1...");
+				
+				Simulation sim1 = loadSimFromFile("simplemap.xml", 2,
+						new FileInputStream(
+							new File("testcases/singleplayerbuildafewthings.txt")
+						),
+						false
+					);
+				List<String> l1 = sim1.simulate("test5-gold.txt");
+				saveResultsToFile(l1, "test5p1.txt");
+				
+				System.out.println("\tRunning part 2...");
+				
+				Simulation sim2 = loadSimFromFile("simplemap.xml", 2,
+						new FileInputStream(
+							new File("testcases/singleplayerbuildafewthings.txt")
+						),
+						true
+					);
+				List<String> l2 = sim2.simulate("test5-modified.txt");
+				saveResultsToFile(l2, "test5p2.txt");
+				
+				compareResults(5, l1, l2);
 			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 5");}
-		}*/
+		}
 		
 		{
 			//Test Case 6
 			System.out.println("Running Test 6...");
 			try{
-				Simulation sim1 = loadSimFromFile("simplemap.xml", 2, new FileInputStream(new File("testcases/testcase6-1.txt")));
-				Simulation sim2 = loadSimFromFile("simplemap.xml", 2, new FileInputStream(new File("testcases/testcase6-2.txt")));
-				compareResults(6,sim1.simulate("newlog1.txt"),sim2.simulate("newlog2.txt"));
-			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 5");}
+				
+				System.out.println("\tRunning part 1...");
+				
+				Simulation sim1 = loadSimFromFile("simplemap.xml", 2,
+						new FileInputStream(
+							new File("testcases/singleplayercrash.txt")
+						),
+						false
+					);
+				List<String> l1 = sim1.simulate("test6-gold.txt");
+				saveResultsToFile(l1, "test6p1.txt");
+				
+				//System.out.println("\tRunning part 2...");
+				
+				//Simulation sim2 = loadSimFromFile("simplemap.xml", 2,
+				//		new FileInputStream(
+				//			new File("testcases/singleplayercrash.txt")
+				//		),
+				//		true
+				//	);
+				//List<String> l2 = sim2.simulate("test6-modified.txt");
+				//saveResultsToFile(l2, "test6p2.txt");
+				
+				//compareResults(5, l1, l2);
+			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 6");}
 		}
+		
+		/*{
+			//Test Case 6
+			System.out.println("Running Test 6...");
+			try{
+				Simulation sim1 = loadSimFromFile("simplemap.xml", 2, new FileInputStream(new File("testcases/testcase6-1.txt")), false);
+				Simulation sim2 = loadSimFromFile("simplemap.xml", 2, new FileInputStream(new File("testcases/testcase6-2.txt")), false);
+				List<String> l1 = sim1.simulate("newlog1.txt");
+				List<String> l2 = sim2.simulate("newlog2.txt");
+				compareResults(6, l1, l2);
+			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 5");}
+		}*/
 	}
 	
 	public static void compareResults(int test_num, List<String> l1, List<String> l2)
@@ -222,21 +278,47 @@ public class GameSimulator {
 			writer.close();
 			
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	public static Simulation loadSimFromFile(String map, int num_players, InputStream file)
+	public static Simulation loadSimFromFile(String map, int num_players, InputStream file, boolean only_last_update)
 	{
 		List<SimulateAction> actions = new ArrayList<SimulateAction>();
 		XMLDecoder d = new XMLDecoder(file);
 		d.setExceptionListener(new XMLErrorDetector());
 		try{
 			while(true)
-				actions.add((SimulateAction)d.readObject());
+			{
+				SimulateAction action = (SimulateAction)d.readObject();
+				actions.add(action);
+			}
 		}catch(ArrayIndexOutOfBoundsException e){}
 		d.close();
+		
+		if (only_last_update)
+		{
+			ArrayList<SimulateAction> new_actions = new ArrayList<SimulateAction>();
+			SimulateAction last = null;
+
+			for (int i=0; i < actions.size(); i++)
+			{
+				SimulateAction action = actions.get(i);
+				
+				if (action.type.equals(SimulateAction.ACTION_TYPE.UPDATE))
+				{
+					last = action;
+				}
+				else
+					new_actions.add(action);
+			}
+			
+			new_actions.add(last);
+			actions = new_actions;
+		}
+		
+		actions.add(new SimulateAction(actions.get(actions.size()-1).do_at_time,
+									   SimulateAction.ACTION_TYPE.SAVE));
 		
 		return new Simulation(map, num_players, actions);
 	}
@@ -272,11 +354,11 @@ public class GameSimulator {
 						try {
 							GC.updater.updateGame();
 						} catch (DataSaverControl.DataNotYetSavedException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						break;
 					case SCHEDULE_ORDER:
+						//TODO: this is kind of devious.  Shouldn't this go via scheduleOrder()?
 						GC.updater.pending_execution.add(action.the_order);
 						break;
 					case SAVE:
@@ -292,6 +374,7 @@ public class GameSimulator {
 						break;
 				}
 			}
+			GC.updater.logFile.close();
 			return results;
 		}
 	}
@@ -314,6 +397,7 @@ public class GameSimulator {
 			order_type=ot;
 		}
 		
+		@Deprecated
 		public SimulateAction(long time, Order o, ACTION_TYPE t)
 		{
 			do_at_time = time;
@@ -375,7 +459,7 @@ public class GameSimulator {
 	public static class SimulatedTimeControl implements TimeManager
 	{
 		/**in milliseconds*/
-		long cur_time; 
+		long cur_time;
 		
 		public SimulatedTimeControl()
 		{
@@ -394,12 +478,13 @@ public class GameSimulator {
 
 		@Override
 		public long getTime() {
-			// TODO Auto-generated method stub
 			return cur_time;
 		}
 		
 		public void advanceTime(long t)
 		{
+			if (t < cur_time)
+				throw new RuntimeException("Monotonicity Error");
 			cur_time = t;
 		}
 	}

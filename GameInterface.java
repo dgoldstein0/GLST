@@ -720,7 +720,12 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 									{
 										//set this as the ship's warp destination
 										some_warped=true;
-										GC.scheduleOrder(new ShipWarpOrder(GC.players[GC.player_id], (Ship)s, GC.updater.TC.getNextTimeGrain(), the_sys));
+										GC.scheduleOrder(
+											new ShipWarpOrder(GC.players[GC.player_id],
+															  (Ship)s,
+															  GC.updater.TC.getNextTimeGrain(),
+															  the_sys)
+										);
 									}
 								}
 								else

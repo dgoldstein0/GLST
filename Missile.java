@@ -32,7 +32,7 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		time = (long)(Math.ceil((double)(time)/(double)(GalacticStrategyConstants.TIME_GRANULARITY))*GalacticStrategyConstants.TIME_GRANULARITY);
 		dest_x_coord = destination.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		dest_y_coord = destination.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
-		current_flying_AI = new TrackingAI(this, 0.0, TrackingAI.NO_SLOWDOWN);
+		current_flying_AI = new TrackingAI(this, 0.0, TrackingAI.IN_RANGE_BEHAVIOR.NO_SLOWDOWN);
 		
 		this.time=time;
 		data_control.saveData();

@@ -209,7 +209,7 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 		try {
 			int index_at_t = data_control.getIndexForTime(t);
 			//System.out.println("TIME is " + Long.toString(time) + " and t is " + Long.toString(t));
-			FlyerDataSaver<?> ds =  (FlyerDataSaver<?>)data_control.saved_data[index_at_t];
+			FlyerDataSaver<?> ds = (FlyerDataSaver<?>)data_control.saved_data[index_at_t];
 			dest_pos_x = ds.px;
 			dest_pos_y = ds.py;
 			dest_vel_x = ds.sp*Math.cos(ds.dir);

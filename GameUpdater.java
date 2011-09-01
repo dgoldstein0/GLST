@@ -68,6 +68,7 @@ public class GameUpdater {
 	}
 	
 	/**scheduleOrder
+	 * 
 	 * Adds an order to the priority queue pending_execution.  Note that this does NOT
 	 * notify other computers of the order - GameControl.scheduleOrder does that
 	 * 
@@ -99,28 +100,39 @@ public class GameUpdater {
 	
 	public void updateGame() throws DataSaverControl.DataNotYetSavedException
 	{
-		long time_elapsed=TC.getTime();
+		long time_elapsed, update_to;
+		PriorityQueue<Order> local_pending_execution;
 		
-		//TODO: Debugging code, remove later
-		log(new GameSimulator.SimulateAction(time_elapsed, GameSimulator.SimulateAction.ACTION_TYPE.UPDATE));
-		
-		long update_to=getLast_time_updated();
-		//System.out.println("Updating to time_elapsed=" + Long.toString(time_elapsed));
-		//start events that need to occur before time_elapsed
-		
-		//can safely use unsynchronized version here since this is only used by the current thread
-		PriorityQueue<Order> local_pending_execution = new PriorityQueue<Order>();
-		
-		do
+		//Atomically get the time and dequeue orders.
+		//This way, if we have an order with the same time as time_elapsed
+		//we will *know* whether it was sucked into this update cycle or not
+		//by their ordering in the log.  Without the locking, we cannot
+		//be sure whether it was dequeued here or not.
+		synchronized(log_lock)
 		{
-			Order o = pending_execution.peek();
-			if(o != null && o.scheduled_time <= time_elapsed)
-				local_pending_execution.add(pending_execution.remove()); //if this does not remove o, it removes one just inserted earlier than o.
-			else
-				break; /*small chance an order should be removed and executed this time around but isn't, 
-						if we don't see it with peek.  it will be executed next time through updateGame,
-						though potentially with a bit of reversion*/
-		} while(true);
+			time_elapsed=TC.getTime();
+			
+			//TODO: Debugging code, remove later
+			log(new GameSimulator.SimulateAction(time_elapsed, GameSimulator.SimulateAction.ACTION_TYPE.UPDATE));
+			
+			update_to=getLast_time_updated();
+			//System.out.println("Updating to time_elapsed=" + Long.toString(time_elapsed));
+			//start events that need to occur before time_elapsed
+			
+			//can safely use unsynchronized version here since this is only used by the current thread
+			local_pending_execution = new PriorityQueue<Order>();
+			
+			do
+			{
+				Order o = pending_execution.peek();
+				if(o != null && o.scheduled_time <= time_elapsed)
+					local_pending_execution.add(pending_execution.remove()); //if this does not remove o, it removes one just inserted earlier than o.
+				else
+					break; /*small chance an order should be removed and executed this time around but isn't, 
+							if we don't see it with peek.  it will be executed next time through updateGame,
+							though potentially with a bit of reversion*/
+			} while(true);
+		}
 		
 		/*now figure out the earliest order in local_pending_execution, and make that time update_to,
 		 * if update_to is currently larger*/
@@ -335,32 +347,24 @@ public class GameUpdater {
 			double v_x_a = a.getXVel(t);
 			double v_y_a = a.getYVel(t);
 			
-			double new_v_x_a, new_v_y_a, proj_frac_a;
+			double proj_frac_a;
 			proj_frac_a = (v_x_a*dif_x + v_y_a*dif_y)/len_sq_dif;
-			if (proj_frac_a < 0.0)
-			{
-				new_v_x_a = 0.0;//v_x_a - proj_frac_a*dif_x;
-				new_v_y_a = 0.0;//v_y_a - proj_frac_a*dif_y;
-				
-				a.speed = Math.hypot(new_v_x_a, new_v_y_a);
-				if (new_v_y_a != 0.0 || new_v_x_a != 0.0)
-					a.direction = Math.atan2(new_v_y_a, new_v_x_a);
-			}
 			
 			//velocity b += 2*projection onto dif
 			double v_x_b = b.getXVel(t);
 			double v_y_b = b.getYVel(t);
 			
-			double new_v_x_b, new_v_y_b, proj_frac_b;
+			double proj_frac_b;
 			proj_frac_b = (v_x_b*dif_x + v_y_b*dif_y)/len_sq_dif;
+			
+			if (proj_frac_a < 0.0) //negative indicates ship a is moving in the direction of ship b
+			{
+				a.speed = 0.0;
+			}
+			
 			if(proj_frac_b > 0.0)
 			{
-				new_v_x_b = 0.0;//v_x_b - proj_frac_b*dif_x;
-				new_v_y_b = 0.0;//v_y_b - proj_frac_b*dif_y;
-				
-				b.speed = Math.hypot(new_v_x_b, new_v_y_b);
-				if (new_v_x_b != 0.0 || new_v_y_b != 0.0)
-					b.direction = Math.atan2(new_v_y_b, new_v_x_b);
+				b.speed = 0.0;
 			}
 			return orders;
 		}

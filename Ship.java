@@ -219,7 +219,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		return isClose;
 	}
 	
-	public 	Ship identifyClosestEnemy(){
+	public Ship identifyClosestEnemy(){
 		Ship currentShip=null;
 		Ship closestShip=null;
 		double closestDistance,currentDistance;
@@ -258,7 +258,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
 		
 		//TODO: get constant 5 out of here
-		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.Attacking_Range-5, TrackingAI.STOP);
+		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.Attacking_Range-5, TrackingAI.IN_RANGE_BEHAVIOR.STOP);
 		data_control.saveData();
 	}
 	
@@ -343,7 +343,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			//System.out.println(Integer.toString(id) + " orderToMove: t is " + Long.toString(t) + " and time is " + Long.toString(time));
 			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
-			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
+			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
 			mode=MODES.MOVING;
 			//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 			data_control.saveData();
@@ -355,7 +355,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		destination = d;
 		dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
-		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
+		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
 		data_control.saveData();
 	}
 	
@@ -369,7 +369,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			
 			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
-			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.MATCH_SPEED);
+			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
 			mode = MODES.USERATTACKMOVE;
 			data_control.saveData();
 		}
