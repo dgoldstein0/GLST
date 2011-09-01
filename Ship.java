@@ -228,17 +228,27 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			if(i!=owner.getId()){
 				for(Fleet.ShipIterator j=location.fleets[i].iterator();j.hasNext();){
 					currentShip = location.fleets[i].ships.get(j.next());
-					currentDistance = findSqDestinationDistance(currentShip);
-					if(currentDistance < GalacticStrategyConstants.Detection_Range_Sq){
-						if(closestShip==null||closestDistance>currentDistance){
-								closestShip = currentShip;
-								closestDistance=currentDistance;
+					if(currentShip!=null)
+					{
+						currentDistance = findSqShipDistance(currentShip);
+						if(currentDistance < GalacticStrategyConstants.Detection_Range_Sq){
+							if(closestShip==null||closestDistance>currentDistance){
+									closestShip = currentShip;
+									closestDistance=currentDistance;
+							}
 						}
 					}
 				}	
 			}	
 		}
 	return closestShip;
+	}
+	public double findSqShipDistance(Ship target)
+	{
+		double deltaX=target.getPos_x()-pos_x;
+		double deltaY=target.getPos_y()-pos_y;
+		return MathFormula.SumofSquares(deltaX, deltaY);
+		
 	}
 	public void setupAttack(Targetable<?> tgt){
 		target= tgt;
