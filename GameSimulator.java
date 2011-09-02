@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -172,10 +173,9 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/singleplayerbuildafewthings.txt")
 						),
-						false
+						false, 10
 					);
 				List<String> l1 = sim1.simulate("test5-gold.txt");
-				saveResultsToFile(l1, "test5p1.txt");
 				
 				System.out.println("\tRunning part 2...");
 				
@@ -183,10 +183,9 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/singleplayerbuildafewthings.txt")
 						),
-						true
+						true, 10
 					);
 				List<String> l2 = sim2.simulate("test5-modified.txt");
-				saveResultsToFile(l2, "test5p2.txt");
 				
 				compareResults(5, l1, l2);
 			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 5");}
@@ -203,7 +202,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/singleplayercrash.txt")
 						),
-						false
+						false, 1
 					);
 				List<String> l1 = sim1.simulate("test6-gold.txt");
 				saveResultsToFile(l1, "test6p1.txt");
@@ -219,21 +218,9 @@ public class GameSimulator {
 				//List<String> l2 = sim2.simulate("test6-modified.txt");
 				//saveResultsToFile(l2, "test6p2.txt");
 				
-				//compareResults(5, l1, l2);
+				//compareResults(6, l1, l2);
 			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 6");}
 		}
-		
-		/*{
-			//Test Case 6
-			System.out.println("Running Test 6...");
-			try{
-				Simulation sim1 = loadSimFromFile("simplemap.xml", 2, new FileInputStream(new File("testcases/testcase6-1.txt")), false);
-				Simulation sim2 = loadSimFromFile("simplemap.xml", 2, new FileInputStream(new File("testcases/testcase6-2.txt")), false);
-				List<String> l1 = sim1.simulate("newlog1.txt");
-				List<String> l2 = sim2.simulate("newlog2.txt");
-				compareResults(6, l1, l2);
-			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 5");}
-		}*/
 	}
 	
 	public static void compareResults(int test_num, List<String> l1, List<String> l2)
@@ -282,7 +269,22 @@ public class GameSimulator {
 		}
 	}
 	
-	public static Simulation loadSimFromFile(String map, int num_players, InputStream file, boolean only_last_update)
+	/**loadSimFromFile
+	 * 
+	 * @param map the path to the map file.
+	 * @param num_players the number of players in the simulated game.
+	 * @param remove_updates false to use the updates found in the file,
+	 * 		true to throw them away and only use extra updates.
+	 * @param num_updates_and_saves the number of updates/saves in the simulation,
+	 * 		occurring at increments of the end time divided by num_updates_and_saves.
+	 * 
+	 * @return a Simulation with the desired sequence of events.
+	 */
+	public static Simulation loadSimFromFile(String map,
+											 int num_players,
+											 InputStream file,
+											 boolean remove_updates,
+											 int num_updates_and_saves)
 	{
 		List<SimulateAction> actions = new ArrayList<SimulateAction>();
 		XMLDecoder d = new XMLDecoder(file);
@@ -296,29 +298,36 @@ public class GameSimulator {
 		}catch(ArrayIndexOutOfBoundsException e){}
 		d.close();
 		
-		if (only_last_update)
-		{
-			ArrayList<SimulateAction> new_actions = new ArrayList<SimulateAction>();
-			SimulateAction last = null;
+		ArrayList<SimulateAction> new_actions = new ArrayList<SimulateAction>();
+		SimulateAction last = null;
 
-			for (int i=0; i < actions.size(); i++)
-			{
-				SimulateAction action = actions.get(i);
-				
-				if (action.type.equals(SimulateAction.ACTION_TYPE.UPDATE))
-				{
-					last = action;
-				}
-				else
-					new_actions.add(action);
-			}
+		//Find last update
+		for (int i=0; i < actions.size(); i++)
+		{
+			SimulateAction action = actions.get(i);
 			
-			new_actions.add(last);
+			if (action.type.equals(SimulateAction.ACTION_TYPE.UPDATE))
+			{
+				last = action;
+			}
+			else
+				new_actions.add(action);
+		}
+			
+		if (remove_updates)
+		{
 			actions = new_actions;
 		}
 		
-		actions.add(new SimulateAction(actions.get(actions.size()-1).do_at_time,
-									   SimulateAction.ACTION_TYPE.SAVE));
+		for(int i=1; i <= num_updates_and_saves; i++)
+		{
+			SimulateAction update = new SimulateAction(last.do_at_time*i/num_updates_and_saves,
+													   SimulateAction.ACTION_TYPE.UPDATE);
+			actions.add(update);
+			actions.add(new SimulateAction(last.do_at_time*i/num_updates_and_saves,
+										   SimulateAction.ACTION_TYPE.SAVE));
+		}
+		Collections.sort(actions, new SimulateAction.Comparer());
 		
 		return new Simulation(map, num_players, actions);
 	}

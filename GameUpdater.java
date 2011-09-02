@@ -147,23 +147,7 @@ public class GameUpdater {
 		/**TODO: Revert here!*/
 		
 		
-		/* update positions of all planets/moons/etc.  These are time-independent, and
-		 * will also be calculated for other times that we need to know*/
-		for(GSystem sys : GC.map.systems)
-		{
-			//move all planets
-			for(Satellite<?> sat : sys.orbiting)
-			{
-				if(sat instanceof Planet)
-				{ //TODO: recursive move?
-					for(Satellite<?> sat2 : ((Planet)sat).orbiting)
-					{
-						sat2.orbit.move(time_elapsed);
-					}
-				}
-				sat.orbit.move(time_elapsed);
-			}
-		}
+
 		
 		//update all planets, facilities, ships and missiles
 		for(; update_to <= time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
@@ -209,11 +193,19 @@ public class GameUpdater {
 				//update planets/facilities:
 				for(Satellite<?> sat : sys.orbiting)
 				{
+					//TODO: do we really need planet/moon positions in here?
+					//Once we have ships flying around, some planets will need
+					//this calculation anyway.  Without good caching, we might
+					//do the move calculations several times.  So it is
+					//probably better for performance to go here.
+					
+					sat.orbit.move(update_to);
 					if(sat instanceof Planet)
 					{
 						((Planet)sat).update(update_to);
 						for(Satellite<?> sat2 : ((Planet)sat).orbiting)
 						{
+							sat2.orbit.move(update_to);
 							if(sat2 instanceof Moon)
 							{
 								((Moon)sat2).update(update_to);

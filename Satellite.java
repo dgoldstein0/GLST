@@ -76,7 +76,7 @@ public strictfp abstract class Satellite<T extends Satellite<T>> extends Stellar
 		if(orbit.boss instanceof Satellite<?>)
 		{
 			Satellite<?> sboss = ((Satellite<?>)orbit.boss);
-			sboss.computeCoords(t);
+
 			boss_y = sboss.getYCoord(t);
 			boss_x = sboss.getXCoord(t);
 			boss_vy = sboss.getYVel(t);
