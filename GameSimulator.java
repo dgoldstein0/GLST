@@ -202,23 +202,23 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/singleplayercrash.txt")
 						),
-						false, 1
+						false, 3
 					);
 				List<String> l1 = sim1.simulate("test6-gold.txt");
 				saveResultsToFile(l1, "test6p1.txt");
 				
-				//System.out.println("\tRunning part 2...");
+				System.out.println("\tRunning part 2...");
 				
-				//Simulation sim2 = loadSimFromFile("simplemap.xml", 2,
-				//		new FileInputStream(
-				//			new File("testcases/singleplayercrash.txt")
-				//		),
-				//		true
-				//	);
-				//List<String> l2 = sim2.simulate("test6-modified.txt");
-				//saveResultsToFile(l2, "test6p2.txt");
+				Simulation sim2 = loadSimFromFile("simplemap.xml", 2,
+						new FileInputStream(
+							new File("testcases/singleplayercrash.txt")
+						),
+						true, 3
+					);
+				List<String> l2 = sim2.simulate("test6-modified.txt");
+				saveResultsToFile(l2, "test6p2.txt");
 				
-				//compareResults(6, l1, l2);
+				compareResults(6, l1, l2);
 			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 6");}
 		}
 	}

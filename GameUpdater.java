@@ -302,7 +302,7 @@ public class GameUpdater {
 									Ship b = sys.fleets[j].ships.get(id2);
 									
 									if(a != null && b != null)
-										local_pending_execution.addAll(doCollision(a,b,t-GalacticStrategyConstants.TIME_GRANULARITY));
+										local_pending_execution.addAll(doCollision(a,b,t));
 								}
 							}
 						}
