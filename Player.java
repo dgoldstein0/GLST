@@ -10,12 +10,16 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	Object metal_lock = new Object();
 	Object money_lock = new Object();
 	
-	/**any function updating both metal and money should grab metal_lock before money_lock
-	 * @GaurdedBy money_lock*/
+	/**
+	 * any function updating both metal and money should grab metal_lock before money_lock
+	 * @GaurdedBy money_lock
+	 */
 	private double money;
 	
-	/**any function updating both metal and money should grab metal_lock before money_lock
-	 * @GaurdedBy metal_lock*/
+	/**
+	 * any function updating both metal and money should grab metal_lock before money_lock
+	 * @GaurdedBy metal_lock
+	 */
 	private double metal;
 	
 	long last_time;
@@ -24,6 +28,12 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	
 	Color color;
 	int id; //id is used to identify players.  These are assigned by the host of the game.
+	
+	/**
+	 * Used to give logical timestamps to orders at creation time.
+	 */
+	private int next_order_number;
+	
 	boolean ready;
 	boolean hosting; //true if running as server, false if running as client
 	ArrayList<Ship> ships_in_transit;
@@ -52,12 +62,13 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	{
 		name = nm;
 		hosting = is_host;
-		data_control = new PlayerDataSaverControl(this);
 		setDefaultValues();
 	}
 	
 	private void setDefaultValues()
 	{
+		data_control = new PlayerDataSaverControl(this);
+		next_order_number = 0;
 		money=GalacticStrategyConstants.DEFAULT_MONEY;
 		metal=GalacticStrategyConstants.DEFAULT_METAL;
 		ships_in_transit = new ArrayList<Ship>();
@@ -141,26 +152,22 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	public void setReady(boolean r){ready=r;}
 	public ArrayList<Ship> getShips_in_transit(){return ships_in_transit;}
 	public void setShips_in_transit(ArrayList<Ship> s){ships_in_transit=s;}
-
+	public List<Saveable<?>> getResource_users(){return resource_users;}
+	public void setResource_users(List<Saveable<?>> l){resource_users=l;}
+	@Override public long getTime() {return last_time;}
+	@Override public void setTime(long t) {last_time=t;}	
+	
 	@Override
 	public PlayerDataSaverControl getDataControl() {
 		return data_control;
-	}
-
-	@Override
-	public long getTime() {
-		return last_time;
 	}
 	
 	@Override
 	public void handleDataNotSaved(long time) {
 		// TODO Auto-generated method stub
-		
 	}
 
-	@Override
-	public void setTime(long t) {last_time=t;}
-	
-	public List<Saveable<?>> getResource_users(){return resource_users;}
-	public void setResource_users(List<Saveable<?>> l){resource_users=l;}
+	public int getNextOrderNumber() {
+		return ++next_order_number;
+	}
 }

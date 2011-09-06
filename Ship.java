@@ -704,7 +704,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		return type.img;
 	}
 	
-	public static class ShipId extends Flyer.FlyerId<ShipId>
+	public static class ShipId extends Flyer.FlyerId<ShipId> implements Comparable<ShipId>
 	{
 		Shipyard manufacturer;
 		int queue_id;
@@ -738,6 +738,20 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 				return false;
 		}
 
+		@Override
+		public int compareTo(ShipId o) {
+			int manufacturer_comp = manufacturer.compareTo(o.manufacturer);
+			if (manufacturer_comp != 0)
+				return manufacturer_comp;
+			
+			if (queue_id < o.queue_id)
+				return -1;
+			else if (queue_id == o.queue_id)
+				return 0;
+			else
+				return 1;
+		}
+		
 		public void setManufacturer(Shipyard manufacturer) {this.manufacturer = manufacturer;}
 		public Shipyard getManufacturer() {return manufacturer;}
 		public void setQueue_id(int queue_id) {this.queue_id = queue_id;}

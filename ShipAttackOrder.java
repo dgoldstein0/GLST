@@ -12,7 +12,8 @@ public strictfp class ShipAttackOrder extends Order
 	
 	public ShipAttackOrder(Player p, Ship s, long t, long target_time, Targetable<?> tgt)
 	{
-		mode = Order.ORIGIN;
+		super(t, p);
+		mode = Order.MODE.ORIGIN;
 		
 		the_ship = s;
 		ship_desc=new ShipDescriber(p,s);
@@ -20,13 +21,12 @@ public strictfp class ShipAttackOrder extends Order
 		the_target = tgt;
 		tgt_desc=tgt.describer();
 		
-		scheduled_time=t;
 		target_t=target_time;
 	}
 	
 	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
-		if(mode==Order.NETWORK)
+		if(mode==Order.MODE.NETWORK)
 		{
 			the_ship = ship_desc.retrieveObject(g, scheduled_time);
 			the_target = tgt_desc.retrieveObject(g, target_t);
@@ -81,7 +81,7 @@ public strictfp class ShipAttackOrder extends Order
 		return new HashSet<Order>();
 	}
 	
-	public ShipAttackOrder(){mode=Order.NETWORK;}
+	public ShipAttackOrder(){mode=Order.MODE.NETWORK;}
 	public ShipDescriber getShip_desc(){return ship_desc;}
 	public void setShip_desc(ShipDescriber sd){ship_desc=sd;}
 	public Describer<? extends Targetable<?>> getTgt_desc(){return tgt_desc;}

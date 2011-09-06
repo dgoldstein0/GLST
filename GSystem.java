@@ -37,8 +37,6 @@ public strictfp class GSystem implements Orbitable<GSystem>
 	int x_adj;
 	int y_adj;
 	
-
-	
 	public GSystem(int i, int x, int y, String nm, ArrayList<Satellite<?>> orbiting, HashSet<Star> stars, int nav)
 	{
 		id=i;
@@ -207,5 +205,23 @@ public strictfp class GSystem implements Orbitable<GSystem>
 			sat.recursiveSaveData();
 		}
 		
+	}
+
+	/**
+	 * @see OwnableSatellite.compareTo
+	 */
+	@Override
+	public int compareTo(Orbitable<?> o) {
+		if (o instanceof GSystem)
+		{
+			if (id < ((GSystem)o).id)
+				return -1;
+			else if (id == ((GSystem)o).id)
+				return 0;
+			else
+				return 1;
+		}
+		else
+			return 1; //this makes GSystems the greatest items in the ordering of Orbitables.
 	}
 }

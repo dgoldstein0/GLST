@@ -5,26 +5,24 @@ public strictfp class CancelFacilityBuildOrder extends Order {
 
 	SatelliteDescriber<? extends OwnableSatellite<?>> sat_desc;
 	OwnableSatellite<?> the_sat;
-	int player_id;
 	
 	public CancelFacilityBuildOrder(OwnableSatellite<?> sat, long t)
 	{
+		super(t, sat.owner);
 		the_sat=sat;
-		player_id = sat.owner.getId();
 		sat_desc = (SatelliteDescriber<? extends OwnableSatellite<?>>)sat.describer();
-		scheduled_time=t;
-		mode = Order.ORIGIN;
+		mode = Order.MODE.ORIGIN;
 	}
 	
 	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
-		if(mode==Order.NETWORK)
+		if(mode==Order.MODE.NETWORK)
 		{
 			the_sat = sat_desc.retrieveObject(g, scheduled_time);
 		}
 		
 		Set<Order> orders_to_reexecute = new HashSet<Order>();
-		if(the_sat.owner.getId() == player_id) //verify that the player ordering this is the owner of the planet.
+		if(the_sat.owner.getId() == p_id) //verify that the player ordering this is the owner of the planet.
 		{
 			long cur_time = the_sat.time;
 			if(cur_time > scheduled_time)
@@ -55,9 +53,7 @@ public strictfp class CancelFacilityBuildOrder extends Order {
 		return orders_to_reexecute;
 	}
 	
-	public CancelFacilityBuildOrder(){mode = Order.NETWORK;}
+	public CancelFacilityBuildOrder(){mode = Order.MODE.NETWORK;}
 	public SatelliteDescriber<? extends OwnableSatellite<?>> getSat_desc(){return sat_desc;}
 	public void setSat_desc(SatelliteDescriber<? extends OwnableSatellite<?>> s){sat_desc=s;}
-	public int getPlayer_id(){return player_id;}
-	public void setPlayer_id(int i){player_id=i;}
 }

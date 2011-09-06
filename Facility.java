@@ -2,7 +2,7 @@
 import java.util.HashSet;
 
 //T = the class which extends Facility
-public strictfp abstract class Facility<T extends Facility<T>> implements Targetable<T>, RelaxedSaveable<T>
+public strictfp abstract class Facility<T extends Facility<T>> implements Targetable<T>, RelaxedSaveable<T>, Comparable<T>
 {	
 	OwnableSatellite<?> location;
 	int id;
@@ -83,6 +83,30 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	public long getTime(){return last_time;}
 	@Override
 	public void setTime(long t){last_time=t;}
+	
+	public int compareTo(T f)
+	{
+		if (f == null)
+			return 1;
+		
+		if (location == null && f.location != null)
+			return -1;
+		else if (location != null && f.location == null)
+			return 1;
+		else if (location != null && f.location != null)
+		{
+			int location_compare = location.compareTo(f.location);
+			if (location_compare != 0)
+				return location_compare;
+		}
+		
+		if (id < f.id)
+			return -1;
+		else if (id == f.id)
+			return 0;
+		else
+			return 1;
+	}
 	
 	public Facility(){}
 	

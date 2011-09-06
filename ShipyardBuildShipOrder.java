@@ -6,27 +6,27 @@ public strictfp class ShipyardBuildShipOrder extends Order {
 	FacilityDescriber<Shipyard> shipyard_describer;
 	Shipyard the_yard;
 	ShipType type;
-	int player_id;
 	
 	public ShipyardBuildShipOrder(Shipyard s, ShipType tp, long t)
 	{
+		super(t, s.location.owner);
+		
 		the_yard=s;
 		shipyard_describer = s.describer();
 		type=tp;
 		scheduled_time=t;
-		mode = Order.ORIGIN;
-		player_id = s.location.owner.getId();
+		mode = Order.MODE.ORIGIN;
 	}
 	
 	@Override
 	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
-		if(mode==NETWORK)
+		if(mode==MODE.NETWORK)
 			the_yard = shipyard_describer.retrieveObject(g, scheduled_time);
 		
 		if(the_yard != null)
 		{	
 			OwnableSatelliteDataSaverControl<?> ctrl = the_yard.location.data_control;
-			if(GameInterface.GC.players[player_id] == ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].own)
+			if(GameInterface.GC.players[p_id] == ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].own)
 			{
 				Set<Order> orders = the_yard.data_control.revertToTime(scheduled_time);
 				orders.addAll(the_yard.location.data_control.revertToTime(scheduled_time)); //make sure it uses the right owner
@@ -40,11 +40,9 @@ public strictfp class ShipyardBuildShipOrder extends Order {
 		return new HashSet<Order>();
 	}
 
-	public ShipyardBuildShipOrder(){mode=Order.NETWORK;}
+	public ShipyardBuildShipOrder(){mode=Order.MODE.NETWORK;}
 	public FacilityDescriber<Shipyard> getShipyard_describer(){return shipyard_describer;}
 	public void setShipyard_describer(FacilityDescriber<Shipyard> desc){shipyard_describer=desc;}
 	public ShipType getType(){return type;}
 	public void setType(ShipType t){type=t;}
-	public int getPlayer_id(){return player_id;}
-	public void setPlayer_id(int pid){player_id=pid;}
 }

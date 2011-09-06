@@ -1,6 +1,9 @@
 import java.util.*;
 
-public strictfp interface Orbitable<T extends Orbitable<T>> extends Destination<T>
+/**Note that the comparison operators of the subclasses are
+ * not very well abstracted from the fact that other classes
+ * can inherit from this interface*/
+public strictfp interface Orbitable<T extends Orbitable<T>> extends Destination<T>, Comparable<Orbitable<?>>
 {
 	public ArrayList<Satellite<?>> getOrbiting();
 	public void setOrbiting(ArrayList<Satellite<?>> o);

@@ -9,26 +9,21 @@ public strictfp class ShipMoveOrder extends Order
 	Describer<Ship> ship_desc;
 	Describer<? extends Destination<?>> dest_desc;
 	
-	int player_id;
-	
 	public ShipMoveOrder(Player p, Ship s, long t, Destination<?> d)
 	{
-		mode = Order.ORIGIN;
+		super(t, p);
+		mode = Order.MODE.ORIGIN;
 		
 		the_ship = s;
 		ship_desc=s.describer();
 		
 		the_dest = d;
 		dest_desc=d.describer();
-		
-		player_id = p.getId();
-		
-		scheduled_time=t;
 	}
 	
 	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
-		if(mode==Order.NETWORK)
+		if(mode==Order.MODE.NETWORK)
 		{
 			the_ship = ship_desc.retrieveObject(g, scheduled_time);
 			the_dest = dest_desc.retrieveObject(g, scheduled_time);
@@ -43,7 +38,8 @@ public strictfp class ShipMoveOrder extends Order
 			System.out.println("\tthe_ship.owner.getId() = " + Integer.toString(the_ship.owner.getId()) + " and player_id = " + Integer.toString(player_id));
 		}*/
 		
-		if(the_ship != null && the_dest != null && the_ship.isAliveAt(scheduled_time) && the_ship.owner.getId() == player_id)
+		if(the_ship != null && the_dest != null && the_ship.isAliveAt(scheduled_time)
+				&& the_ship.owner.getId() == p_id)
 		{
 			//System.out.println("\trevert and execute...");
 			
@@ -67,11 +63,9 @@ public strictfp class ShipMoveOrder extends Order
 		}
 	}
 	
-	public ShipMoveOrder(){mode=Order.NETWORK;}
+	public ShipMoveOrder(){mode=Order.MODE.NETWORK;}
 	public Describer<Ship> getShip_desc(){return ship_desc;}
 	public void setShip_desc(Describer<Ship> sd){ship_desc=sd;}
 	public Describer<? extends Destination<?>> getDest_desc(){return dest_desc;}
 	public void setDest_desc(Describer<? extends Destination<?>> d){dest_desc=d;}
-	public int getPlayer_id(){return player_id;}
-	public void setPlayer_id(int id){player_id = id;}
 }

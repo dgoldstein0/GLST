@@ -1,9 +1,9 @@
-import java.util.Hashtable;
+import java.util.TreeMap;
 import java.util.Iterator;
 
 public strictfp class Fleet implements RelaxedSaveable<Fleet>
 {
-	Hashtable<Ship.ShipId, Ship> ships;
+	TreeMap<Ship.ShipId, Ship> ships;
 	Player owner;
 	GSystem location;
 	Object lock = new Object();
@@ -13,7 +13,7 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 	
 	public Fleet(GSystem loc, Player o)
 	{
-		ships = new Hashtable<Ship.ShipId, Ship>();
+		ships = new TreeMap<Ship.ShipId, Ship>();
 		location = loc;
 		owner = o;
 		data_control = new FleetDataSaverControl(this);
@@ -23,8 +23,8 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 	
 	//methods required for load/save
 	public Fleet(){}
-	public Hashtable<Ship.ShipId, Ship> getShips(){return ships;}
-	public void setShips(Hashtable<Ship.ShipId, Ship> sh){ships=sh;}
+	public TreeMap<Ship.ShipId, Ship> getShips(){return ships;}
+	public void setShips(TreeMap<Ship.ShipId, Ship> sh){ships=sh;}
 	public Player getOwner(){return owner;}
 	public void setOwner(Player p){owner = p;}
 	public void setLocation(GSystem sys){location=sys;}

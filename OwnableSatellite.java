@@ -316,4 +316,53 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	
 	public long getTime(){return time;}
 	public void setTime(long t){time=t;}
+
+	public int compareTo(OwnableSatellite<?> sat) {
+		
+		if (sat == null)
+			return 1;
+		
+		if (orbit == null)
+		{
+			if (sat.orbit != null)
+				return -1;
+		}
+		else
+		{
+			if (sat.orbit == null)
+				return 1;
+			
+			if (orbit.boss != null || sat.orbit.boss != null)
+			{
+				if (orbit.boss == null)
+					return -1;
+				else if (sat.orbit.boss == null)
+					return 1;
+				
+				//none of orbit, orbit.boss, sat.orbit, and sat.orbit.boss are null.
+				
+				int boss_compare = orbit.boss.compareTo(sat.orbit.boss);
+				
+				if(boss_compare != 0)
+					return boss_compare;
+			}
+		}
+		
+		if (id < sat.id)
+			return -1;
+		else if (id == sat.id)
+			return 0;
+		else
+			return 1;
+	}
+	
+	@Override
+	public int compareTo(Orbitable<?> o) {
+		if (o instanceof OwnableSatellite<?>)
+		{
+			return compareTo((OwnableSatellite<?>) o);
+		}
+		else
+			return -1;
+	}
 }

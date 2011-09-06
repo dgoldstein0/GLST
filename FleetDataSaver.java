@@ -1,9 +1,8 @@
-import java.util.Hashtable;
-
+import java.util.TreeMap;
 
 public strictfp class FleetDataSaver extends DataSaver<Fleet> {
 
-	Hashtable<Ship.ShipId, Ship> ships;
+	TreeMap<Ship.ShipId, Ship> ships;
 	
 	@Override
 	protected void doLoadData(Fleet f) {
@@ -18,14 +17,14 @@ public strictfp class FleetDataSaver extends DataSaver<Fleet> {
 			 * also not necessary because of setTime in DataSaver.loadData*/
 			//f.last_time_changed = t;
 			
-			f.ships = (Hashtable<Ship.ShipId, Ship>)ships.clone();
+			f.ships = (TreeMap<Ship.ShipId, Ship>)ships.clone();
 		}
 	}
 
 	@Override
 	protected void doSaveData(Fleet f) {
 		
-		ships = (Hashtable<Ship.ShipId, Ship>)f.ships.clone();
+		ships = (TreeMap<Ship.ShipId, Ship>)f.ships.clone();
 	}
 
 }

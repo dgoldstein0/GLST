@@ -6,29 +6,25 @@ public strictfp class ShipPickupTroopsOrder extends Order {
 	Ship the_ship;
 	
 	Describer<Ship> ship_desc;
-	int player_id;
 	
 	public ShipPickupTroopsOrder(Player p, Ship s, long t)
 	{
-		mode = Order.ORIGIN;
+		super(t, p);
+		mode = Order.MODE.ORIGIN;
 		
 		ship_desc=s.describer();
 		the_ship = s;
-		
-		player_id = p.getId();
-		
-		scheduled_time=t;
 	}
 	
 	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
-		if(mode==Order.NETWORK)
+		if(mode==Order.MODE.NETWORK)
 		{
 			the_ship = ship_desc.retrieveObject(g, scheduled_time);
 		}
 		
 		//validate order
-		if(the_ship != null && the_ship.owner.getId() == player_id)
+		if(the_ship != null && the_ship.owner.getId() == p_id)
 		{
 			the_ship.update(scheduled_time, null);
 			ShipDataSaver data = (ShipDataSaver) the_ship.data_control.saved_data[the_ship.data_control.getIndexForTime(scheduled_time)];
@@ -58,9 +54,7 @@ public strictfp class ShipPickupTroopsOrder extends Order {
 		return new HashSet<Order>();
 	}
 	
-	public ShipPickupTroopsOrder(){mode=Order.NETWORK;}
+	public ShipPickupTroopsOrder(){mode=Order.MODE.NETWORK;}
 	public Describer<Ship> getShip_desc(){return ship_desc;}
 	public void setShip_desc(Describer<Ship> sd){ship_desc=sd;}
-	public int getPlayer_id(){return player_id;}
-	public void setPlayer_id(int id){player_id=id;}
 }

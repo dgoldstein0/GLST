@@ -10,7 +10,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 /**GameSimulator
@@ -41,11 +40,12 @@ public class GameSimulator {
 		
 		{
 			System.out.println("Running Test 2...");
-			//test case 2: verifying my orders-left-in-queue theory, and
+			//test case 2: verifying my orders-left-in-queue theory
 			
 			FacilityBuildOrder shipyard_build_order = new FacilityBuildOrder();
 			shipyard_build_order.setBldg_type(FacilityType.SHIPYARD);
-			shipyard_build_order.setPlayer_id(0);
+			shipyard_build_order.setP_id(0);
+			shipyard_build_order.setOrder_number(1);
 			SatelliteDescriber<Planet> eulenspiegel_desc = new SatelliteDescriber<Planet>();
 				GSystemDescriber azha_sys = new GSystemDescriber();
 					azha_sys.setId(1);
@@ -69,7 +69,8 @@ public class GameSimulator {
 			
 			FacilityBuildOrder shipyard_build_order = new FacilityBuildOrder();
 			shipyard_build_order.setBldg_type(FacilityType.SHIPYARD);
-			shipyard_build_order.setPlayer_id(0);
+			shipyard_build_order.setP_id(0);
+			shipyard_build_order.setOrder_number(1);
 			SatelliteDescriber<Planet> eulenspiegel_desc = new SatelliteDescriber<Planet>();
 				GSystemDescriber azha_sys = new GSystemDescriber();
 					azha_sys.setId(1);
@@ -119,7 +120,8 @@ public class GameSimulator {
 			{
 				FacilityBuildOrder build_order = new FacilityBuildOrder();
 				build_order.setBldg_type(t);
-				build_order.setPlayer_id(0);
+				build_order.setP_id(0);
+				build_order.setOrder_number(1);
 				SatelliteDescriber<Planet> eulenspiegel_desc = new SatelliteDescriber<Planet>();
 					GSystemDescriber azha_sys = new GSystemDescriber();
 						azha_sys.setId(1);
@@ -161,6 +163,9 @@ public class GameSimulator {
 				compareResults(4, results1, results2);
 			}
 		}
+		
+		//NOTE: neither test 5 nor test 6 have order_numbers for their orders.
+		//They were made before order numbers were made :(
 		
 		{
 			//Test Case 5
