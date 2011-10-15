@@ -522,6 +522,10 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		direction = exit_direction + EXIT_DIRECTION_JITTER*generator.nextGaussian(); //should already be true, but just in case
 		
 		mode=MODES.EXIT_WARP;
+		double time = (1.125*speed)/getAccel();
+		destination=new DestinationPoint(pos_x+.5*speed*time*Math.cos(direction),pos_y+.5*speed*time*Math.sin(direction));
+		dest_x_coord = pos_x+.5*speed*time*Math.cos(direction);
+		dest_y_coord = pos_y+.5*speed*time*Math.sin(direction);
 		current_flying_AI = new StopAI();
 		
 		ship_it.remove();//owner.ships_in_transit.remove(this);
@@ -634,7 +638,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	private void targetLost(LOST_REASON reason, long t, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
 	{
 		//System.out.println("target lost");
-		if (destination==(Destination<?>)target && mode==MODES.ATTACKING)
+		if (destination==(Destination<?>)target && (mode==MODES.ATTACKING||mode==MODES.USERATTACKING))
 		{
 			//System.out.println("\tchanging destination...");
 			destination=new DestinationPoint(target.getXCoord(t),target.getYCoord(t));

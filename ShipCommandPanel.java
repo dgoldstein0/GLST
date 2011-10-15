@@ -1,14 +1,24 @@
 import javax.swing.*;
+
 import java.awt.event.*;
-import java.awt.*;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.util.*;
+
+
+
+
 
 public class ShipCommandPanel extends JPanel implements ActionListener
 {
 	Ship the_ship;
-	
+	List<Selectable> ship_list;
 	JProgressBar health;
-	
+	List<JProgressBar> health_list;
 	JPanel button_panel;
+	JPanel ship_fleet_panel;
 	JButton attack;
 	JButton move;
 	JButton warp;
@@ -22,10 +32,13 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 	JLabel dest_name;
 	JLabel dest_pic;
 	
+	GroupLayout.ParallelGroup ship_vgroup;
+	GroupLayout.SequentialGroup ship_hgroup;
+	
 	public ShipCommandPanel()
 	{
 		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		
+		health_list = new ArrayList<JProgressBar>();
 		//build the buttons
 		button_panel = new JPanel(new GridLayout(5,1));
 		
@@ -70,14 +83,29 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		dest_pic_panel.add(dest_pic);
 		
 		dest_display.add(dest_pic_panel);
+		
+		ship_fleet_panel = new JPanel();
+		GroupLayout ship_panel_layout = new GroupLayout(ship_fleet_panel);
+		ship_fleet_panel.setLayout(ship_panel_layout);
+		
+		ship_vgroup = ship_panel_layout.createParallelGroup();
+		ship_hgroup = ship_panel_layout.createSequentialGroup();
+		
+		ship_panel_layout.setHorizontalGroup(ship_hgroup);
+		ship_panel_layout.setVerticalGroup(ship_vgroup);
+
+		
 	}
 	
-	public void setShip(Ship s)
+	public void setShip(Ship s, List<Selectable> selected)
 	{
 		removeAll();
+		ship_fleet_panel.removeAll();
+		health_list.clear();
 		the_ship=s;
-		
+		ship_list=selected;
 		//toggle buttons
+		Ship current;
 		boolean enable = (the_ship.owner.getId() == GameInterface.GC.player_id);
 		
 		attack.setEnabled(enable);
@@ -120,13 +148,56 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		add(button_panel);
 		add(dest_display);
 		updateDestDisplay(s.destination);
+		
+		ListIterator<Selectable> ship_iter = selected.listIterator();
+		JProgressBar healthofship;
+		int index=0;
+		while(ship_iter.hasNext())
+		{
+			current= (Ship)ship_iter.next();
+			if(current!=s)
+			{
+				JPanel the_panel2 = new JPanel();
+				BoxLayout bl = new BoxLayout(the_panel2, BoxLayout.Y_AXIS);
+				the_panel2.setLayout(bl);
+				the_panel2.setMaximumSize(new Dimension(80, 140));
+				the_panel2.add(new JLabel(new ImageIcon(current.imageLoc())));
+				healthofship= new JProgressBar(0,current.type.hull);
+				healthofship.setMaximumSize(new Dimension(120,20));
+				healthofship.setStringPainted(true);
+				health_list.add(healthofship);
+				the_panel2.add(health_list.get(index));
+				index++;
+				ship_vgroup.addComponent(the_panel2);
+				ship_hgroup.addComponent(the_panel2);
+			}
+		}
+		add(ship_fleet_panel);
 	}
 	
 	public void update()
-	{
+	{	
 		health.setValue(the_ship.type.hull - the_ship.damage);
 		health.setString(Integer.toString(the_ship.type.hull - the_ship.damage));
+		
 		soldier_label.setText("    " + Integer.toString(the_ship.getSoldierInt()) + " soldiers");
+		
+		ListIterator<JProgressBar> health_iter = health_list.listIterator();
+		ListIterator<Selectable> ship_iter = ship_list.listIterator();
+		JProgressBar healthofship;
+		Ship current;
+		while(health_iter.hasNext()&&ship_iter.hasNext())
+		{
+			current = (Ship)ship_iter.next();
+			while(the_ship==current){
+				current = (Ship)ship_iter.next();
+			}
+			healthofship=health_iter.next();
+			if(current!=the_ship){
+				healthofship.setValue(current.type.hull - current.damage);
+				healthofship.setString(Integer.toString(current.type.hull - current.damage));
+			}
+		}
 		
 		if(the_ship.destination instanceof OwnableSatellite<?>&& the_ship.owner.getId() == GameInterface.GC.player_id && Math.hypot(the_ship.dest_x_coord-the_ship.pos_x, the_ship.dest_y_coord-the_ship.pos_y) <= GalacticStrategyConstants.LANDING_RANGE)
 		{

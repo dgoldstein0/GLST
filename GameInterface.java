@@ -417,7 +417,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		frame.setVisible(true);
 	}
 	
-	public void displayShipPanel(Ship s)
+	public void displayShipPanel(Ship s,List<Selectable> selected_in_sys)
 	{
 		if(sat_or_ship_disp != PANEL_DISP.SHIP_PANEL)
 		{
@@ -427,7 +427,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 			sat_or_ship_disp = PANEL_DISP.SHIP_PANEL;
 		}
 		
-		ShipPanel.setShip(s);
+		ShipPanel.setShip(s,selected_in_sys);
 		
 		frame.setVisible(true);
 	}
@@ -760,7 +760,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 						if(selected_in_sys.size() == 1)
 						{
 							if(selected_in_sys.get(0) instanceof Ship)
-								displayShipPanel((Ship) selected_in_sys.get(0));
+								displayShipPanel((Ship) selected_in_sys.get(0),selected_in_sys);
 							else if(selected_in_sys.get(0) instanceof Satellite<?>)
 								displaySatellitePanel((Satellite<?>) selected_in_sys.get(0));
 							else displayNoPanel();
@@ -768,7 +768,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 						else if(selected_in_sys.size() > 1)
 						{
 							//mass ship selection
-							displayShipPanel((Ship) selected_in_sys.get(0));
+							displayShipPanel((Ship) selected_in_sys.get(0),selected_in_sys);
 						}
 						else
 							displayNoPanel();
@@ -931,7 +931,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 				displaySatellitePanel((Satellite<?>)s);
 				break;
 			case Selectable.SHIP:
-				displayShipPanel((Ship)s);
+				displayShipPanel((Ship)s, selected_in_sys);
 				break;
 			default:
 				System.out.println("selection unsupported by selectObjInSystem!!");
