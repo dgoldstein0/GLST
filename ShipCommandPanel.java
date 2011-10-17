@@ -17,6 +17,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 	List<Selectable> ship_list;
 	JProgressBar health;
 	List<JProgressBar> health_list;
+	List<JLabel> soldier_list_label;
 	JPanel button_panel;
 	JPanel ship_fleet_panel;
 	JButton attack;
@@ -39,6 +40,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 	{
 		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		health_list = new ArrayList<JProgressBar>();
+		soldier_list_label = new ArrayList<JLabel>();
 		//build the buttons
 		button_panel = new JPanel(new GridLayout(5,1));
 		
@@ -167,6 +169,9 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 				healthofship.setStringPainted(true);
 				health_list.add(healthofship);
 				the_panel2.add(health_list.get(index));
+				JLabel soldier_label = new JLabel();
+				soldier_list_label.add(soldier_label);
+				the_panel2.add(soldier_list_label.get(index));
 				index++;
 				ship_vgroup.addComponent(the_panel2);
 				ship_hgroup.addComponent(the_panel2);
@@ -180,22 +185,26 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		health.setValue(the_ship.type.hull - the_ship.damage);
 		health.setString(Integer.toString(the_ship.type.hull - the_ship.damage));
 		
-		soldier_label.setText("    " + Integer.toString(the_ship.getSoldierInt()) + " soldiers");
+		soldier_label.setText("  " + Integer.toString(the_ship.getSoldierInt()) + " soldiers");
 		
 		ListIterator<JProgressBar> health_iter = health_list.listIterator();
 		ListIterator<Selectable> ship_iter = ship_list.listIterator();
+		ListIterator<JLabel> label_iter = soldier_list_label.listIterator();
+		JLabel soldierlabelship;
 		JProgressBar healthofship;
 		Ship current;
 		while(health_iter.hasNext()&&ship_iter.hasNext())
 		{
 			current = (Ship)ship_iter.next();
-			while(the_ship==current){
+			while((the_ship==current)&&ship_iter.hasNext()){
 				current = (Ship)ship_iter.next();
 			}
 			healthofship=health_iter.next();
+			soldierlabelship=label_iter.next();
 			if(current!=the_ship){
 				healthofship.setValue(current.type.hull - current.damage);
 				healthofship.setString(Integer.toString(current.type.hull - current.damage));
+				soldierlabelship.setText("    " + Integer.toString(current.getSoldierInt()) + " soldiers");
 			}
 		}
 		
