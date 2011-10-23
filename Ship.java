@@ -470,6 +470,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			}
 			return true;
 		}
+		
 		else
 			return false;
 	}
@@ -600,6 +601,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	public void destroyed()
 	{
+		boolean refresh = owner.getId()==GameInterface.GC.player_id;
 		//System.out.println("destroyed-before");	
 		if(location.fleets[owner.getId()].remove(this, time))//if is so in case another attack has already destroyed the ship, but both call the destroyed method
 		{
@@ -614,6 +616,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			
 			//notify interface
 			SwingUtilities.invokeLater(new ShipDeselector(this));
+			if(refresh){GameInterface.GC.GI.refreshShipPanel();}
+
 				
 			//System.out.println("destroyed-after");
 		}

@@ -150,15 +150,13 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		add(button_panel);
 		add(dest_display);
 		updateDestDisplay(s.destination);
-		
-		ListIterator<Selectable> ship_iter = selected.listIterator();
-		JProgressBar healthofship;
-		int index=0;
-		while(ship_iter.hasNext())
-		{
-			current= (Ship)ship_iter.next();
-			if(current!=s)
+		if(selected.size()>1){
+			ListIterator<Selectable> ship_iter = selected.listIterator();
+			JProgressBar healthofship;
+			int index=0;
+			while(ship_iter.hasNext())
 			{
+				current= (Ship)ship_iter.next();
 				JPanel the_panel2 = new JPanel();
 				BoxLayout bl = new BoxLayout(the_panel2, BoxLayout.Y_AXIS);
 				the_panel2.setLayout(bl);
@@ -172,12 +170,14 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 				JLabel soldier_label = new JLabel();
 				soldier_list_label.add(soldier_label);
 				the_panel2.add(soldier_list_label.get(index));
+				the_panel2.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+				if(current==s)the_panel2.setBorder(BorderFactory.createLineBorder(Color.RED));
 				index++;
 				ship_vgroup.addComponent(the_panel2);
 				ship_hgroup.addComponent(the_panel2);
 			}
+			add(ship_fleet_panel);
 		}
-		add(ship_fleet_panel);
 	}
 	
 	public void update()
@@ -186,22 +186,19 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		health.setString(Integer.toString(the_ship.type.hull - the_ship.damage));
 		
 		soldier_label.setText("  " + Integer.toString(the_ship.getSoldierInt()) + " soldiers");
-		
-		ListIterator<JProgressBar> health_iter = health_list.listIterator();
-		ListIterator<Selectable> ship_iter = ship_list.listIterator();
-		ListIterator<JLabel> label_iter = soldier_list_label.listIterator();
-		JLabel soldierlabelship;
-		JProgressBar healthofship;
-		Ship current;
-		while(health_iter.hasNext()&&ship_iter.hasNext())
+		if(ship_list.size()>1)
 		{
-			current = (Ship)ship_iter.next();
-			while((the_ship==current)&&ship_iter.hasNext()){
+			ListIterator<JProgressBar> health_iter = health_list.listIterator();
+			ListIterator<Selectable> ship_iter = ship_list.listIterator();
+			ListIterator<JLabel> label_iter = soldier_list_label.listIterator();
+			JLabel soldierlabelship;
+			JProgressBar healthofship;
+			Ship current;
+			while(health_iter.hasNext()&&ship_iter.hasNext())
+			{
 				current = (Ship)ship_iter.next();
-			}
-			healthofship=health_iter.next();
-			soldierlabelship=label_iter.next();
-			if(current!=the_ship){
+				healthofship=health_iter.next();
+				soldierlabelship=label_iter.next();
 				healthofship.setValue(current.type.hull - current.damage);
 				healthofship.setString(Integer.toString(current.type.hull - current.damage));
 				soldierlabelship.setText("    " + Integer.toString(current.getSoldierInt()) + " soldiers");
