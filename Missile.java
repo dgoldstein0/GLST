@@ -14,7 +14,6 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		
 		location = s.location;
 		id= new MissileId(s.next_missile_id++, s);
-		location.next_missile_id++;
 		owner = s.owner;
 		
 		//set up physics
@@ -85,8 +84,8 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		//TODO: when is target not alive, and destination not a DestinationPoint?
 		if(target_alive)
 		{
-			double x_dif=this.pos_x-target.getXCoord(time);
-			double y_dif=this.pos_y-target.getYCoord(time);
+			double x_dif=this.pos_x-target.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+			double y_dif=this.pos_y-target.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			return (x_dif*x_dif+y_dif*y_dif<Collide_Range*Collide_Range);
 		}
 		else

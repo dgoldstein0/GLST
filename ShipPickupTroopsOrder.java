@@ -1,5 +1,3 @@
-import java.util.Set;
-import java.util.HashSet;
 
 public strictfp class ShipPickupTroopsOrder extends Order {
 
@@ -16,7 +14,7 @@ public strictfp class ShipPickupTroopsOrder extends Order {
 		the_ship = s;
 	}
 	
-	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
+	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.MODE.NETWORK)
 		{
@@ -32,26 +30,14 @@ public strictfp class ShipPickupTroopsOrder extends Order {
 			{
 				Base b = ((OwnableSatellite<?>)data.dest).data_control.saved_data[((OwnableSatellite<?>)data.dest).data_control.getIndexForTime(scheduled_time)].base;
 				if(b != null)
-				{
-				
-					Set<Order> orders = the_ship.data_control.revertToTime(scheduled_time); /*only this ship is affected,
-							since the order to pickup troops does not interrupt any other orders or
-							the flight pattern, since the ship will move the same whether it is
-							picking up troops or not.  POTENTIALLY can ignore reverting other objects... but lets not*/
-					
-					orders.addAll(b.data_control.revertToTime(scheduled_time));
-					
+				{					
 					the_ship.orderToPickupTroops(scheduled_time);
-					
-					return orders;
 				}
 				else orderDropped();
 			}
 			else orderDropped();
 		}
 		else orderDropped();
-		
-		return new HashSet<Order>();
 	}
 	
 	public ShipPickupTroopsOrder(){mode=Order.MODE.NETWORK;}

@@ -28,6 +28,13 @@ public strictfp class TimeControl implements TimeManager
 		return t - (t % GalacticStrategyConstants.TIME_GRANULARITY);
 	}
 	
+	public static long roundUpToTimeGrain(long t) {
+		if (t % GalacticStrategyConstants.TIME_GRANULARITY == 0)
+			return t;
+		else
+			return t + GalacticStrategyConstants.TIME_GRANULARITY - (t % GalacticStrategyConstants.TIME_GRANULARITY);
+	}
+	
 	public long getNextTimeGrain()
 	{
 		return getTimeGrainAfter(getTime());

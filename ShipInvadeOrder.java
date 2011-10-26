@@ -1,5 +1,3 @@
-import java.util.Set;
-import java.util.HashSet;
 
 public strictfp class ShipInvadeOrder extends Order {
 
@@ -16,7 +14,7 @@ public strictfp class ShipInvadeOrder extends Order {
 	}
 	
 	@Override
-	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
+	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
 		
 		if(mode == Order.MODE.NETWORK)
 			the_ship = ship_desc.retrieveObject(g, scheduled_time);
@@ -29,21 +27,14 @@ public strictfp class ShipInvadeOrder extends Order {
 			
 			if(the_ship.isAliveAt(scheduled_time) && data.dest instanceof OwnableSatellite<?>
 				&& the_ship.owner.getId() == p_id)
-			{
-				Set<Order> orders = the_ship.data_control.revertToTime(scheduled_time);
-				orders.addAll(((OwnableSatellite<?>)the_ship.destination).getDataControl().revertToTime(scheduled_time));
-				
+			{				
 				the_ship.orderToInvade((OwnableSatellite<?>)the_ship.destination,scheduled_time);
-				
-				return orders;
 			}
 			else
 				orderDropped();
 		}
 		else
 			orderDropped();
-		
-		return new HashSet<Order>();
 	}
 
 	public ShipInvadeOrder(){mode=Order.MODE.NETWORK;}

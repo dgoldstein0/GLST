@@ -210,8 +210,8 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 				synchronized(owner.money_lock){
 					if(owner.getMetal() >= met && owner.getMoney() >= mon && facilities.size() < building_limit)
 					{
-						owner.changeMetal(-met, start_time, this);
-						owner.changeMoney(-mon, start_time, this); 
+						owner.changeMetal(-met, start_time);
+						owner.changeMoney(-mon, start_time); 
 						
 						time=start_time;
 						data_control.saveData();
@@ -239,8 +239,8 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		{
 			synchronized(owner.money_lock)
 			{
-				owner.changeMoney((long)(frac_remaining*bldg_in_progress.money_cost), t, this);
-				owner.changeMetal((long)(frac_remaining*bldg_in_progress.metal_cost), t, this);
+				owner.changeMoney((long)(frac_remaining*bldg_in_progress.money_cost), t);
+				owner.changeMetal((long)(frac_remaining*bldg_in_progress.metal_cost), t);
 			}
 		}
 		

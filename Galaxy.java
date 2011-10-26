@@ -1,4 +1,4 @@
-import java.util.*;
+import java.util.ArrayList;
 
 public strictfp class Galaxy
 {
@@ -20,6 +20,35 @@ public strictfp class Galaxy
 	public void setStart_locations(ArrayList<OwnableSatellite<?>> loc){start_locations = loc;}
 	public ArrayList<OwnableSatellite<?>> getStart_locations(){return start_locations;}
 
+	public void saveAllData()
+	{
+		for (GSystem sys : systems)
+		{
+			sys.saveOwnablesData();
+			for (Fleet f : sys.fleets)
+			{
+				f.data_control.saveData();
+			}
+			
+			sys.missiles.data_control.saveData();
+		}
+	}
+	
+	public void revertAllToTime(long t) throws DataSaverControl.DataNotYetSavedException
+	{
+		for (GSystem sys : systems)
+		{
+			sys.revertOwnables(t);
+			for (Fleet f : sys.fleets)
+			{
+				f.data_control.revertToTime(t);
+			}
+			
+			sys.missiles.data_control.revertToTime(t);
+		}
+	}
+	
+	//TODO: what is this for?
 	public void saveOwnablesData() {
 		
 		for(GSystem s : systems)

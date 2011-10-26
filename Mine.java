@@ -47,7 +47,7 @@ public strictfp class Mine extends Facility<Mine>{
 			add_met += location.calcMiningrate()*GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
 			last_time += GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
 		}
-		location.owner.changeMetal(add_met, last_time, this);
+		location.owner.changeMetal(add_met, last_time);
 		data_control.saveData();
 	}
 	

@@ -1,5 +1,3 @@
-import java.util.Set;
-import java.util.HashSet;
 
 public strictfp class ShipyardBuildShipOrder extends Order {
 
@@ -19,7 +17,7 @@ public strictfp class ShipyardBuildShipOrder extends Order {
 	}
 	
 	@Override
-	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
+	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
 		if(mode==MODE.NETWORK)
 			the_yard = shipyard_describer.retrieveObject(g, scheduled_time);
 		
@@ -28,16 +26,11 @@ public strictfp class ShipyardBuildShipOrder extends Order {
 			OwnableSatelliteDataSaverControl<?> ctrl = the_yard.location.data_control;
 			if(GameInterface.GC.players[p_id] == ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].own)
 			{
-				Set<Order> orders = the_yard.data_control.revertToTime(scheduled_time);
-				orders.addAll(the_yard.location.data_control.revertToTime(scheduled_time)); //make sure it uses the right owner
 				the_yard.addToQueue(new Ship(type), scheduled_time);
-				return orders;
 			}
 			else orderDropped();
 		}
 		else orderDropped();
-		
-		return new HashSet<Order>();
 	}
 
 	public ShipyardBuildShipOrder(){mode=Order.MODE.NETWORK;}

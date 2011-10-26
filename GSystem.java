@@ -1,5 +1,6 @@
 import java.awt.Color;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public strictfp class GSystem implements Orbitable<GSystem>
 {
@@ -13,8 +14,6 @@ public strictfp class GSystem implements Orbitable<GSystem>
 	int current_player_id; //used in OWNER_CONFLICTED state to keep track of the last player whose color was used
 	long time_last_color_valid_until; //the time until which the last_color will be used
 	Color last_color; //the last return value of currentColor()
-	
-	int next_missile_id;
 	
 	ArrayList<Satellite<?>> orbiting;
 	HashSet<Star> stars;
@@ -49,7 +48,6 @@ public strictfp class GSystem implements Orbitable<GSystem>
 		fleets = new Fleet[GalacticStrategyConstants.MAX_PLAYERS];
 		missiles = new MissileList();
 		owner_id = NO_OWNER;
-		next_missile_id=0;
 		time_last_color_valid_until=-1;
 	}
 	
@@ -180,8 +178,6 @@ public strictfp class GSystem implements Orbitable<GSystem>
 	public void setMissiles(MissileList m){missiles=m;}
 	public int getOwner_id(){return owner_id;}
 	public void setOwner_id(int id){owner_id=id;}
-	public int getNext_missile_id(){return next_missile_id;}
-	public void setNext_missile_id(int n){next_missile_id=n;}
 	
 	public int getWidth(){return width;}
 	public void setWidth(int w){width=w;}
@@ -204,7 +200,14 @@ public strictfp class GSystem implements Orbitable<GSystem>
 		{
 			sat.recursiveSaveData();
 		}
+	}
+	
+	public void revertOwnables(long t) throws DataSaverControl.DataNotYetSavedException {
 		
+		for(Satellite<?> sat : orbiting)
+		{
+			sat.recursiveRevert(t);
+		}
 	}
 
 	/**
@@ -223,5 +226,20 @@ public strictfp class GSystem implements Orbitable<GSystem>
 		}
 		else
 			return 1; //this makes GSystems the greatest items in the ordering of Orbitables.
+	}
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		if (o instanceof GSystem)
+			return (compareTo((GSystem)o) == 0);
+		else
+			return false;
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return id;
 	}
 }

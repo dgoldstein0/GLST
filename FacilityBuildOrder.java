@@ -1,5 +1,3 @@
-import java.util.Set;
-import java.util.HashSet;
 
 public strictfp class FacilityBuildOrder extends Order
 {
@@ -16,7 +14,8 @@ public strictfp class FacilityBuildOrder extends Order
 		mode = Order.MODE.ORIGIN;
 	}
 	
-	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
+	@Override
+	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.MODE.NETWORK)
 		{
@@ -26,16 +25,11 @@ public strictfp class FacilityBuildOrder extends Order
 		//validate - check if owner is the same as orderer at the time the order should be executed
 		if(the_sat.data_control.saved_data[the_sat.data_control.getIndexForTime(scheduled_time)].own == GameInterface.GC.players[p_id])
 		{
-			Set<Order> need_to_reexecute = the_sat.data_control.revertToTime(scheduled_time); //TODO: will revert everything associated with the planet (via facilities).  necessary?		
-			
 			the_sat.scheduleConstruction(bldg_type, scheduled_time);
-			
-			return need_to_reexecute;
 		}
 		else
 		{
 			orderDropped();
-			return new HashSet<Order>();
 		}
 	}
 	

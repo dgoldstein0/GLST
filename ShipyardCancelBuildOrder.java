@@ -1,5 +1,3 @@
-import java.util.Set;
-import java.util.HashSet;
 
 public strictfp class ShipyardCancelBuildOrder extends Order {
 
@@ -23,7 +21,7 @@ public strictfp class ShipyardCancelBuildOrder extends Order {
 	}
 	
 	@Override
-	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
+	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
 		if(mode==MODE.NETWORK)
 			the_yard = (Shipyard)shipyard_describer.retrieveObject(g, scheduled_time);
 		
@@ -35,30 +33,22 @@ public strictfp class ShipyardCancelBuildOrder extends Order {
 			if(data.alive && data.queue.size() != 0 &&
 					ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].own.getId() == p_id) //validity check: is the Shipyard still alive?
 			{
-				Set<Order> orders = the_yard.data_control.revertToTime(scheduled_time);
 				
 				if (mode == MODE.NETWORK)
 					the_ship = the_yard.manufac_queue.get(ship_id);
 				
 				if(the_ship != null)
 				{
-					orders.addAll(the_ship.data_control.revertToTime(scheduled_time));
-					orders.addAll(ctrl.revertToTime(scheduled_time)); //make sure it uses the right owner
-					
 					the_yard.removeFromQueue(the_ship, scheduled_time);
 				}
 				else
 					orderDropped();
-				
-				return orders;
 			}
 			else
 				orderDropped();
 		}
 		else
 			orderDropped();
-		
-		return new HashSet<Order>();
 	}
 
 	public ShipyardCancelBuildOrder(){mode=Order.MODE.NETWORK;}

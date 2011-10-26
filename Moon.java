@@ -1,3 +1,4 @@
+
 public strictfp class Moon extends OwnableSatellite<Moon>
 {
 	public Moon(int i, double m, String nm, int sz)
@@ -38,5 +39,18 @@ public strictfp class Moon extends OwnableSatellite<Moon>
 	@Override
 	public void recursiveSaveData() {
 		data_control.saveData();
+		for(Integer id : facilities.keySet())
+		{
+			facilities.get(id).data_control.saveData();
+		}
+	}
+
+	@Override
+	public void recursiveRevert(long t) throws DataSaverControl.DataNotYetSavedException {
+		data_control.revertToTime(t);
+		for(Integer id : facilities.keySet())
+		{
+			facilities.get(id).data_control.revertToTime(t);
+		}
 	}
 }

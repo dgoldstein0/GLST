@@ -70,7 +70,7 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 			add_money += tax_rate*location.population;
 			last_time += GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
 		}
-		location.owner.changeMoney(add_money, last_time, this);
+		location.owner.changeMoney(add_money, last_time);
 		data_control.saveData();
 	}
 	

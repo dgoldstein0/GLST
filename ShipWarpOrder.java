@@ -1,5 +1,3 @@
-import java.util.Set;
-import java.util.HashSet;
 
 public strictfp class ShipWarpOrder extends Order
 {
@@ -20,7 +18,8 @@ public strictfp class ShipWarpOrder extends Order
 		dest_desc=sys.describer();
 	}
 	
-	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
+	@Override
+	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.MODE.NETWORK)
 		{
@@ -31,15 +30,11 @@ public strictfp class ShipWarpOrder extends Order
 		if(the_ship != null && the_ship.isAliveAt(scheduled_time)
 				&& the_ship.owner.getId() == p_id)
 		{
-			the_ship.update(scheduled_time, null);
-			Set<Order> orders = the_ship.data_control.revertToTime(scheduled_time);
 			the_ship.orderToWarp(scheduled_time, the_dest);
-			return orders;
 		}
 		else
 		{
 			orderDropped();
-			return new HashSet<Order>();
 		}
 	}
 	

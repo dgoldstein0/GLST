@@ -1,5 +1,3 @@
-import java.util.Set;
-import java.util.HashSet;
 
 public strictfp class ShipMoveOrder extends Order
 {
@@ -21,7 +19,8 @@ public strictfp class ShipMoveOrder extends Order
 		dest_desc=d.describer();
 	}
 	
-	public Set<Order> execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
+	@Override
+	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.MODE.NETWORK)
 		{
@@ -40,26 +39,12 @@ public strictfp class ShipMoveOrder extends Order
 		
 		if(the_ship != null && the_dest != null && the_ship.isAliveAt(scheduled_time)
 				&& the_ship.owner.getId() == p_id)
-		{
-			//System.out.println("\trevert and execute...");
-			
-			the_ship.update(scheduled_time, null);
-			Set<Order> orders = the_ship.data_control.revertToTime(scheduled_time);
-			
-			/*TODO: should we revert destination?  this implementation assumes setting an object as a
-			 * destination has no effect on that object.  As of 7/13/10, this is true.*/
-			
-			if(the_dest instanceof Flyer<?,?,?>)
-				((Flyer<?,?,?>)the_dest).update(scheduled_time,null);
-			
+		{			
 			the_ship.orderToMove(scheduled_time, the_dest);
-			
-			return orders;
 		}
 		else
 		{
 			orderDropped();
-			return new HashSet<Order>();
 		}
 	}
 	

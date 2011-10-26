@@ -3,10 +3,10 @@ import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
 import javax.swing.SwingUtilities;
@@ -18,6 +18,7 @@ public class GameUpdater {
 	TimeManager TC;
 	final GameControl GC;
 	final PriorityBlockingQueue<Order> pending_execution;
+	SortedSet<Order> already_executed;
 	TaskManager TM;
 	
 	long last_time_updated;
@@ -29,6 +30,7 @@ public class GameUpdater {
 	public GameUpdater(GameControl ctrl)
 	{
 		pending_execution = new PriorityBlockingQueue<Order>();
+		already_executed = new TreeSet<Order>();
 		TM = new TaskManager();
 		GC = ctrl;
 		last_time_updated = 0l;
@@ -134,31 +136,62 @@ public class GameUpdater {
 			} while(true);
 		}
 		
-		/*now figure out the earliest order in local_pending_execution, and make that time update_to,
-		 * if update_to is currently larger*/
+		/*
+		 * now figure out the earliest order in local_pending_execution, and make that time update_to,
+		 * if update_to is currently larger
+		 */
 		Order first_order = local_pending_execution.peek();
 		if(first_order != null)
 		{
 			long next_order_time = first_order.scheduled_time;
-			if(next_order_time < update_to)
-				update_to = TimeControl.roundDownToTimeGrain(next_order_time); //forces the main loop to reconsider below
+			if(next_order_time < update_to)	
+			{
+				//forces the main loop to reconsider below
+				
+				//set to update to the time at which this order will be executed
+				update_to = TimeControl.roundUpToTimeGrain(next_order_time);
+				long revert_to_time = update_to - GalacticStrategyConstants.TIME_GRANULARITY;
+				
+				//revert to data for time grain before the given order is executed.
+				GC.map.revertAllToTime(revert_to_time);
+				
+				//and now figure out which orders to replay, and queue those
+				//too.
+				Order temp = new InvalidOrder();
+				temp.scheduled_time = revert_to_time+1;
+				temp.p_id = -1;
+				temp.order_number = -1;
+				
+				//TODO: implement a way for old orders in already_executed to
+				//be thrown out - a sort of distributed Garbage collection is
+				//necessary, perhaps based on the distributed state algorithm
+				//for the 3+ player case.
+				SortedSet<Order> orders_to_redo = already_executed.tailSet(temp);
+				already_executed.removeAll(orders_to_redo);
+				local_pending_execution.addAll(orders_to_redo);
+			}
 		}
-		
-		/**TODO: Revert here!*/
-		
-		
-
 		
 		//update all planets, facilities, ships and missiles
 		for(; update_to <= time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
 		{
 			setLast_time_updated(update_to);
 			
-			/**TODO: Save Everything here!*/
+			/**
+			 * TODO: Save Everything here!
+			 * Everything = map data (ships, missiles, facilities, planets,
+			 * etc.) and Player data (money, metal, and ships in transit).
+			 */
+			GC.map.saveAllData();
+			for (Player p : GC.players)
+			{
+				if (p != null)
+				{
+					p.data_control.saveData();
+				}
+			}
 			
-			
-			/**update all intersystem data.  This is must be within the loop in case ships are reverted back
-			 * into warp or something of the sort*/
+			/**update all intersystem data.*/
 			for(int i=0; i<GC.players.length; i++)
 			{
 				if(GC.players[i] != null)
@@ -175,20 +208,29 @@ public class GameUpdater {
 			
 			for(GSystem sys : GC.map.systems)
 			{
-				/*We must stick facilities and planets in this loop because otherwise Ship updating would not
-				be coordinated with facilities and planets, so bugs could then occur in terms of building ships
-				or invading planets.
-				
-				For instance, consider this scenario: ship is attacking a Shipyard, and Shipyard is about to
-				complete a new Ship right around the time it is about to explode.  If it should finish
-				the ship after it is destroyed, but a call to updateGame must handle both the time in which
-				the Shipyard will be destroyed and in which the ship would be completed if the shipyard were
-				not destroyed, and if facilities/planets were updated before the Ships all the way to
-				time_elapsed, then the Shipyard could be updated to a time later than the time it is
-				destroyed at, produce the ship which it should not produce, and then be destroyed.  But now
-				we have a ship which should have not completed construction.   Uh oh...
-				
-				Though less dramatic, similar issues can exist with mining/taxation.  So it all goes in here.*/
+				/* We must stick facilities and planets in this loop because
+				 * otherwise Ship updating would not be coordinated with
+				 * facilities and planets, so bugs could then occur in terms
+				 * of building ships or invading planets.
+				 * 
+				 * For instance, consider this scenario: ship is attacking a
+				 * Shipyard, and Shipyard is about to complete a new Ship right
+				 * around the time it is about to explode.  If it should finish
+				 * the ship after it is destroyed, but the call to updateGame
+				 * handles both the time in which the Shipyard will be
+				 * destroyed and the time at which the ship would be completed
+				 * if the shipyard were not destroyed, and if facilities &
+				 * planets were updated before the Ships all the way to
+				 * time_elapsed, then the Shipyard could be updated to a time
+				 * later than the time it is destroyed at, produce the ship
+				 * which it should not produce, and then be destroyed.  But now
+				 * we have a ship which should have not completed construction.
+				 * Uh oh...
+				 * 
+				 * Though less dramatic, similar issues can exist with
+				 * mining/taxation.  Thats why planets and facilities get
+				 * update in here.
+				 */
 				
 				//update planets/facilities:
 				for(Satellite<?> sat : sys.orbiting)
@@ -228,7 +270,6 @@ public class GameUpdater {
 					}
 				}
 				
-				//NOTE: Missile collision detection relies on Missiles being updated after ships.  See Missile.collidedWithTarget
 				//update all missiles AND save data
 				synchronized(sys.missiles)
 				{
@@ -249,18 +290,10 @@ public class GameUpdater {
 			{
 				/**execute does all the necessary reversion itself.  It never reverts anything to earlier than
 				 * scheduled_time, which should be within one time grain less than update_to*/
-				local_pending_execution.addAll(local_pending_execution.remove().execute(GC.map));
+				Order cur_order = local_pending_execution.remove();
+				cur_order.execute(GC.map);
+				already_executed.add(cur_order);
 			}
-			
-			if(getLast_time_updated() > update_to)
-				update_to = getLast_time_updated();
-			
-			/* debuging code, should later be removed
-			if(DEBUGGING)
-			{
-				log("\r\nUpdated to " + update_to, GC.map);
-				log("\n",GC.players);
-			}*/
 		}
 		
 		setLast_time_updated(update_to);
@@ -302,7 +335,7 @@ public class GameUpdater {
 									Ship b = sys.fleets[j].ships.get(id2);
 									
 									if(a != null && b != null)
-										local_pending_execution.addAll(doCollision(a,b,t));
+										doCollision(a,b,t);
 								}
 							}
 						}
@@ -312,7 +345,7 @@ public class GameUpdater {
 		}
 	}
 	
-	public Set<Order> doCollision(Ship a, Ship b, long t) throws DataSaverControl.DataNotYetSavedException
+	public void doCollision(Ship a, Ship b, long t) throws DataSaverControl.DataNotYetSavedException
 	{
 		double x_a = a.getXCoord(t);
 		double y_a = a.getYCoord(t);
@@ -331,9 +364,6 @@ public class GameUpdater {
 		if(len_sq_dif < collision_dist*collision_dist)
 		{
 			//do collision
-			Set<Order> orders = new HashSet<Order>();
-			orders.addAll(a.data_control.revertToTime(t));
-			orders.addAll(b.data_control.revertToTime(t));
 			
 			//velocity a -= 2*projection onto dif
 			double v_x_a = a.getXVel(t);
@@ -358,9 +388,7 @@ public class GameUpdater {
 			{
 				b.speed = 0.0;
 			}
-			return orders;
 		}
-		return new HashSet<Order>();
 	}
 	
 	public class InterfaceUpdater implements Runnable

@@ -1,16 +1,16 @@
 import java.util.ArrayList;
-import java.util.List;
-
 
 public class PlayerDataSaver extends DataSaver<Player> {
 
 	double metal;
 	double money;
-	List<Saveable<?>> resource_users;
+	ArrayList<Ship> in_transit;
+	
+	//TODO: should known_systems or known_satellites be saved?
 	
 	public PlayerDataSaver()
 	{
-		resource_users = new ArrayList<Saveable<?>>();
+		in_transit = new ArrayList<Ship>();
 	}
 	
 	@Override
@@ -21,11 +21,11 @@ public class PlayerDataSaver extends DataSaver<Player> {
 			{
 				p.setMoney(money);
 				p.setMetal(metal);
-				
-				p.resource_users.clear();
-				p.resource_users.addAll(resource_users);
 			}
 		}
+		
+		p.ships_in_transit.clear();
+		p.ships_in_transit.addAll(in_transit);
 	}
 
 	@Override
@@ -36,11 +36,11 @@ public class PlayerDataSaver extends DataSaver<Player> {
 			{
 				money = p.getMoney();
 				metal = p.getMetal();
-				
-				resource_users.clear();
-				resource_users.addAll(p.resource_users);
 			}
 		}
+		
+		in_transit.clear();
+		in_transit.addAll(p.ships_in_transit);
 	}
 
 }

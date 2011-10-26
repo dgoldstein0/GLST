@@ -64,8 +64,8 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 			synchronized(location.owner.money_lock){
 				if(location.owner.getMetal() >= met && location.owner.getMoney() >= mon)
 				{
-					location.owner.changeMetal(-met, t, this);
-					location.owner.changeMoney(-mon, t, this);
+					location.owner.changeMetal(-met, t);
+					location.owner.changeMoney(-mon, t);
 					
 					ship.id = new Ship.ShipId(next_queue_id, this);
 					synchronized(queue_lock)
@@ -102,8 +102,8 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 				{
 					synchronized(location.owner.money_lock)
 					{
-						location.owner.changeMoney(ship.type.money_cost, t, this);
-						location.owner.changeMetal(ship.type.metal_cost, t, this);
+						location.owner.changeMoney(ship.type.money_cost, t);
+						location.owner.changeMetal(ship.type.metal_cost, t);
 					}
 				}
 			}

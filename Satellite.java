@@ -110,4 +110,5 @@ public strictfp abstract class Satellite<T extends Satellite<T>> extends Stellar
 	double y_vel;
 
 	public abstract void recursiveSaveData();
+	public abstract void recursiveRevert(long t) throws DataSaverControl.DataNotYetSavedException;
 }

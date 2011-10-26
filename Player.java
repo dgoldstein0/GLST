@@ -1,6 +1,5 @@
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
+import javax.swing.JOptionPane;
+import java.awt.Color;
 import java.util.ArrayList;
 
 public strictfp class Player implements RelaxedSaveable<Player>
@@ -23,7 +22,6 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	private double metal;
 	
 	long last_time;
-	List<Saveable<?>> resource_users;
 	PlayerDataSaverControl data_control;
 	
 	Color color;
@@ -75,7 +73,6 @@ public strictfp class Player implements RelaxedSaveable<Player>
 		known_systems = new ArrayList<GSystem>();
 		known_satellites = new ArrayList<Satellite<?>>();
 		ready=false;
-		resource_users = new ArrayList<Saveable<?>>();
 		last_time=0;
 	}
 	
@@ -92,7 +89,7 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	}
 	
 	//return true = successfully changed, return false = player doesn't have enough money.
-	public boolean changeMoney(double m, long t, Saveable<?> requester)
+	public boolean changeMoney(double m, long t)
 	{
 		boolean ret=false;
 		synchronized(money_lock){
@@ -102,18 +99,14 @@ public strictfp class Player implements RelaxedSaveable<Player>
 				ret=true;
 			}
 			
-			//if request fails, a roll-back might cause it to succeed, so still save the requester
-			if(t != last_time)
-					resource_users.clear();
 			last_time=t;
-			resource_users.add(requester);
 			data_control.saveData();
 		}
 		return ret;
 	}
 	
 	//return true = successfully changed, return false = player doesn't have enough money.
-	public boolean changeMetal(double m, long t, Saveable<?> requester)
+	public boolean changeMetal(double m, long t)
 	{
 		boolean ret=false;
 		synchronized(metal_lock){
@@ -123,11 +116,7 @@ public strictfp class Player implements RelaxedSaveable<Player>
 				ret=true;
 			}
 			
-			//if request fails, a roll-back might cause it to succeed, so still save the requester
-			if(t != last_time)
-				resource_users.clear();
 			last_time=t;
-			resource_users.add(requester);
 			data_control.saveData();
 		}
 		return ret;
@@ -152,8 +141,6 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	public void setReady(boolean r){ready=r;}
 	public ArrayList<Ship> getShips_in_transit(){return ships_in_transit;}
 	public void setShips_in_transit(ArrayList<Ship> s){ships_in_transit=s;}
-	public List<Saveable<?>> getResource_users(){return resource_users;}
-	public void setResource_users(List<Saveable<?>> l){resource_users=l;}
 	@Override public long getTime() {return last_time;}
 	@Override public void setTime(long t) {last_time=t;}	
 	

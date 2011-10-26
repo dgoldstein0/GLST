@@ -1,4 +1,5 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public strictfp class Planet extends OwnableSatellite<Planet>
 {
@@ -47,9 +48,28 @@ public strictfp class Planet extends OwnableSatellite<Planet>
 	@Override
 	public void recursiveSaveData() {
 		data_control.saveData();
+		for(Integer id : facilities.keySet())
+		{
+			facilities.get(id).data_control.saveData();
+		}
+		
 		for(Satellite<?> sat : orbiting)
 		{
 			sat.recursiveSaveData();
+		}
+	}
+
+	@Override
+	public void recursiveRevert(long t) throws DataSaverControl.DataNotYetSavedException {
+		data_control.revertToTime(t);
+		for(Integer id : facilities.keySet())
+		{
+			facilities.get(id).data_control.revertToTime(t);
+		}
+		
+		for(Satellite<?> sat : orbiting)
+		{
+			sat.recursiveRevert(t);
 		}
 	}
 }
