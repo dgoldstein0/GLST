@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.HashMap;
 import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
 import javax.swing.SwingUtilities;
@@ -19,6 +20,7 @@ public class GameUpdater {
 	final GameControl GC;
 	final PriorityBlockingQueue<Order> pending_execution;
 	SortedSet<Order> already_executed;
+	HashMap<Integer, Long> most_recent_time; //tracking for garbage collection; maps player_id->last order received
 	TaskManager TM;
 	
 	long last_time_updated;
@@ -35,6 +37,7 @@ public class GameUpdater {
 		GC = ctrl;
 		last_time_updated = 0l;
 		log_lock = new Object();
+		most_recent_time = new HashMap<Integer, Long>();
 	}
 	
 	public void setTimeManager(TimeManager TM)
@@ -45,6 +48,17 @@ public class GameUpdater {
 	public void startUpdating()
 	{
 		is_closing=false;
+		
+		//this initialization of most_recent_time has to wait until GC.players
+		//is populated, so it cannot be done in the GameUpdater constructor.
+		for (int i=0; i < GC.players.length; i++)
+		{
+			if(GC.players[i] != null)
+			{
+				most_recent_time.put(i, 0l);
+			}
+		}
+		
 		TM.startConstIntervalTask(new Updater(),(int)GalacticStrategyConstants.TIME_GRANULARITY);
 	}
 	
@@ -292,7 +306,9 @@ public class GameUpdater {
 				 * scheduled_time, which should be within one time grain less than update_to*/
 				Order cur_order = local_pending_execution.remove();
 				cur_order.execute(GC.map);
+				
 				already_executed.add(cur_order);
+				most_recent_time.put(cur_order.p_id, cur_order.scheduled_time);
 			}
 		}
 		
@@ -306,6 +322,24 @@ public class GameUpdater {
 		{
 			System.out.println("We still have orders in the local queue.");
 			pending_execution.addAll(local_pending_execution);
+		}
+		
+		//Collect the Trash!
+		{
+			long minimum = Long.MAX_VALUE;
+			for (Integer i : most_recent_time.keySet())
+			{
+				long last_order_time = most_recent_time.get(i);
+				if (last_order_time < minimum)
+					minimum = last_order_time;
+			}
+			
+			//now every already_executed order with time less than minimum is trash.
+			InvalidOrder min_order = new InvalidOrder();
+			min_order.scheduled_time = minimum;
+			min_order.order_number = 0;
+			min_order.p_id = -1;
+			already_executed.headSet(min_order).clear();
 		}
 		
 		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));

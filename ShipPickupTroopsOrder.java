@@ -24,7 +24,6 @@ public strictfp class ShipPickupTroopsOrder extends Order {
 		//validate order
 		if(the_ship != null && the_ship.owner.getId() == p_id)
 		{
-			the_ship.update(scheduled_time, null);
 			ShipDataSaver data = (ShipDataSaver) the_ship.data_control.saved_data[the_ship.data_control.getIndexForTime(scheduled_time)];
 			if(data.is_alive && ((OwnableSatellite<?>)data.dest).owner == the_ship.owner && data.dest instanceof OwnableSatellite<?>)
 			{

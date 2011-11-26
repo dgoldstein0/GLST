@@ -1,17 +1,23 @@
 public strictfp class TimeControl implements TimeManager
 {
-	volatile long time_elapsed; 
 	volatile long start_time;
+	
+	/**
+	 * used to gaurantee monotonicity
+	 * @GaurdedBy TimeControl object
+	 */
+	volatile long last_time;
 	
 	public TimeControl(int offset)
 	{
+		last_time = 0;
 		resetTime(offset);
 	}
 	
 	public void resetTime(int offset)
 	{
-		start_time=System.nanoTime()-offset;
-		time_elapsed=offset;
+		start_time = System.nanoTime()-offset;
+		last_time = offset;
 	}
 	
 	public static long getTimeGrainAfter(long t)
@@ -42,18 +48,36 @@ public strictfp class TimeControl implements TimeManager
 	
 	public long getTime()
 	{
-		time_elapsed=System.nanoTime()-start_time;
+		long time_elapsed=System.nanoTime()-start_time;
+		
+		//to guarantee monotonicity
+		synchronized(this)
+		{
+			if (time_elapsed < last_time)
+				time_elapsed = last_time;
+			last_time = time_elapsed;
+		}
+		
 		return time_elapsed/1000000; //convert to milliseconds - don't need to keep the decimal so no cast to doubles
 	}
 	
 	public long getNanoTime()
 	{
-		time_elapsed=System.nanoTime()-start_time;
+		long time_elapsed=System.nanoTime()-start_time;
+		
+		//to guarantee monotonicity
+		synchronized(this)
+		{
+			if (time_elapsed < last_time)
+				time_elapsed = last_time;
+			last_time = time_elapsed;
+		}
+		
 		return time_elapsed;
 	}
 	
-	public long gettime_elapsed(){return time_elapsed;}
-	public void settime_elapsed(long t){time_elapsed=t;}
+	public long getlast_time(){return last_time;}
+	public void setlast_time(long t){last_time=t;}
 
 	/**roundUpToNextResourceChange
 	 * returns t rounded up to the next multiple of TIME_BETWEEN_RESOURCES.

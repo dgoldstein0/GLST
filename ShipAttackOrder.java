@@ -37,7 +37,7 @@ public strictfp class ShipAttackOrder extends Order
 			/*if targetHasWarped or targetIsDestroyed, need to update so that the mode change
 			 * will not get overwritten before it is saved.  if order is good, need to update
 			 * before we can carry it out*/
-			the_ship.update(scheduled_time, null); //TODO: I don't like this.
+			the_ship.update(scheduled_time, null); //TODO: What the fuck is this?
 			
 			//check if the target is alive at scheduled time.  if not, then target was destroyed (assuming you can't order attacks on dead ships, in which case the target never should have been targeted, but we'll ignore that possibility)
 			if(the_target.isAliveAt(scheduled_time))
