@@ -1,18 +1,17 @@
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Set;
 
 public strictfp class MissileList implements RelaxedSaveable<MissileList> {
 	
-	HashMap<Missile.MissileId, Missile> table;
+	TreeMap<Missile.MissileId, Missile> table;
 	MissileListDataControl data_control;
 	volatile long time;
 	
 	public MissileList()
 	{
-		table = new HashMap<Missile.MissileId, Missile>();
+		table = new TreeMap<Missile.MissileId, Missile>();
 		data_control = new MissileListDataControl(this);
 		time=0;
-		data_control.saveData();
 	}
 
 	public synchronized Missile get(Missile.MissileId key)
@@ -24,7 +23,6 @@ public strictfp class MissileList implements RelaxedSaveable<MissileList> {
 	{
 		Missile ret = table.put(key, m);
 		time = t;
-		data_control.saveData();
 		
 		return ret;
 	}
@@ -33,7 +31,6 @@ public strictfp class MissileList implements RelaxedSaveable<MissileList> {
 	{
 		time=t;
 		Missile m = table.remove(key);
-		data_control.saveData();
 		
 		return m;
 	}
@@ -61,6 +58,6 @@ public strictfp class MissileList implements RelaxedSaveable<MissileList> {
 		System.out.println("Impossible: MissileList.handleDataNotSaved has been invoked.");
 	}
 	
-	public synchronized HashMap<Missile.MissileId, Missile> getTable(){return table;}
-	public synchronized void setTable(HashMap<Missile.MissileId, Missile> t){table=t;}
+	public synchronized TreeMap<Missile.MissileId, Missile> getTable(){return table;}
+	public synchronized void setTable(TreeMap<Missile.MissileId, Missile> t){table=t;}
 }

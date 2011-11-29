@@ -17,7 +17,6 @@ public strictfp class Base extends Facility<Base>{
 		max_soldier = GalacticStrategyConstants.default_max_soldier;
 		data_control = new BaseDataSaverControl(this);
 		soldier_taker = new HashSet<Saveable<?>>();
-		data_control.saveData();
 	}
 	
 	public void upgrade()
@@ -36,7 +35,6 @@ public strictfp class Base extends Facility<Base>{
 			
 			soldier_taker.clear();
 			last_time=time;
-			data_control.saveData();
 		}
 	}
 	
@@ -105,7 +103,6 @@ public strictfp class Base extends Facility<Base>{
 	{
 		last_time=t;
 		soldier=0;
-		data_control.saveData();
 	}
 	
 	public void destroyed()

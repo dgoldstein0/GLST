@@ -17,7 +17,7 @@ public strictfp class ShipyardBuildShipOrder extends Order {
 	}
 	
 	@Override
-	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
+	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
 		if(mode==MODE.NETWORK)
 			the_yard = shipyard_describer.retrieveObject(g, scheduled_time);
 		
@@ -27,10 +27,13 @@ public strictfp class ShipyardBuildShipOrder extends Order {
 			if(GameInterface.GC.players[p_id] == ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].own)
 			{
 				the_yard.addToQueue(new Ship(type), scheduled_time);
+				return true;
 			}
-			else orderDropped();
+			else
+				return false;
 		}
-		else orderDropped();
+		else
+			return false;
 	}
 
 	public ShipyardBuildShipOrder(){mode=Order.MODE.NETWORK;}

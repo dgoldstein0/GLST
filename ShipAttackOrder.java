@@ -23,7 +23,7 @@ public strictfp class ShipAttackOrder extends Order
 	}
 	
 	@Override
-	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
+	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.MODE.NETWORK)
 		{
@@ -34,11 +34,6 @@ public strictfp class ShipAttackOrder extends Order
 		//if we couldn't find the ship, the target, or the ship is not alive at scheduled time, order is moot
 		if(the_ship != null && the_ship.isAliveAt(scheduled_time) && the_target != null)
 		{
-			/*if targetHasWarped or targetIsDestroyed, need to update so that the mode change
-			 * will not get overwritten before it is saved.  if order is good, need to update
-			 * before we can carry it out*/
-			the_ship.update(scheduled_time, null); //TODO: What the fuck is this?
-			
 			//check if the target is alive at scheduled time.  if not, then target was destroyed (assuming you can't order attacks on dead ships, in which case the target never should have been targeted, but we'll ignore that possibility)
 			if(the_target.isAliveAt(scheduled_time))
 			{
@@ -64,8 +59,11 @@ public strictfp class ShipAttackOrder extends Order
 			{
 				the_ship.targetIsDestroyed(scheduled_time, true, the_target);
 			}
+			
+			return true;
 		}
-		else orderDropped();
+		else
+			return false;
 	}
 	
 	public ShipAttackOrder(){mode=Order.MODE.NETWORK;}

@@ -1,8 +1,8 @@
-import java.util.HashMap;
+import java.util.TreeMap;
 
 public strictfp class MissileListDataSaver extends DataSaver<MissileList> {
 
-	HashMap<Missile.MissileId, Missile> tbl;
+	TreeMap<Missile.MissileId, Missile> tbl;
 	
 	public MissileListDataSaver() {
 		
@@ -14,7 +14,7 @@ public strictfp class MissileListDataSaver extends DataSaver<MissileList> {
 		
 		synchronized(l)
 		{
-			tbl = (HashMap<Missile.MissileId, Missile>) l.table.clone();
+			tbl = (TreeMap<Missile.MissileId, Missile>) l.table.clone();
 		}
 	}
 
@@ -23,7 +23,7 @@ public strictfp class MissileListDataSaver extends DataSaver<MissileList> {
 		
 		synchronized(l)
 		{
-			l.table = (HashMap<Missile.MissileId, Missile>) tbl.clone();
+			l.table = (TreeMap<Missile.MissileId, Missile>) tbl.clone();
 		}
 	}
 

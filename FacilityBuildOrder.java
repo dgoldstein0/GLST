@@ -15,7 +15,7 @@ public strictfp class FacilityBuildOrder extends Order
 	}
 	
 	@Override
-	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
+	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.MODE.NETWORK)
 		{
@@ -26,11 +26,10 @@ public strictfp class FacilityBuildOrder extends Order
 		if(the_sat.data_control.saved_data[the_sat.data_control.getIndexForTime(scheduled_time)].own == GameInterface.GC.players[p_id])
 		{
 			the_sat.scheduleConstruction(bldg_type, scheduled_time);
+			return true;
 		}
 		else
-		{
-			orderDropped();
-		}
+			return false;
 	}
 	
 	public FacilityBuildOrder(){mode = Order.MODE.NETWORK;}

@@ -36,7 +36,6 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 		damage+=d;
 		if(damage>=endurance)
 			destroyed();
-		data_control.saveData();
 	}
 	
 	public void destroyed() //default option.  Base, Mine and TaxOffice override
@@ -123,13 +122,11 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	@Override public void addAggressor(Targetter<?> t)
 	{
 		aggressors.add(t);
-		data_control.saveData();
 	}
 	
 	@Override public void removeAggressor(Targetter<?> t)
 	{
 		aggressors.remove(t);
-		data_control.saveData();
 	}
 	public abstract void updateStatus(long t);
 	public final String getName(){return getType().name;}

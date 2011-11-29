@@ -201,7 +201,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			} while (mode != orig_mode);
 			
 			time += GalacticStrategyConstants.TIME_GRANULARITY;
-			data_control.saveData();
 		}
 		return false;
 	}
@@ -259,7 +258,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		
 		//TODO: get constant 5 out of here
 		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.Attacking_Range-5, TrackingAI.IN_RANGE_BEHAVIOR.STOP);
-		data_control.saveData();
 	}
 	
 	public void userOverride(){
@@ -309,7 +307,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 				pos_y += dist_moved*exit_vec_y;
 				time=t;
 			}
-			data_control.saveData(); //TODO: I think we should keep this saveData... but should double-check
 		}
 		return false;
 	}
@@ -346,7 +343,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
 			mode=MODES.MOVING;
 			//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
-			data_control.saveData();
 		}
 	}
 	
@@ -356,7 +352,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
-		data_control.saveData();
 	}
 	
 	public void orderToAttackMove(long t, Destination<?> d)
@@ -371,7 +366,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
 			mode = MODES.USERATTACKMOVE;
-			data_control.saveData();
 		}
 	}
 	
@@ -383,7 +377,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			userOverride();
 			mode=MODES.USERATTACKING;
 			setupAttack(tgt);
-			data_control.saveData();
 		}
 	}
 	
@@ -407,7 +400,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			exit_direction = Math.atan2(exit_vec_y, exit_vec_x);
 			
 			current_flying_AI = new WarpAI(this);
-			data_control.saveData();
 		}
 	}
 	
@@ -434,7 +426,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					((OwnableSatellite<?>)destination).setOwnerAtTime(getOwner(), t);
 				}
 			}
-			data_control.saveData();
 		}
 	}
 	
@@ -447,7 +438,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 				soldier < type.soldier_capacity)
 		{
 			mode = MODES.PICKUP_TROOPS;
-			data_control.saveData();
 		}
 	}
 	
@@ -466,11 +456,9 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 				{
 					soldier += ((OwnableSatellite<?>)destination).the_base.retrieveSoldiers(time+GalacticStrategyConstants.TIME_GRANULARITY, get_soldiers, this);
 				}
-				data_control.saveData();
 			}
 			return true;
-		}
-		
+		}		
 		else
 			return false;
 	}
@@ -505,7 +493,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		
 		mode=MODES.IN_WARP;
 		owner.ships_in_transit.add(this);
-		data_control.saveData(); //TODO: I think I should keep this... but should double-check this is a good idea
 	}
 	
 	private void disengageWarpDrive(Iterator<Ship> ship_it)
@@ -531,9 +518,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		
 		ship_it.remove();//owner.ships_in_transit.remove(this);
 		location.fleets[owner.getId()].add(this, arrival_time);
-		
-		//TODO: should we do data_control.saveData() here?
-		//since this method is only called from moveDuringWarp (and that does the saveData... or used to, at some point)
 	}
 	
 	/*this function returns true IF:
@@ -617,8 +601,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			//notify interface
 			SwingUtilities.invokeLater(new ShipDeselector(this));
 			if(refresh){GameInterface.GC.GI.refreshShipPanel();}
-
-				
+		
 			//System.out.println("destroyed-after");
 		}
 	}
@@ -656,8 +639,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			was_target = tgt;
 		
 		target=null;
-		
-		data_control.saveData();
 		
 		//TODO: player notification - THIS SHOULD USE LOST_REASON
 	}

@@ -41,7 +41,6 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 			Ship val = ships.put(s.getId(), s);
 			System.out.println("\tval is null: " + Boolean.toString(val==null));
 			last_time_changed=t;
-			data_control.saveData();
 		}
 		location.increaseClaim(owner);
 	}
@@ -57,7 +56,6 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 			{
 				last_time_changed = t;
 				location.decreaseClaim(owner);
-				data_control.saveData();
 				return true;
 			}
 		}
@@ -118,7 +116,6 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 				the_iterator.remove();
 				last_time_changed = t;
 				location.decreaseClaim(owner);
-				data_control.saveData();
 			}
 		}
 

@@ -20,7 +20,7 @@ public strictfp class ShipMoveOrder extends Order
 	}
 	
 	@Override
-	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
+	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.MODE.NETWORK)
 		{
@@ -41,10 +41,11 @@ public strictfp class ShipMoveOrder extends Order
 				&& the_ship.owner.getId() == p_id)
 		{			
 			the_ship.orderToMove(scheduled_time, the_dest);
+			return true;
 		}
 		else
 		{
-			orderDropped();
+			return false;
 		}
 	}
 	

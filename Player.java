@@ -100,7 +100,6 @@ public strictfp class Player implements RelaxedSaveable<Player>
 			}
 			
 			last_time=t;
-			data_control.saveData();
 		}
 		return ret;
 	}
@@ -117,7 +116,6 @@ public strictfp class Player implements RelaxedSaveable<Player>
 			}
 			
 			last_time=t;
-			data_control.saveData();
 		}
 		return ret;
 	}

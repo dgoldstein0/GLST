@@ -34,7 +34,6 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		current_flying_AI = new TrackingAI(this, 0.0, TrackingAI.IN_RANGE_BEHAVIOR.NO_SLOWDOWN);
 		
 		this.time=time;
-		data_control.saveData();
 	}
 	
 	public Missile(){}
@@ -63,12 +62,7 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 			if (collidedWithTarget())
 			{
 				detonate(missileIteration);
-				data_control.saveData(); //TODO: should this be here?
 				retval = true;
-			}
-			else
-			{
-				data_control.saveData();
 			}
 			
 			time += GalacticStrategyConstants.TIME_GRANULARITY;

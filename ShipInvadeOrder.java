@@ -14,7 +14,7 @@ public strictfp class ShipInvadeOrder extends Order {
 	}
 	
 	@Override
-	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
+	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
 		
 		if(mode == Order.MODE.NETWORK)
 			the_ship = ship_desc.retrieveObject(g, scheduled_time);
@@ -22,19 +22,19 @@ public strictfp class ShipInvadeOrder extends Order {
 		//validate order
 		if(the_ship != null)
 		{
-			the_ship.update(scheduled_time, null); //update by one increment - this will do nothing if we are already past up to date/in need of reversion
 			ShipDataSaver data = (ShipDataSaver)the_ship.data_control.saved_data[the_ship.data_control.getIndexForTime(scheduled_time)];
 			
 			if(the_ship.isAliveAt(scheduled_time) && data.dest instanceof OwnableSatellite<?>
 				&& the_ship.owner.getId() == p_id)
 			{				
 				the_ship.orderToInvade((OwnableSatellite<?>)the_ship.destination,scheduled_time);
+				return true;
 			}
 			else
-				orderDropped();
+				return false;
 		}
 		else
-			orderDropped();
+			return false;
 	}
 
 	public ShipInvadeOrder(){mode=Order.MODE.NETWORK;}

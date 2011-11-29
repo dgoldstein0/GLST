@@ -7,16 +7,12 @@ public strictfp class Mine extends Facility<Mine>{
 		super(loc, i, t, GalacticStrategyConstants.initial_mine_endu);
 		location.number_mines++;
 		data_control = new MineDataSaverControl(this);
-		data_control.saveData();
 		
 		//set time to the next resource change, and save.  Need to align ourselves to the
 		//timing of resource updates, but can't do it via super() call because then our first
 		//record doesn't correspond to the time the Mine was built
 		last_time = TimeControl.roundUpToNextResourceChange(t);
-		data_control.saveData();
 	}
-	
-
 	
 	@Override
 	public void destroyed()
@@ -48,7 +44,6 @@ public strictfp class Mine extends Facility<Mine>{
 			last_time += GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
 		}
 		location.owner.changeMetal(add_met, last_time);
-		data_control.saveData();
 	}
 	
 	public FacilityType getType(){return FacilityType.MINE;}
@@ -58,6 +53,5 @@ public strictfp class Mine extends Facility<Mine>{
 	@Override
 	public void ownerChanged(long t) {
 		last_time = t;
-		data_control.saveData();
 	}
 }

@@ -30,8 +30,10 @@ public strictfp abstract class Order implements Comparable<Order>
 	 * 1) retrieve objects from their describers, if the order came over the network
 	 * 2) check the validity of the order.
 	 * 3) execute the actual Order
+	 * 
+	 * @return true on success; false if the Order could not be executed.
 	 */
-	public abstract void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException;
+	public abstract boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException;
 
 	//remember once an Order is instantiated to ask GameControl to notifyAllPlayers
 	
@@ -85,10 +87,10 @@ public strictfp abstract class Order implements Comparable<Order>
 			return false;
 	}
 	
-	public void orderDropped()
+	@Override
+	public int hashCode()
 	{
-		if(GameUpdater.DEBUGGING)
-			throw new OrderDroppedException();
+		return (int) scheduled_time/20 + order_number*100000 + p_id * 100000000;
 	}
 	
 	/**the following nested class is for debugging purposes only*/

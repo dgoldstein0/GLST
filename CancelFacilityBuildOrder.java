@@ -12,20 +12,23 @@ public strictfp class CancelFacilityBuildOrder extends Order {
 		mode = Order.MODE.ORIGIN;
 	}
 	
-	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
+	@Override
+	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.MODE.NETWORK)
 		{
 			the_sat = sat_desc.retrieveObject(g, scheduled_time);
 		}
 		
-		if(the_sat.owner.getId() == p_id) //verify that the player ordering this is the owner of the planet.
+		//verify that the player ordering this is the owner of the planet.
+		if(the_sat.owner.getId() == p_id)
 		{	
 			//the actual execution of the order.
-			the_sat.cancelConstruction(scheduled_time); //(bldg_type, scheduled_time);
+			the_sat.cancelConstruction(scheduled_time);
+			return true;
 		}
 		else
-			orderDropped();
+			return false;
 	}
 	
 	public CancelFacilityBuildOrder(){mode = Order.MODE.NETWORK;}

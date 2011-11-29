@@ -25,7 +25,6 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 		time_on_current_ship = 0;
 		data_control = new ShipyardDataSaverControl(this);
 		next_queue_id=0;
-		data_control.saveData();
 	}
 	
 	//for saving/loading data
@@ -73,7 +72,6 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 						manufac_queue.put(next_queue_id++,ship);
 					}
 					last_time=t;
-					data_control.saveData();
 					ret=true;
 					
 					SwingUtilities.invokeLater(ObjBuilder.shipManufactureFuncs.getCallback(this));
@@ -108,7 +106,6 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 				}
 			}
 			last_time=t;
-			data_control.saveData();
 			
 			SwingUtilities.invokeLater(new QueueUpdater(this));
 			
@@ -129,7 +126,6 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 		newship.assemble(this, t);
 		
 		last_time=t;
-		data_control.saveData();
 	}
 	
 	public void updateStatus(long t)
@@ -171,6 +167,5 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 	@Override
 	public void ownerChanged(long t) {
 		//do nothing
-		//data_control.saveData();
 	}
 }

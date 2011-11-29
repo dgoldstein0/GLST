@@ -14,7 +14,6 @@ public strictfp class Moon extends OwnableSatellite<Moon>
 		building_limit = OwnableSatelliteType.Moon.building_Num;
 		base_mining_r = OwnableSatelliteType.Moon.mining_rate;
 		current_mining_r = OwnableSatelliteType.Moon.mining_rate;
-		data_control.saveData();
 	}
 	
 	public Moon(){

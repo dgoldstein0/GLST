@@ -63,6 +63,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		last_number_mines=0;
 		number_taxoffices=0;
 	}
+	
 	@Override
 	public void handleDataNotSaved(long t){System.out.println("OwnableSatellite data not saved.  Ridiculous!");}
 	
@@ -111,7 +112,6 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 			last_tax_time += TAX_INTERVAL;
 			updatePop(last_tax_time);
 			tax_money = (long) (TAX_PER_PERSON*((double)population));
-			data_control.saveData();
 		}
 		
 		return tax_money;
@@ -134,7 +134,6 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 				}
 				SwingUtilities.invokeLater(new FacilityAdder(new_fac, GameInterface.GC.GI));
 				bldg_in_progress = FacilityType.NO_BLDG;
-				data_control.saveData();
 			}
 		}
 	}
@@ -214,7 +213,6 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 						owner.changeMoney(-mon, start_time); 
 						
 						time=start_time;
-						data_control.saveData();
 						
 						SwingUtilities.invokeLater(ObjBuilder.facilityManufactureFuncs.getCallback(this));
 						
@@ -245,7 +243,6 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		}
 		
 		bldg_in_progress=FacilityType.NO_BLDG;
-		data_control.saveData();
 	}
 	
 	
@@ -272,7 +269,6 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		//last_tax_time = time;
 		
 		setOwner(p);
-		data_control.saveData();
 		
 		SwingUtilities.invokeLater(new DestDisplayUpdater(this));
 	}

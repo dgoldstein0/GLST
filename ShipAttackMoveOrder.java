@@ -22,7 +22,7 @@ public class ShipAttackMoveOrder extends Order {
 	}
 
 	@Override
-	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
+	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
 		// TODO Auto-generated method stub
 		{
 			if(mode==Order.MODE.NETWORK)
@@ -40,14 +40,14 @@ public class ShipAttackMoveOrder extends Order {
 				System.out.println("\tthe_ship.owner.getId() = " + Integer.toString(the_ship.owner.getId()) + " and player_id = " + Integer.toString(player_id));
 			}*/
 			
-			if(the_ship != null && the_dest != null && the_ship.isAliveAt(scheduled_time) && the_ship.owner.getId() == p_id)
+			if(the_ship != null && the_dest != null && the_ship.isAliveAt(scheduled_time)
+					&& the_ship.owner.getId() == p_id)
 			{
 				the_ship.orderToAttackMove(scheduled_time, the_dest);
+				return true;
 			}
 			else
-			{
-				orderDropped();
-			}
+				return false;
 		}
 	}
 	public ShipAttackMoveOrder(){mode=Order.MODE.NETWORK;}

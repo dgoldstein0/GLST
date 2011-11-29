@@ -23,7 +23,6 @@ public strictfp class Planet extends OwnableSatellite<Planet>
 		
 		orbiting=new ArrayList<Satellite<?>>();
 		facilities=new HashMap<Integer, Facility<?>>();
-		data_control.saveData();
 	}
 	
 	//methods required for load/save

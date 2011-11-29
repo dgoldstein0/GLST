@@ -230,12 +230,10 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	public void addAggressor(Targetter<?> t)
 	{
 		aggressors.add(t);
-		data_control.saveData();
 	}
 	public void removeAggressor(Targetter<?> t)
 	{
 		aggressors.remove(t);
-		data_control.saveData();
 	}
 	
 	@Override
@@ -244,7 +242,6 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 		damage+=d;
 		if(damage>=type.hull)
 			destroyed();
-		data_control.saveData();
 	}
 	
 	public ShipType getType(){return type;}

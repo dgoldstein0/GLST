@@ -14,7 +14,8 @@ public strictfp class ShipPickupTroopsOrder extends Order {
 		the_ship = s;
 	}
 	
-	public void execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
+	@Override
+	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		if(mode==Order.MODE.NETWORK)
 		{
@@ -31,12 +32,16 @@ public strictfp class ShipPickupTroopsOrder extends Order {
 				if(b != null)
 				{					
 					the_ship.orderToPickupTroops(scheduled_time);
+					return true;
 				}
-				else orderDropped();
+				else
+					return false;
 			}
-			else orderDropped();
+			else
+				return false;
 		}
-		else orderDropped();
+		else
+			return false;
 	}
 	
 	public ShipPickupTroopsOrder(){mode=Order.MODE.NETWORK;}

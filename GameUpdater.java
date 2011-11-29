@@ -167,7 +167,7 @@ public class GameUpdater {
 				long revert_to_time = update_to - GalacticStrategyConstants.TIME_GRANULARITY;
 				
 				//revert to data for time grain before the given order is executed.
-				GC.map.revertAllToTime(revert_to_time);
+				GC.map.revertAllToTime(revert_to_time, GC.players);
 				
 				//and now figure out which orders to replay, and queue those
 				//too.
@@ -196,14 +196,7 @@ public class GameUpdater {
 			 * Everything = map data (ships, missiles, facilities, planets,
 			 * etc.) and Player data (money, metal, and ships in transit).
 			 */
-			GC.map.saveAllData();
-			for (Player p : GC.players)
-			{
-				if (p != null)
-				{
-					p.data_control.saveData();
-				}
-			}
+			GC.map.saveAllData(GC.players);
 			
 			/**update all intersystem data.*/
 			for(int i=0; i<GC.players.length; i++)
