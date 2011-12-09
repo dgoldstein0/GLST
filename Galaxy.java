@@ -58,6 +58,8 @@ public strictfp class Galaxy
 	
 	public void revertAllToTime(long t, Player[] players) throws DataSaverControl.DataNotYetSavedException
 	{
+		invalidateAllCaches();
+		
 		for (Player p : players)
 		{
 			if (p != null)
@@ -88,6 +90,27 @@ public strictfp class Galaxy
 			{
 				Missile m = sys.missiles.table.get(id);
 				m.data_control.revertToTime(t);
+			}
+		}
+	}
+	
+	public void invalidateAllCaches()
+	{
+		for (GSystem sys : systems)
+		{
+			for (Fleet f : sys.fleets)
+			{
+				for (Ship.ShipId id : f.ships.keySet())
+				{
+					Ship s = f.ships.get(id);
+					s.invalidateCache();
+				}
+			}
+			
+			for (Missile.MissileId id : sys.missiles.table.keySet())
+			{
+				Missile m = sys.missiles.table.get(id);
+				m.invalidateCache();
 			}
 		}
 	}

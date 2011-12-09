@@ -222,6 +222,11 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 		}
 	}
 	
+	public void invalidateCache()
+	{
+		dest_coords_time = -1;
+	}
+	
 	//for Saveable
 	public FlyerDataSaverControl<T, ? extends FlyerDataSaver<T>> getDataControl(){return data_control;}
 	

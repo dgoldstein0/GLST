@@ -1,4 +1,3 @@
-
 public strictfp class ShipWarpOrder extends Order
 {
 	Ship the_ship;
@@ -31,10 +30,12 @@ public strictfp class ShipWarpOrder extends Order
 				&& the_ship.owner.getId() == p_id)
 		{
 			the_ship.orderToWarp(scheduled_time, the_dest);
+			decision = Decision.ACCEPT;
 			return true;
 		}
 		else
 		{
+			decision = Decision.REJECT;
 			return false;
 		}
 	}

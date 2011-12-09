@@ -242,6 +242,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		}
 	return closestShip;
 	}
+	
 	public double findSqShipDistance(Ship target)
 	{
 		double deltaX=target.getPos_x()-pos_x;
@@ -249,6 +250,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		return MathFormula.SumofSquares(deltaX, deltaY);
 		
 	}
+	
 	public void setupAttack(Targetable<?> tgt){
 		target= tgt;
 		destination = tgt;
@@ -268,8 +270,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			target=null;
 		}
 	}
-	
-	
 	
 	public double findSqDestinationDistance(Destination<?> Dest){
 		double deltaX = Dest.getXCoord(time)-pos_x;

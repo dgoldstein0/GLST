@@ -811,7 +811,18 @@ public strictfp class GameControl
 		if(OS != null)
 		{
 			XMLEncoder2 encoder = new XMLEncoder2(OS);
-			encoder.writeObject(o);
+			encoder.writeObject(new Message(Message.Type.ORDER, o));
+			encoder.finish();
+		}
+	}
+	
+	public void notifyAllPlayersOfDecision(Order o)
+	{
+		//notify other players
+		if(OS != null)
+		{
+			XMLEncoder2 encoder = new XMLEncoder2(OS);
+			encoder.writeObject(new Message(Message.Type.DECISION, o));
 			encoder.finish();
 		}
 	}
@@ -917,21 +928,42 @@ public strictfp class GameControl
 					{
 						ByteArrayInputStream sr = new ByteArrayInputStream(str.toString().getBytes("UTF-8"));
 						XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(sr));
-						Order o =(Order) decoder.readObject(); //TODO: add in leaving message, which will need to be handled differently here
+						Message m =(Message) decoder.readObject(); //TODO: add in leaving message, which will need to be handled differently here
 						decoder.close();
 						
-						System.out.println("\t" + o.getClass().getName());
+						Order o = (Order) m.contents;
 						
-						//atomically queue and log the new order
+						System.out.println("\t" + m.type + " " + m.contents.getClass().getName());
+						
+						//atomically queue and log the new Message
 						synchronized(updater.log_lock)
 						{
-							updater.scheduleOrder(o);
-							
-							//TODO: move debugging code
-							long time = updater.getTime();
-							updater.log(new GameSimulator.SimulateAction(time, o,
-									GameSimulator.SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
-									GameSimulator.SimulateAction.ORDER_TYPE.REMOTE));
+							switch(m.type)
+							{
+								case ORDER:
+								{
+									updater.scheduleOrder(o);
+									
+									//TODO: move debugging code
+									long time = updater.getTime();
+									updater.log(new GameSimulator.SimulateAction(time, o,
+											GameSimulator.SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
+											GameSimulator.SimulateAction.ORDER_TYPE.REMOTE));
+									break;
+								}
+								case DECISION:
+								{
+									updater.decideOrder(o);
+									
+									//TODO: move debugging code
+									//TODO: I think we should log who this came from... oh yeah, only two player at the moment
+									long time = updater.getTime();
+									updater.log(new GameSimulator.SimulateAction(time, o,
+											GameSimulator.SimulateAction.ACTION_TYPE.RECEIVED_DECISION,
+											GameSimulator.SimulateAction.ORDER_TYPE.REMOTE));
+									break;
+								}
+							}
 						}
 					}
 				}

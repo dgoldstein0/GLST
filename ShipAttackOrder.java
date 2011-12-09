@@ -1,4 +1,3 @@
-
 public strictfp class ShipAttackOrder extends Order
 {
 	Ship the_ship;
@@ -60,10 +59,14 @@ public strictfp class ShipAttackOrder extends Order
 				the_ship.targetIsDestroyed(scheduled_time, true, the_target);
 			}
 			
+			decision = Decision.ACCEPT;
 			return true;
 		}
 		else
+		{
+			decision = Decision.REJECT;
 			return false;
+		}
 	}
 	
 	public ShipAttackOrder(){mode=Order.MODE.NETWORK;}

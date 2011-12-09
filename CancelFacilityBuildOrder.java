@@ -25,10 +25,14 @@ public strictfp class CancelFacilityBuildOrder extends Order {
 		{	
 			//the actual execution of the order.
 			the_sat.cancelConstruction(scheduled_time);
+			decision = Decision.ACCEPT;
 			return true;
 		}
 		else
+		{
+			decision = Decision.REJECT;
 			return false;
+		}
 	}
 	
 	public CancelFacilityBuildOrder(){mode = Order.MODE.NETWORK;}

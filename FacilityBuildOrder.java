@@ -26,10 +26,14 @@ public strictfp class FacilityBuildOrder extends Order
 		if(the_sat.data_control.saved_data[the_sat.data_control.getIndexForTime(scheduled_time)].own == GameInterface.GC.players[p_id])
 		{
 			the_sat.scheduleConstruction(bldg_type, scheduled_time);
+			decision = Decision.ACCEPT;
 			return true;
 		}
 		else
+		{
+			decision = Decision.REJECT;
 			return false;
+		}
 	}
 	
 	public FacilityBuildOrder(){mode = Order.MODE.NETWORK;}

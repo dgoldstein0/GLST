@@ -1,4 +1,3 @@
-
 public strictfp class ShipyardCancelBuildOrder extends Order {
 
 	FacilityDescriber<Shipyard> shipyard_describer;
@@ -40,16 +39,14 @@ public strictfp class ShipyardCancelBuildOrder extends Order {
 				if(the_ship != null)
 				{
 					the_yard.removeFromQueue(the_ship, scheduled_time);
+					decision = Decision.ACCEPT;
 					return true;
 				}
-				else
-					return false;
 			}
-			else
-				return false;
 		}
-		else
-			return false;
+		
+		decision = Decision.REJECT;
+		return false;
 	}
 
 	public ShipyardCancelBuildOrder(){mode=Order.MODE.NETWORK;}

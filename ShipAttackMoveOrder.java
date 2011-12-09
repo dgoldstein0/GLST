@@ -1,4 +1,3 @@
-
 public class ShipAttackMoveOrder extends Order {
 
 	Ship the_ship;
@@ -22,8 +21,8 @@ public class ShipAttackMoveOrder extends Order {
 	}
 
 	@Override
-	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
-		// TODO Auto-generated method stub
+	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
+	{
 		{
 			if(mode==Order.MODE.NETWORK)
 			{
@@ -44,10 +43,14 @@ public class ShipAttackMoveOrder extends Order {
 					&& the_ship.owner.getId() == p_id)
 			{
 				the_ship.orderToAttackMove(scheduled_time, the_dest);
+				decision = Decision.ACCEPT;
 				return true;
 			}
 			else
+			{
+				decision = Decision.REJECT;
 				return false;
+			}
 		}
 	}
 	public ShipAttackMoveOrder(){mode=Order.MODE.NETWORK;}

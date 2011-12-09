@@ -1,5 +1,5 @@
-
-public strictfp class ShipInvadeOrder extends Order {
+public strictfp class ShipInvadeOrder extends Order
+{
 
 	Ship the_ship;
 	ShipDescriber ship_desc;
@@ -28,13 +28,20 @@ public strictfp class ShipInvadeOrder extends Order {
 				&& the_ship.owner.getId() == p_id)
 			{				
 				the_ship.orderToInvade((OwnableSatellite<?>)the_ship.destination,scheduled_time);
+				decision = Decision.ACCEPT;
 				return true;
 			}
 			else
+			{
+				decision = Decision.REJECT;
 				return false;
+			}
 		}
 		else
+		{
+			decision = Decision.REJECT;
 			return false;
+		}
 	}
 
 	public ShipInvadeOrder(){mode=Order.MODE.NETWORK;}

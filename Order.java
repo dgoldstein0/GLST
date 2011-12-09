@@ -19,11 +19,15 @@ public strictfp abstract class Order implements Comparable<Order>
 	 */
 	int order_number;
 	
+	enum Decision {UNDECIDED, ACCEPT, REJECT};
+	Decision decision;
+	
 	Order(long time, Player orderer)
 	{
 		scheduled_time = time;
 		p_id = orderer.id;
 		order_number = orderer.getNextOrderNumber();
+		decision = Decision.UNDECIDED;
 	}
 	
 	/**This function must perform the following tasks:
@@ -44,6 +48,8 @@ public strictfp abstract class Order implements Comparable<Order>
 	public int getP_id(){return p_id;}
 	public void setOrder_number(int n){order_number=n;}
 	public int getOrder_number(){return order_number;}
+	public Decision getDecision(){return decision;}
+	public void setDecision(Decision d){decision = d;}
 	
 	@Override
 	public int compareTo(Order o)

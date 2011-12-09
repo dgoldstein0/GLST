@@ -1,4 +1,3 @@
-
 public strictfp class ShipPickupTroopsOrder extends Order {
 
 	Ship the_ship;
@@ -32,16 +31,14 @@ public strictfp class ShipPickupTroopsOrder extends Order {
 				if(b != null)
 				{					
 					the_ship.orderToPickupTroops(scheduled_time);
+					decision = Decision.ACCEPT;
 					return true;
 				}
-				else
-					return false;
 			}
-			else
-				return false;
 		}
-		else
-			return false;
+
+		decision = Decision.REJECT;
+		return false;
 	}
 	
 	public ShipPickupTroopsOrder(){mode=Order.MODE.NETWORK;}

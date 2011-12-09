@@ -9,6 +9,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.HashMap;
 import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import javax.swing.SwingUtilities;
 
@@ -19,7 +21,10 @@ public class GameUpdater {
 	TimeManager TC;
 	final GameControl GC;
 	final PriorityBlockingQueue<Order> pending_execution;
+	final BlockingQueue<Order> incoming_decisions;
+	final HashMap<Order, Order.Decision> decisions;
 	SortedSet<Order> already_executed;
+	SortedSet<Order> ready_to_retire;
 	HashMap<Integer, Long> most_recent_time; //tracking for garbage collection; maps player_id->last order received
 	TaskManager TM;
 	
@@ -33,6 +38,9 @@ public class GameUpdater {
 	{
 		pending_execution = new PriorityBlockingQueue<Order>();
 		already_executed = new TreeSet<Order>();
+		ready_to_retire = new TreeSet<Order>();
+		incoming_decisions = new LinkedBlockingQueue<Order>();
+		decisions = new HashMap<Order, Order.Decision>();
 		TM = new TaskManager();
 		GC = ctrl;
 		last_time_updated = 0l;
@@ -93,6 +101,11 @@ public class GameUpdater {
 	public void scheduleOrder(Order o)
 	{
 		pending_execution.add(o);
+	}
+	
+	public void decideOrder(Order o)
+	{
+		incoming_decisions.add(o);
 	}
 	
 	private class Updater extends TimerTask
@@ -332,7 +345,41 @@ public class GameUpdater {
 			min_order.scheduled_time = minimum;
 			min_order.order_number = 0;
 			min_order.p_id = -1;
-			already_executed.headSet(min_order).clear();
+			SortedSet<Order> will_retire = already_executed.headSet(min_order);
+			ready_to_retire.addAll(will_retire);
+			
+			for (Order o : will_retire)
+			{
+				GC.notifyAllPlayersOfDecision(o);
+			}
+			
+			will_retire.clear();
+		}
+		
+		//Read off the incoming_decisions queue, and put the info into the
+		//almighty decisions HashMap.
+		while (!incoming_decisions.isEmpty())
+		{
+			Order o = incoming_decisions.remove();
+			decisions.put(o, o.decision); //TODO: this only works for the two-player case.  For more players, we need a counting mechanism.
+		}
+		
+		for (Iterator<Order> it = ready_to_retire.iterator(); it.hasNext();)
+		{
+			Order o = it.next();
+			if (decisions.get(o) != null)
+			{
+				//TODO: this only works in the 2 player case
+				if (decisions.get(o) == o.decision)
+				{
+					it.remove();
+					decisions.remove(o);
+				}
+				else
+				{
+					throw new RuntimeException("Disagreement Detected!\n" + o.getClass().getName() + " from player " + o.p_id + ", order_num " + o.order_number + " scheduled at time " + o.scheduled_time);
+				}
+			}
 		}
 		
 		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));

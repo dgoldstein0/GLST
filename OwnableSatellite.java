@@ -10,6 +10,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	
 	/**@GuardedBy facilities*/
 	HashMap<Integer, Facility<?> > facilities;
+	
 	/**@GuardedBy facilities*/
 	Base the_base; //the base is a member of facilities.  As such, it should be governed by facilities_lock.
 	
@@ -76,11 +77,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 				facilities.get(i).updateStatus(time_elapsed);
 		}
 		updateConstruction(time_elapsed);
-		
-	/*	if(owner != null)
-			owner.changeMoney(updatePopAndTax(time_elapsed));
-		else*/
-			updatePop(time_elapsed);
+		updatePop(time_elapsed);
 	}
 	
 	public double calcMiningrate(){
@@ -101,21 +98,6 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		//this computes population based on a logarithmic model
 		population = (long)(initial_pop*pop_capacity/(initial_pop+(pop_capacity-initial_pop)*Math.exp(-pop_growth_rate*((double)t))));
 	}
-	
-	/*private long updatePopAndTax(long t)
-	{
-		//taxes are computed incrementally to prevent rounding inconsistencies
-		tax_money = 0;
-		
-		if(t-last_tax_time >= TAX_INTERVAL) //this will be called every every time grain, since it is now within the loop in UpdateGame, so to have it be a while instead of an if is misleading.
-	/*	{
-			last_tax_time += TAX_INTERVAL;
-			updatePop(last_tax_time);
-			tax_money = (long) (TAX_PER_PERSON*((double)population));
-		}
-		
-		return tax_money;
-	}*/
 	
 	private void updateConstruction(long t)
 	{
