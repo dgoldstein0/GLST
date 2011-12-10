@@ -931,7 +931,7 @@ public strictfp class GameControl
 						Message m =(Message) decoder.readObject(); //TODO: add in leaving message, which will need to be handled differently here
 						decoder.close();
 						
-						Order o = (Order) m.contents;
+						Order o = m.contents;
 						
 						System.out.println("\t" + m.type + " " + m.contents.getClass().getName());
 						
@@ -953,7 +953,7 @@ public strictfp class GameControl
 								}
 								case DECISION:
 								{
-									updater.decideOrder(o);
+									updater.decideOrder(m);
 									
 									//TODO: move debugging code
 									//TODO: I think we should log who this came from... oh yeah, only two player at the moment

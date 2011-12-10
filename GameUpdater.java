@@ -21,7 +21,7 @@ public class GameUpdater {
 	TimeManager TC;
 	final GameControl GC;
 	final PriorityBlockingQueue<Order> pending_execution;
-	final BlockingQueue<Order> incoming_decisions;
+	final BlockingQueue<Message> incoming_decisions;
 	final HashMap<Order, Order.Decision> decisions;
 	SortedSet<Order> already_executed;
 	SortedSet<Order> ready_to_retire;
@@ -39,7 +39,7 @@ public class GameUpdater {
 		pending_execution = new PriorityBlockingQueue<Order>();
 		already_executed = new TreeSet<Order>();
 		ready_to_retire = new TreeSet<Order>();
-		incoming_decisions = new LinkedBlockingQueue<Order>();
+		incoming_decisions = new LinkedBlockingQueue<Message>();
 		decisions = new HashMap<Order, Order.Decision>();
 		TM = new TaskManager();
 		GC = ctrl;
@@ -103,9 +103,9 @@ public class GameUpdater {
 		pending_execution.add(o);
 	}
 	
-	public void decideOrder(Order o)
+	public void decideOrder(Message m)
 	{
-		incoming_decisions.add(o);
+		incoming_decisions.add(m);
 	}
 	
 	private class Updater extends TimerTask
@@ -331,6 +331,19 @@ public class GameUpdater {
 		}
 		
 		//Collect the Trash!
+		
+		//Read off the incoming_decisions queue, and put the info into the
+		//almighty decisions HashMap.
+		while (!incoming_decisions.isEmpty())
+		{
+			Message m = incoming_decisions.remove();
+			Order o = m.contents;
+			decisions.put(o, o.decision); //TODO: this only works for the two-player case.  For more players, we need a counting mechanism.
+
+			if (most_recent_time.get(m.sender_id) < o.scheduled_time)
+				most_recent_time.put(m.sender_id, o.scheduled_time);
+		}
+		
 		{
 			long minimum = Long.MAX_VALUE;
 			for (Integer i : most_recent_time.keySet())
@@ -354,14 +367,6 @@ public class GameUpdater {
 			}
 			
 			will_retire.clear();
-		}
-		
-		//Read off the incoming_decisions queue, and put the info into the
-		//almighty decisions HashMap.
-		while (!incoming_decisions.isEmpty())
-		{
-			Order o = incoming_decisions.remove();
-			decisions.put(o, o.decision); //TODO: this only works for the two-player case.  For more players, we need a counting mechanism.
 		}
 		
 		for (Iterator<Order> it = ready_to_retire.iterator(); it.hasNext();)
