@@ -19,10 +19,10 @@ public strictfp abstract class Order implements Comparable<Order>
 	 */
 	int order_number;
 	
-	enum Decision {UNDECIDED, ACCEPT, REJECT};
+	public static enum Decision {UNDECIDED, ACCEPT, REJECT};
 	Decision decision;
 	
-	Order(long time, Player orderer)
+	public Order(long time, Player orderer)
 	{
 		scheduled_time = time;
 		p_id = orderer.id;
@@ -41,7 +41,7 @@ public strictfp abstract class Order implements Comparable<Order>
 
 	//remember once an Order is instantiated to ask GameControl to notifyAllPlayers
 	
-	Order(){}
+	public Order(){}
 	public long getScheduled_time(){return scheduled_time;}
 	public void setScheduled_time(long t){scheduled_time=t;}
 	public void setP_id(int p){p_id=p;}

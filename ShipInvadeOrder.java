@@ -22,9 +22,7 @@ public strictfp class ShipInvadeOrder extends Order
 		//validate order
 		if(the_ship != null)
 		{
-			ShipDataSaver data = (ShipDataSaver)the_ship.data_control.saved_data[the_ship.data_control.getIndexForTime(scheduled_time)];
-			
-			if(the_ship.isAliveAt(scheduled_time) && data.dest instanceof OwnableSatellite<?>
+			if(the_ship.isAlive() && the_ship.destination instanceof OwnableSatellite<?>
 				&& the_ship.owner.getId() == p_id)
 			{				
 				the_ship.orderToInvade((OwnableSatellite<?>)the_ship.destination,scheduled_time);

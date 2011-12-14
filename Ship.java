@@ -77,7 +77,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			location = (GSystem) ((Planet)builder.location.orbit.boss).orbit.boss;
 		
 		location.fleets[owner.getId()].add(this, t);
-		time = TimeControl.getTimeGrainAfter(t);
+		time = TimeControl.getTimeGrainBefore(t);
 		orderToAttackMove(time, builder.location); //this call does not go via the game Order handling system.  all computers should issue these orders on their own.
 	}
 	
@@ -89,6 +89,10 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		/*this if statement is necessary in case game is updated too slow.  For instance, update last to 60, then
 		an order is given which advances the ship to 80., but the next time all are updated to is 100, we want the
 		ship ordered to move to only be updated once and not twice*/
+		
+		if (time + GalacticStrategyConstants.TIME_GRANULARITY != t)
+			throw new RuntimeException("timing error!");
+		
 		if(time < t)
 		{
 			moveIncrement();
@@ -202,6 +206,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			
 			time += GalacticStrategyConstants.TIME_GRANULARITY;
 		}
+		
 		return false;
 	}
 	
@@ -297,7 +302,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			{
 				//System.out.println("arriving...")
 				disengageWarpDrive(ship_it);
-				time = TimeControl.getTimeGrainAfter(arrival_time);
+				time = TimeControl.getTimeGrainBefore(arrival_time);
 				return true;
 			}
 			else

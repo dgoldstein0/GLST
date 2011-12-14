@@ -9,7 +9,7 @@ public strictfp abstract class FlyerDataSaverControl<T extends Flyer<T, ?, ?>, S
 	{
 		//System.out.println("t is " + Long.toString(t) + " and game time is " + Long.toString(GameInterface.GC.TC.getTime()));
 		
-		int stepback=(int) ((the_obj.getTime()-t)/GalacticStrategyConstants.TIME_GRANULARITY + 1);
+		int stepback=(int) ((saved_data[getPreviousIndex(index)].t-t)/GalacticStrategyConstants.TIME_GRANULARITY + 1);
 		stepback += (t%GalacticStrategyConstants.TIME_GRANULARITY != 0) ? 1 : 0;
 		
 		int indx=-1;
@@ -30,6 +30,10 @@ public strictfp abstract class FlyerDataSaverControl<T extends Flyer<T, ?, ?>, S
 			else
 				indx=index+GalacticStrategyConstants.data_capacity-stepback;			
 		}
+		
+		if (saved_data[indx].t != t)
+			throw new RuntimeException("saved_data[" + indx + "].t is " + saved_data[indx].t + " and t is " + t);
+		
 		return indx;
 	}
 }

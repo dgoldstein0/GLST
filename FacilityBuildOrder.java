@@ -23,7 +23,7 @@ public strictfp class FacilityBuildOrder extends Order
 		}
 		
 		//validate - check if owner is the same as orderer at the time the order should be executed
-		if(the_sat.data_control.saved_data[the_sat.data_control.getIndexForTime(scheduled_time)].own == GameInterface.GC.players[p_id])
+		if(the_sat.owner == GameInterface.GC.players[p_id])
 		{
 			the_sat.scheduleConstruction(bldg_type, scheduled_time);
 			decision = Decision.ACCEPT;

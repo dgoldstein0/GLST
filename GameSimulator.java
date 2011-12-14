@@ -193,6 +193,7 @@ public class GameSimulator {
 				List<String> l2 = sim2.simulate("test5-modified.txt");
 				
 				compareResults(5, l1, l2);
+				
 			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 5");}
 		}
 		
@@ -210,7 +211,6 @@ public class GameSimulator {
 						false, 3
 					);
 				List<String> l1 = sim1.simulate("test6-gold.txt");
-				saveResultsToFile(l1, "test6p1.txt");
 				
 				System.out.println("\tRunning part 2...");
 				
@@ -221,10 +221,67 @@ public class GameSimulator {
 						true, 3
 					);
 				List<String> l2 = sim2.simulate("test6-modified.txt");
-				saveResultsToFile(l2, "test6p2.txt");
 				
 				compareResults(6, l1, l2);
 			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 6");}
+		}
+		
+		{
+			//Test Case 7
+			System.out.println("Running Test 7...");
+			try{
+				
+				System.out.println("\tRunning part 1...");
+				
+				Simulation sim1 = loadSimFromFile("simplemap.xml", 2,
+						new FileInputStream(
+							new File("testcases/test7-singleplayerattackbug.txt")
+						),
+						false, 3
+					);
+				List<String> l1 = sim1.simulate("test7-gold.txt");
+				
+				System.out.println("\tRunning part 2...");
+				
+				Simulation sim2 = loadSimFromFile("simplemap.xml", 2,
+						new FileInputStream(
+							new File("testcases/test7-singleplayerattackbug.txt")
+						),
+						true, 3
+					);
+				List<String> l2 = sim2.simulate("test7-modified.txt");
+				
+				compareResults(7, l1, l2);
+			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 7");}
+		}
+		
+		{
+			//Test Case 8 = first multiplayer test
+			System.out.println("Running Test 8...");
+			try{
+				
+				System.out.println("\tRunning part 1...");
+				
+				Simulation sim1 = loadSimFromFile("simplemap.xml", 2,
+						new FileInputStream(
+							new File("testcases/dualplayercommcrashA.txt")
+						),
+						false, 3
+					);
+				List<String> l1 = sim1.simulate("test8-a.txt");
+				
+				System.out.println("\tRunning part 2...");
+				
+				Simulation sim2 = loadSimFromFile("simplemap.xml", 2,
+						new FileInputStream(
+							new File("testcases/dualplayercommcrashB.txt")
+						),
+						false, 3
+					);
+				List<String> l2 = sim2.simulate("test8-b.txt");
+				
+				compareResults(8, l1, l2);
+			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 8");}
 		}
 	}
 	
@@ -245,9 +302,9 @@ public class GameSimulator {
 			{
 				boolean match = l1.get(i).equals(l2.get(i));
 				if(!match)
-					System.out.println("\tSave point " + i + " does not match");
+					System.out.println("\tSave point " + i + " does not match: " + l1.get(i).substring(0, l1.get(i).indexOf('\n')));
 				else
-					System.out.println("\tSave point " + i + " matches");
+					System.out.println("\tSave point " + i + " matches: " + l2.get(i).substring(0, l2.get(i).indexOf('\n')));
 				identical = identical && match;
 			}
 			
@@ -257,7 +314,7 @@ public class GameSimulator {
 				System.out.println("\ttest FAILED");
 		}
 	}
-
+	
 	public static void saveResultsToFile(List<String> results, String filename)
 	{
 		try {
@@ -300,7 +357,8 @@ public class GameSimulator {
 				SimulateAction action = (SimulateAction)d.readObject();
 				actions.add(action);
 			}
-		}catch(ArrayIndexOutOfBoundsException e){}
+		}
+		catch(ArrayIndexOutOfBoundsException e){}
 		d.close();
 		
 		ArrayList<SimulateAction> new_actions = new ArrayList<SimulateAction>();
@@ -372,8 +430,7 @@ public class GameSimulator {
 						}
 						break;
 					case SCHEDULE_ORDER:
-						//TODO: this is kind of devious.  Shouldn't this go via scheduleOrder()?
-						GC.updater.pending_execution.add(action.the_order);
+						GC.updater.scheduleOrder(action.the_order);
 						break;
 					case SAVE:
 						ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -385,6 +442,9 @@ public class GameSimulator {
 						String output = "Save @" + GC.updater.getTime() +"\n";
 						output += os.toString();
 						results.add(output);
+						break;
+					case RECEIVED_DECISION:
+						GC.updater.decideOrder(new Message(Message.Type.DECISION, action.the_order));
 						break;
 				}
 			}

@@ -12,6 +12,8 @@ import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
+
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 public class GameUpdater {
@@ -189,13 +191,9 @@ public class GameUpdater {
 				temp.p_id = -1;
 				temp.order_number = -1;
 				
-				//TODO: implement a way for old orders in already_executed to
-				//be thrown out - a sort of distributed Garbage collection is
-				//necessary, perhaps based on the distributed state algorithm
-				//for the 3+ player case.
 				SortedSet<Order> orders_to_redo = already_executed.tailSet(temp);
-				already_executed.removeAll(orders_to_redo);
 				local_pending_execution.addAll(orders_to_redo);
+				already_executed.removeAll(orders_to_redo);
 			}
 		}
 		
@@ -203,13 +201,6 @@ public class GameUpdater {
 		for(; update_to <= time_elapsed; update_to+=GalacticStrategyConstants.TIME_GRANULARITY)
 		{
 			setLast_time_updated(update_to);
-			
-			/**
-			 * TODO: Save Everything here!
-			 * Everything = map data (ships, missiles, facilities, planets,
-			 * etc.) and Player data (money, metal, and ships in transit).
-			 */
-			GC.map.saveAllData(GC.players);
 			
 			/**update all intersystem data.*/
 			for(int i=0; i<GC.players.length; i++)
@@ -255,7 +246,7 @@ public class GameUpdater {
 				//update planets/facilities:
 				for(Satellite<?> sat : sys.orbiting)
 				{
-					//TODO: do we really need planet/moon positions in here?
+					//Q: do we really need planet/moon positions in here?
 					//Once we have ships flying around, some planets will need
 					//this calculation anyway.  Without good caching, we might
 					//do the move calculations several times.  So it is
@@ -285,7 +276,8 @@ public class GameUpdater {
 						for(Ship.ShipId j; ship_iteration.hasNext();)
 						{
 							j=ship_iteration.next();
-							sys.fleets[i].ships.get(j).update(update_to, ship_iteration);
+							Ship s = sys.fleets[i].ships.get(j);
+							s.update(update_to, ship_iteration);
 						}
 					}
 				}
@@ -302,7 +294,7 @@ public class GameUpdater {
 				}
 				
 				//collision processing... (FAIL)
-				detectCollisions(sys, update_to, local_pending_execution);
+				detectCollisions(sys, update_to);
 			}
 			
 			Order o;
@@ -316,6 +308,13 @@ public class GameUpdater {
 				already_executed.add(cur_order);
 				most_recent_time.put(cur_order.p_id, cur_order.scheduled_time);
 			}
+			
+			/**
+			 * Save Everything here!
+			 * Everything = map data (ships, missiles, facilities, planets,
+			 * etc.) and Player data (money, metal, and ships in transit).
+			 */
+			GC.map.saveAllData(GC.players);
 		}
 		
 		setLast_time_updated(update_to);
@@ -374,8 +373,10 @@ public class GameUpdater {
 			Order o = it.next();
 			if (decisions.get(o) != null)
 			{
+				Order.Decision d = decisions.get(o);
+				
 				//TODO: this only works in the 2 player case
-				if (decisions.get(o) == o.decision)
+				if (d.equals(o.decision))
 				{
 					it.remove();
 					decisions.remove(o);
@@ -390,7 +391,7 @@ public class GameUpdater {
 		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));
 	}
 	
-	private void detectCollisions(GSystem sys, long t, PriorityQueue<Order> local_pending_execution) throws DataSaverControl.DataNotYetSavedException
+	private void detectCollisions(GSystem sys, long t) throws DataSaverControl.DataNotYetSavedException
 	{
 		for(int i=0; i<sys.fleets.length; i++)
 		{
@@ -426,11 +427,11 @@ public class GameUpdater {
 	
 	public void doCollision(Ship a, Ship b, long t) throws DataSaverControl.DataNotYetSavedException
 	{
-		double x_a = a.getXCoord(t);
-		double y_a = a.getYCoord(t);
+		double x_a = a.pos_x;
+		double y_a = a.pos_y;
 		
-		double x_b = b.getXCoord(t);
-		double y_b = b.getYCoord(t);
+		double x_b = b.pos_x;
+		double y_b = b.pos_y;
 		
 		double dif_x = x_a - x_b;
 		double dif_y = y_a - y_b;
@@ -445,15 +446,15 @@ public class GameUpdater {
 			//do collision
 			
 			//velocity a -= 2*projection onto dif
-			double v_x_a = a.getXVel(t);
-			double v_y_a = a.getYVel(t);
+			double v_x_a = a.speed*Math.cos(a.direction);
+			double v_y_a = a.speed*Math.sin(a.direction);
 			
 			double proj_frac_a;
 			proj_frac_a = (v_x_a*dif_x + v_y_a*dif_y)/len_sq_dif;
 			
 			//velocity b += 2*projection onto dif
-			double v_x_b = b.getXVel(t);
-			double v_y_b = b.getYVel(t);
+			double v_x_b = b.speed*Math.cos(b.direction);
+			double v_y_b = b.speed*Math.sin(b.direction);
 			
 			double proj_frac_b;
 			proj_frac_b = (v_x_b*dif_x + v_y_b*dif_y)/len_sq_dif;
@@ -499,7 +500,10 @@ public class GameUpdater {
 			if(!is_closing)
 			{
 				if(logFile == null)
-					setupLogFile("log.txt");
+				{
+					String logname = JOptionPane.showInputDialog("What should the log file be named?");
+					setupLogFile(logname);
+				}
 				
 				if(o != null)
 				{

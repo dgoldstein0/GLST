@@ -57,7 +57,7 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	public boolean isAlive(){return is_alive;}
 	public boolean isAliveAt(long t) throws DataSaverControl.DataNotYetSavedException
 	{
-		if(t == time + GalacticStrategyConstants.TIME_GRANULARITY)
+		if(t == time)
 			return isAlive();
 		else
 		{

@@ -31,10 +31,10 @@ public strictfp class ShipAttackOrder extends Order
 		}
 		
 		//if we couldn't find the ship, the target, or the ship is not alive at scheduled time, order is moot
-		if(the_ship != null && the_ship.isAliveAt(scheduled_time) && the_target != null)
+		if(the_ship != null && the_ship.isAlive() && the_target != null)
 		{
 			//check if the target is alive at scheduled time.  if not, then target was destroyed (assuming you can't order attacks on dead ships, in which case the target never should have been targeted, but we'll ignore that possibility)
-			if(the_target.isAliveAt(scheduled_time))
+			if(the_target.isAlive())
 			{
 				if(!(the_target instanceof Ship))
 				{
@@ -42,9 +42,7 @@ public strictfp class ShipAttackOrder extends Order
 				}
 				else
 				{
-					ShipDataSaverControl ctrl = (ShipDataSaverControl)((Ship)the_target).data_control;
-					
-					if(ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].loc == the_ship.location)
+					if(((Ship)the_target).location == the_ship.location)
 					{
 						the_ship.orderToAttack(scheduled_time, the_target);
 					}
