@@ -400,12 +400,18 @@ public strictfp class GameControl
 			for(GSystem sys : map.systems)
 				sys.setUpForGame(this);
 			
-			//start the player in assigned location
-			OwnableSatellite<?> p = map.start_locations.get(player_id);
-			p.setOwner(players[player_id]);
-			Base b = new Base(p, p.next_facility_id++, (long)0);
-			p.facilities.put(b.id,b);
-			p.the_base = b;
+			//start all players in assigned locations
+			for (int i = 0; i < players.length; i++)
+			{
+				if (players[i] != null)
+				{
+					OwnableSatellite<?> sat = map.start_locations.get(i);
+					sat.setOwner(players[i]);
+					Base b = new Base(sat, sat.next_facility_id++, (long)0);
+					sat.facilities.put(b.id,b);
+					sat.the_base = b;
+				}
+			}
 			
 			map.saveOwnablesData();
 			
@@ -810,9 +816,12 @@ public strictfp class GameControl
 		//notify other players
 		if(OS != null)
 		{
-			XMLEncoder2 encoder = new XMLEncoder2(OS);
-			encoder.writeObject(new Message(Message.Type.ORDER, o));
-			encoder.finish();
+			synchronized(OS) //Synchronize to prevent race conditions on writing to the socket
+			{
+				XMLEncoder2 encoder = new XMLEncoder2(OS);
+				encoder.writeObject(new Message(Message.Type.ORDER, o));
+				encoder.finish();
+			}
 		}
 	}
 	
@@ -821,9 +830,12 @@ public strictfp class GameControl
 		//notify other players
 		if(OS != null)
 		{
-			XMLEncoder2 encoder = new XMLEncoder2(OS);
-			encoder.writeObject(new Message(Message.Type.DECISION, o));
-			encoder.finish();
+			synchronized(OS) //Synchronize to prevent race conditions on writing to the socket
+			{
+				XMLEncoder2 encoder = new XMLEncoder2(OS);
+				encoder.writeObject(new Message(Message.Type.DECISION, o));
+				encoder.finish();
+			}
 		}
 	}
 	
@@ -926,6 +938,7 @@ public strictfp class GameControl
 					
 					if(connected)
 					{
+						System.out.println(str);
 						ByteArrayInputStream sr = new ByteArrayInputStream(str.toString().getBytes("UTF-8"));
 						XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(sr));
 						Message m =(Message) decoder.readObject(); //TODO: add in leaving message, which will need to be handled differently here

@@ -590,7 +590,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	public void destroyed()
 	{
-		boolean refresh = owner.getId()==GameInterface.GC.player_id;
 		//System.out.println("destroyed-before");	
 		if(location.fleets[owner.getId()].remove(this, time))//if is so in case another attack has already destroyed the ship, but both call the destroyed method
 		{
@@ -605,7 +604,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			
 			//notify interface
 			SwingUtilities.invokeLater(new ShipDeselector(this));
-			if(refresh){GameInterface.GC.GI.refreshShipPanel();}
 		
 			//System.out.println("destroyed-after");
 		}
@@ -633,7 +631,14 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		if (destination==(Destination<?>)target && (mode==MODES.ATTACKING||mode==MODES.USERATTACKING))
 		{
 			//System.out.println("\tchanging destination...");
-			destination=new DestinationPoint(target.getXCoord(t),target.getYCoord(t));
+			//Need to look backwards a time grain because otherwise we will get DataNotYetSavedException
+			//since missile detonation code runs before saveAllData().
+			//It is possible that we could write functions to get the lastest position that would be safe,
+			//but at the moment they don't exist.
+			destination=new DestinationPoint(
+							target.getXCoord(t - GalacticStrategyConstants.TIME_GRANULARITY),
+							target.getYCoord(t - GalacticStrategyConstants.TIME_GRANULARITY)
+						);
 			SwingUtilities.invokeLater(new DestUpdater(this));
 		}
 		

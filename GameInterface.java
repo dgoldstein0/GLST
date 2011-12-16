@@ -418,9 +418,12 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	}
 	
 	public void refreshShipPanel(){
-		displayShipPanel((Ship) selected_in_sys.get(0),selected_in_sys);
-		
+		if (selected_in_sys.size() == 0)
+			displayNoPanel();
+		else
+			displayShipPanel((Ship) selected_in_sys.get(0),selected_in_sys);
 	}
+	
 	public void displayShipPanel(Ship s,List<Selectable> selected_in_sys)
 	{
 		if(sat_or_ship_disp != PANEL_DISP.SHIP_PANEL)

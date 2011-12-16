@@ -10,7 +10,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**GameSimulator
  * This class is meant to simulate games, for testing purposes.  It will be tightly
@@ -174,21 +176,21 @@ public class GameSimulator {
 				
 				System.out.println("\tRunning part 1...");
 				
-				Simulation sim1 = loadSimFromFile("simplemap.xml", 2,
+				Simulation sim1 = loadSimFromFile("simplemap.xml", 1,
 						new FileInputStream(
 							new File("testcases/singleplayerbuildafewthings.txt")
 						),
-						false, 10
+						false, 10, null
 					);
 				List<String> l1 = sim1.simulate("test5-gold.txt");
 				
 				System.out.println("\tRunning part 2...");
 				
-				Simulation sim2 = loadSimFromFile("simplemap.xml", 2,
+				Simulation sim2 = loadSimFromFile("simplemap.xml", 1,
 						new FileInputStream(
 							new File("testcases/singleplayerbuildafewthings.txt")
 						),
-						true, 10
+						true, 10, null
 					);
 				List<String> l2 = sim2.simulate("test5-modified.txt");
 				
@@ -204,21 +206,21 @@ public class GameSimulator {
 				
 				System.out.println("\tRunning part 1...");
 				
-				Simulation sim1 = loadSimFromFile("simplemap.xml", 2,
+				Simulation sim1 = loadSimFromFile("simplemap.xml", 1,
 						new FileInputStream(
 							new File("testcases/singleplayercrash.txt")
 						),
-						false, 3
+						false, 3, null
 					);
 				List<String> l1 = sim1.simulate("test6-gold.txt");
 				
 				System.out.println("\tRunning part 2...");
 				
-				Simulation sim2 = loadSimFromFile("simplemap.xml", 2,
+				Simulation sim2 = loadSimFromFile("simplemap.xml", 1,
 						new FileInputStream(
 							new File("testcases/singleplayercrash.txt")
 						),
-						true, 3
+						true, 3, null
 					);
 				List<String> l2 = sim2.simulate("test6-modified.txt");
 				
@@ -233,21 +235,21 @@ public class GameSimulator {
 				
 				System.out.println("\tRunning part 1...");
 				
-				Simulation sim1 = loadSimFromFile("simplemap.xml", 2,
+				Simulation sim1 = loadSimFromFile("simplemap.xml", 1,
 						new FileInputStream(
 							new File("testcases/test7-singleplayerattackbug.txt")
 						),
-						false, 3
+						false, 3, null
 					);
 				List<String> l1 = sim1.simulate("test7-gold.txt");
 				
 				System.out.println("\tRunning part 2...");
 				
-				Simulation sim2 = loadSimFromFile("simplemap.xml", 2,
+				Simulation sim2 = loadSimFromFile("simplemap.xml", 1,
 						new FileInputStream(
 							new File("testcases/test7-singleplayerattackbug.txt")
 						),
-						true, 3
+						true, 3, null
 					);
 				List<String> l2 = sim2.simulate("test7-modified.txt");
 				
@@ -257,31 +259,37 @@ public class GameSimulator {
 		
 		{
 			//Test Case 8 = first multiplayer test
-			System.out.println("Running Test 8...");
+			/*System.out.println("Running Test 8...");
 			try{
-				
-				System.out.println("\tRunning part 1...");
-				
 				Simulation sim1 = loadSimFromFile("simplemap.xml", 2,
 						new FileInputStream(
 							new File("testcases/dualplayercommcrashA.txt")
 						),
-						false, 3
+						false, 30, 165047l
 					);
-				List<String> l1 = sim1.simulate("test8-a.txt");
-				
-				System.out.println("\tRunning part 2...");
+
 				
 				Simulation sim2 = loadSimFromFile("simplemap.xml", 2,
 						new FileInputStream(
 							new File("testcases/dualplayercommcrashB.txt")
 						),
-						false, 3
+						false, 30, 165047l
 					);
+				
+				System.out.println("Test 8 has same orders: " + hasSameOrders(sim1, sim2));
+				correctOrders(sim1, sim2, 165048l);
+				
+				System.out.println("\tRunning part 1...");
+				List<String> l1 = sim1.simulate("test8-a.txt");
+				
+				System.out.println("\tRunning part 2...");
 				List<String> l2 = sim2.simulate("test8-b.txt");
 				
 				compareResults(8, l1, l2);
-			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 8");}
+				
+				saveResultsToFile(l1, "test8p1.txt");
+				saveResultsToFile(l2, "test8p2.txt");
+			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 8");}*/
 		}
 	}
 	
@@ -315,6 +323,95 @@ public class GameSimulator {
 		}
 	}
 	
+	public static boolean hasSameOrders(Simulation sim1, Simulation sim2)
+	{
+		Set<Order> o1 = new HashSet<Order>();
+		Set<Order> o2 = new HashSet<Order>();
+		
+		for (SimulateAction action : sim1.actions)
+		{
+			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER)
+			{
+				o1.add(action.the_order);
+			}
+		}
+		
+		for (SimulateAction action : sim2.actions)
+		{
+			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER)
+			{
+				o2.add(action.the_order);
+			}
+		}
+		
+		for (Order o : o1)
+		{
+			if (!o2.contains(o))
+				System.out.println("\tsim2 is missing " + o.getClass().getName() + " from player " + o.p_id + " order_number " + o.order_number + " at time " + o.scheduled_time);
+		}
+		
+		for (Order o : o2)
+		{
+			if (!o1.contains(o))
+				System.out.println("\tsim1 is missing " + o.getClass().getName() + " from player " + o.p_id + " order_number " + o.order_number + " at time " + o.scheduled_time);
+		}
+		
+		return o1.containsAll(o2) && o2.containsAll(o1);
+	}
+	
+	public static void correctOrders(Simulation sim1, Simulation sim2, long end_time)
+	{
+		Set<Order> o1 = new HashSet<Order>();
+		Set<Order> o2 = new HashSet<Order>();
+		
+		for (SimulateAction action : sim1.actions)
+		{
+			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER)
+			{
+				o1.add(action.the_order);
+			}
+		}
+		
+		for (SimulateAction action : sim2.actions)
+		{
+			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER)
+			{
+				o2.add(action.the_order);
+			}
+		}
+		
+		for (Order o : o1)
+		{
+			if (!o2.contains(o))
+				sim2.actions.add(
+					new SimulateAction(
+							end_time,
+							o,
+							SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
+							SimulateAction.ORDER_TYPE.NONE_SPECIFIED
+						)
+					);
+		}
+		
+		for (Order o : o2)
+		{
+			if (!o1.contains(o))
+				sim1.actions.add(
+						new SimulateAction(
+								end_time,
+								o,
+								SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
+								SimulateAction.ORDER_TYPE.NONE_SPECIFIED
+							)
+						);
+		}
+		
+		sim1.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.UPDATE));
+		sim1.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.SAVE));
+		sim2.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.UPDATE));
+		sim2.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.SAVE));
+	}
+	
 	public static void saveResultsToFile(List<String> results, String filename)
 	{
 		try {
@@ -338,7 +435,9 @@ public class GameSimulator {
 	 * @param remove_updates false to use the updates found in the file,
 	 * 		true to throw them away and only use extra updates.
 	 * @param num_updates_and_saves the number of updates/saves in the simulation,
-	 * 		occurring at increments of the end time divided by num_updates_and_saves.
+	 * 		occurring at increments of the end_time divided by num_updates_and_saves.
+	 * @param end_time the time at which the simulation should end.  If this is null,
+	 * 		the simulation ends right after the last entry in the given file.
 	 * 
 	 * @return a Simulation with the desired sequence of events.
 	 */
@@ -346,7 +445,8 @@ public class GameSimulator {
 											 int num_players,
 											 InputStream file,
 											 boolean remove_updates,
-											 int num_updates_and_saves)
+											 int num_updates_and_saves,
+											 Long end_time)
 	{
 		List<SimulateAction> actions = new ArrayList<SimulateAction>();
 		XMLDecoder d = new XMLDecoder(file);
@@ -382,12 +482,15 @@ public class GameSimulator {
 			actions = new_actions;
 		}
 		
+		if (end_time == null)
+			end_time = last.do_at_time;
+		
 		for(int i=1; i <= num_updates_and_saves; i++)
 		{
-			SimulateAction update = new SimulateAction(last.do_at_time*i/num_updates_and_saves,
+			SimulateAction update = new SimulateAction(end_time*i/num_updates_and_saves,
 													   SimulateAction.ACTION_TYPE.UPDATE);
 			actions.add(update);
-			actions.add(new SimulateAction(last.do_at_time*i/num_updates_and_saves,
+			actions.add(new SimulateAction(end_time*i/num_updates_and_saves,
 										   SimulateAction.ACTION_TYPE.SAVE));
 		}
 		Collections.sort(actions, new SimulateAction.Comparer());

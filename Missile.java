@@ -129,7 +129,12 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 	@Override
 	public void targetIsDestroyed(long t)
 	{
-		destination = new DestinationPoint(target.getXCoord(t), target.getYCoord(t));
+		//also see Ship's targetIsDestroyed function.
+		//Need to subtract a time grain to make sure we don't get any DataNotYetSavedExceptions.
+		destination = new DestinationPoint(
+						target.getXCoord(t - GalacticStrategyConstants.TIME_GRANULARITY),
+						target.getYCoord(t - GalacticStrategyConstants.TIME_GRANULARITY)
+					);
 		target_alive = false;
 		target = null;
 	}
@@ -143,7 +148,7 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 	public boolean getTarget_alive(){return target_alive;}
 	public void setTarget_alive(boolean b){target_alive=b;}
 	
-	public static class MissileId extends Flyer.FlyerId<MissileId>
+	public static class MissileId extends Flyer.FlyerId<MissileId> implements Comparable<MissileId>
 	{
 		private Ship shooter;
 		private int m_id;
@@ -178,5 +183,20 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		public int getM_id() {return m_id;}
 		public void setShooter(Ship shooter) {this.shooter = shooter;}
 		public Ship getShooter() {return shooter;}
+
+		@Override
+		public int compareTo(MissileId o) {
+			
+			int shooter_comp = shooter.id.compareTo(o.shooter.id);
+			if (shooter_comp != 0)
+				return shooter_comp;
+			
+			if (m_id < o.m_id)
+				return -1;
+			else if (m_id > o.m_id)
+				return 1;
+			else
+				return 0;
+		}
 	}
 }
