@@ -420,7 +420,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	public void refreshShipPanel(){
 		if (selected_in_sys.size() == 0)
 			displayNoPanel();
-		else
+		else if (selected_in_sys.get(0) instanceof Ship)
 			displayShipPanel((Ship) selected_in_sys.get(0),selected_in_sys);
 	}
 	
