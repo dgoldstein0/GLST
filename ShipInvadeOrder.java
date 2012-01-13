@@ -16,8 +16,7 @@ public strictfp class ShipInvadeOrder extends Order
 	@Override
 	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
 		
-		if(mode == Order.MODE.NETWORK)
-			the_ship = ship_desc.retrieveObject(g, scheduled_time);
+		the_ship = ship_desc.retrieveObject(g, scheduled_time);
 		
 		//validate order
 		if(the_ship != null)
