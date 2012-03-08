@@ -161,7 +161,8 @@ public strictfp class GSystem implements Orbitable<GSystem>
 				if (owner != null)
 					player_claims[owner.getId()]++;
 				
-				recalculateSatelliteClaims(o.orbiting);
+				if (o.orbiting != null)
+					recalculateSatelliteClaims(o.orbiting);
 			}
 		}
 	}
