@@ -259,25 +259,27 @@ public class GameSimulator {
 		
 		{
 			//Test Case 8 = first multiplayer test
-			/*System.out.println("Running Test 8...");
+			System.out.println("Running Test 8...");
 			try{
+				//actual end time is 281180
+				
 				Simulation sim1 = loadSimFromFile("simplemap.xml", 2,
 						new FileInputStream(
-							new File("testcases/dualplayercommcrashA.txt")
+							new File("testcases/test8-host.txt")
 						),
-						false, 30, 165047l
+						false, 600, 120000l
 					);
 
 				
 				Simulation sim2 = loadSimFromFile("simplemap.xml", 2,
 						new FileInputStream(
-							new File("testcases/dualplayercommcrashB.txt")
+							new File("testcases/test8-guest.txt")
 						),
-						false, 30, 165047l
+						false, 600, 120000l
 					);
 				
 				System.out.println("Test 8 has same orders: " + hasSameOrders(sim1, sim2));
-				correctOrders(sim1, sim2, 165048l);
+				//correctOrders(sim1, sim2, 281180l);
 				
 				System.out.println("\tRunning part 1...");
 				List<String> l1 = sim1.simulate("test8-a.txt");
@@ -289,7 +291,7 @@ public class GameSimulator {
 				
 				saveResultsToFile(l1, "test8p1.txt");
 				saveResultsToFile(l2, "test8p2.txt");
-			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 8");}*/
+			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 8");}
 		}
 	}
 	
@@ -332,7 +334,9 @@ public class GameSimulator {
 		{
 			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER)
 			{
-				o1.add(action.the_order);
+				boolean retval = o1.add(action.the_order);
+				if (!retval)
+					throw new RuntimeException("sim1 has a duplicate order!");
 			}
 		}
 		
@@ -340,7 +344,9 @@ public class GameSimulator {
 		{
 			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER)
 			{
-				o2.add(action.the_order);
+				boolean retval = o2.add(action.the_order);
+				if (!retval)
+					throw new RuntimeException("sim2 has a duplicate order!");
 			}
 		}
 		
@@ -359,6 +365,14 @@ public class GameSimulator {
 		return o1.containsAll(o2) && o2.containsAll(o1);
 	}
 	
+	/**
+	 * If this function has to do anything, it will stick extra orders at end_time.
+	 * This almost always means trouble.
+	 * 
+	 * @param sim1 the first simulation (game from p1's perspective)
+	 * @param sim2 the second simulation (game from p2's perspective)
+	 * @param end_time the end time of the game
+	 */
 	public static void correctOrders(Simulation sim1, Simulation sim2, long end_time)
 	{
 		Set<Order> o1 = new HashSet<Order>();
@@ -468,6 +482,14 @@ public class GameSimulator {
 		for (int i=0; i < actions.size(); i++)
 		{
 			SimulateAction action = actions.get(i);
+			
+			//destroy anything happening after end_time.
+			if (end_time != null && action.do_at_time > end_time)
+			{
+				actions.remove(i);
+				i--;
+				continue;
+			}
 			
 			if (action.type.equals(SimulateAction.ACTION_TYPE.UPDATE))
 			{

@@ -18,11 +18,16 @@ public strictfp class FacilityBuildOrder extends Order
 	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
 		the_sat = sat_desc.retrieveObject(g, scheduled_time);
+		boolean is_building = false;
 		
 		//validate - check if owner is the same as orderer at the time the order should be executed
 		if(the_sat.owner == GameInterface.GC.players[p_id])
 		{
-			the_sat.scheduleConstruction(bldg_type, scheduled_time);
+			is_building = the_sat.scheduleConstruction(bldg_type, scheduled_time);
+		}
+		
+		if (is_building)
+		{
 			decision = Decision.ACCEPT;
 			return true;
 		}

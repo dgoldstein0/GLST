@@ -664,7 +664,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		
 		public void run()
 		{
-			if(GameInterface.GC.GI.ShipPanel.the_ship == the_ship)
+			if(GameInterface.GC.GI != null && GameInterface.GC.GI.ShipPanel.the_ship == the_ship)
 			{
 				GameInterface.GC.GI.ShipPanel.updateDestDisplay(the_ship.destination);
 			}

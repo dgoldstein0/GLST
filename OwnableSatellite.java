@@ -101,7 +101,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	
 	private void updateConstruction(long t)
 	{
-		if(bldg_in_progress != FacilityType.NO_BLDG)
+		if (bldg_in_progress != FacilityType.NO_BLDG)
 		{
 			if(t >= time_finish) //if build is finished...
 			{
@@ -155,7 +155,10 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	
 	/**@return true if the building could be built right now, false otherwise.
 	 * this will return the same value as scheduleConstruction, but is meant
-	 * to be called by GUI code to check if an order makes sense before scheduling it.*/
+	 * to be called by GUI code to check if an order makes sense before scheduling it.
+	 * Calling this function doesn't guarantee that the metal/money will be there
+	 * when you try to build instead of just checking if you can.
+	 */
 	public boolean canBuild(FacilityType bldg_type)
 	{
 		int met = bldg_type.metal_cost, mon=bldg_type.money_cost; //metal and money costs
