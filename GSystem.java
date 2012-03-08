@@ -32,7 +32,8 @@ public strictfp class GSystem implements Orbitable<GSystem>
 	int width;
 	int height;
 	
-	//only used in the designer for multi-system drags
+	//only used in the designer for multi-system drags.
+	//Probably don't belong here...
 	int x_adj;
 	int y_adj;
 	
@@ -110,6 +111,61 @@ public strictfp class GSystem implements Orbitable<GSystem>
 		}
 	}
 	
+	public void recalculateClaims()
+	{
+		for (int i=0; i < player_claims.length; i++)
+		{
+			player_claims[i] = 0;
+			if (fleets[i] != null)
+				player_claims[i] += fleets[i].getShips().size();
+		}
+		
+		recalculateSatelliteClaims(orbiting);
+		
+		int claimers = 0;
+		int last_claimer = -2;
+		for (int i=0; i < player_claims.length; i++)
+		{
+			if (player_claims[i] > 0)
+			{
+				last_claimer = i;
+				claimers++;
+			}
+		}
+		
+		if (claimers <= 1)
+			owner_id = last_claimer;
+		else
+			owner_id = OWNER_CONFLICTED;
+	}
+	
+	/**
+	 * recalculateSatelliteClaims
+	 * 
+	 * This is meant solely as a helper function for recalculateClaims().  It
+	 * works by recursively calling itself on the sets of objects orbiting
+	 * the objects in the given list.
+	 * 
+	 * @param sats an ArrayList of orbiting satellites.  This can be the set of
+	 * 		the major satellites in the system, or a set of sub-satellites (Moons),
+	 * 		or anything else.
+	 */
+	private void recalculateSatelliteClaims(ArrayList<Satellite<?>> sats)
+	{
+		for (Satellite<?> s : sats)
+		{
+			if (s instanceof OwnableSatellite<?>)
+			{
+				OwnableSatellite<?> o = (OwnableSatellite<?>)s;
+				Player owner = o.getOwner();
+				if (owner != null)
+					player_claims[owner.getId()]++;
+				
+				recalculateSatelliteClaims(o.orbiting);
+			}
+		}
+	}
+	
 	public double massSum()
 	{
 		double sum=0;
@@ -120,6 +176,21 @@ public strictfp class GSystem implements Orbitable<GSystem>
 		return sum;
 	}
 	
+	/**
+	 * currentColor
+	 * 
+	 * This function picks the color that the system should appears as in the
+	 * Galaxy view.  It handles conflicts by switching the colors round-robin,
+	 * and will color unowned systems white.
+	 * 
+	 * Note that the last_color and time_last_color_valid_until exist for this
+	 * function and essentially form a cache.  This "cache" is only used for
+	 * display, so stale data in it is unimportant.
+	 * 
+	 * @param time the current time.  Used to change the color as a function
+	 * 		of time.
+	 * @return the color to use.
+	 */
 	public Color currentColor(long time)
 	{
 		if(time <= time_last_color_valid_until)
@@ -128,7 +199,9 @@ public strictfp class GSystem implements Orbitable<GSystem>
 		}
 		else
 		{
+			//TODO: should 500 be in our constants file?
 			time_last_color_valid_until = time+500;
+			
 			switch(owner_id)
 			{
 				case NO_OWNER:
@@ -137,7 +210,7 @@ public strictfp class GSystem implements Orbitable<GSystem>
 					
 					do {
 						current_player_id = (current_player_id+1) % player_claims.length;
-					} while(player_claims[current_player_id] == 0);
+					} while (player_claims[current_player_id] == 0);
 					
 					return last_color = GameInterface.GC.players[current_player_id].getColor();
 	

@@ -91,6 +91,8 @@ public strictfp class Galaxy
 				Missile m = sys.missiles.table.get(id);
 				m.data_control.revertToTime(t);
 			}
+			
+			sys.recalculateClaims();
 		}
 	}
 	
