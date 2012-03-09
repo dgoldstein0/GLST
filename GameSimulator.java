@@ -261,13 +261,14 @@ public class GameSimulator {
 			//Test Case 8 = first multiplayer test
 			System.out.println("Running Test 8...");
 			try{
-				//actual end time is 281180
+				//actual end time is 281180.  Need protocol replacement to
+				//make the full length pass, however.
 				
 				Simulation sim1 = loadSimFromFile("simplemap.xml", 2,
 						new FileInputStream(
 							new File("testcases/test8-host.txt")
 						),
-						false, 600, 120000l
+						false, 100, 250000l
 					);
 
 				
@@ -275,7 +276,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/test8-guest.txt")
 						),
-						false, 600, 120000l
+						false, 100, 250000l
 					);
 				
 				System.out.println("Test 8 has same orders: " + hasSameOrders(sim1, sim2));

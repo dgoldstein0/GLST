@@ -1,6 +1,7 @@
 
 public strictfp class Mine extends Facility<Mine>{
 	
+	long last_resource_time;
 	
 	public Mine(OwnableSatellite<?> loc, int i, long t)
 	{
@@ -11,7 +12,7 @@ public strictfp class Mine extends Facility<Mine>{
 		//set time to the next resource change, and save.  Need to align ourselves to the
 		//timing of resource updates, but can't do it via super() call because then our first
 		//record doesn't correspond to the time the Mine was built
-		last_time = TimeControl.roundUpToNextResourceChange(t);
+		last_resource_time = TimeControl.roundUpToNextResourceChange(t);
 	}
 	
 	@Override
@@ -38,12 +39,13 @@ public strictfp class Mine extends Facility<Mine>{
 	public void updateStatus(long t)
 	{
 		long add_met=0;
-		if(t-last_time >= GalacticStrategyConstants.TIME_BETWEEN_RESOURCES && location.owner != null) //do nothing unless the location has an owner
+		if(t-last_resource_time >= GalacticStrategyConstants.TIME_BETWEEN_RESOURCES && location.owner != null) //do nothing unless the location has an owner
 		{
 			add_met += location.calcMiningrate()*GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
-			last_time += GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
+			last_resource_time += GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
 		}
-		location.owner.changeMetal(add_met, last_time);
+		location.owner.changeMetal(add_met, last_resource_time);
+		last_time = t;
 	}
 	
 	public FacilityType getType(){return FacilityType.MINE;}
@@ -52,6 +54,9 @@ public strictfp class Mine extends Facility<Mine>{
 
 	@Override
 	public void ownerChanged(long t) {
-		last_time = t;
+		last_resource_time = TimeControl.roundUpToNextResourceChange(t);
 	}
+	
+	public long getLast_resource_time(){return last_resource_time;}
+	public void setLast_resource_time(long l){last_resource_time=l;}
 }
