@@ -259,6 +259,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	
 		//set up game control
 		GC = new GameControl(this);
+		Runtime.getRuntime().addShutdownHook(new ShutdownThread(GC));
 		
 		system_state = SYS_NORMAL;
 		galaxy_state = GALAXY_STATE.NORMAL;

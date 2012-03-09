@@ -1020,7 +1020,7 @@ public strictfp class GameControl
 		}
 		if(readThread != null)
 		{
-			//BOOKMARK!  send leaving game message
+			//TODO: send leaving game message
 			readThread.interrupt();
 		}
 		if(startThread != null)
