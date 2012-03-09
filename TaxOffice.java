@@ -3,6 +3,7 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 	
 	long add_money;
 	double tax_rate;
+	long last_resource_time;
 	
 	public TaxOffice(OwnableSatellite<?> loc, int i, long t)
 	{
@@ -14,7 +15,7 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 		//set time to the next resource change, and save.  Need to align ourselves to the
 		//timing of resource updates, but can't do it via super() call because then our first
 		//record doesn't correspond to the time the TaxOffice was built
-		last_time = TimeControl.roundUpToNextResourceChange(t);
+		last_resource_time = TimeControl.roundUpToNextResourceChange(t);
 	}
 	
 	public double calcTaxingrate(){
@@ -55,6 +56,7 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 	@Override
 	public void ownerChanged(long t) {
 		last_time = t;
+		last_resource_time = TimeControl.roundUpToNextResourceChange(t);
 	}
 
 	@Override
@@ -62,12 +64,13 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 		tax_rate = calcTaxingrate();
 		add_money=0;
 		
-		if(t-last_time >= GalacticStrategyConstants.TIME_BETWEEN_RESOURCES && location.owner != null) //do nothing unless the location has an owner
+		if(t-last_resource_time >= GalacticStrategyConstants.TIME_BETWEEN_RESOURCES && location.owner != null) //do nothing unless the location has an owner
 		{
 			add_money += tax_rate*location.population;
-			last_time += GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
+			last_resource_time += GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
 		}
-		location.owner.changeMoney(add_money, last_time);
+		location.owner.changeMoney(add_money, last_resource_time);
+		last_time = t;
 	}
 	
 	public TaxOffice(){}
