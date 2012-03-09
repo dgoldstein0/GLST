@@ -34,16 +34,13 @@ public class ShipCommandPanel extends JPanel implements ActionListener, MouseLis
 	JLabel dest_name;
 	JLabel dest_pic;
 	
-	GroupLayout.ParallelGroup ship_vgroup;
-	GroupLayout.SequentialGroup ship_hgroup;
-	
 	public ShipCommandPanel()
 	{
 		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		health_list = new ArrayList<JProgressBar>();
 		soldier_list = new ArrayList<JProgressBar>();
 		ship_panel_list = new ArrayList<JPanel>();
-		ship_fleet_panel = new JPanel(new GridLayout(2,4));
+		ship_fleet_panel = new JPanel(new GridLayout(2,6));
 		//build the buttons
 		button_panel = new JPanel(new GridLayout(5,1));
 		
@@ -88,17 +85,6 @@ public class ShipCommandPanel extends JPanel implements ActionListener, MouseLis
 		dest_pic_panel.add(dest_pic);
 		
 		dest_display.add(dest_pic_panel);
-		
-		GroupLayout ship_panel_layout = new GroupLayout(ship_fleet_panel);
-		ship_fleet_panel.setLayout(ship_panel_layout);
-		
-		ship_vgroup = ship_panel_layout.createParallelGroup();
-		ship_hgroup = ship_panel_layout.createSequentialGroup();
-		
-		ship_panel_layout.setHorizontalGroup(ship_hgroup);
-		ship_panel_layout.setVerticalGroup(ship_vgroup);
-
-		
 	}
 	
 	public void setShip(Ship s, List<Selectable> selected)
@@ -158,24 +144,23 @@ public class ShipCommandPanel extends JPanel implements ActionListener, MouseLis
 			ListIterator<Selectable> ship_iter = selected.listIterator();
 			JProgressBar healthofship;
 			int index=0;
-			while(ship_iter.hasNext()&&index<8)
+			while(ship_iter.hasNext()&&index<12)
 			{
 				current= (Ship)ship_iter.next();
 				JPanel the_panel2 = new JPanel();
 				ship_panel_list.add(the_panel2);
 				BoxLayout bl = new BoxLayout(the_panel2, BoxLayout.Y_AXIS);
 				the_panel2.setLayout(bl);
-				the_panel2.setMaximumSize(new Dimension(80, 140));
 				ImageIcon shippict = new ImageIcon(current.type.thumbimg.Thumbnail);
 				the_panel2.add(new JLabel(shippict));
 				the_panel2.addMouseListener(this);
 				healthofship= new JProgressBar(0,current.type.hull);
-				healthofship.setPreferredSize(new Dimension(GalacticStrategyConstants.mini_prog_w,15));
+				healthofship.setPreferredSize(new Dimension(GalacticStrategyConstants.mini_prog_w,10));
 				healthofship.setStringPainted(true);
 				health_list.add(healthofship);
 				the_panel2.add(health_list.get(index));
 				JProgressBar soldier_label = new JProgressBar(0,current.type.soldier_capacity);
-				soldier_label.setPreferredSize(new Dimension(GalacticStrategyConstants.mini_prog_w,15));
+				soldier_label.setPreferredSize(new Dimension(GalacticStrategyConstants.mini_prog_w,10));
 				soldier_label.setForeground(Color.blue);
 				soldier_label.setStringPainted(true);
 				soldier_list.add(soldier_label);
@@ -184,8 +169,12 @@ public class ShipCommandPanel extends JPanel implements ActionListener, MouseLis
 				the_panel2.setPreferredSize(new Dimension(GalacticStrategyConstants.mini_ship_w,GalacticStrategyConstants.mini_ship_h));
 				if(current==s)the_panel2.setBorder(BorderFactory.createLineBorder(Color.RED));
 				index++;
-				ship_vgroup.addComponent(the_panel2);
-				ship_hgroup.addComponent(the_panel2);
+				ship_fleet_panel.add(the_panel2);
+			}
+			if(index<12)
+			{
+				ship_fleet_panel.add(Box.createRigidArea(new Dimension(GalacticStrategyConstants.mini_ship_w,GalacticStrategyConstants.mini_ship_h)));
+				index++;
 			}
 			add(ship_fleet_panel);
 		}
@@ -205,8 +194,8 @@ public class ShipCommandPanel extends JPanel implements ActionListener, MouseLis
 			JProgressBar soldierlabelship;
 			JProgressBar healthofship;
 			Ship current;
-			int count =1;
-			while(health_iter.hasNext()&&ship_iter.hasNext()&&count<8)
+			int count =0;
+			while(health_iter.hasNext()&&ship_iter.hasNext()&&count<12)
 			{
 				current = (Ship)ship_iter.next();
 				healthofship=health_iter.next();

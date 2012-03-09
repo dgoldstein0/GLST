@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 import java.util.*;
 
 import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
 
 //Currently only supports Display for 2 players
 public class SystemCommandPanel extends JPanel implements MouseListener
@@ -15,6 +16,7 @@ public class SystemCommandPanel extends JPanel implements MouseListener
 	JPanel MyShips;
 	GSystem currentSystem;
 	
+	//List<JProgressBar> buildingprog;
 	List<JPanel> MyPlanets_list;
 
 	List<Selectable> MPlanet_list;
@@ -29,20 +31,12 @@ public class SystemCommandPanel extends JPanel implements MouseListener
 		BoxLayout layout = new BoxLayout(this, BoxLayout.X_AXIS);
 		setLayout(layout);
 		//SystemInfo = new JPanel(new GridLayout(4,1));
-		
+		//buildingprog = new ArrayList<JProgress>()
 		MyPlanets_list= new ArrayList<JPanel>();
 		MPlanet_list = new ArrayList<Selectable>();
-		MyPlanets = new JPanel(new GridLayout(2,2));
+		MyPlanets = new JPanel(new GridLayout(1,4));
+		MyPlanets.setPreferredSize(new Dimension(800,0));
 		MyShips = new JPanel();
-
-		GroupLayout MyPlanets_layout = new GroupLayout(MyPlanets);
-		MyPlanets.setLayout(MyPlanets_layout);
-		
-		MyPlanets_vgroup = MyPlanets_layout.createParallelGroup();
-		MyPlanets_hgroup = MyPlanets_layout.createSequentialGroup();
-		
-		MyPlanets_layout.setHorizontalGroup(MyPlanets_hgroup);
-		MyPlanets_layout.setVerticalGroup(MyPlanets_vgroup);
 		//SystemInfo.add(MyPlanets);
 	}
 	public void setSystem(GSystem cur_System)
@@ -64,8 +58,9 @@ public class SystemCommandPanel extends JPanel implements MouseListener
 				JPanel planet_panel= new JPanel();
 				if((currentplanet.getOwner()!=null) && (currentplanet.getOwner().getId()==GameInterface.GC.player_id))
 				{
-					MyPlanets_vgroup.addComponent(planet_panel);
-					MyPlanets_hgroup.addComponent(planet_panel);
+					MyPlanets.add(planet_panel);
+					BoxLayout block = new BoxLayout(planet_panel,BoxLayout.Y_AXIS);
+					planet_panel.setLayout(block);
 					MyPlanets_list.add(planet_panel);
 					MPlanet_list.add(currentplanet);
 					ImageIcon pic;
@@ -77,19 +72,31 @@ public class SystemCommandPanel extends JPanel implements MouseListener
 					planet_panel.add(icon_label);
 					JLabel name_label = new JLabel(currentplanet.getName());
 					planet_panel.add(name_label);
+					
+		//			if(currentplanet.bldg_in_progress!=FacilityType.NO_BLDG)
+			//		{}
 					planet_panel.addMouseListener(this);
 					planet_panel.setBorder(BorderFactory.createLineBorder(Color.GREEN));
-					planet_panel.setPreferredSize(new Dimension(75,65));
 					count++;
 				}
 			}
 
 		}
+		while(count<4)
+		{
+			MyPlanets.add(Box.createRigidArea(new Dimension (0,0)));
+			count++;
+		}
 
 		//add(SystemInfo);
 		add(MyPlanets);
 		MyShips.add(new JLabel(ShipType.JUNK.icon));
+		MyShips.add(new JLabel("Select All"));
+		BoxLayout bl = new BoxLayout(MyShips, BoxLayout.Y_AXIS);
+		MyShips.setLayout(bl);
 		MyShips.addMouseListener(this);
+		MyShips.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+		
 		add(MyShips);
 		update();
 	}
