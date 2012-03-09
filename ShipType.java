@@ -12,9 +12,9 @@ import javax.swing.ImageIcon;
 
 public strictfp enum ShipType
 {
-			//name			fuel	hull	money	metal	time to build	troops	image					max speed	max ang. vel.	max accel	warp accel	warp speed	warp range	tooltip
-	MISSILE	("Missile",		5,		10,		0,		0,		2000,			0,		ImageResource.MISSILE,	.15,		.0015,			.0001,		0.0,		0.0,		0,			"BOOM!  You're dead if you get hit by one of these..."),
-	JUNK	("Junk",		20,		100,	100,	100,	10000,			400,	ImageResource.JUNK,		.06,		.0007,			.00003,		.0005,		.0016,		100,		"A basic spacecraft often built from spare parts.  It can shoot, but don't expect it to take a beating.");
+			//name			fuel	hull	money	metal	time to build	troops	image					ThumbPict					max speed	max ang. vel.	max accel	warp accel	warp speed	warp range	tooltip
+	MISSILE	("Missile",		5,		10,		0,		0,		2000,			0,		ImageResource.MISSILE,	null,	.15,				.0015,			.0001,		0.0,		0.0,		0,			"BOOM!  You're dead if you get hit by one of these..."),
+	JUNK	("Junk",		20,		100,	100,	100,	10000,			400,	ImageResource.JUNK,		ThumbPictResource.JUNK,		.06,		.0007,			.00003,		.0005,		.0016,		100,		"A basic spacecraft often built from spare parts.  It can shoot, but don't expect it to take a beating.");
 	
 	
 	String name;
@@ -25,6 +25,7 @@ public strictfp enum ShipType
 	int soldier_capacity;
 	int time_to_build;
 	ImageResource img;
+	ThumbPictResource thumbimg;
 	ImageIcon icon;
 	
 	//used to cache paint of the scaled image of the ship type
@@ -44,7 +45,7 @@ public strictfp enum ShipType
 	int warp_range; //px in Galaxy
 	final String tooltip;
 	
-	private ShipType(String name, int mfuel, int hull, int money, int metal, int time_to_build, int capacity, ImageResource res, double m_speed, double m_ang_vel, double accel, double waccel, double wspeed, int wrange, String tooltip)
+	private ShipType(String name, int mfuel, int hull, int money, int metal, int time_to_build, int capacity, ImageResource res, ThumbPictResource thumbs, double m_speed, double m_ang_vel, double accel, double waccel, double wspeed, int wrange, String tooltip)
 	{
 		this.name=name;
 		max_energy=mfuel;
@@ -62,6 +63,7 @@ public strictfp enum ShipType
 		warp_speed = wspeed;
 		warp_range = wrange;
 		this.tooltip = tooltip;
+		thumbimg = thumbs;
 		
 		paint_cache = new HashMap<Color, ShipPaintCache>(11);
 		for(int i =0; i< GalacticStrategyConstants.DEFAULT_COLORS.length; ++i)

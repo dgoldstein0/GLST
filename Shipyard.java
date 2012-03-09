@@ -124,6 +124,7 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 			manufac_queue.remove(first);
 		}
 		newship.assemble(this, t);
+		GameInterface.GC.GI.refreshShipPanel();
 		
 		last_time=t;
 	}

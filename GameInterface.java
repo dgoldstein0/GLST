@@ -94,11 +94,12 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	
 	JPanel system_list;
 	
-	enum PANEL_DISP{SAT_PANEL, SHIP_PANEL, NONE};
+	enum PANEL_DISP{SAT_PANEL, SHIP_PANEL, SYS_PANEL, NONE};
 	PANEL_DISP sat_or_ship_disp;
 	
 	PlanetMoonCommandPanel SatellitePanel;
 	ShipCommandPanel ShipPanel;
+	SystemCommandPanel SysPanel;
 	
 	enum GalaxyOrSystem{Galaxy, System;}
 	
@@ -303,6 +304,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		
 		SatellitePanel = new PlanetMoonCommandPanel();
 		ShipPanel = new ShipCommandPanel();
+		SysPanel = new SystemCommandPanel();
 		
 		graphics_started=false;
 		sat_or_ship_disp = PANEL_DISP.NONE;
@@ -350,6 +352,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		{
 			theinterface.removeAll();
 			theinterface.add(SystemPanel); //automatically adds to center
+			sat_or_ship_disp = PANEL_DISP.NONE;
+			displaySystemPanel(sys);
 			mode=GalaxyOrSystem.System;
 		}
 /*		sys_scale = 1.0d;
@@ -417,10 +421,23 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		
 		frame.setVisible(true);
 	}
+	public void displaySystemPanel(GSystem newsystem)
+	{
+		if(sat_or_ship_disp != PANEL_DISP.SYS_PANEL)
+		{
+			stat_and_order.removeAll();
+			stat_and_order.repaint();
+			stat_and_order.add(SysPanel);
+			sat_or_ship_disp = PANEL_DISP.SYS_PANEL;
+		}
+		SysPanel.setSystem(newsystem);
+		
+		frame.setVisible(true);
+	}
 	
 	public void refreshShipPanel(){
 		if (selected_in_sys.size() == 0)
-			displayNoPanel();
+			displaySystemPanel(sys);
 		else if (selected_in_sys.get(0) instanceof Ship)
 			displayShipPanel((Ship) selected_in_sys.get(0),selected_in_sys);
 	}
@@ -771,7 +788,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 								displayShipPanel((Ship) selected_in_sys.get(0),selected_in_sys);
 							else if(selected_in_sys.get(0) instanceof Satellite<?>)
 								displaySatellitePanel((Satellite<?>) selected_in_sys.get(0));
-							else displayNoPanel();
+							else displaySystemPanel(sys);
 						}
 						else if(selected_in_sys.size() > 1)
 						{
@@ -779,7 +796,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 							displayShipPanel((Ship) selected_in_sys.get(0),selected_in_sys);
 						}
 						else
-							displayNoPanel();
+							displaySystemPanel(sys);
 					
 						system_state = SYS_NORMAL;
 					}
@@ -869,7 +886,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		else //if nothing found
 		{
 			selected_in_sys.clear();
-			displayNoPanel();
+			displaySystemPanel(sys);
 		}
 	}
 	
@@ -933,7 +950,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		switch(s.getSelectType())
 		{
 			case Selectable.STAR:
-				displayNoPanel();
+				displaySystemPanel(sys);
 				break;
 			case Selectable.SATELLITE:
 				displaySatellitePanel((Satellite<?>)s);

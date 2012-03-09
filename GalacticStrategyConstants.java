@@ -119,6 +119,10 @@ public strictfp class GalacticStrategyConstants
 	final static int planet_building_limit = 7;
 	//For MathFormula
 	final static double rand_mod = .05;
+	//For Panel sizing
+	final static int mini_ship_w=50;
+	final static int mini_ship_h=75;
+	final static int mini_prog_w=75;
 	
 	//***************************************************************GENERAL DATA*******************************************//
 	

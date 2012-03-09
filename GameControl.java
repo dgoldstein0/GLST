@@ -1069,6 +1069,8 @@ public strictfp class GameControl
 					break;
 				case SHIP_PANEL:
 					GI.ShipPanel.update();
+				case SYS_PANEL:
+					GI.SysPanel.update();
 					break;
 			}
 			

@@ -41,7 +41,7 @@ public strictfp class Planet extends OwnableSatellite<Planet>
 	{
 		return (GSystem)orbit.boss;
 	}
-	
+		
 	public String imageLoc(){return "images/planet.jpg";}
 
 	@Override

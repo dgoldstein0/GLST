@@ -10,7 +10,9 @@ public enum ImageResource {
 	BLUE_STAR		("images/blue.png",			1.0),
 	MISSILE			("images/missile.png",		.20),
 	JUNK			("images/junk.png",			.30),
-	RETURN_ARROW	("images/return_arrow.png",	1.0);
+	RETURN_ARROW	("images/return_arrow.png",	1.0),
+	PLANET			("images/planet.jpg", 1.0),
+	MOON			("images/moon.jpg", 1.0);//to-do change image loc to use this
 	
 	String img_path;
 	BufferedImage image;
