@@ -127,5 +127,6 @@ public strictfp class GalacticStrategyConstants
 	//***************************************************************GENERAL DATA*******************************************//
 	
 	//used by GameControl for networking
-	static final int DEFAULT_PORT_NUMBER = 7007;
+	static final int DEFAULT_PORT_NUMBER = 7007; //used for game server.
+	public static final String DEFAULT_IP = "192.168.5.101";
 }

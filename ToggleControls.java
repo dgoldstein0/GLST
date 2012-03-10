@@ -1,4 +1,4 @@
 
 public class ToggleControls {
-	static boolean fogofwar=true;
+	static boolean fogofwar=false;
 }

@@ -315,7 +315,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 
 			if(TM == null)
 				TM = new TaskManager();
-			TM.startConstIntervalTask(new UpdateTask(),20);
+			TM.startConstIntervalTask(new UpdateTask(), 20);
 		}
 		else if(e.getSource()==t_reset_time || e.getSource() == c_reset_time)
 		{

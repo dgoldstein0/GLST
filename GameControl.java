@@ -177,10 +177,13 @@ public strictfp class GameControl
 				
 				//ping
 				boolean pong=false;
-				long[] pingtimes = new long[100];
+				long[] pingtimes = new long[1000];
 				long pongtime=0;
 				String pongmsg="";
-				for(int i=0; !pong && i<100; i++)
+				
+				//TODO: if possible, get rid of all these damn pings.  This is not totally reliable.
+				//As of 3/10/2012, upping old limit from 100 to 1000.
+				for(int i=0; !pong && i<1000; i++)
 				{
 					writer.println("ping" + Integer.toString(i));
 					pingtimes[i] = System.nanoTime();
@@ -428,9 +431,10 @@ public strictfp class GameControl
 			{
 				updater.setTimeManager(new GameSimulator.SimulatedTimeControl());
 			}
-		}catch(Exception e)
+		} catch(Exception e)
 		{
 			handleError("Start game failed", "Start game has failed, potentially due to a MapLoadException.", !automate);
+			e.printStackTrace();
 			if (!automate)
 				startupDialog();
 			return;
@@ -587,7 +591,7 @@ public strictfp class GameControl
 		boolean ip_valid=false;
 		while(!ip_valid) {
 			try {
-				String ip_in_string=JOptionPane.showInputDialog("Enter the IP address of the host:");
+				String ip_in_string=JOptionPane.showInputDialog("Enter the IP address of the host:", GalacticStrategyConstants.DEFAULT_IP);
 				if(ip_in_string != null){
 					String[] ip=ip_in_string.split("\\.");
 					
@@ -1069,6 +1073,7 @@ public strictfp class GameControl
 					break;
 				case SHIP_PANEL:
 					GI.ShipPanel.update();
+					break;
 				case SYS_PANEL:
 					GI.SysPanel.update();
 					break;

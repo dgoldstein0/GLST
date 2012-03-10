@@ -1062,11 +1062,10 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		}
 	}
 	
-	public void update(long t)      					//TODO: use only known systems
+	public void update(long t) //TODO: use only known systems
 	{		
 		if (!labels_made)
 		{
-			System.out.println("made");
 			known_sys=GC.map.systems;//GC.players[GC.player_id].known_systems;
 				
 			labels_made=true;									
