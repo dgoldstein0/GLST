@@ -273,6 +273,11 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		{
 			target.removeAggressor(this);
 			target=null;
+		}else {
+			if(destination instanceof Ship)
+			{
+				((Ship) destination).removeAggressor(this);
+			}
 		}
 	}
 	
@@ -338,9 +343,12 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	{
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP) //to ensure if the interface tries to issue an order, it can't
 		{
-			destination = d;
-			
 			userOverride();
+			destination = d;
+			if(d instanceof Ship)
+			{
+				((Ship)d).addAggressor(this);
+			}
 			
 			//System.out.println(Integer.toString(id) + " orderToMove: t is " + Long.toString(t) + " and time is " + Long.toString(time));
 			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
@@ -354,6 +362,10 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public void AIMove(Destination<?> d)
 	{
 		destination = d;
+		if(d instanceof Ship)
+		{
+			((Ship)d).addAggressor(this);
+		}
 		dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
@@ -363,9 +375,9 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	{
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP)
 		{
+			userOverride();
 			destination = d;
 			SecondDest = d;
-			userOverride();
 			
 			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
@@ -627,7 +639,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	private void targetLost(LOST_REASON reason, long t, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
 	{
-		//System.out.println("target lost");
+		System.out.println("target lost");
 		if (destination==(Destination<?>)target && (mode==MODES.ATTACKING||mode==MODES.USERATTACKING))
 		{
 			//System.out.println("\tchanging destination...");
@@ -635,13 +647,60 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			//since missile detonation code runs before saveAllData().
 			//It is possible that we could write functions to get the lastest position that would be safe,
 			//but at the moment they don't exist.
-			destination=new DestinationPoint(
-							target.getXCoord(t - GalacticStrategyConstants.TIME_GRANULARITY),
-							target.getYCoord(t - GalacticStrategyConstants.TIME_GRANULARITY)
-						);
+			double newXCoord = target.getXCoord(t - GalacticStrategyConstants.TIME_GRANULARITY);
+			double newYCoord = target.getYCoord(t - GalacticStrategyConstants.TIME_GRANULARITY);
+			if(newXCoord>GalacticStrategyConstants.SYS_WIDTH)
+			{
+				newXCoord = GalacticStrategyConstants.SYS_WIDTH;
+			}
+			else
+			{ 
+				if(newXCoord<0)
+					newXCoord=0;
+			}
+			if(newYCoord>GalacticStrategyConstants.SYS_HEIGHT)
+			{
+				newYCoord = GalacticStrategyConstants.SYS_HEIGHT;
+			}
+			else
+			{ 
+				if(newYCoord<0)
+					newYCoord=0;
+			}
+			destination=new DestinationPoint(newXCoord,newYCoord);
+			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
 			SwingUtilities.invokeLater(new DestUpdater(this));
 		}
-		
+		else 
+		{	
+			if(mode == MODES.MOVING)
+			{
+				double newXCoord = destination.getXCoord(t - GalacticStrategyConstants.TIME_GRANULARITY);
+				double newYCoord = destination.getYCoord(t - GalacticStrategyConstants.TIME_GRANULARITY);
+				if(newXCoord>GalacticStrategyConstants.SYS_WIDTH)
+				{
+					newXCoord = GalacticStrategyConstants.SYS_WIDTH;
+				}
+				else
+				{ 
+					if(newXCoord<0)
+						newXCoord=0;
+				}
+				if(newYCoord>GalacticStrategyConstants.SYS_HEIGHT)
+				{
+					newYCoord = GalacticStrategyConstants.SYS_HEIGHT;
+				}
+				else
+				{ 
+					if(newYCoord<0)
+						newYCoord=0;
+				}
+				destination=new DestinationPoint(newXCoord,newYCoord);
+				current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
+				SwingUtilities.invokeLater(new DestUpdater(this));
+				
+			}
+		}
 		mode = MODES.TARGET_LOST;
 		if(!late_order)
 			was_target = target;

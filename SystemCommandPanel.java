@@ -16,32 +16,38 @@ public class SystemCommandPanel extends JPanel implements MouseListener
 	JPanel MyShips;
 	GSystem currentSystem;
 	
-	//List<JProgressBar> buildingprog;
+	List<JProgressBar> buildingprog;
+	//List<JProgressBar> shipprog; //of first shipyard in system
 	List<JPanel> MyPlanets_list;
+	List<Integer> buildindex;
+	//List<JProgressBar> ;
 
-	List<Selectable> MPlanet_list;
+	List<OwnableSatellite<?>> MPlanet_list;
 
 	GroupLayout.ParallelGroup MyPlanets_vgroup;
 	GroupLayout.SequentialGroup MyPlanets_hgroup;
 
-	
+	//NOTE: drawing assumes new buildings/Ships cannot be built from SystemCommandPanel
 	SystemCommandPanel()
 	{
-		super();
-		BoxLayout layout = new BoxLayout(this, BoxLayout.X_AXIS);
-		setLayout(layout);
+		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		//SystemInfo = new JPanel(new GridLayout(4,1));
 		//buildingprog = new ArrayList<JProgress>()
 		MyPlanets_list= new ArrayList<JPanel>();
-		MPlanet_list = new ArrayList<Selectable>();
+		MPlanet_list = new ArrayList<OwnableSatellite<?>>();
+		buildingprog = new ArrayList<JProgressBar>();
+		buildindex = new ArrayList<Integer>();
+		//shipprog = new ArrayList<JProgressBar> ();
 		MyPlanets = new JPanel(new GridLayout(1,4));
-		MyPlanets.setPreferredSize(new Dimension(600,0));
+		MyPlanets.setPreferredSize(new Dimension(600,140));
 		MyShips = new JPanel();
 		//SystemInfo.add(MyPlanets);
 	}
 	public void setSystem(GSystem cur_System)
 	{
 		removeAll();
+		buildindex.clear();
+		buildingprog.clear();
 		MyPlanets.removeAll();
 		MyShips.removeAll();
 		MyPlanets_list.clear();
@@ -73,8 +79,20 @@ public class SystemCommandPanel extends JPanel implements MouseListener
 					JLabel name_label = new JLabel(currentplanet.getName());
 					planet_panel.add(name_label);
 					
-		//			if(currentplanet.bldg_in_progress!=FacilityType.NO_BLDG)
-			//		{}
+					if(currentplanet.bldg_in_progress!=FacilityType.NO_BLDG)
+					{
+						JLabel buildingpict = new JLabel(currentplanet.bldg_in_progress.icon);
+						planet_panel.add(buildingpict);
+						JProgressBar xbuildingprog = new JProgressBar(0,1000);
+						planet_panel.add(xbuildingprog);
+						buildingprog.add( xbuildingprog);
+						buildindex.add(buildingprog.indexOf(xbuildingprog));
+					}
+					/*if()
+					JProgressBar manufac_bar = new JProgressBar(0,100);
+					manufac_bar.setMaximumSize(new Dimension(120, 20));
+					manufac_bar.setStringPainted(true);
+					planet_panel.add(manufac_bar)*/
 					planet_panel.addMouseListener(this);
 					planet_panel.setBorder(BorderFactory.createLineBorder(Color.GREEN));
 					count++;
@@ -90,20 +108,34 @@ public class SystemCommandPanel extends JPanel implements MouseListener
 
 		//add(SystemInfo);
 		add(MyPlanets);
-		MyShips.add(new JLabel(ShipType.JUNK.icon));
-		MyShips.add(new JLabel("Select All"));
-		BoxLayout bl = new BoxLayout(MyShips, BoxLayout.Y_AXIS);
-		MyShips.setLayout(bl);
-		MyShips.addMouseListener(this);
-		MyShips.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+		Fleet.ShipIterator ship_iter = cur_System.fleets[GameInterface.GC.player_id].iterator();
+
+		if(ship_iter.hasNext()){
+			MyShips.add(new JLabel(ShipType.JUNK.icon));
+			MyShips.add(new JLabel("Select All"));
+			BoxLayout bl = new BoxLayout(MyShips, BoxLayout.Y_AXIS);
+			MyShips.setLayout(bl);
+			MyShips.addMouseListener(this);
+			MyShips.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+		}
 		
 		add(MyShips);
-		update();
 	}
 	
-	public void update()
+	public void update(long t)
 	{
-
+		ListIterator<Integer> k = buildindex.listIterator();
+		while(k.hasNext())
+		{
+			int index = k.next();
+			OwnableSatellite<?> currentplanet = MPlanet_list.get(index);
+			JProgressBar progress = buildingprog.get(index);
+			if(currentplanet.bldg_in_progress!=FacilityType.NO_BLDG)
+			{
+				double prog = currentplanet.constructionProgress(t);
+				progress.setValue((int)(1000.0*prog));
+			}
+		}
 	}
 
 	@Override
