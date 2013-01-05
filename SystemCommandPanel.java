@@ -35,7 +35,7 @@ public class SystemCommandPanel extends JPanel implements MouseListener
 		MyPlanets_list= new ArrayList<JPanel>();
 		MPlanet_list = new ArrayList<Selectable>();
 		MyPlanets = new JPanel(new GridLayout(1,4));
-		MyPlanets.setPreferredSize(new Dimension(800,0));
+		MyPlanets.setPreferredSize(new Dimension(600,0));
 		MyShips = new JPanel();
 		//SystemInfo.add(MyPlanets);
 	}
