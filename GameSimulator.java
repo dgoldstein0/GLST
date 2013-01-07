@@ -37,7 +37,7 @@ public class GameSimulator {
 			actions2.add(new SimulateAction(1000l,SimulateAction.ACTION_TYPE.UPDATE));
 			actions2.add(new SimulateAction(1000l,SimulateAction.ACTION_TYPE.SAVE));
 			Simulation sim2 = new Simulation("simplemap.xml",1,actions2);
-			compareResults(1, sim1.simulate(null), sim2.simulate(null));
+			compareResults(1, sim1.simulate(null), sim2.simulate(null), sim1, sim2);
 		}
 		
 		{
@@ -109,7 +109,7 @@ public class GameSimulator {
 			Simulation sim2 = new Simulation("simplemap.xml", 1, actions2);
 			List<String> results2 = sim2.simulate(null);
 			
-			compareResults(3, results1, results2);
+			compareResults(3, results1, results2, sim1, sim2);
 			//saveResultsToFile(results1, "test3p1.txt");
 			//saveResultsToFile(results2, "test3p2.txt");
 		}
@@ -162,7 +162,7 @@ public class GameSimulator {
 				
 				
 				//saveResultsToFile(results2, "results2.txt");
-				compareResults(4, results1, results2);
+				compareResults(4, results1, results2, sim1, sim2);
 			}
 		}
 		
@@ -194,7 +194,7 @@ public class GameSimulator {
 					);
 				List<String> l2 = sim2.simulate("test5-modified.txt");
 				
-				compareResults(5, l1, l2);
+				compareResults(5, l1, l2, sim1, sim2);
 				
 			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 5");}
 		}
@@ -224,7 +224,7 @@ public class GameSimulator {
 					);
 				List<String> l2 = sim2.simulate("test6-modified.txt");
 				
-				compareResults(6, l1, l2);
+				compareResults(6, l1, l2, sim1, sim2);
 			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 6");}
 		}
 		
@@ -253,7 +253,7 @@ public class GameSimulator {
 					);
 				List<String> l2 = sim2.simulate("test7-modified.txt");
 				
-				compareResults(7, l1, l2);
+				compareResults(7, l1, l2, sim1, sim2);
 			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 7");}
 		}
 		
@@ -288,7 +288,7 @@ public class GameSimulator {
 				System.out.println("\tRunning part 2...");
 				List<String> l2 = sim2.simulate("test8-b.txt");
 				
-				compareResults(8, l1, l2);
+				compareResults(8, l1, l2, sim1, sim2);
 				
 				saveResultsToFile(l1, "test8p1.txt");
 				saveResultsToFile(l2, "test8p2.txt");
@@ -296,7 +296,7 @@ public class GameSimulator {
 		}
 	}
 	
-	public static void compareResults(int test_num, List<String> l1, List<String> l2)
+	public static void compareResults(int test_num, List<String> l1, List<String> l2, Simulation sim1, Simulation sim2)
 	{
 		System.out.println("Comparing for test "+test_num);
 		
@@ -313,7 +313,22 @@ public class GameSimulator {
 			{
 				boolean match = l1.get(i).equals(l2.get(i));
 				if(!match)
-					System.out.println("\tSave point " + i + " does not match: " + l1.get(i).substring(0, l1.get(i).indexOf('\n')));
+				{
+					//Parsing the time out of here is a little hacky, but it gets the job done.
+					String savept_str = l1.get(i).substring(0, l1.get(i).indexOf('\n'));
+					String time_str = savept_str.substring(savept_str.indexOf("@")+1);
+					
+					System.out.println("Missing orders detected\n");
+					if (hasSameOrders(sim1, sim2, Long.parseLong(time_str, 10)))
+					{
+						System.out.println("\tSave point " + i + " does not match: " + savept_str);
+					}
+					else
+					{
+						System.out.println("\tSave point " + i + " at time " + time_str + " has different orders, skipping.\n");
+						match = true; //suppress difference
+					}
+				}
 				else
 					System.out.println("\tSave point " + i + " matches: " + l2.get(i).substring(0, l2.get(i).indexOf('\n')));
 				identical = identical && match;
@@ -328,12 +343,18 @@ public class GameSimulator {
 	
 	public static boolean hasSameOrders(Simulation sim1, Simulation sim2)
 	{
+		return hasSameOrders(sim1, sim2, -1l);
+	}
+	
+	public static boolean hasSameOrders(Simulation sim1, Simulation sim2, long time)
+	{
 		Set<Order> o1 = new HashSet<Order>();
 		Set<Order> o2 = new HashSet<Order>();
 		
 		for (SimulateAction action : sim1.actions)
 		{
-			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER)
+			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER && 
+					(time == -1 || action.do_at_time <= time) )
 			{
 				boolean retval = o1.add(action.the_order);
 				if (!retval)
