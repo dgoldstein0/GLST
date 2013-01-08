@@ -46,7 +46,7 @@ public class GameSimulator {
 			actions2.add(new SimulateAction(1000l,SimulateAction.ACTION_TYPE.UPDATE));
 			actions2.add(new SimulateAction(1000l,SimulateAction.ACTION_TYPE.SAVE));
 			Simulation sim2 = new Simulation("simplemap.xml",1,actions2);
-			compareResults(1, sim1.simulate(null), sim2.simulate(null), sim1, sim2);
+			compareResults(1, sim1.simulate(null, null), sim2.simulate(null, null), sim1, sim2);
 		}
 		
 		{
@@ -71,7 +71,7 @@ public class GameSimulator {
 			actions1.add(new SimulateAction(75l,SimulateAction.ACTION_TYPE.UPDATE));
 			
 			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
-			sim1.simulate(null);
+			sim1.simulate(null, null);
 		}
 		
 		{
@@ -103,7 +103,7 @@ public class GameSimulator {
 			actions1.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.SAVE));
 			
 			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
-			List<String> results1 = sim1.simulate(null);
+			List<String> results1 = sim1.simulate(null, null);
 			
 			
 			
@@ -116,7 +116,7 @@ public class GameSimulator {
 			actions2.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.SAVE));
 			
 			Simulation sim2 = new Simulation("simplemap.xml", 1, actions2);
-			List<String> results2 = sim2.simulate(null);
+			List<String> results2 = sim2.simulate(null, null);
 			
 			compareResults(3, results1, results2, sim1, sim2);
 			//saveResultsToFile(results1, "test3p1.txt");
@@ -154,7 +154,7 @@ public class GameSimulator {
 				actions1.add(new SimulateAction(50000l, SimulateAction.ACTION_TYPE.SAVE));
 				
 				Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
-				List<String> results1 = sim1.simulate("log1.txt");
+				List<String> results1 = sim1.simulate("log1.txt", null);
 				
 				
 				
@@ -167,7 +167,7 @@ public class GameSimulator {
 				actions2.add(new SimulateAction(50000l, SimulateAction.ACTION_TYPE.SAVE));
 				
 				Simulation sim2 = new Simulation("simplemap.xml", 1, actions2);
-				List<String> results2 = sim2.simulate("log2.txt");
+				List<String> results2 = sim2.simulate("log2.txt", null);
 				
 				
 				//saveResultsToFile(results2, "results2.txt");
@@ -191,7 +191,7 @@ public class GameSimulator {
 						),
 						false, 10, null
 					);
-				List<String> l1 = sim1.simulate("test5-gold.txt");
+				List<String> l1 = sim1.simulate("test5-gold.txt", null);
 				
 				System.out.println("\tRunning part 2...");
 				
@@ -201,7 +201,7 @@ public class GameSimulator {
 						),
 						true, 10, null
 					);
-				List<String> l2 = sim2.simulate("test5-modified.txt");
+				List<String> l2 = sim2.simulate("test5-modified.txt", null);
 				
 				compareResults(5, l1, l2, sim1, sim2);
 				
@@ -221,7 +221,7 @@ public class GameSimulator {
 						),
 						false, 3, null
 					);
-				List<String> l1 = sim1.simulate("test6-gold.txt");
+				List<String> l1 = sim1.simulate("test6-gold.txt", null);
 				
 				System.out.println("\tRunning part 2...");
 				
@@ -231,7 +231,7 @@ public class GameSimulator {
 						),
 						true, 3, null
 					);
-				List<String> l2 = sim2.simulate("test6-modified.txt");
+				List<String> l2 = sim2.simulate("test6-modified.txt", null);
 				
 				compareResults(6, l1, l2, sim1, sim2);
 			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 6");}
@@ -250,7 +250,7 @@ public class GameSimulator {
 						),
 						false, 3, null
 					);
-				List<String> l1 = sim1.simulate("test7-gold.txt");
+				List<String> l1 = sim1.simulate("test7-gold.txt", null);
 				
 				System.out.println("\tRunning part 2...");
 				
@@ -260,7 +260,7 @@ public class GameSimulator {
 						),
 						true, 3, null
 					);
-				List<String> l2 = sim2.simulate("test7-modified.txt");
+				List<String> l2 = sim2.simulate("test7-modified.txt", null);
 				
 				compareResults(7, l1, l2, sim1, sim2);
 			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 7");}
