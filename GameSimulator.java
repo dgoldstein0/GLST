@@ -377,7 +377,6 @@ public class GameSimulator {
 					String savept_str = l1.get(i).substring(0, l1.get(i).indexOf('\n'));
 					String time_str = savept_str.substring(savept_str.indexOf("@")+1);
 					
-					System.out.println("Missing orders detected\n");
 					if (hasSameOrdersUpToTime(sim1, sim2, Long.parseLong(time_str, 10)))
 					{
 						System.out.println("\tSave point " + i + " does not match: " + savept_str);
@@ -423,13 +422,19 @@ public class GameSimulator {
 		
 		for (SimulateAction action : sim2.actions)
 		{
-			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER)
+			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER &&
+					(time == -1 || action.do_at_time <= time) )
 			{
 				boolean retval = o2.add(action.the_order);
 				if (!retval)
 					throw new RuntimeException("sim2 has a duplicate order!");
 			}
 		}
+		
+		boolean same_orders = o1.containsAll(o2) && o2.containsAll(o1);
+		
+		if (!same_orders)
+			System.out.println("Missing orders detected");
 		
 		for (Order o : o1)
 		{
@@ -443,7 +448,7 @@ public class GameSimulator {
 				System.out.println("\tsim1 is missing " + o.getClass().getName() + " from player " + o.p_id + " order_number " + o.order_number + " at time " + o.scheduled_time);
 		}
 		
-		return o1.containsAll(o2) && o2.containsAll(o1);
+		return same_orders;
 	}
 	
 	/**
