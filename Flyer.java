@@ -168,63 +168,24 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	//methods to implement destination
 	public String imageLoc(){return type.img.img_path;}
 	
-	//cache destination data
-	private long dest_coords_time=0; //there cannot be a call to getXCoord or getYCoord with t=0, since ships do not exist then, and if they do will not be targetting other ships
-	private double dest_pos_x;
-	private double dest_pos_y;
-	private double dest_vel_x;
-	private double dest_vel_y;
-	
 	public double getXCoord(long t)
 	{
-		if(t != dest_coords_time)
-			updateDestData(t);
-		return dest_pos_x;
+		return pos_x;
 	}
 	
 	public double getYCoord(long t)
 	{
-		if(t != dest_coords_time)
-			updateDestData(t);
-		return dest_pos_y;
+		return pos_y;
 	}
 	
 	public double getXVel(long t)
 	{
-		if(t != dest_coords_time)
-			updateDestData(t);
-		return dest_vel_x;
+		return speed*Math.cos(direction);
 	}
 	
 	public double getYVel(long t)
 	{
-		if(t != dest_coords_time)
-			updateDestData(t);
-		return dest_vel_y;
-	}
-	
-	//this method is used to fill in cached data
-	private void updateDestData(long t)
-	{
-		try {
-			int index_at_t = data_control.getIndexForTime(t);
-			//System.out.println("TIME is " + Long.toString(time) + " and t is " + Long.toString(t));
-			FlyerDataSaver<?> ds = (FlyerDataSaver<?>)data_control.saved_data[index_at_t];
-			dest_pos_x = ds.px;
-			dest_pos_y = ds.py;
-			dest_vel_x = ds.sp*Math.cos(ds.dir);
-			dest_vel_y = ds.sp*Math.sin(ds.dir);
-			dest_coords_time = t;
-		} catch (DataSaverControl.DataNotYetSavedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new RuntimeException();
-		}
-	}
-	
-	public void invalidateCache()
-	{
-		dest_coords_time = -1;
+		return speed*Math.sin(direction);
 	}
 	
 	//for Saveable

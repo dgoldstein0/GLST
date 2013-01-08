@@ -98,6 +98,8 @@ public strictfp class Galaxy
 	
 	public void invalidateAllCaches()
 	{
+		//TODO: is this function necessary?
+		
 		for (GSystem sys : systems)
 		{
 			for (Fleet f : sys.fleets)
@@ -105,14 +107,14 @@ public strictfp class Galaxy
 				for (Ship.ShipId id : f.ships.keySet())
 				{
 					Ship s = f.ships.get(id);
-					s.invalidateCache();
+					//s.invalidateCache();
 				}
 			}
 			
 			for (Missile.MissileId id : sys.missiles.table.keySet())
 			{
 				Missile m = sys.missiles.table.get(id);
-				m.invalidateCache();
+				//m.invalidateCache();
 			}
 		}
 	}
