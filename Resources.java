@@ -8,7 +8,9 @@ public class Resources
 		//load Images
 		for(ImageResource r : ImageResource.values())
 		{
-			r.image = GraphicsUtilities.loadCompatibleImage(r.img_path);
+			// this function may be called multiple times, so this null check speeds things up.
+			if (r.image == null)
+				r.image = GraphicsUtilities.loadCompatibleImage(r.img_path);
 		}
 		
 		//store metrics from images to ShipTypes
@@ -17,7 +19,10 @@ public class Resources
 			t.width = t.img.getWidth();
 			t.height = t.img.getHeight();
 			t.dim = Math.max(t.width, t.height);
-			t.icon = new ImageIcon(t.img.image);
+			
+			// null check to avoid constructing extra ImageIcons
+			if (t.icon == null)
+				t.icon = new ImageIcon(t.img.image);
 		}
 	}
 }

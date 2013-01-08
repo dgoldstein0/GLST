@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -22,6 +23,14 @@ public class GameSimulator {
 	
 	public static void main(String[] args)
 	{
+		// This is only necessary when we call loadSimFromFile before simulate (simulate calls preload by creating a GameControl)
+		try {
+			Resources.preload();
+		} catch (IOException e) {
+			System.err.println("Problem preloading resources.  Exiting.");
+			System.exit(1);
+		}
+		
 		{
 			//test case 1: time-independence of the game
 			System.out.println("Running Test 1...");
@@ -259,40 +268,90 @@ public class GameSimulator {
 		
 		{
 			//Test Case 8 = first multiplayer test
-			System.out.println("Running Test 8...");
-			try{
-				//actual end time is 281180.  Need protocol replacement to
-				//make the full length pass, however.
-				
-				Simulation sim1 = loadSimFromFile("simplemap.xml", 2,
-						new FileInputStream(
-							new File("testcases/test8-host.txt")
-						),
-						false, 100, 250000l
-					);
+			
+			//actual end time is 281180.  Need protocol replacement to
+			//make the full length pass, however.
+			twoPlayerTest(8, "simplemap.xml", "testcases/test8-host.txt", "testcases/test8-guest.txt", 250000l, 100);
+			
+			// Tests based on EOH 2012 data
+			twoPlayerTest(9, "simplemap.xml", "eoh2012logs/Day 1/log1-host.txt", "eoh2012logs/Day 1/log1-guest.txt", 267000, 100); //end at 267000
+			twoPlayerTest(10, "simplemap.xml", "eoh2012logs/Day 1/log4-host.txt", "eoh2012logs/Day 1/log4-guest.txt", 268000, 100);
+		}
+	}
+	
+	public static void twoPlayerTest(int test_num, String map_file, String input_log1, String input_log2, long total_time, int num_save_points)
+	{
+		System.out.println("Running Test " + test_num + "...");
+		Simulation sim1, sim2;
+		
+		try{
+			sim1 = loadSimFromFile(map_file, 2,
+					new FileInputStream(
+						new File(input_log1)
+					),
+					false, num_save_points, total_time
+				);
 
-				
-				Simulation sim2 = loadSimFromFile("simplemap.xml", 2,
-						new FileInputStream(
-							new File("testcases/test8-guest.txt")
-						),
-						false, 100, 250000l
-					);
-				
-				System.out.println("Test 8 has same orders: " + hasSameOrders(sim1, sim2));
-				//correctOrders(sim1, sim2, 281180l);
-				
-				System.out.println("\tRunning part 1...");
-				List<String> l1 = sim1.simulate("test8-a.txt");
-				
-				System.out.println("\tRunning part 2...");
-				List<String> l2 = sim2.simulate("test8-b.txt");
-				
-				compareResults(8, l1, l2, sim1, sim2);
-				
-				saveResultsToFile(l1, "test8p1.txt");
-				saveResultsToFile(l2, "test8p2.txt");
-			} catch(FileNotFoundException fnfe){System.out.println("FileNotFound for Test 8");}
+			
+			sim2 = loadSimFromFile(map_file, 2,
+					new FileInputStream(
+						new File(input_log2)
+					),
+					false, num_save_points, total_time
+				);
+		} catch(FileNotFoundException fnfe) {
+			System.out.println("FileNotFound for Test " + test_num);
+			return;
+		}
+		
+		System.out.println("Test " + test_num + " has same orders: " + hasSameOrders(sim1, sim2));
+		//correctOrders(sim1, sim2, 281180l);
+		
+		List<Order> decisions2 = sim1.extractDecisions();
+		List<Order> decisions1 = sim2.extractDecisions();
+		
+		List<String> l1 = null, l2 = null;
+		boolean finished1 = false;
+		boolean finished2 = false;
+		boolean decision_check_exc1 = false;
+		boolean decision_check_exc2 = false;
+		
+		try {
+			System.out.println("\tRunning part 1...");
+			l1 = sim1.simulate("test" + test_num +"-a.txt", new RecordKeeper(decisions1));
+			finished1 = true;
+		} catch (GameUpdater.DisagreementException e) {
+			e.printStackTrace();
+		} catch (RecordKeeper.DecisionCheckException e) {
+			e.printStackTrace();
+			decision_check_exc1 = true;
+		}
+		
+		try {
+			System.out.println("\tRunning part 2...");
+			l2 = sim2.simulate("test" + test_num + "-b.txt", new RecordKeeper(decisions2));
+			finished2 = true;
+		} catch (GameUpdater.DisagreementException e) {
+			e.printStackTrace();
+		} catch (RecordKeeper.DecisionCheckException e) {
+			e.printStackTrace();
+			decision_check_exc2 = true;
+		}
+		
+		
+		if (!finished1)
+			System.out.println("ERROR: part 1 failed to finish");
+		if (!finished2)
+			System.out.println("ERROR: part 2 failed to finish");
+		
+		if (decision_check_exc1 || decision_check_exc2)
+			System.out.println("NOTE: we have a decision check exception, so consider disregarding the results.");
+		
+		if (finished1 && finished2)
+		{
+			compareResults(test_num, l1, l2, sim1, sim2);
+			saveResultsToFile(l1, "test" + test_num + "p1.txt");
+			saveResultsToFile(l2, "test" + test_num + "p2.txt");
 		}
 	}
 	
@@ -319,7 +378,7 @@ public class GameSimulator {
 					String time_str = savept_str.substring(savept_str.indexOf("@")+1);
 					
 					System.out.println("Missing orders detected\n");
-					if (hasSameOrders(sim1, sim2, Long.parseLong(time_str, 10)))
+					if (hasSameOrdersUpToTime(sim1, sim2, Long.parseLong(time_str, 10)))
 					{
 						System.out.println("\tSave point " + i + " does not match: " + savept_str);
 					}
@@ -343,10 +402,10 @@ public class GameSimulator {
 	
 	public static boolean hasSameOrders(Simulation sim1, Simulation sim2)
 	{
-		return hasSameOrders(sim1, sim2, -1l);
+		return hasSameOrdersUpToTime(sim1, sim2, -1l);
 	}
 	
-	public static boolean hasSameOrders(Simulation sim1, Simulation sim2, long time)
+	public static boolean hasSameOrdersUpToTime(Simulation sim1, Simulation sim2, long time)
 	{
 		Set<Order> o1 = new HashSet<Order>();
 		Set<Order> o2 = new HashSet<Order>();
@@ -555,9 +614,9 @@ public class GameSimulator {
 			this.map_location = map_location;
 		}
 				
-		List<String> simulate(String logfile_name)
+		List<String> simulate(String logfile_name, RecordKeeper checker)
 		{
-			GameControl GC = new GameControl(null);
+			GameControl GC = new GameControl(null, checker);
 			GameInterface.GC = GC;
 			GC.startTest(num_players, true, new File(map_location));
 			GC.updater.setupLogFile((logfile_name == null) ? "log.txt" : logfile_name);
@@ -597,6 +656,28 @@ public class GameSimulator {
 			}
 			GC.updater.logFile.close();
 			return results;
+		}
+		
+		/**
+		 * This function finds all decisions that the simulation recieves, and packages them into a list
+		 * 
+		 * TODO: consider adding filtering based one which players the decisions are coming from
+		 * 
+		 * @return the list of orders that are decided
+		 */
+		List<Order> extractDecisions(){
+			
+			List<Order> decided = new ArrayList<Order>();
+			
+			for (SimulateAction action : actions)
+			{
+				if (action.type == SimulateAction.ACTION_TYPE.RECEIVED_DECISION)
+				{
+					decided.add(action.the_order);
+				}
+			}
+			
+			return decided;
 		}
 	}
 	

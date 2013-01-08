@@ -1,0 +1,22 @@
+DataSaverControl$DataNotYetSavedException
+Major consistency error: stepback in getIndexForTime is -25425with t=508520 and time=508540
+	at FlyerDataSaverControl.getIndexForTime(FlyerDataSaverControl.java:24)
+	at Flyer.updateDestData(Flyer.java:210)
+	at Flyer.getXCoord(Flyer.java:181)
+	at Flyer.destinationX(Flyer.java:148)
+	at Ship.attack(Ship.java:586)
+	at Ship.update(Ship.java:149)
+	at GameUpdater.updateGame(GameUpdater.java:280)
+	at GameUpdater$Updater.run(GameUpdater.java:121)
+	at java.util.TimerThread.mainLoop(Unknown Source)
+	at java.util.TimerThread.run(Unknown Source)
+Exception in thread "Timer-0" java.lang.RuntimeException
+	at Flyer.updateDestData(Flyer.java:221)
+	at Flyer.getXCoord(Flyer.java:181)
+	at Flyer.destinationX(Flyer.java:148)
+	at Ship.attack(Ship.java:586)
+	at Ship.update(Ship.java:149)
+	at GameUpdater.updateGame(GameUpdater.java:280)
+	at GameUpdater$Updater.run(GameUpdater.java:121)
+	at java.util.TimerThread.mainLoop(Unknown Source)
+	at java.util.TimerThread.run(Unknown Source)

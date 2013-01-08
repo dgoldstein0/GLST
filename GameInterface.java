@@ -259,7 +259,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		mouseover_obj = null;
 	
 		//set up game control
-		GC = new GameControl(this);
+		GC = new GameControl(this, null);
 		Runtime.getRuntime().addShutdownHook(new ShutdownThread(GC));
 		
 		system_state = SYS_NORMAL;

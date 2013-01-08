@@ -1,0 +1,14 @@
+Exception in thread "Timer-0" java.lang.ArrayIndexOutOfBoundsException: -1
+	at DataSaverControl.revertToTime(DataSaverControl.java:49)
+	at Galaxy.revertAllToTime(Galaxy.java:88)
+	at GameUpdater.updateGame(GameUpdater.java:185)
+	at GameUpdater$Updater.run(GameUpdater.java:121)
+	at java.util.TimerThread.mainLoop(Unknown Source)
+	at java.util.TimerThread.run(Unknown Source)
+Log105:
+Exception in thread "Timer-0" java.lang.RuntimeException: Disagreement Detected!
+ShipMoveOrder from player 1, order_num 48 scheduled at time 320600
+	at GameUpdater.updateGame(GameUpdater.java:386)
+	at GameUpdater$Updater.run(GameUpdater.java:121)
+	at java.util.TimerThread.mainLoop(Unknown Source)
+	at java.util.TimerThread.run(Unknown Source)

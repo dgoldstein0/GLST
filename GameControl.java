@@ -23,6 +23,7 @@ public strictfp class GameControl
 	int player_id;
 	Player[] players;
 	Galaxy map;
+	RecordKeeper record_keeper; //This is for testing
 
 	JFileChooser filechooser; //for single player testing
 	
@@ -40,9 +41,10 @@ public strictfp class GameControl
 	Thread readThread; //reads data during the game
 	Thread startThread; //processes start game.   This is a separate Thread because it can crash the interface if run on swing's event thread
 	
-	public GameControl(GameInterface gi)
+	public GameControl(GameInterface gi, RecordKeeper r)
 	{
 		GI = gi;
+		record_keeper = r;
 		try {
 			Resources.preload(); //preload images
 		} catch (IOException e) {
@@ -827,6 +829,7 @@ public strictfp class GameControl
 				encoder.finish();
 			}
 		}
+
 	}
 	
 	public void notifyAllPlayersOfDecision(Order o)
@@ -840,7 +843,11 @@ public strictfp class GameControl
 				encoder.writeObject(new Message(Message.Type.DECISION, o));
 				encoder.finish();
 			}
-		}
+		}		
+		
+		// for simulations
+		if (record_keeper != null)
+			record_keeper.checkDecision(o);
 	}
 	
 	public void downloadAndLoadMap(boolean SAVE) throws IOException //for the client

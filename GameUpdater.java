@@ -383,7 +383,7 @@ public class GameUpdater {
 				}
 				else
 				{
-					throw new RuntimeException("Disagreement Detected!\n" + o.getClass().getName() + " from player " + o.p_id + ", order_num " + o.order_number + " scheduled at time " + o.scheduled_time);
+					throw new DisagreementException("Disagreement Detected!\n" + o.getClass().getName() + " from player " + o.p_id + ", order_num " + o.order_number + " scheduled at time " + o.scheduled_time);
 				}
 			}
 		}
@@ -523,4 +523,14 @@ public class GameUpdater {
 	
 	public long getLast_time_updated(){return last_time_updated;}
 	public void setLast_time_updated(long t){last_time_updated=t;}
+	
+	public static class DisagreementException extends RuntimeException
+	{
+		private static final long serialVersionUID = -2086920344688123754L;
+
+		DisagreementException(String s)
+		{
+			super(s);
+		}
+	}
 }
