@@ -12,10 +12,11 @@ public strictfp class MissileDescriber implements Describer<Missile>
 	}
 	
 	@Override
-	public Missile retrieveObject(Galaxy g, long t)
+	public Missile retrieveObject(Galaxy g)
 	{
-		MissileListDataControl ctrl = g.systems.get(system_id).missiles.data_control;
-		return ctrl.saved_data[ctrl.getIndexForTime(t)].tbl.get(new Missile.MissileId(missile_id, shooter.retrieveObject(g, t)));
+		return g.systems.get(system_id).missiles.get(
+			new Missile.MissileId(missile_id, shooter.retrieveObject(g))
+		);
 	}
 	
 	public MissileDescriber(){}

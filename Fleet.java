@@ -18,7 +18,7 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 		owner = o;
 		data_control = new FleetDataSaverControl(this);
 		last_time_changed=0;
-		data_control.saveData();
+		data_control.saveData(0);
 	}
 	
 	//methods required for load/save
@@ -29,6 +29,22 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 	public void setOwner(Player p){owner = p;}
 	public void setLocation(GSystem sys){location=sys;}
 	public GSystem getLocation(){return location;}
+	
+	public void update(long time)
+	{
+		synchronized(lock)
+		{
+			Fleet.ShipIterator ship_iteration = iterator();
+			for(Ship.ShipId j; ship_iteration.hasNext();)
+			{
+				j=ship_iteration.next();
+				Ship s = ships.get(j);
+				s.update(time, ship_iteration);
+			}
+		}
+		
+		last_time_changed = time;
+	}
 	
 	public void add(Ship s, long t)
 	{

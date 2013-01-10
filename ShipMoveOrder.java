@@ -21,8 +21,8 @@ public strictfp class ShipMoveOrder extends Order
 	@Override
 	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
-		the_ship = ship_desc.retrieveObject(g, scheduled_time);
-		the_dest = dest_desc.retrieveObject(g, scheduled_time);
+		the_ship = ship_desc.retrieveObject(g);
+		the_dest = dest_desc.retrieveObject(g);
 		
 		/*System.out.println("ship move order executing with scheduled_time = " + Long.toString(scheduled_time));
 		System.out.println("\tthe_ship is null: " + Boolean.toString(the_ship == null));

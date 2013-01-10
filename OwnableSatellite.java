@@ -183,12 +183,13 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	public boolean scheduleConstruction(FacilityType bldg_type, long start_time)
 	{
 		bldg_in_progress = bldg_type;
-		time_start = start_time;
+		time_start = TimeControl.roundUpToTimeGrain(start_time);
 		
 		long build_time = bldg_type.build_time;
 		int met = bldg_type.metal_cost, mon=bldg_type.money_cost; //metal and money costs
 		
-		time_finish = start_time+build_time;
+		time_finish = TimeControl.roundUpToTimeGrain(start_time+build_time);
+		
 		synchronized(facilities){
 			synchronized(owner.metal_lock){
 				synchronized(owner.money_lock){

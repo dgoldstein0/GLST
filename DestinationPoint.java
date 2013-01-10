@@ -9,10 +9,24 @@ public strictfp class DestinationPoint implements Destination<DestinationPoint>,
 	}
 	
 	@Override
-	public DestinationPoint retrieveObject(Galaxy g, long t){return this;}
+	public DestinationPoint retrieveObject(Galaxy g)
+	{
+		// this function used to "return this".  I am changing this due to
+		// problems in the logs I'm using for testing (test case 10) - for
+		// some reason, a pair of DestinationPoints in the logs are aliased on
+		// one player's computer but not the other, so then alias in the
+		// simulated games; making a new DestinationPoint fixes this.  I'm also
+		// changing the describer() function so that this aliasing won't get
+		// into the logs in the future.
+		return new DestinationPoint(x, y);
+	}
 	
 	@Override
-	public Describer<DestinationPoint> describer(){return this;}
+	public Describer<DestinationPoint> describer() {
+		
+		// See comment in retrieveObject
+		return new DestinationPoint(x, y);
+	}
 	
 	@Override
 	public double getXCoord(long t){return x;}

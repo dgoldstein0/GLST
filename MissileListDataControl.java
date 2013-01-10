@@ -1,5 +1,5 @@
 
-public strictfp class MissileListDataControl extends RelaxedDataSaverControl<MissileList, MissileListDataSaver> {
+public strictfp class MissileListDataControl extends DataSaverControl<MissileList, MissileListDataSaver> {
 
 	public MissileListDataControl(MissileList m) {
 		super(m, new Creator<MissileList, MissileListDataSaver>(){

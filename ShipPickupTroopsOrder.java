@@ -16,7 +16,7 @@ public strictfp class ShipPickupTroopsOrder extends Order {
 	@Override
 	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
-		the_ship = ship_desc.retrieveObject(g, scheduled_time);
+		the_ship = ship_desc.retrieveObject(g);
 		
 		//validate order
 		if(the_ship != null && the_ship.owner.getId() == p_id)

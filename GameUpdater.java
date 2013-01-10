@@ -202,18 +202,12 @@ public class GameUpdater {
 		{
 			setLast_time_updated(update_to);
 			
-			/**update all intersystem data.*/
+			/**update all players / intersystem data.*/
 			for(int i=0; i<GC.players.length; i++)
 			{
 				if(GC.players[i] != null)
 				{
-					Iterator<Ship> ship_it = GC.players[i].ships_in_transit.iterator();
-					Ship s;
-					while(ship_it.hasNext())
-					{
-						s=ship_it.next();
-						s.moveDuringWarp(update_to, ship_it); //the iterator is passed so that moveDuringWarp can remove the ship from the iteration, and by doing so from ships_in_transit
-					}
+					GC.players[i].update(update_to);
 				}
 			}
 			
@@ -270,28 +264,11 @@ public class GameUpdater {
 				//update data for all ships
 				for(int i=0; i<sys.fleets.length; i++)
 				{
-					synchronized(sys.fleets[i].lock)
-					{
-						Fleet.ShipIterator ship_iteration = sys.fleets[i].iterator();
-						for(Ship.ShipId j; ship_iteration.hasNext();)
-						{
-							j=ship_iteration.next();
-							Ship s = sys.fleets[i].ships.get(j);
-							s.update(update_to, ship_iteration);
-						}
-					}
+					sys.fleets[i].update(update_to);
 				}
 				
 				//update all missiles AND save data
-				synchronized(sys.missiles)
-				{
-					Iterator<Missile.MissileId> missile_iteration = sys.missiles.keySet().iterator();
-					for(Missile.MissileId i; missile_iteration.hasNext();)
-					{
-						i=missile_iteration.next();
-						sys.missiles.get(i).update(update_to, missile_iteration); //returns true if the missile detonates
-					}
-				}
+				sys.missiles.update(update_to);
 				
 				//collision processing... (FAIL)
 				detectCollisions(sys, update_to);
@@ -314,7 +291,7 @@ public class GameUpdater {
 			 * Everything = map data (ships, missiles, facilities, planets,
 			 * etc.) and Player data (money, metal, and ships in transit).
 			 */
-			GC.map.saveAllData(GC.players);
+			GC.map.saveAllData(GC.players, update_to);
 		}
 		
 		setLast_time_updated(update_to);

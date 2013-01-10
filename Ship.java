@@ -34,8 +34,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	long arrival_time;
 	Destination<?> SecondDest;
 	
-	
-	
 	public Ship(ShipType t)
 	{
 		super(t.name,t);
@@ -86,126 +84,120 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	@Override
 	public boolean update(long t, Fleet.ShipIterator shipIteration)
 	{
-		/*this if statement is necessary in case game is updated too slow.  For instance, update last to 60, then
-		an order is given which advances the ship to 80., but the next time all are updated to is 100, we want the
-		ship ordered to move to only be updated once and not twice*/
-		
 		if (time + GalacticStrategyConstants.TIME_GRANULARITY != t)
 			throw new RuntimeException("timing error!");
 		
-		if(time < t)
-		{
-			moveIncrement();
-			MODES orig_mode;
+		moveIncrement();
+		MODES orig_mode;
+		
+		time += GalacticStrategyConstants.TIME_GRANULARITY;
+		
+		/* this do-while is necessary because it lets the ship go through
+		 * multiple states within a time grain */
+		do {
+			orig_mode = mode;
 			
-			/* this do-while is necessary because if we revert the ship to this state,
-			 * it will do the action corresponding to whatever was last saved */
-			do {
-				orig_mode = mode;
-				
-				switch(mode)
-				{
-				/*TODO change attack if there are teams or other factors*/
-					case IDLE:
+			switch(mode)
+			{
+				/*TODO: change attack if there are teams or other factors*/
+				case IDLE:
+					SecondDest=null;
+					Ship targettoattack = identifyClosestEnemy();
+					if(targettoattack != null){
+						setOtherDest(destination);
+						setupAttack(targettoattack);
+						mode = MODES.ATTACKING;
+					} 
+					break;
+				case MOVING:
+					SecondDest = null;
+					if((!(destination instanceof Ship))&&reachedDest(destination)){
+						if(destination instanceof Satellite<?>)
+							{mode = MODES.ORBITING;}
+						else mode = MODES.IDLE;
+					}
+					break;
+				case ORBITING:
+					SecondDest=null;
+					break;
+				case PROTECTORBIT:
+					SecondDest=null;
+					Ship possibletarget = identifyClosestEnemy();
+					if (possibletarget != null) {
+						setOtherDest(destination);
+						setupAttack(possibletarget);
+						mode = MODES.ATTACKING;
+					} 
+					break;
+				case TARGET_LOST:
+					if (SecondDest!=null) {
+						AIMove(SecondDest);
 						SecondDest=null;
-						Ship targettoattack = identifyClosestEnemy();
-						if(targettoattack != null){
-							setOtherDest(destination);
-							setupAttack(targettoattack);
-							mode = MODES.ATTACKING;
-	
-						} 
+						mode = MODES.ATTACKMOVE;
+					}
+					else {
+						mode=MODES.IDLE;
+					}
+					was_target=null;
+					break;
+				case ATTACKING:
+					attack(time);
+					break;
+				case USERATTACKING:
+					attack(time);
+					break;
+				case ATTACKMOVE:
+					Ship atkMoveTarget = identifyClosestEnemy();
+					if(atkMoveTarget != null){
+						setOtherDest(destination);
+						setupAttack(atkMoveTarget);
+						mode = MODES.ATTACKING;
 						break;
-					case MOVING:
-						SecondDest = null;
-						if((!(destination instanceof Ship))&&reachedDest(destination)){
-							if(destination instanceof Satellite<?>)
-								{mode = MODES.ORBITING;}
-							else mode = MODES.IDLE;
-						}
+					} 
+					if(reachedDest(destination)){
+						if(destination instanceof OwnableSatellite<?>)
+							{mode = MODES.PROTECTORBIT;}
+						else
+							mode = MODES.IDLE;
+					}
+					break;
+				case USERATTACKMOVE:
+					Ship useratkMoveTarget = identifyClosestEnemy();
+					if(useratkMoveTarget != null){
+						setOtherDest(destination);
+						setupAttack(useratkMoveTarget);
+						mode = MODES.ATTACKING;
 						break;
-					case ORBITING:
-						SecondDest=null;
-						break;
-					case PROTECTORBIT:
-						SecondDest=null;
-						Ship possibletarget = identifyClosestEnemy();
-						if(possibletarget != null){
-							setOtherDest(destination);
-							setupAttack(possibletarget);
-							mode = MODES.ATTACKING;
-						} 
-						break;
-					case TARGET_LOST:
-						if(SecondDest!=null){
-							AIMove(SecondDest);
-							SecondDest=null;
-							mode = MODES.ATTACKMOVE;
-						}
-						else{mode=MODES.IDLE;}
-						was_target=null;
-						break;
-					case ATTACKING:
-						attack(time);
-						break;
-					case USERATTACKING:
-						attack(time);
-						break;
-					case ATTACKMOVE:
-						Ship atkMoveTarget = identifyClosestEnemy();
-						if(atkMoveTarget != null){
-							setOtherDest(destination);
-							setupAttack(atkMoveTarget);
-							mode = MODES.ATTACKING;
-							break;
-						} 
-						if(reachedDest(destination)){
-							if(destination instanceof OwnableSatellite<?>)
-								{mode = MODES.PROTECTORBIT;}
-							else
-								mode = MODES.IDLE;
-						}
-						break;
-					case USERATTACKMOVE:
-						Ship useratkMoveTarget = identifyClosestEnemy();
-						if(useratkMoveTarget != null){
-							setOtherDest(destination);
-							setupAttack(useratkMoveTarget);
-							mode = MODES.ATTACKING;
-							break;
-						} 
-						if(reachedDest(destination)){
-							if(destination instanceof OwnableSatellite<?>)
-								{mode = MODES.PROTECTORBIT;}
-							else
-								mode = MODES.IDLE;
-						}
-						break;
-					case TRAVEL_TO_WARP:
-						if(isClearToWarp())
-						{
-							System.out.println("clear to warp!");
-							mode=MODES.ENTER_WARP;
-							current_flying_AI = new SpeedUpAI();
-						}
-						break;
-					case ENTER_WARP:
-						if(fastEnoughToWarp())
-							engageWarpDrive(shipIteration);
-						break;
-					case EXIT_WARP:
-						if(speed <= type.max_speed)
-							mode=MODES.ATTACKMOVE;
-						break;
-					case PICKUP_TROOPS:
-						if(!doTransferTroops() || soldier >= type.soldier_capacity)
-							mode=MODES.ORBITING;
-						break;
-				}
-			} while (mode != orig_mode);
-			
-			time += GalacticStrategyConstants.TIME_GRANULARITY;
-		}
+					} 
+					if(reachedDest(destination)){
+						if(destination instanceof OwnableSatellite<?>)
+							{mode = MODES.PROTECTORBIT;}
+						else
+							mode = MODES.IDLE;
+					}
+					break;
+				case TRAVEL_TO_WARP:
+					if(isClearToWarp())
+					{
+						System.out.println("clear to warp!");
+						mode=MODES.ENTER_WARP;
+						current_flying_AI = new SpeedUpAI();
+					}
+					break;
+				case ENTER_WARP:
+					if(fastEnoughToWarp())
+						engageWarpDrive(shipIteration);
+					break;
+				case EXIT_WARP:
+					if(speed <= type.max_speed)
+						mode=MODES.ATTACKMOVE;
+					break;
+				case PICKUP_TROOPS:
+					if(!doTransferTroops() || soldier >= type.soldier_capacity)
+						mode=MODES.ORBITING;
+					break;
+			}
+		} while (mode != orig_mode);
 		
 		return false;
 	}
@@ -364,7 +356,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP)
 		{
 			destination = d;
-			SecondDest = d;
 			userOverride();
 			
 			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
@@ -575,7 +566,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public void shootMissile(long t, double dx, double dy){
 		if (MathFormula.SumofSquares(dx,dy) < GalacticStrategyConstants.Attacking_Range_Sq &&(nextAttackingtime<=t))
 		{
-			Missile m=new Missile(this, target, time+GalacticStrategyConstants.TIME_GRANULARITY); 
+			Missile m=new Missile(this, target, time); 
 			location.missiles.put(m.id, m, t);
 			nextAttackingtime= time+GalacticStrategyConstants.Attacking_cooldown;
 		}
@@ -695,6 +686,11 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public double getExit_vec_y(){return exit_vec_y;}
 	public void setExit_direction(double d){exit_direction=d;}
 	public double getExit_direction(){return exit_direction;}
+	
+	public long getNextAttackingtime(){return nextAttackingtime;}
+	public void setNextAttackingtime(long t){nextAttackingtime = t;}
+	public int getNext_missile_id(){return next_missile_id;}
+	public void setNext_missile_id(int id){next_missile_id = id;}
 	
 	//support for Selectable
 	@Override

@@ -29,6 +29,7 @@ public strictfp class ShipDataSaver extends FlyerDataSaver<Ship> {
 					//from after a warp to before it.
 	Targetable<?> was_tgt;
 	Destination<?> second_dest;
+	int next_m_id;
 	
 	public ShipDataSaver()
 	{
@@ -50,6 +51,7 @@ public strictfp class ShipDataSaver extends FlyerDataSaver<Ship> {
 		loc = s.location;
 		was_tgt = s.was_target;
 		second_dest = s.SecondDest;
+		next_m_id = s.next_missile_id;
 	}
 	
 	@Override
@@ -67,5 +69,6 @@ public strictfp class ShipDataSaver extends FlyerDataSaver<Ship> {
 		s.location = loc;
 		s.was_target = was_tgt;
 		s.SecondDest = second_dest;
+		s.next_missile_id = next_m_id;
 	}
 }

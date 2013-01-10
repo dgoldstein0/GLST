@@ -18,12 +18,11 @@ public strictfp class ShipyardBuildShipOrder extends Order
 	@Override
 	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
-		the_yard = shipyard_describer.retrieveObject(g, scheduled_time);
+		the_yard = shipyard_describer.retrieveObject(g);
 		
 		if(the_yard != null)
-		{	
-			OwnableSatelliteDataSaverControl<?> ctrl = the_yard.location.data_control;
-			if(GameInterface.GC.players[p_id] == ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].own)
+		{
+			if(GameInterface.GC.players[p_id] == the_yard.location.owner)
 			{
 				the_yard.addToQueue(new Ship(type), scheduled_time);
 				decision = Decision.ACCEPT;

@@ -28,7 +28,7 @@ public class GameSimulator {
 			Resources.preload();
 		} catch (IOException e) {
 			System.err.println("Problem preloading resources.  Exiting.");
-			System.exit(1);
+			return;
 		}
 		
 		{
@@ -189,7 +189,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/singleplayerbuildafewthings.txt")
 						),
-						false, 10, null
+						false, 10, null, false
 					);
 				List<String> l1 = sim1.simulate("test5-gold.txt", null);
 				
@@ -199,7 +199,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/singleplayerbuildafewthings.txt")
 						),
-						true, 10, null
+						true, 10, null, false
 					);
 				List<String> l2 = sim2.simulate("test5-modified.txt", null);
 				
@@ -219,7 +219,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/singleplayercrash.txt")
 						),
-						false, 3, null
+						false, 3, null, false
 					);
 				List<String> l1 = sim1.simulate("test6-gold.txt", null);
 				
@@ -229,7 +229,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/singleplayercrash.txt")
 						),
-						true, 3, null
+						true, 3, null, false
 					);
 				List<String> l2 = sim2.simulate("test6-modified.txt", null);
 				
@@ -248,7 +248,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/test7-singleplayerattackbug.txt")
 						),
-						false, 3, null
+						false, 3, null, false
 					);
 				List<String> l1 = sim1.simulate("test7-gold.txt", null);
 				
@@ -258,7 +258,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/test7-singleplayerattackbug.txt")
 						),
-						true, 3, null
+						true, 3, null, false
 					);
 				List<String> l2 = sim2.simulate("test7-modified.txt", null);
 				
@@ -274,8 +274,8 @@ public class GameSimulator {
 			twoPlayerTest(8, "simplemap.xml", "testcases/test8-host.txt", "testcases/test8-guest.txt", 250000l, 100);
 			
 			// Tests based on EOH 2012 data
-			twoPlayerTest(9, "simplemap.xml", "eoh2012logs/Day 1/log1-host.txt", "eoh2012logs/Day 1/log1-guest.txt", 267000, 100); //end at 267000
-			twoPlayerTest(10, "simplemap.xml", "eoh2012logs/Day 1/log4-host.txt", "eoh2012logs/Day 1/log4-guest.txt", 268000, 100);
+			twoPlayerTest(9, "simplemap.xml", "eoh2012logs/Day 1/log1-host.txt", "eoh2012logs/Day 1/log1-guest.txt", 267000, 100);
+			twoPlayerTest(10, "simplemap.xml", "eoh2012logs/Day 1/log4-host.txt", "eoh2012logs/Day 1/log4-guest.txt", 255000, 100); //end at 268000
 		}
 	}
 	
@@ -284,20 +284,19 @@ public class GameSimulator {
 		System.out.println("Running Test " + test_num + "...");
 		Simulation sim1, sim2;
 		
-		try{
+		try {
 			sim1 = loadSimFromFile(map_file, 2,
 					new FileInputStream(
 						new File(input_log1)
 					),
-					false, num_save_points, total_time
+					false, num_save_points, total_time, false
 				);
 
-			
 			sim2 = loadSimFromFile(map_file, 2,
 					new FileInputStream(
 						new File(input_log2)
 					),
-					false, num_save_points, total_time
+					false, num_save_points, total_time, false
 				);
 		} catch(FileNotFoundException fnfe) {
 			System.out.println("FileNotFound for Test " + test_num);
@@ -336,8 +335,7 @@ public class GameSimulator {
 		} catch (RecordKeeper.DecisionCheckException e) {
 			e.printStackTrace();
 			decision_check_exc2 = true;
-		}
-		
+		}		
 		
 		if (!finished1)
 			System.out.println("ERROR: part 1 failed to finish");
@@ -349,13 +347,93 @@ public class GameSimulator {
 		
 		if (finished1 && finished2)
 		{
-			compareResults(test_num, l1, l2, sim1, sim2);
-			saveResultsToFile(l1, "test" + test_num + "p1.txt");
-			saveResultsToFile(l2, "test" + test_num + "p2.txt");
+			if (!compareResults(test_num, l1, l2, sim1, sim2))
+			{
+				// cl1 = check l1
+				List<String> cl1 = null, cl2 = null;
+				Simulation sim1_check = null, sim2_check = null;
+
+				// Part 3: rerun part 1 with everything in order.
+				boolean finished_cl1 = false;
+				boolean decision_check_exc_c1 = false;
+				
+				try {
+					sim1_check = loadSimFromFile(map_file, 2,
+						new FileInputStream(
+							new File(input_log1)
+						),
+						true, num_save_points, total_time, true
+					);
+				} catch (FileNotFoundException fnfe) {
+					System.err.println("Failed to find file " + input_log1);
+					return;
+				}
+				
+				try {
+					System.out.println("\tRunning part 1 in order...");
+					cl1 = sim1_check.simulate("test" + test_num + "-ca.txt", new RecordKeeper(decisions2));
+					finished_cl1 = true;
+				} catch (GameUpdater.DisagreementException e) {
+					e.printStackTrace();
+				} catch (RecordKeeper.DecisionCheckException e) {
+					e.printStackTrace();
+					
+					if (decision_check_exc1)
+						System.out.println("Both part 1 and the check terminated with DecisionCheckExceptions.");
+				}
+				
+				if (!finished_cl1)
+					System.out.println("ERROR: part 1 (in order) failed to finish");
+				else
+					compareResults(test_num, l1, cl1, sim1, sim1_check);
+				
+				// Part 4: rerun part 2 with everything in order.
+				boolean finished_cl2 = false;
+				boolean decision_check_exc_c2 = false;
+				
+				try {
+					sim2_check = loadSimFromFile(map_file, 2,
+						new FileInputStream(
+							new File(input_log2)
+						),
+						true, num_save_points, total_time, true
+					);
+				} catch (FileNotFoundException fnfe) {
+					System.err.println("Failed to find file " + input_log2);
+					return;
+				}
+				
+				try {
+					System.out.println("\tRunning part 2 in order...");
+					cl2 = sim2_check.simulate("test" + test_num + "-cb.txt", new RecordKeeper(decisions2));
+					finished_cl2 = true;
+				} catch (GameUpdater.DisagreementException e) {
+					e.printStackTrace();
+				} catch (RecordKeeper.DecisionCheckException e) {
+					e.printStackTrace();
+					
+					if (decision_check_exc2)
+						System.out.println("Both part 2 and the check terminated with DecisionCheckExceptions.");
+				}
+				
+				if (!finished_cl2)
+					System.out.println("ERROR: part 2 (in order) failed to finish");
+				else
+					compareResults(test_num, l2, cl2, sim2, sim2_check);
+				
+				saveResultsToFile(l1, "test" + test_num + "p1.txt");
+				saveResultsToFile(l2, "test" + test_num + "p2.txt");
+				
+				if (finished_cl1)
+					saveResultsToFile(cl1, "test" + test_num + "p1_check.txt");
+				
+				if (finished_cl2)
+					saveResultsToFile(cl2, "test" + test_num + "p2_check.txt");
+			}
 		}
 	}
 	
-	public static void compareResults(int test_num, List<String> l1, List<String> l2, Simulation sim1, Simulation sim2)
+	public static boolean compareResults(int test_num, List<String> l1, List<String> l2, Simulation sim1, Simulation sim2)
 	{
 		System.out.println("Comparing for test "+test_num);
 		
@@ -364,7 +442,7 @@ public class GameSimulator {
 		{
 			System.out.println("\tunequal result lengths in test " + test_num);
 			System.out.println("\tList 1: " + l1.size() +"; List 2: " + l2.size());
-			return;
+			return false;
 		}
 		else
 		{
@@ -396,6 +474,8 @@ public class GameSimulator {
 				System.out.println("\ttest PASSED");
 			else
 				System.out.println("\ttest FAILED");
+			
+			return identical;
 		}
 	}
 	
@@ -546,7 +626,8 @@ public class GameSimulator {
 											 InputStream file,
 											 boolean remove_updates,
 											 int num_updates_and_saves,
-											 Long end_time)
+											 Long end_time,
+											 boolean orders_at_actual_times)
 	{
 		List<SimulateAction> actions = new ArrayList<SimulateAction>();
 		XMLDecoder d = new XMLDecoder(file);
@@ -601,6 +682,18 @@ public class GameSimulator {
 			actions.add(new SimulateAction(end_time*i/num_updates_and_saves,
 										   SimulateAction.ACTION_TYPE.SAVE));
 		}
+		
+		if (orders_at_actual_times)
+		{
+			for (SimulateAction action : actions)
+			{
+				if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER)
+				{
+					action.do_at_time = action.the_order.scheduled_time - 1;
+				}
+			}
+		}
+		
 		Collections.sort(actions, new SimulateAction.Comparer());
 		
 		return new Simulation(map, num_players, actions);

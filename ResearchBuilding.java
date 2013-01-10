@@ -6,7 +6,7 @@ public strictfp class ResearchBuilding extends Facility<ResearchBuilding>{
 	{
 		super(loc, id, t, GalacticStrategyConstants.initial_research_building_endu);
 		data_control = new ResearchBuildingDataControl(this);
-		data_control.saveData();
+		data_control.saveData(t);
 	}
 	
 	public void research(ResearchOption o)

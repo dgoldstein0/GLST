@@ -10,7 +10,7 @@ public strictfp class Asteroid extends Satellite<Asteroid>
 	public Asteroid(){}
 	
 	@Override public String imageLoc(){return "images/asteroid.jpg";}
-	@Override public void recursiveSaveData() {}
+	@Override public void recursiveSaveData(long time) {}
 
 	@Override
 	public void recursiveRevert(long t) throws DataSaverControl.DataNotYetSavedException {

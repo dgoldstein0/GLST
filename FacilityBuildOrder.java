@@ -17,7 +17,7 @@ public strictfp class FacilityBuildOrder extends Order
 	@Override
 	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
-		the_sat = sat_desc.retrieveObject(g, scheduled_time);
+		the_sat = sat_desc.retrieveObject(g);
 		boolean is_building = false;
 		
 		//validate - check if owner is the same as orderer at the time the order should be executed

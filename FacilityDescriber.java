@@ -11,10 +11,9 @@ public strictfp class FacilityDescriber<T extends Facility<T>> implements Descri
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public T retrieveObject(Galaxy g, long t)
+	public T retrieveObject(Galaxy g)
 	{
-		OwnableSatelliteDataSaverControl data_ctrl = boss.retrieveObject(g, t).data_control;
-		return (T)((OwnableSatelliteDataSaver)data_ctrl.saved_data[data_ctrl.getIndexForTime(t)]).fac.get(id);
+		return (T) boss.retrieveObject(g).facilities.get(id);
 	}
 	
 	public FacilityDescriber(){}

@@ -1,6 +1,7 @@
 import javax.swing.JOptionPane;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public strictfp class Player implements RelaxedSaveable<Player>
 {
@@ -99,7 +100,7 @@ public strictfp class Player implements RelaxedSaveable<Player>
 				ret=true;
 			}
 			
-			last_time=t;
+			//last_time=t;
 		}
 		return ret;
 	}
@@ -115,7 +116,7 @@ public strictfp class Player implements RelaxedSaveable<Player>
 				ret=true;
 			}
 			
-			last_time=t;
+			//last_time=t;
 		}
 		return ret;
 	}
@@ -154,5 +155,19 @@ public strictfp class Player implements RelaxedSaveable<Player>
 
 	public int getNextOrderNumber() {
 		return ++next_order_number;
+	}
+
+	public void update(long time)
+	{	
+		Iterator<Ship> ship_it = ships_in_transit.iterator();
+		Ship s;
+		
+		while(ship_it.hasNext())
+		{
+			s=ship_it.next();
+			s.moveDuringWarp(time, ship_it); //the iterator is passed so that moveDuringWarp can remove the ship from the iteration, and by doing so from ships_in_transit
+		}
+		
+		last_time = time;
 	}
 }

@@ -1,5 +1,5 @@
 
-public strictfp class FleetDataSaverControl extends RelaxedDataSaverControl<Fleet, FleetDataSaver> {
+public strictfp class FleetDataSaverControl extends DataSaverControl<Fleet, FleetDataSaver> {
 
 	public FleetDataSaverControl(Fleet f) {
 		super(f, new Creator<Fleet, FleetDataSaver >(){

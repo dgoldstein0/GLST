@@ -268,11 +268,11 @@ public strictfp class GSystem implements Orbitable<GSystem>
 	public void setId(int i){id=i;}
 	public int getId(){return id;}
 
-	public void saveOwnablesData() {
+	public void saveOwnablesData(long time) {
 		
 		for(Satellite<?> sat : orbiting)
 		{
-			sat.recursiveSaveData();
+			sat.recursiveSaveData(time);
 		}
 	}
 	

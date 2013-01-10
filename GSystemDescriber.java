@@ -8,7 +8,7 @@ public strictfp class GSystemDescriber implements Describer<GSystem>
 	}
 	
 	@Override
-	public GSystem retrieveObject(Galaxy g, long t)
+	public GSystem retrieveObject(Galaxy g)
 	{
 		return g.systems.get(id);
 	}

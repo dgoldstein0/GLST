@@ -20,38 +20,38 @@ public strictfp class Galaxy
 	public void setStart_locations(ArrayList<OwnableSatellite<?>> loc){start_locations = loc;}
 	public ArrayList<OwnableSatellite<?>> getStart_locations(){return start_locations;}
 
-	public void saveAllData(Player[] players)
+	public void saveAllData(Player[] players, long time)
 	{
 		for (Player p : players)
 		{
 			if (p != null)
 			{
-				p.data_control.saveData();
+				p.data_control.saveData(time);
 				for (Ship s : p.ships_in_transit)
 				{
-					s.data_control.saveData();
+					s.data_control.saveData(time);
 				}
 			}
 		}
 		
 		for (GSystem sys : systems)
 		{
-			sys.saveOwnablesData();
+			sys.saveOwnablesData(time);
 			for (Fleet f : sys.fleets)
 			{
-				f.data_control.saveData();
+				f.data_control.saveData(time);
 				for (Ship.ShipId id : f.ships.keySet())
 				{
 					Ship s = f.ships.get(id);
-					s.data_control.saveData();
+					s.data_control.saveData(time);
 				}
 			}
 			
-			sys.missiles.data_control.saveData();
+			sys.missiles.data_control.saveData(time);
 			for (Missile.MissileId id : sys.missiles.table.keySet())
 			{
 				Missile m = sys.missiles.table.get(id);
-				m.data_control.saveData();
+				m.data_control.saveData(time);
 			}
 		}
 	}
@@ -120,11 +120,11 @@ public strictfp class Galaxy
 	}
 	
 	//TODO: what is this for?
-	public void saveOwnablesData() {
+	public void saveOwnablesData(long time) {
 		
 		for(GSystem s : systems)
 		{
-			s.saveOwnablesData();
+			s.saveOwnablesData(time);
 		}
 	}
 }

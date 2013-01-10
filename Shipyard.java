@@ -71,7 +71,6 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 					{
 						manufac_queue.put(next_queue_id++,ship);
 					}
-					last_time=t;
 					ret=true;
 					
 					SwingUtilities.invokeLater(ObjBuilder.shipManufactureFuncs.getCallback(this));
@@ -105,7 +104,6 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 					}
 				}
 			}
-			last_time=t;
 			
 			SwingUtilities.invokeLater(new QueueUpdater(this));
 			
@@ -113,7 +111,7 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 		}
 	}
 		
-	public void produce(long t)
+	private void produce(long t)
 	{
 		Ship newship;
 		synchronized(queue_lock)
@@ -123,8 +121,7 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 			newship=manufac_queue.get(first);//produce the 1st one in the queue
 			manufac_queue.remove(first);
 		}
-		newship.assemble(this, t);		
-		last_time=t;
+		newship.assemble(this, t);
 	}
 	
 	public void updateStatus(long t)
@@ -148,10 +145,11 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 						if(manufac_queue.size() == 0)
 							time_on_current_ship = 0;
 					}
-					last_time=t;
+
 				}
 			}
 		}
+		last_time=t;
 	}
 	
 	public double percentComplete()

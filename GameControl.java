@@ -308,7 +308,7 @@ public strictfp class GameControl
 			p.the_base = b;
 		}
 		
-		map.saveOwnablesData();
+		map.saveOwnablesData(0);
 		
 		//start game graphics...
 		GI.drawGalaxy(GameInterface.GALAXY_STATE.NORMAL);
@@ -418,7 +418,7 @@ public strictfp class GameControl
 				}
 			}
 			
-			map.saveOwnablesData();
+			map.saveOwnablesData(0);
 			
 			if(!automate)
 			{

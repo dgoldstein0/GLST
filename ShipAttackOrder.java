@@ -24,8 +24,8 @@ public strictfp class ShipAttackOrder extends Order
 	@Override
 	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
-		the_ship = ship_desc.retrieveObject(g, scheduled_time);
-		the_target = tgt_desc.retrieveObject(g, target_t);
+		the_ship = ship_desc.retrieveObject(g);
+		the_target = tgt_desc.retrieveObject(g);
 		
 		//if we couldn't find the ship, the target, or the ship is not alive at scheduled time, order is moot
 		if(the_ship != null && the_ship.isAlive() && the_target != null)

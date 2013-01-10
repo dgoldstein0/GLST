@@ -23,14 +23,23 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 	}
 	
 	//loading and saving data functions.
-	final public void saveData()
+	final public void saveData(long correct_time)
 	{
 		//if(the_obj instanceof Ship)
 		//	System.out.println(Integer.toString(((Ship)the_obj).id.queue_id) + " saving time " + Long.toString(((Ship)the_obj).time) + " at index " + Integer.toString(index));
 
 		int prev_index = getPreviousIndex(index);
-		if(saved_data[prev_index].t == ((T)the_obj).getTime())
+		long time_to_save = ((T)the_obj).getTime();
+		
+		if (time_to_save > correct_time)
+			throw new RuntimeException();
+		
+		if(saved_data[prev_index].t == time_to_save)
+		{
 			saved_data[prev_index].saveData(the_obj);
+			if (correct_time != 0)
+				throw new RuntimeException();
+		}
 		else
 		{
 			saved_data[index].saveData(the_obj);
@@ -63,7 +72,37 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 		}
 	}
 	
-	public abstract int getIndexForTime(long t) throws DataNotYetSavedException;
+	public int getIndexForTime(long t) throws DataNotYetSavedException
+	{
+		//System.out.println("t is " + Long.toString(t) + " and game time is " + Long.toString(GameInterface.GC.TC.getTime()));
+		
+		int stepback=(int) ((saved_data[getPreviousIndex(index)].t-t)/GalacticStrategyConstants.TIME_GRANULARITY + 1);
+		stepback += (t%GalacticStrategyConstants.TIME_GRANULARITY != 0) ? 1 : 0;
+		
+		int indx=-1;
+		//System.out.println("load data: t is " + Long.toString(t) + " and time is " + Long.toString(time) + ", so step back... " + Integer.toString(stepback));
+		if (stepback>50)
+		{
+			System.out.println("Error loading ship data: the delay is too long"); //BOOKMARK - how should these errors be dealt with
+		}
+		else if(stepback <= 0)
+		{
+			System.out.println("Major consistency error: stepback in getIndexForTime is " + Integer.toString(stepback) + "with t=" + Long.toString(t) + " and time="+Long.toString(the_obj.getTime()));
+			throw new DataNotYetSavedException(stepback);
+		}
+		else
+		{
+			if (stepback<=index)
+				indx=index-stepback;
+			else
+				indx=index+GalacticStrategyConstants.data_capacity-stepback;			
+		}
+		
+		if (saved_data[indx].t != t)
+			throw new RuntimeException("saved_data[" + indx + "].t is " + saved_data[indx].t + " and t is " + t);
+		
+		return indx;
+	}
 	
 	protected int getNextIndex(int i)
 	{
@@ -82,7 +121,7 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 		public abstract S[] createArray();
 	}
 	
-	public static class DataNotYetSavedException extends Exception
+	public static class DataNotYetSavedException extends RuntimeException
 	{
 		/**
 		 * Auto-generated serialVersionUID for Serializable

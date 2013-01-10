@@ -19,12 +19,12 @@ public class RelaxedDataSaverTester {
 		Planet p = new Planet(0,"tester", 100.0, 1000.0, 10, 10.0, .00001);
 		p.owner = new Player();
 		
-		p.data_control.saveData();
+		p.data_control.saveData(0);
 		
 		for(int i=0; i<times.length; i++)	
 		{
 			p.time=times[i];
-			p.data_control.saveData();
+			p.data_control.saveData(times[i]);
 		}
 		
 		int indx = p.data_control.getIndexForTime(17);

@@ -1,7 +1,8 @@
+import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.Set;
 
-public strictfp class MissileList implements RelaxedSaveable<MissileList> {
+public strictfp class MissileList implements Saveable<MissileList> {
 	
 	TreeMap<Missile.MissileId, Missile> table;
 	MissileListDataControl data_control;
@@ -60,4 +61,18 @@ public strictfp class MissileList implements RelaxedSaveable<MissileList> {
 	
 	public synchronized TreeMap<Missile.MissileId, Missile> getTable(){return table;}
 	public synchronized void setTable(TreeMap<Missile.MissileId, Missile> t){table=t;}
+
+	public void update(long time) {
+		
+		this.time = time;
+		synchronized(this)
+		{
+			Iterator<Missile.MissileId> missile_iteration = keySet().iterator();
+			for(Missile.MissileId i; missile_iteration.hasNext();)
+			{
+				i=missile_iteration.next();
+				get(i).update(time, missile_iteration); //returns true if the missile detonates
+			}
+		}
+	}
 }

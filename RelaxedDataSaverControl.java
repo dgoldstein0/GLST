@@ -1,4 +1,11 @@
 
+/**
+ * This class is probably getting the axe soon.  Just moved all it's children
+ * to DataSaverControl, as well as promoting the getIndexForTime function from
+ * FlyerDataSaverControl.
+ */
+
+@Deprecated
 public strictfp abstract class RelaxedDataSaverControl<T extends RelaxedSaveable<T>, S extends DataSaver<T> > extends DataSaverControl<T, S> {
 
 	public RelaxedDataSaverControl(T s, Creator<T, S> c) {

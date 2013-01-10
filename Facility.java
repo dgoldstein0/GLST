@@ -14,13 +14,15 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	
 	long last_time;//the last time it was updated
 	
-	RelaxedDataSaverControl<T, ? extends FacilityDataSaver<T> > data_control; //must be instantiated by subclasses
+	DataSaverControl<T, ? extends FacilityDataSaver<T> > data_control; //must be instantiated by subclasses
 	
 	public Facility(OwnableSatellite<?> l, int i, long t, int endu)
 	{
 		location=l;
 		
 		id=i;
+		
+		if (t % 20 != 0) throw new RuntimeException();
 		
 		last_time=t;
 		
@@ -77,7 +79,7 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	
 	
 	@Override //for Saveable
-	public RelaxedDataSaverControl<T, ? extends FacilityDataSaver<T> > getDataControl(){return data_control;}
+	public DataSaverControl<T, ? extends FacilityDataSaver<T> > getDataControl(){return data_control;}
 	@Override
 	public long getTime(){return last_time;}
 	@Override

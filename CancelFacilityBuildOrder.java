@@ -15,7 +15,7 @@ public strictfp class CancelFacilityBuildOrder extends Order {
 	@Override
 	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
-		the_sat = sat_desc.retrieveObject(g, scheduled_time);
+		the_sat = sat_desc.retrieveObject(g);
 		
 		//verify that the player ordering this is the owner of the planet.
 		if(the_sat.owner.getId() == p_id)

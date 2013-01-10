@@ -20,8 +20,8 @@ public strictfp class ShipWarpOrder extends Order
 	@Override
 	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException
 	{
-		the_ship = ship_desc.retrieveObject(g, scheduled_time);
-		the_dest = dest_desc.retrieveObject(g, scheduled_time);
+		the_ship = ship_desc.retrieveObject(g);
+		the_dest = dest_desc.retrieveObject(g);
 		
 		if(the_ship != null && the_ship.isAliveAt(scheduled_time)
 				&& the_ship.owner.getId() == p_id)

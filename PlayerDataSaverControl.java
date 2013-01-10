@@ -1,6 +1,6 @@
 
 
-public strictfp class PlayerDataSaverControl extends RelaxedDataSaverControl<Player, PlayerDataSaver> {
+public strictfp class PlayerDataSaverControl extends DataSaverControl<Player, PlayerDataSaver> {
 
 	public PlayerDataSaverControl(Player p) {
 		super(p, new Creator<Player, PlayerDataSaver>(){

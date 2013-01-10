@@ -22,15 +22,12 @@ public strictfp class ShipyardCancelBuildOrder extends Order {
 	@Override
 	public boolean execute(Galaxy g) throws DataSaverControl.DataNotYetSavedException {
 		
-		the_yard = (Shipyard)shipyard_describer.retrieveObject(g, scheduled_time);
+		the_yard = (Shipyard)shipyard_describer.retrieveObject(g);
 		
 		if(the_yard != null)
 		{
-			ShipyardDataSaver data = (ShipyardDataSaver) the_yard.data_control.saved_data[the_yard.data_control.getIndexForTime(scheduled_time)];
-			OwnableSatelliteDataSaverControl<?> ctrl = the_yard.location.data_control;
-			
-			if(data.alive && data.queue.size() != 0 &&
-					ctrl.saved_data[ctrl.getIndexForTime(scheduled_time)].own.getId() == p_id) //validity check: is the Shipyard still alive?
+			if(the_yard.is_alive && the_yard.manufac_queue.size() != 0 &&
+					the_yard.location.owner.getId() == p_id) //validity check: is the Shipyard still alive?
 			{
 				
 				if (mode == MODE.NETWORK)

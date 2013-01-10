@@ -11,9 +11,9 @@ public strictfp class SatelliteDescriber<T extends Satellite<T>> implements Desc
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public T retrieveObject(Galaxy g, long t)
+	public T retrieveObject(Galaxy g)
 	{
-		Orbitable<?> boss = boss_describer.retrieveObject(g, t);
+		Orbitable<?> boss = boss_describer.retrieveObject(g);
 		
 		return (T)boss.getOrbiting().get(id); //orbiting is only an array of Satellites, so, though we know here we will have a T, this gives an unchecked exception
 	}

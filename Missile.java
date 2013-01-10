@@ -28,7 +28,9 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		t.addAggressor(this);
 		target_alive=true;
 		
-		time = (long)(Math.ceil((double)(time)/(double)(GalacticStrategyConstants.TIME_GRANULARITY))*GalacticStrategyConstants.TIME_GRANULARITY);
+		time = TimeControl.roundUpToTimeGrain(time);
+		
+		//TODO: why do getXCoord and getYCoord take time values?
 		dest_x_coord = destination.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		dest_y_coord = destination.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
 		current_flying_AI = new TrackingAI(this, 0.0, TrackingAI.IN_RANGE_BEHAVIOR.NO_SLOWDOWN);
@@ -59,13 +61,16 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		{
 			moveIncrement();
 			
+			// TODO: detonate calls addDamage which uses time.  Should it use
+			// the pre- or post-incremented time? Right now, addDamage ignores
+			// the time argument.
+			time += GalacticStrategyConstants.TIME_GRANULARITY;
+			
 			if (collidedWithTarget())
 			{
 				detonate(missileIteration);
 				retval = true;
 			}
-			
-			time += GalacticStrategyConstants.TIME_GRANULARITY;
 		}
 				
 		return retval;

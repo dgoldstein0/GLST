@@ -64,7 +64,8 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 		tax_rate = calcTaxingrate();
 		add_money=0;
 		
-		if(t-last_resource_time >= GalacticStrategyConstants.TIME_BETWEEN_RESOURCES && location.owner != null) //do nothing unless the location has an owner
+		if (t - last_resource_time >= GalacticStrategyConstants.TIME_BETWEEN_RESOURCES
+		    && location.owner != null) //do nothing unless the location has an owner
 		{
 			add_money += tax_rate*location.population;
 			last_resource_time += GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
