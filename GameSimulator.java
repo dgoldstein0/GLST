@@ -276,6 +276,7 @@ public class GameSimulator {
 			// Tests based on EOH 2012 data
 			twoPlayerTest(9, "simplemap.xml", "eoh2012logs/Day 1/log1-host.txt", "eoh2012logs/Day 1/log1-guest.txt", 267000, 100);
 			twoPlayerTest(10, "simplemap.xml", "eoh2012logs/Day 1/log4-host.txt", "eoh2012logs/Day 1/log4-guest.txt", 255000, 100); //end at 268000
+			twoPlayerTest(11, "simplemap.xml", "eoh2012logs/Day 1/log8-host.txt", "eoh2012logs/Day 1/log8-guest.txt", 600000, 100);
 		}
 	}
 	
