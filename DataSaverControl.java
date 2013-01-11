@@ -29,20 +29,16 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 		//	System.out.println(Integer.toString(((Ship)the_obj).id.queue_id) + " saving time " + Long.toString(((Ship)the_obj).time) + " at index " + Integer.toString(index));
 
 		int prev_index = getPreviousIndex(index);
-		long time_to_save = ((T)the_obj).getTime();
 		
-		if (time_to_save > correct_time)
-			throw new RuntimeException();
-		
-		if(saved_data[prev_index].t == time_to_save)
+		if(saved_data[prev_index].t == correct_time)
 		{
-			saved_data[prev_index].saveData(the_obj);
+			saved_data[prev_index].saveData(the_obj, correct_time);
 			if (correct_time != 0)
 				throw new RuntimeException();
 		}
 		else
 		{
-			saved_data[index].saveData(the_obj);
+			saved_data[index].saveData(the_obj, correct_time);
 	
 			index = getNextIndex(index);
 		}
@@ -67,7 +63,7 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 				//(consider possibly save it for re-creation?)
 				
 				//remove the object from the data structure
-				the_obj.handleDataNotSaved(t);
+				the_obj.handleDataNotSaved();
 			}
 		}
 	}
@@ -87,7 +83,7 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 		}
 		else if(stepback <= 0)
 		{
-			System.out.println("Major consistency error: stepback in getIndexForTime is " + Integer.toString(stepback) + "with t=" + Long.toString(t) + " and time="+Long.toString(the_obj.getTime()));
+			System.out.println("Major consistency error: stepback in getIndexForTime is " + Integer.toString(stepback) + "with t=" + Long.toString(t));
 			throw new DataNotYetSavedException(stepback);
 		}
 		else

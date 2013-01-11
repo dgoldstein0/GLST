@@ -74,9 +74,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		else //builder.location is a Moon
 			location = (GSystem) ((Planet)builder.location.orbit.boss).orbit.boss;
 		
-		location.fleets[owner.getId()].add(this, t);
-		time = TimeControl.getTimeGrainBefore(t);
-		orderToAttackMove(time, builder.location); //this call does not go via the game Order handling system.  all computers should issue these orders on their own.
+		location.fleets[owner.getId()].add(this);
+		orderToAttackMove(t, builder.location); //this call does not go via the game Order handling system.  all computers should issue these orders on their own.
 	}
 	
 	//updates the ship an increment towards time t - moving and attacking.  return value is meaningless/ignored
@@ -84,13 +83,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	@Override
 	public boolean update(long t, Fleet.ShipIterator shipIteration)
 	{
-		if (time + GalacticStrategyConstants.TIME_GRANULARITY != t)
-			throw new RuntimeException("timing error!");
-		
-		moveIncrement();
+		moveIncrement(t);
 		MODES orig_mode;
-		
-		time += GalacticStrategyConstants.TIME_GRANULARITY;
 		
 		/* this do-while is necessary because it lets the ship go through
 		 * multiple states within a time grain */
@@ -104,14 +98,14 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					SecondDest=null;
 					Ship targettoattack = identifyClosestEnemy();
 					if(targettoattack != null){
-						setOtherDest(destination);
-						setupAttack(targettoattack);
+						setOtherDest(t, destination);
+						setupAttack(t, targettoattack);
 						mode = MODES.ATTACKING;
 					} 
 					break;
 				case MOVING:
 					SecondDest = null;
-					if((!(destination instanceof Ship))&&reachedDest(destination)){
+					if((!(destination instanceof Ship)) && reachedDest(t, destination)){
 						if(destination instanceof Satellite<?>)
 							{mode = MODES.ORBITING;}
 						else mode = MODES.IDLE;
@@ -124,14 +118,14 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					SecondDest=null;
 					Ship possibletarget = identifyClosestEnemy();
 					if (possibletarget != null) {
-						setOtherDest(destination);
-						setupAttack(possibletarget);
+						setOtherDest(t, destination);
+						setupAttack(t, possibletarget);
 						mode = MODES.ATTACKING;
 					} 
 					break;
 				case TARGET_LOST:
 					if (SecondDest!=null) {
-						AIMove(SecondDest);
+						AIMove(t, SecondDest);
 						SecondDest=null;
 						mode = MODES.ATTACKMOVE;
 					}
@@ -141,20 +135,20 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					was_target=null;
 					break;
 				case ATTACKING:
-					attack(time);
+					attack(t);
 					break;
 				case USERATTACKING:
-					attack(time);
+					attack(t);
 					break;
 				case ATTACKMOVE:
 					Ship atkMoveTarget = identifyClosestEnemy();
 					if(atkMoveTarget != null){
-						setOtherDest(destination);
-						setupAttack(atkMoveTarget);
+						setOtherDest(t, destination);
+						setupAttack(t, atkMoveTarget);
 						mode = MODES.ATTACKING;
 						break;
 					} 
-					if(reachedDest(destination)){
+					if(reachedDest(t, destination)){
 						if(destination instanceof OwnableSatellite<?>)
 							{mode = MODES.PROTECTORBIT;}
 						else
@@ -164,12 +158,12 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 				case USERATTACKMOVE:
 					Ship useratkMoveTarget = identifyClosestEnemy();
 					if(useratkMoveTarget != null){
-						setOtherDest(destination);
-						setupAttack(useratkMoveTarget);
+						setOtherDest(t, destination);
+						setupAttack(t, useratkMoveTarget);
 						mode = MODES.ATTACKING;
 						break;
 					} 
-					if(reachedDest(destination)){
+					if(reachedDest(t, destination)){
 						if(destination instanceof OwnableSatellite<?>)
 							{mode = MODES.PROTECTORBIT;}
 						else
@@ -186,7 +180,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					break;
 				case ENTER_WARP:
 					if(fastEnoughToWarp())
-						engageWarpDrive(shipIteration);
+						engageWarpDrive(t, shipIteration);
 					break;
 				case EXIT_WARP:
 					if(speed <= type.max_speed)
@@ -202,16 +196,16 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		return false;
 	}
 	
-	private void setOtherDest(Destination<?> d)
+	private void setOtherDest(long t, Destination<?> d)
 	{
 		if(d instanceof Flyer<?,?,?>)
-			SecondDest = new DestinationPoint(d.getXCoord(time), d.getYCoord(time));
+			SecondDest = new DestinationPoint(d.getXCoord(t), d.getYCoord(t));
 		else
 			SecondDest = d;
 	}
 
-	public boolean reachedDest(Destination<?> s){
-		boolean isClose =GalacticStrategyConstants.CloseEnoughDistance > findSqDestinationDistance(s);
+	public boolean reachedDest(long t, Destination<?> s){
+		boolean isClose =GalacticStrategyConstants.CloseEnoughDistance > findSqDestinationDistance(t, s);
 		return isClose;
 	}
 	
@@ -248,12 +242,11 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		
 	}
 	
-	public void setupAttack(Targetable<?> tgt){
+	public void setupAttack(long t, Targetable<?> tgt){
 		target= tgt;
 		destination = tgt;
 		target.addAggressor(this);
-		nextAttackingtime = time;
-		nextAttackingtime+=GalacticStrategyConstants.Attacking_cooldown;
+		nextAttackingtime = t + GalacticStrategyConstants.Attacking_cooldown;
 		
 		//TODO: get constant 5 out of here
 		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.Attacking_Range-5, TrackingAI.IN_RANGE_BEHAVIOR.STOP);
@@ -268,18 +261,18 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		}
 	}
 	
-	public double findSqDestinationDistance(Destination<?> Dest){
-		double deltaX = Dest.getXCoord(time)-pos_x;
-		double deltaY = Dest.getYCoord(time)-pos_y;
+	public double findSqDestinationDistance(long t, Destination<?> Dest){
+		double deltaX = Dest.getXCoord(t)-pos_x;
+		double deltaY = Dest.getYCoord(t)-pos_y;
 		return MathFormula.SumofSquares(deltaX, deltaY);
 		
 	}
 	
 	//this function is called when time is rolled back to before the ship existed
 	@Override
-	public void removeFromGame(long t)
+	public void removeFromGame()
 	{
-		location.fleets[owner.getId()].remove(this, t);
+		location.fleets[owner.getId()].remove(this);
 	}
 	
 	//this function is NOT incremental, i.e. it is only called once during updateGame() - before the updateGame function cycles through the systems
@@ -287,22 +280,20 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public boolean moveDuringWarp(long t, Iterator<Ship> ship_it)
 	{
 		//System.out.println("move during warp");
-		if(t > time && mode==MODES.IN_WARP)
+		if(mode==MODES.IN_WARP)
 		{
 			//System.out.println("...warping...");
 			if(t >= arrival_time)
 			{
 				//System.out.println("arriving...")
 				disengageWarpDrive(ship_it);
-				time = TimeControl.getTimeGrainBefore(arrival_time);
 				return true;
 			}
 			else
 			{
-				double dist_moved = type.warp_speed*(t-time);
+				double dist_moved = type.warp_speed*GalacticStrategyConstants.TIME_GRANULARITY;
 				pos_x += dist_moved*exit_vec_x;
 				pos_y += dist_moved*exit_vec_y;
-				time=t;
 			}
 		}
 		return false;
@@ -335,19 +326,19 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			userOverride();
 			
 			//System.out.println(Integer.toString(id) + " orderToMove: t is " + Long.toString(t) + " and time is " + Long.toString(time));
-			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
-			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+			dest_x_coord = d.getXCoord(t);
+			dest_y_coord = d.getYCoord(t);
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
 			mode=MODES.MOVING;
 			//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 		}
 	}
 	
-	public void AIMove(Destination<?> d)
+	public void AIMove(long t, Destination<?> d)
 	{
 		destination = d;
-		dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
-		dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+		dest_x_coord = d.getXCoord(t);
+		dest_y_coord = d.getYCoord(t);
 		current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
 	}
 	
@@ -358,8 +349,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			destination = d;
 			userOverride();
 			
-			dest_x_coord = d.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
-			dest_y_coord = d.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+			dest_x_coord = d.getXCoord(t);
+			dest_y_coord = d.getYCoord(t);
 			current_flying_AI = new TrackingAI(this, GalacticStrategyConstants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
 			mode = MODES.USERATTACKMOVE;
 		}
@@ -372,11 +363,11 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			//System.out.println(Integer.toString(id) + "orderToAttack: t is " + Long.toString(t));
 			userOverride();
 			mode=MODES.USERATTACKING;
-			setupAttack(tgt);
+			setupAttack(t, tgt);
 		}
 	}
 	
-	public void orderToWarp(long t, GSystem sys)
+	public void orderToWarp(GSystem sys)
 	{
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP && sys != location) //if sys == location, user means to cancel warp command.
 		{
@@ -414,7 +405,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 						if(sat.the_base == null) //if base isn't finished being built, player can take over without a fight
 							sat.setOwnerAtTime(getOwner(), t);
 						else
-							sat.the_base.attackedByTroops(GameInterface.GC.updater.TC.getNextTimeGrain(), this);
+							sat.the_base.attackedByTroops(t, this);
 					}
 				}
 				else
@@ -450,7 +441,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 				float get_soldiers = Math.min(type.soldier_capacity - soldier, GalacticStrategyConstants.troop_transfer_rate*GalacticStrategyConstants.TIME_GRANULARITY);
 				synchronized(((OwnableSatellite<?>)destination).facilities)
 				{
-					soldier += ((OwnableSatellite<?>)destination).the_base.retrieveSoldiers(time+GalacticStrategyConstants.TIME_GRANULARITY, get_soldiers, this);
+					soldier += ((OwnableSatellite<?>)destination).the_base.retrieveSoldiers(get_soldiers);
 				}
 			}
 			return true;
@@ -461,16 +452,16 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	public int warpRange(){return type.warp_range;}
 	
-	private void engageWarpDrive(Fleet.ShipIterator shipIteration)
+	private void engageWarpDrive(long time, Fleet.ShipIterator shipIteration)
 	{
 		//This function works very much like the destroyed() function
 		System.out.println("Engaging warp drive....");
 		
 		//remove from listing in system
 		if(shipIteration != null)
-			shipIteration.remove(time); //remove via the iterator to avoid ConcurrentModificationException
+			shipIteration.remove(); //remove via the iterator to avoid ConcurrentModificationException
 		else
-			location.fleets[owner.getId()].remove(this, time);
+			location.fleets[owner.getId()].remove(this);
 		
 		//notify aggressors
 		for(Targetter<?> t : aggressors)
@@ -484,7 +475,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		//compute details of flight plan
 		pos_x=location.x;
 		pos_y=location.y;
-		arrival_time = time+(long)(exit_vec_len/type.warp_speed);
+		arrival_time = time + (long)(exit_vec_len/type.warp_speed);
 		System.out.println("arrival time is " + Long.toString(arrival_time));
 		
 		mode=MODES.IN_WARP;
@@ -513,7 +504,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		current_flying_AI = new StopAI();
 		
 		ship_it.remove();//owner.ships_in_transit.remove(this);
-		location.fleets[owner.getId()].add(this, arrival_time);
+		location.fleets[owner.getId()].add(this);
 	}
 	
 	/*this function returns true IF:
@@ -566,23 +557,24 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public void shootMissile(long t, double dx, double dy){
 		if (MathFormula.SumofSquares(dx,dy) < GalacticStrategyConstants.Attacking_Range_Sq &&(nextAttackingtime<=t))
 		{
-			Missile m=new Missile(this, target, time); 
-			location.missiles.put(m.id, m, t);
-			nextAttackingtime= time+GalacticStrategyConstants.Attacking_cooldown;
+			Missile m=new Missile(this, t, target); 
+			location.missiles.put(m.id, m);
+			nextAttackingtime= t+GalacticStrategyConstants.Attacking_cooldown;
 		}
 	}
 	
 	public void attack(long t)
 	{
-		double dx = destinationX() - pos_x;
-		double dy = destinationY() - pos_y;
+		double dx = destinationX(t) - pos_x;
+		double dy = destinationY(t) - pos_y;
 		shootMissile(t,dx,dy);
 	}
 	
-	public void destroyed()
+	@Override
+	public void destroyed(long time)
 	{
 		//System.out.println("destroyed-before");	
-		if(location.fleets[owner.getId()].remove(this, time))//if is so in case another attack has already destroyed the ship, but both call the destroyed method
+		if(location.fleets[owner.getId()].remove(this))//if is so in case another attack has already destroyed the ship, but both call the destroyed method
 		{
 			is_alive=false;
 			
@@ -605,7 +597,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	public void targetIsDestroyed(long t, boolean late_order, Targetable<?> tgt)
 	{
-		targetLost(LOST_REASON.DESTROYED, t, late_order, tgt);
+		targetLost(t, LOST_REASON.DESTROYED, late_order, tgt);
 	}
 	
 	@Override
@@ -613,10 +605,10 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	public void targetHasWarped(long t, boolean late_order, Targetable<?> tgt)
 	{
-		targetLost(LOST_REASON.WARPED, t, late_order, tgt);
+		targetLost(t, LOST_REASON.WARPED, late_order, tgt);
 	}
 	
-	private void targetLost(LOST_REASON reason, long t, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
+	private void targetLost(long t, LOST_REASON reason, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
 	{
 		//System.out.println("target lost");
 		if (destination==(Destination<?>)target && (mode==MODES.ATTACKING||mode==MODES.USERATTACKING))
@@ -626,9 +618,10 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			//since missile detonation code runs before saveAllData().
 			//It is possible that we could write functions to get the lastest position that would be safe,
 			//but at the moment they don't exist.
+			
 			destination=new DestinationPoint(
-							target.getXCoord(t - GalacticStrategyConstants.TIME_GRANULARITY),
-							target.getYCoord(t - GalacticStrategyConstants.TIME_GRANULARITY)
+							target.getXCoord(t),
+							target.getYCoord(t)
 						);
 			SwingUtilities.invokeLater(new DestUpdater(this));
 		}

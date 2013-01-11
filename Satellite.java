@@ -29,6 +29,12 @@ public strictfp abstract class Satellite<T extends Satellite<T>> extends Stellar
 	public void setId(int i){id=i;}
 	public int getId(){return id;}	
 	
+	long last_t_gotten=0;
+	double x_coord;
+	double y_coord;
+	double x_vel;
+	double y_vel;
+	
 	//the rest of the code is to implement Destination without unnecessary computation.
 	@Override
 	public double getXCoord(long t)
@@ -102,12 +108,6 @@ public strictfp abstract class Satellite<T extends Satellite<T>> extends Stellar
 		
 		last_t_gotten=t;
 	}
-	
-	long last_t_gotten=0;
-	double x_coord;
-	double y_coord;
-	double x_vel;
-	double y_vel;
 
 	public abstract void recursiveSaveData(long time);
 	public abstract void recursiveRevert(long t) throws DataSaverControl.DataNotYetSavedException;

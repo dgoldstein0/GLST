@@ -5,7 +5,7 @@ public strictfp class WarpAI extends FlyerAI
 		the_flyer=f;
 	}
 	
-	public double calcDesiredDirection()
+	public double calcDesiredDirection(long t)
 	{
 		return ((Ship)the_flyer).exit_direction;
 	}
@@ -15,7 +15,7 @@ public strictfp class WarpAI extends FlyerAI
 		return FlyerAI.ABS_DIRECTION;
 	}
 	
-	public double calcDesiredSpeed(double angle_chng)
+	public double calcDesiredSpeed(long t, double angle_chng)
 	{
 		double cosine = Math.cos(angle_chng);
 		return the_flyer.type.max_speed*cosine*Math.abs(cosine);

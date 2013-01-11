@@ -2,13 +2,13 @@
 public class CollisionAvoidingAI extends FlyerAI {
 
 	@Override
-	public double calcDesiredDirection() {
+	public double calcDesiredDirection(long t) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public double calcDesiredSpeed(double dirChng) {
+	public double calcDesiredSpeed(long t, double dirChng) {
 		
 		/*new_v_x_a = v_x_a;
 		new_v_y_a = v_y_a;

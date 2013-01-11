@@ -6,13 +6,11 @@ public strictfp class MissileList implements Saveable<MissileList> {
 	
 	TreeMap<Missile.MissileId, Missile> table;
 	MissileListDataControl data_control;
-	volatile long time;
 	
 	public MissileList()
 	{
 		table = new TreeMap<Missile.MissileId, Missile>();
 		data_control = new MissileListDataControl(this);
-		time=0;
 	}
 
 	public synchronized Missile get(Missile.MissileId key)
@@ -20,17 +18,15 @@ public strictfp class MissileList implements Saveable<MissileList> {
 		return table.get(key);
 	}
 	
-	public synchronized Missile put(Missile.MissileId key, Missile m, long t)
+	public synchronized Missile put(Missile.MissileId key, Missile m)
 	{
 		Missile ret = table.put(key, m);
-		time = t;
 		
 		return ret;
 	}
 	
-	public synchronized Missile remove(Missile.MissileId key, long t)
+	public synchronized Missile remove(Missile.MissileId key)
 	{
-		time=t;
 		Missile m = table.remove(key);
 		
 		return m;
@@ -40,12 +36,6 @@ public strictfp class MissileList implements Saveable<MissileList> {
 	{
 		return table.keySet();
 	}
-	
-	@Override
-	public long getTime() {return time;}
-	
-	@Override
-	public void setTime(long t) {time=t;}
 
 	@Override
 	public DataSaverControl<MissileList, ? extends DataSaver<MissileList>> getDataControl() {
@@ -54,7 +44,7 @@ public strictfp class MissileList implements Saveable<MissileList> {
 	}
 
 	@Override
-	public void handleDataNotSaved(long time) {
+	public void handleDataNotSaved() {
 		
 		System.out.println("Impossible: MissileList.handleDataNotSaved has been invoked.");
 	}
@@ -64,7 +54,6 @@ public strictfp class MissileList implements Saveable<MissileList> {
 
 	public void update(long time) {
 		
-		this.time = time;
 		synchronized(this)
 		{
 			Iterator<Missile.MissileId> missile_iteration = keySet().iterator();

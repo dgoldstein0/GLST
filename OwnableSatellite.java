@@ -66,7 +66,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	}
 	
 	@Override
-	public void handleDataNotSaved(long t){System.out.println("OwnableSatellite data not saved.  Ridiculous!");}
+	public void handleDataNotSaved(){System.out.println("OwnableSatellite data not saved.  Ridiculous!");}
 	
 	public void update(long time_elapsed)
 	{
@@ -195,10 +195,8 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 				synchronized(owner.money_lock){
 					if(owner.getMetal() >= met && owner.getMoney() >= mon && facilities.size() < building_limit)
 					{
-						owner.changeMetal(-met, start_time);
-						owner.changeMoney(-mon, start_time); 
-						
-						time=start_time;
+						owner.changeMetal(-met);
+						owner.changeMoney(-mon); 
 						
 						SwingUtilities.invokeLater(ObjBuilder.facilityManufactureFuncs.getCallback(this));
 						
@@ -223,8 +221,8 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		{
 			synchronized(owner.money_lock)
 			{
-				owner.changeMoney((long)(frac_remaining*bldg_in_progress.money_cost), t);
-				owner.changeMetal((long)(frac_remaining*bldg_in_progress.metal_cost), t);
+				owner.changeMoney((long)(frac_remaining*bldg_in_progress.money_cost));
+				owner.changeMetal((long)(frac_remaining*bldg_in_progress.metal_cost));
 			}
 		}
 		

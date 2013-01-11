@@ -2,7 +2,7 @@
 import java.util.HashSet;
 
 //T = the class which extends Facility
-public strictfp abstract class Facility<T extends Facility<T>> implements Targetable<T>, RelaxedSaveable<T>, Comparable<T>
+public strictfp abstract class Facility<T extends Facility<T>> implements Targetable<T>, Saveable<T>, Comparable<T>
 {	
 	OwnableSatellite<?> location;
 	int id;
@@ -12,19 +12,13 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	int damage;
 	boolean is_alive;
 	
-	long last_time;//the last time it was updated
-	
 	DataSaverControl<T, ? extends FacilityDataSaver<T> > data_control; //must be instantiated by subclasses
 	
-	public Facility(OwnableSatellite<?> l, int i, long t, int endu)
+	public Facility(OwnableSatellite<?> l, int i, int endu)
 	{
 		location=l;
 		
 		id=i;
-		
-		if (t % 20 != 0) throw new RuntimeException();
-		
-		last_time=t;
 		
 		endurance=endu;
 		damage=0;
@@ -32,15 +26,16 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 		aggressors = new HashSet<Targetter<?>>();
 	}
 	
+	@Override
 	public void addDamage(long t, int d)
 	{
-		updateStatus(t);
 		damage+=d;
 		if(damage>=endurance)
-			destroyed();
+			destroyed(t);
 	}
 	
-	public void destroyed() //default option.  Base, Mine and TaxOffice override
+	@Override
+	public void destroyed(long t) //default option.  Base, Mine and TaxOffice override
 	{
 		synchronized(location.facilities)
 		{
@@ -55,9 +50,9 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	}
 	
 	@Override
-	public void handleDataNotSaved(long t){removeFromGame(t);}
+	public void handleDataNotSaved(){removeFromGame();}
 	
-	public void removeFromGame(long t)
+	public void removeFromGame()
 	{
 		synchronized(location.facilities)
 		{
@@ -68,22 +63,12 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	
 	@Override
 	public boolean isAlive(){return is_alive;}
-	@Override
-	public boolean isAliveAt(long t)
-	{
-		return data_control.saved_data[data_control.getIndexForTime(t)].alive;
-	}
-	
-	//Most implementations should do last_time = time, though this is not strictly required.
+
 	public abstract void ownerChanged(long t);
 	
 	
 	@Override //for Saveable
 	public DataSaverControl<T, ? extends FacilityDataSaver<T> > getDataControl(){return data_control;}
-	@Override
-	public long getTime(){return last_time;}
-	@Override
-	public void setTime(long t){last_time=t;}
 	
 	public int compareTo(T f)
 	{
@@ -110,9 +95,6 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	}
 	
 	public Facility(){}
-	
-	public long getLast_time(){return last_time;}
-	public void setLast_time(long t){last_time=t;}
 	
 	@Override public double getXCoord(long t){return location.getXCoord(t);}
 	@Override public double getYCoord(long t){return location.getYCoord(t);}

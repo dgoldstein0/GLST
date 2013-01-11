@@ -6,6 +6,6 @@ public strictfp abstract class Targetter<T extends Targetter<T>> implements Targ
 	public Targetable<?> getTarget(){return target;}
 	public void setTarget(Targetable<?> s){target = s;}
 	
-	public abstract void targetIsDestroyed(long time);
-	public abstract void targetHasWarped(long time);
+	public abstract void targetIsDestroyed(long t);
+	public abstract void targetHasWarped(long t);
 }

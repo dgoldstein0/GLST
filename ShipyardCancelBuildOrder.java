@@ -35,7 +35,7 @@ public strictfp class ShipyardCancelBuildOrder extends Order {
 				
 				if(the_ship != null)
 				{
-					the_yard.removeFromQueue(the_ship, scheduled_time);
+					the_yard.removeFromQueue(the_ship);
 					decision = Decision.ACCEPT;
 					return true;
 				}

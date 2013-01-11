@@ -22,7 +22,6 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	 */
 	private double metal;
 	
-	long last_time;
 	PlayerDataSaverControl data_control;
 	
 	Color color;
@@ -74,7 +73,6 @@ public strictfp class Player implements RelaxedSaveable<Player>
 		known_systems = new ArrayList<GSystem>();
 		known_satellites = new ArrayList<Satellite<?>>();
 		ready=false;
-		last_time=0;
 	}
 	
 	public Color getColor()
@@ -90,7 +88,7 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	}
 	
 	//return true = successfully changed, return false = player doesn't have enough money.
-	public boolean changeMoney(double m, long t)
+	public boolean changeMoney(double m)
 	{
 		boolean ret=false;
 		synchronized(money_lock){
@@ -99,14 +97,12 @@ public strictfp class Player implements RelaxedSaveable<Player>
 				money += m;
 				ret=true;
 			}
-			
-			//last_time=t;
 		}
 		return ret;
 	}
 	
 	//return true = successfully changed, return false = player doesn't have enough money.
-	public boolean changeMetal(double m, long t)
+	public boolean changeMetal(double m)
 	{
 		boolean ret=false;
 		synchronized(metal_lock){
@@ -115,8 +111,6 @@ public strictfp class Player implements RelaxedSaveable<Player>
 				metal += m;
 				ret=true;
 			}
-			
-			//last_time=t;
 		}
 		return ret;
 	}
@@ -140,8 +134,6 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	public void setReady(boolean r){ready=r;}
 	public ArrayList<Ship> getShips_in_transit(){return ships_in_transit;}
 	public void setShips_in_transit(ArrayList<Ship> s){ships_in_transit=s;}
-	@Override public long getTime() {return last_time;}
-	@Override public void setTime(long t) {last_time=t;}	
 	
 	@Override
 	public PlayerDataSaverControl getDataControl() {
@@ -149,7 +141,7 @@ public strictfp class Player implements RelaxedSaveable<Player>
 	}
 	
 	@Override
-	public void handleDataNotSaved(long time) {
+	public void handleDataNotSaved() {
 		// TODO Auto-generated method stub
 	}
 
@@ -167,7 +159,5 @@ public strictfp class Player implements RelaxedSaveable<Player>
 			s=ship_it.next();
 			s.moveDuringWarp(time, ship_it); //the iterator is passed so that moveDuringWarp can remove the ship from the iteration, and by doing so from ships_in_transit
 		}
-		
-		last_time = time;
 	}
 }

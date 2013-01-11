@@ -431,6 +431,7 @@ public strictfp class GameControl
 			}
 			else
 			{
+				updater.setupMostRecentTime();
 				updater.setTimeManager(new GameSimulator.SimulatedTimeControl());
 			}
 		} catch(Exception e)

@@ -9,16 +9,15 @@ public strictfp abstract class DataSaver<T extends Saveable<T>> {
 		data_saved=false;
 	}
 	
-	final public void saveData(T s)
+	final public void saveData(T s, long time)
 	{
 		data_saved=true;
-		t = s.getTime();
+		t = time;
 		doSaveData(s);
 	}
 	
 	final public void loadData(T s)
 	{
-		s.setTime(t);
 		doLoadData(s);
 	}
 	

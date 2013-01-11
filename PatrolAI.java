@@ -54,7 +54,7 @@ public strictfp class PatrolAI extends FlyerAI
 		patrol_ang_chng *= GalacticStrategyConstants.TIME_GRANULARITY*dir;
 	}
 	
-	public double calcDesiredDirection()
+	public double calcDesiredDirection(long t)
 	{
 		switch(state)
 		{
@@ -63,7 +63,7 @@ public strictfp class PatrolAI extends FlyerAI
 				double dif_y = the_flyer.getPos_y()-patrol_start_y;
 				
 				if(dif_x*dif_x + dif_y*dif_y > IN_RANGE * IN_RANGE)
-					return tracker.calcDesiredDirection();
+					return tracker.calcDesiredDirection(t);
 				else
 				{
 					double chng = patrol_start_ang - the_flyer.direction;
@@ -75,7 +75,7 @@ public strictfp class PatrolAI extends FlyerAI
 					if(chng == 0)
 					{
 						state=PATROLLING;
-						return calcDesiredDirection();
+						return calcDesiredDirection(t);
 					}
 					else
 						return chng;
@@ -89,12 +89,12 @@ public strictfp class PatrolAI extends FlyerAI
 		}
 	}
 	
-	public double calcDesiredSpeed(double dir)
+	public double calcDesiredSpeed(long t, double dir)
 	{
 		switch(state)
 		{
 			case TRAVEL_TO_PATROL:
-				return tracker.calcDesiredSpeed(dir);
+				return tracker.calcDesiredSpeed(t, dir);
 				//break;
 			case PATROLLING:
 				return patrol_speed;
@@ -102,5 +102,11 @@ public strictfp class PatrolAI extends FlyerAI
 			default:
 				return 0.0;
 		}
+	}
+
+	@Override
+	public int directionType() {
+		
+		return FlyerAI.REL_DIRECTION;
 	}
 }

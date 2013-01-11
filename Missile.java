@@ -5,7 +5,7 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 	private static final double Collide_Range=10.0;
 	boolean target_alive;
 
-	public Missile(Ship s, Targetable<?> t, long time)
+	public Missile(Ship s, long time, Targetable<?> t)
 	{
 		super("", ShipType.MISSILE);
 		
@@ -28,14 +28,10 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		t.addAggressor(this);
 		target_alive=true;
 		
-		time = TimeControl.roundUpToTimeGrain(time);
-		
 		//TODO: why do getXCoord and getYCoord take time values?
-		dest_x_coord = destination.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
-		dest_y_coord = destination.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+		dest_x_coord = destination.getXCoord(time);
+		dest_y_coord = destination.getYCoord(time);
 		current_flying_AI = new TrackingAI(this, 0.0, TrackingAI.IN_RANGE_BEHAVIOR.NO_SLOWDOWN);
-		
-		this.time=time;
 	}
 	
 	public Missile(){}
@@ -46,9 +42,9 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 	}
 	
 	@Override
-	public void removeFromGame(long t)
+	public void removeFromGame()
 	{
-		location.missiles.remove(id, t);
+		location.missiles.remove(id);
 	}
 	
 	//returns true when the missile detonates, false otherwise
@@ -57,34 +53,26 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 	{
 		boolean retval = false;
 		
-		if (time < t)
+		moveIncrement(t);
+		
+		if (collidedWithTarget(t))
 		{
-			moveIncrement();
-			
-			// TODO: detonate calls addDamage which uses time.  Should it use
-			// the pre- or post-incremented time? Right now, addDamage ignores
-			// the time argument.
-			time += GalacticStrategyConstants.TIME_GRANULARITY;
-			
-			if (collidedWithTarget())
-			{
-				detonate(missileIteration);
-				retval = true;
-			}
+			detonate(t, missileIteration);
+			retval = true;
 		}
-				
+
 		return retval;
 	}
 	
 	//TODO: POTENTIAL COORDINATION HAZARD - if missile/ship update order is changed, this won't work
-	public boolean collidedWithTarget()
+	public boolean collidedWithTarget(long t)
 	{
 		//can use current x/y coords for ships because ship positions are updated first
 		//TODO: when is target not alive, and destination not a DestinationPoint?
 		if(target_alive)
 		{
-			double x_dif=this.pos_x-target.getXCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
-			double y_dif=this.pos_y-target.getYCoord(time-GalacticStrategyConstants.TIME_GRANULARITY);
+			double x_dif=this.pos_x-target.getXCoord(t);
+			double y_dif=this.pos_y-target.getYCoord(t);
 			return (x_dif*x_dif+y_dif*y_dif<Collide_Range*Collide_Range);
 		}
 		else
@@ -102,7 +90,7 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		}
 	}
 	
-	public void detonate(Iterator<MissileId> missileIteration)
+	public void detonate(long t, Iterator<MissileId> missileIteration)
 	{
 		//this function could start an explosion animation instead
 		missileIteration.remove();
@@ -115,18 +103,18 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 			//right now, destroyed() themselves when notified that their targetIsDestroyed(long).  because iteration.remove
 			//is called, without removeAggressor(this), this addDamage call would cause the program to try to remove the
 			//element from the missiles hashtable a second time - even though the iteration is using that element at the moment.
-			target.addDamage(time, GalacticStrategyConstants.MISSILE_DAMAGE);
+			target.addDamage(t, GalacticStrategyConstants.MISSILE_DAMAGE);
 		}
 		
 		is_alive=false;
 	}
 	
 	/**not safe to call while iterating through location.missiles*/
-	public void destroyed()
+	public void destroyed(long t)
 	{
 		synchronized(location.missiles)
 		{
-			location.missiles.remove(id, time); //must call remove with the Key and not the Value
+			location.missiles.remove(id); //must call remove with the Key and not the Value
 		}
 		is_alive=false;
 	}
@@ -137,8 +125,8 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		//also see Ship's targetIsDestroyed function.
 		//Need to subtract a time grain to make sure we don't get any DataNotYetSavedExceptions.
 		destination = new DestinationPoint(
-						target.getXCoord(t - GalacticStrategyConstants.TIME_GRANULARITY),
-						target.getYCoord(t - GalacticStrategyConstants.TIME_GRANULARITY)
+						target.getXCoord(t),
+						target.getYCoord(t)
 					);
 		target_alive = false;
 		target = null;
@@ -147,7 +135,7 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 	@Override
 	public void targetHasWarped(long t)
 	{
-		destroyed();
+		destroyed(t);
 	}
 	
 	public boolean getTarget_alive(){return target_alive;}

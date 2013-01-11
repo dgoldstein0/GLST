@@ -1,4 +1,3 @@
-import java.util.HashSet;
 import java.util.Random;
 
 public strictfp class Base extends Facility<Base>{
@@ -7,16 +6,12 @@ public strictfp class Base extends Facility<Base>{
 	float soldier;
 	int max_soldier;
 	
-	long time_soldiers_taken;//the time for which the soldier_taker set is valid
-	HashSet<Saveable<?>> soldier_taker;
-	
 	public Base(OwnableSatellite<?> l, int i, long t)
 	{
-		super(l, i, t, GalacticStrategyConstants.initial_base_endu);
-		soldier=GalacticStrategyConstants.initial_soldier;
+		super(l, i, GalacticStrategyConstants.initial_base_endu);
+		soldier = GalacticStrategyConstants.initial_soldier;
 		max_soldier = GalacticStrategyConstants.default_max_soldier;
 		data_control = new BaseDataSaverControl(this);
-		soldier_taker = new HashSet<Saveable<?>>();
 	}
 	
 	public void upgrade()
@@ -29,41 +24,27 @@ public strictfp class Base extends Facility<Base>{
 	{
 		synchronized(soldier_lock)
 		{
-			soldier += GalacticStrategyConstants.soldier_production_rate*(time-last_time);
+			soldier += GalacticStrategyConstants.soldier_production_rate*GalacticStrategyConstants.TIME_GRANULARITY;
 			if(soldier > max_soldier)
 				soldier=(float)max_soldier;
-			
-			soldier_taker.clear();
-			last_time=time;
 		}
 	}
 	
-	public float retrieveSoldiers(long time, float asking, Saveable<?> taker)
+	public float retrieveSoldiers(float asking)
 	{
 		float giving; //the number of soldiers the Base is giving up to the ship
 		synchronized(soldier_lock)
 		{
-			updateStatus(time);
-			
 			if(soldier > asking)
 			{
 				soldier -= asking;
-				giving=asking;
+				giving = asking;
 			}
 			else
 			{
 				giving = soldier;
 				soldier = 0.0f;
 			}
-		}
-		
-		if(time == time_soldiers_taken)
-			soldier_taker.add(taker);
-		else
-		{
-			time_soldiers_taken=time;
-			soldier_taker.clear();
-			soldier_taker.add(taker);
 		}
 		
 		return giving;
@@ -73,9 +54,6 @@ public strictfp class Base extends Facility<Base>{
 	{
 		synchronized(soldier_lock)
 		{
-			updateStatus(t);
-			soldier_taker.add(enemy);
-			
 			Random gen = new Random(t);
 			
 			while(soldier >= 1 && enemy.getSoldier() >= 1)
@@ -101,7 +79,6 @@ public strictfp class Base extends Facility<Base>{
 	@Override
 	public void ownerChanged(long t)
 	{
-		last_time=t;
 		soldier=0;
 	}
 	
@@ -120,15 +97,10 @@ public strictfp class Base extends Facility<Base>{
 	
 	public Base(){}
 	
-	public HashSet<Saveable<?>> getSoldier_taker(){return soldier_taker;}
-	public void setSoldier_taker(HashSet<Saveable<?>> takers){soldier_taker = takers;}
-	
 	public float getSoldier(){return soldier;}
 	public void setSoldier(float s){synchronized(soldier_lock){soldier=s;}}
 	public int getMax_soldier(){return max_soldier;}
 	public void setMax_soldier(int s){max_soldier=s;}
-	public long getTime_soldiers_taken(){return time_soldiers_taken;}
-	public void setTime_soldiers_taken(long t){time_soldiers_taken=t;}
 	
 	public FacilityType getType(){return FacilityType.BASE;}
 }

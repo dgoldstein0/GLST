@@ -59,6 +59,12 @@ public class GameUpdater {
 	{
 		is_closing=false;
 		
+		setupMostRecentTime();
+		TM.startConstIntervalTask(new Updater(),(int)GalacticStrategyConstants.TIME_GRANULARITY);
+	}
+	
+	public void setupMostRecentTime()
+	{
 		//this initialization of most_recent_time has to wait until GC.players
 		//is populated, so it cannot be done in the GameUpdater constructor.
 		for (int i=0; i < GC.players.length; i++)
@@ -68,8 +74,6 @@ public class GameUpdater {
 				most_recent_time.put(i, 0l);
 			}
 		}
-		
-		TM.startConstIntervalTask(new Updater(),(int)GalacticStrategyConstants.TIME_GRANULARITY);
 	}
 	
 	public void stopUpdating()
@@ -102,6 +106,8 @@ public class GameUpdater {
 	 * */
 	public void scheduleOrder(Order o)
 	{
+		// Force everything onto the next time grain
+		o.scheduled_time = TimeControl.roundUpToTimeGrain(o.scheduled_time);
 		pending_execution.add(o);
 	}
 	

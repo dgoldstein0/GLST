@@ -9,7 +9,6 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 	Object lock = new Object();
 	
 	FleetDataSaverControl data_control;
-	long last_time_changed;
 	
 	public Fleet(GSystem loc, Player o)
 	{
@@ -17,7 +16,6 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 		location = loc;
 		owner = o;
 		data_control = new FleetDataSaverControl(this);
-		last_time_changed=0;
 		data_control.saveData(0);
 	}
 	
@@ -42,26 +40,22 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 				s.update(time, ship_iteration);
 			}
 		}
-		
-		last_time_changed = time;
 	}
 	
-	public void add(Ship s, long t)
+	public void add(Ship s)
 	{
 		synchronized(lock)
 		{
 			System.out.println("Adding ship to fleet: queue_id = " + s.getId().queue_id);
 			System.out.println("\tmanufacturer has id " + s.getId().manufacturer.getId());
-			System.out.println("\tAt time " + Long.toString(t));
-			
+
 			Ship val = ships.put(s.getId(), s);
 			System.out.println("\tval is null: " + Boolean.toString(val==null));
-			last_time_changed=t;
 		}
 		location.increaseClaim(owner);
 	}
 	
-	public boolean remove(Ship s, long t)
+	public boolean remove(Ship s)
 	{
 		//this removes the ship.  remove() returns the ship if the ship was in the hashtable, so
 		//check against null makes sure we are not removing a ship that has already been removed
@@ -70,7 +64,6 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 		{
 			if(ships.remove(s.getId()) != null)
 			{
-				last_time_changed = t;
 				location.decreaseClaim(owner);
 				return true;
 			}
@@ -91,19 +84,9 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 	}
 
 	@Override
-	public void handleDataNotSaved(long t) {
+	public void handleDataNotSaved() {
 		
-		System.out.println("handleDataNotSaved called for Fleet!  This is impossible!");
-	}
-
-	@Override
-	public long getTime() {
-		return last_time_changed;
-	}
-
-	@Override
-	public void setTime(long t) {
-		last_time_changed = t;
+		throw new RuntimeException("handleDataNotSaved called for Fleet!  This is impossible!");
 	}
 	
 	public class ShipIterator implements Iterator<Ship.ShipId>
@@ -126,20 +109,12 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 			return the_iterator.hasNext();
 		}
 
-		public void remove(long t) {
+		public void remove() {
 			synchronized(lock)
 			{
 				the_iterator.remove();
-				last_time_changed = t;
 				location.decreaseClaim(owner);
 			}
-		}
-
-		@Override
-		@Deprecated
-		public void remove() {
-			
-			throw new UnsupportedOperationException();
 		}
 	}
 }

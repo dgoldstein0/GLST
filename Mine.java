@@ -5,7 +5,7 @@ public strictfp class Mine extends Facility<Mine>{
 	
 	public Mine(OwnableSatellite<?> loc, int i, long t)
 	{
-		super(loc, i, t, GalacticStrategyConstants.initial_mine_endu);
+		super(loc, i, GalacticStrategyConstants.initial_mine_endu);
 		location.number_mines++;
 		data_control = new MineDataSaverControl(this);
 		
@@ -16,7 +16,7 @@ public strictfp class Mine extends Facility<Mine>{
 	}
 	
 	@Override
-	public void destroyed()
+	public void destroyed(long t)
 	{
 		synchronized(location.facilities)
 		{
@@ -27,7 +27,7 @@ public strictfp class Mine extends Facility<Mine>{
 	}
 	
 	@Override
-	public void removeFromGame(long t)
+	public void removeFromGame()
 	{
 		synchronized(location.facilities)
 		{
@@ -44,8 +44,7 @@ public strictfp class Mine extends Facility<Mine>{
 			add_met += location.calcMiningrate()*GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
 			last_resource_time += GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
 		}
-		location.owner.changeMetal(add_met, last_resource_time);
-		last_time = t;
+		location.owner.changeMetal(add_met);
 	}
 	
 	public FacilityType getType(){return FacilityType.MINE;}

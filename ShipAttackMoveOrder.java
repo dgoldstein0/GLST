@@ -36,7 +36,7 @@ public class ShipAttackMoveOrder extends Order {
 				System.out.println("\tthe_ship.owner.getId() = " + Integer.toString(the_ship.owner.getId()) + " and player_id = " + Integer.toString(player_id));
 			}*/
 			
-			if(the_ship != null && the_dest != null && the_ship.isAliveAt(scheduled_time)
+			if(the_ship != null && the_dest != null && the_ship.isAlive()
 					&& the_ship.owner.getId() == p_id)
 			{
 				the_ship.orderToAttackMove(scheduled_time, the_dest);

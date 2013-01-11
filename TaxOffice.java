@@ -7,7 +7,7 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 	
 	public TaxOffice(OwnableSatellite<?> loc, int i, long t)
 	{
-		super(loc, i, t, GalacticStrategyConstants.initial_taxoffice_endu);
+		super(loc, i, GalacticStrategyConstants.initial_taxoffice_endu);
 		location.number_taxoffices++;
 		tax_rate = GalacticStrategyConstants.DEFAULT_INCOME_RATE;
 		data_control = new TaxOfficeDataSaverControl(this);
@@ -27,7 +27,7 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 	}
 	
 	@Override
-	public void destroyed()
+	public void destroyed(long t)
 	{
 		synchronized(location.facilities)
 		{
@@ -38,7 +38,7 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 	}
 	
 	@Override
-	public void removeFromGame(long t)
+	public void removeFromGame()
 	{
 		synchronized(location.facilities)
 		{
@@ -55,7 +55,6 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 
 	@Override
 	public void ownerChanged(long t) {
-		last_time = t;
 		last_resource_time = TimeControl.roundUpToNextResourceChange(t);
 	}
 
@@ -70,8 +69,7 @@ public strictfp class TaxOffice extends Facility<TaxOffice> {
 			add_money += tax_rate*location.population;
 			last_resource_time += GalacticStrategyConstants.TIME_BETWEEN_RESOURCES;
 		}
-		location.owner.changeMoney(add_money, last_resource_time);
-		last_time = t;
+		location.owner.changeMoney(add_money);
 	}
 	
 	public TaxOffice(){}

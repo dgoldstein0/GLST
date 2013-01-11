@@ -19,8 +19,8 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 	
 	long time_on_current_ship;
 	
-	public Shipyard(OwnableSatellite<?> loc, int i, long t) {
-		super(loc, i, t, GalacticStrategyConstants.initial_shipyard_endu);
+	public Shipyard(OwnableSatellite<?> loc, int i) {
+		super(loc, i, GalacticStrategyConstants.initial_shipyard_endu);
 		manufac_queue=new Hashtable<Integer,Ship>(GalacticStrategyConstants.queue_capa);
 		time_on_current_ship = 0;
 		data_control = new ShipyardDataSaverControl(this);
@@ -63,8 +63,8 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 			synchronized(location.owner.money_lock){
 				if(location.owner.getMetal() >= met && location.owner.getMoney() >= mon)
 				{
-					location.owner.changeMetal(-met, t);
-					location.owner.changeMoney(-mon, t);
+					location.owner.changeMetal(-met);
+					location.owner.changeMoney(-mon);
 					
 					ship.id = new Ship.ShipId(next_queue_id, this);
 					synchronized(queue_lock)
@@ -82,7 +82,7 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 		return ret;
 	}
 	
-	public void removeFromQueue(Ship ship, long t)
+	public void removeFromQueue(Ship ship)
 	{
 		synchronized(queue_lock)
 		{
@@ -99,8 +99,8 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 				{
 					synchronized(location.owner.money_lock)
 					{
-						location.owner.changeMoney(ship.type.money_cost, t);
-						location.owner.changeMetal(ship.type.metal_cost, t);
+						location.owner.changeMoney(ship.type.money_cost);
+						location.owner.changeMetal(ship.type.metal_cost);
 					}
 				}
 			}
@@ -132,12 +132,11 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 			{
 				if(manufac_queue.size() != 0)
 				{
-					time_on_current_ship += t-last_time;
+					time_on_current_ship += GalacticStrategyConstants.TIME_GRANULARITY;
 					int first = indexOfFirstShipInQueue();
 					if(time_on_current_ship >= manufac_queue.get(first).type.time_to_build)
 					{
-						time_on_current_ship -= manufac_queue.get(first).type.time_to_build;
-						produce(t-time_on_current_ship);
+						produce(t);
 						
 						//update the queue display... if it is being displayed.
 						SwingUtilities.invokeLater(new QueueUpdater(this));
@@ -149,7 +148,6 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 				}
 			}
 		}
-		last_time=t;
 	}
 	
 	public double percentComplete()

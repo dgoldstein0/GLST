@@ -29,7 +29,7 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	double pos_y;
 	double direction;
 	double speed;
-	protected long time;
+
 	FlyerAI current_flying_AI;
 	boolean is_alive;
 	
@@ -51,38 +51,17 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	public Flyer(){}
 	
 	@Override
-	public void handleDataNotSaved(long t){removeFromGame(t);}
-	public abstract void removeFromGame(long t);
+	public void handleDataNotSaved(){removeFromGame();}
+	public abstract void removeFromGame();
 	
 	public boolean isAlive(){return is_alive;}
-	public boolean isAliveAt(long t) throws DataSaverControl.DataNotYetSavedException
-	{
-		if(t == time)
-			return isAlive();
-		else
-		{
-			try
-			{
-				return data_control.saved_data[data_control.getIndexForTime(t)].is_alive;
-			}
-			catch(DataSaverControl.DataNotYetSavedException e)
-			{
-				if(!data_control.saved_data[data_control.getPreviousIndex(data_control.index)].is_alive)
-					return false;
-				/*else if (e.stepback == 0) //not necessary due to first if in the function
-					return true;*/
-				else
-					throw e; //TODO: in Java 1.7, this can be changed to throw;
-			}
-		}
-	}
 	
 	public abstract boolean update(long time, ITERATOR iterator);
 	
 	//ship physics functions
 	
 	//moves the ship one time_granularity.  this is a separate function so that all ships updates can be stepped through 1 by 1.
-	protected void moveIncrement()
+	protected void moveIncrement(long t)
 	{
 		//change position
 		pos_x += speed*GalacticStrategyConstants.TIME_GRANULARITY*Math.cos(direction);
@@ -93,14 +72,14 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 		switch(current_flying_AI.directionType())
 		{
 			case FlyerAI.ABS_DIRECTION:
-				desired_direction_chng = current_flying_AI.calcDesiredDirection() - direction;
+				desired_direction_chng = current_flying_AI.calcDesiredDirection(t) - direction;
 				if(desired_direction_chng > Math.PI)
 					desired_direction_chng -= 2.0*Math.PI;
 				else if(desired_direction_chng < -Math.PI)
 					desired_direction_chng += 2.0*Math.PI;
 				break;
 			case FlyerAI.REL_DIRECTION:
-				desired_direction_chng = current_flying_AI.calcDesiredDirection();
+				desired_direction_chng = current_flying_AI.calcDesiredDirection(t);
 				break;
 			default:
 				System.out.println("directionType not supported by Flyer.moveIncrement");
@@ -108,7 +87,7 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 				//break;
 		}
 		
-		double desired_speed = current_flying_AI.calcDesiredSpeed(desired_direction_chng);
+		double desired_speed = current_flying_AI.calcDesiredSpeed(t, desired_direction_chng);
 		
 		double accel = getAccel();
 		
@@ -143,36 +122,39 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 		return type.accel_rate;
 	}
 	
-	public double destinationX()
+	public double destinationX(long t)
 	{
-		dest_x_coord = destination.getXCoord(time);
+		dest_x_coord = destination.getXCoord(t);
 		return dest_x_coord;
 	}
 	
-	public double destinationY()
+	public double destinationY(long t)
 	{
-		dest_y_coord = destination.getYCoord(time);
+		dest_y_coord = destination.getYCoord(t);
 		return dest_y_coord;
 	}
 	
-	public double destinationVelX()
+	public double destinationVelX(long t)
 	{
-		return destination.getXVel(time);
+		return destination.getXVel(t);
 	}
 	
-	public double destinationVelY()
+	public double destinationVelY(long t)
 	{
-		return destination.getYVel(time);
+		return destination.getYVel(t);
 	}
 	
 	//methods to implement destination
+	@Override
 	public String imageLoc(){return type.img.img_path;}
 	
+	@Override
 	public double getXCoord(long t)
 	{
 		return pos_x;
 	}
 	
+	@Override
 	public double getYCoord(long t)
 	{
 		return pos_y;
@@ -204,10 +186,10 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	
 	@Override
 	public void addDamage(long t, int d)
-	{ //TODO: t is ignored... should it be?
+	{
 		damage+=d;
 		if(damage>=type.hull)
-			destroyed();
+			destroyed(t);
 	}
 	
 	public ShipType getType(){return type;}
@@ -220,8 +202,6 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	public double getDirection(){return direction;}
 	public void setSpeed(double s){speed=s;}
 	public void setDirection(double d){direction=d;}
-	final public long getTime(){return time;}
-	final public void setTime(long t){time=t;}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 	public int getDamage(){return damage;}

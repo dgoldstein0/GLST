@@ -23,10 +23,10 @@ public strictfp class ShipWarpOrder extends Order
 		the_ship = ship_desc.retrieveObject(g);
 		the_dest = dest_desc.retrieveObject(g);
 		
-		if(the_ship != null && the_ship.isAliveAt(scheduled_time)
+		if(the_ship != null && the_ship.isAlive()
 				&& the_ship.owner.getId() == p_id)
 		{
-			the_ship.orderToWarp(scheduled_time, the_dest);
+			the_ship.orderToWarp(the_dest);
 			decision = Decision.ACCEPT;
 			return true;
 		}
