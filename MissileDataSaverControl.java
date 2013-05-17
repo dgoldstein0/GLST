@@ -1,12 +1,11 @@
 
-public strictfp class MissileDataSaverControl extends FlyerDataSaverControl<Missile, FlyerDataSaver<Missile>> {
+public strictfp class MissileDataSaverControl extends FlyerDataSaverControl<Missile, MissileDataSaver> {
 
-	@SuppressWarnings("unchecked")
 	public MissileDataSaverControl(Missile m)
 	{
-		super(m, new Creator<Missile, FlyerDataSaver<Missile> >(){
-				public FlyerDataSaver<Missile> create(){return new FlyerDataSaver<Missile>();}
-				public FlyerDataSaver[] createArray(){return new FlyerDataSaver[GalacticStrategyConstants.data_capacity];}
+		super(m, new Creator<Missile, MissileDataSaver>(){
+				public MissileDataSaver create(){return new MissileDataSaver();}
+				public MissileDataSaver[] createArray(){return new MissileDataSaver[GalacticStrategyConstants.data_capacity];}
 			});
 	}
 }

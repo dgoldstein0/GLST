@@ -432,7 +432,7 @@ public strictfp class GameControl
 			else
 			{
 				updater.setupMostRecentTime();
-				updater.setTimeManager(new GameSimulator.SimulatedTimeControl());
+				updater.setTimeManager(new SimulatedTimeControl());
 			}
 		} catch(Exception e)
 		{
@@ -971,9 +971,9 @@ public strictfp class GameControl
 									
 									//TODO: move debugging code
 									long time = updater.getTime();
-									updater.log(new GameSimulator.SimulateAction(time, o,
-											GameSimulator.SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
-											GameSimulator.SimulateAction.ORDER_TYPE.REMOTE));
+									updater.log(new SimulateAction(time, o,
+											SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
+											SimulateAction.ORDER_TYPE.REMOTE));
 									break;
 								}
 								case DECISION:
@@ -983,9 +983,9 @@ public strictfp class GameControl
 									//TODO: move debugging code
 									//TODO: I think we should log who this came from... oh yeah, only two player at the moment
 									long time = updater.getTime();
-									updater.log(new GameSimulator.SimulateAction(time, o,
-											GameSimulator.SimulateAction.ACTION_TYPE.RECEIVED_DECISION,
-											GameSimulator.SimulateAction.ORDER_TYPE.REMOTE));
+									updater.log(new SimulateAction(time, o,
+											SimulateAction.ACTION_TYPE.RECEIVED_DECISION,
+											SimulateAction.ORDER_TYPE.REMOTE));
 									break;
 								}
 							}
@@ -1057,9 +1057,9 @@ public strictfp class GameControl
 		//TODO: move debugging code
 		synchronized(updater.log_lock)
 		{
-			updater.log(new GameSimulator.SimulateAction(updater.getTime(), o,
-					GameSimulator.SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
-					GameSimulator.SimulateAction.ORDER_TYPE.LOCAL));
+			updater.log(new SimulateAction(updater.getTime(), o,
+					SimulateAction.ACTION_TYPE.SCHEDULE_ORDER,
+					SimulateAction.ORDER_TYPE.LOCAL));
 			
 			updater.scheduleOrder(o);
 			

@@ -15,9 +15,6 @@ public class RecordKeeper {
 		
 		for (Order o : decisions)
 		{
-			// necessary because GameUpdater.scheduleOrder does this too, but
-			// the old logs have non-grain aligned times.
-			o.scheduled_time = TimeControl.roundUpToTimeGrain(o.scheduled_time);
 			decided_orders.put(o,o);
 		}
 	}

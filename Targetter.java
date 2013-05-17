@@ -1,6 +1,5 @@
 public strictfp abstract class Targetter<T extends Targetter<T>> implements Targetable<T>
 {
-	
 	Targetable<?> target;
 	
 	public Targetable<?> getTarget(){return target;}

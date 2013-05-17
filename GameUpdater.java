@@ -107,7 +107,6 @@ public class GameUpdater {
 	public void scheduleOrder(Order o)
 	{
 		// Force everything onto the next time grain
-		o.scheduled_time = TimeControl.roundUpToTimeGrain(o.scheduled_time);
 		pending_execution.add(o);
 	}
 	
@@ -150,7 +149,7 @@ public class GameUpdater {
 			time_elapsed=TC.getTime();
 			
 			//TODO: Debugging code, remove later
-			log(new GameSimulator.SimulateAction(time_elapsed, GameSimulator.SimulateAction.ACTION_TYPE.UPDATE));
+			log(new SimulateAction(time_elapsed, SimulateAction.ACTION_TYPE.UPDATE));
 			
 			update_to=getLast_time_updated();
 			//System.out.println("Updating to time_elapsed=" + Long.toString(time_elapsed));
@@ -298,6 +297,7 @@ public class GameUpdater {
 			 * etc.) and Player data (money, metal, and ships in transit).
 			 */
 			GC.map.saveAllData(GC.players, update_to);
+			//GC.record_keeper.maybeSaveData(update_to);
 		}
 		
 		setLast_time_updated(update_to);

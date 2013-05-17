@@ -1,16 +1,11 @@
 import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,7 +63,7 @@ public class GameSimulator {
 			
 			List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
 			actions1.add(new SimulateAction(0l, shipyard_build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
-			actions1.add(new SimulateAction(75l,SimulateAction.ACTION_TYPE.UPDATE));
+			actions1.add(new SimulateAction(75l, SimulateAction.ACTION_TYPE.UPDATE));
 			
 			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
 			sim1.simulate(null, null);
@@ -189,7 +184,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/singleplayerbuildafewthings.txt")
 						),
-						false, 10, null, false
+						false, new EvenlySpacedSaves(10), null, false
 					);
 				List<String> l1 = sim1.simulate("test5-gold.txt", null);
 				
@@ -199,7 +194,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/singleplayerbuildafewthings.txt")
 						),
-						true, 10, null, false
+						true, new EvenlySpacedSaves(10), null, false
 					);
 				List<String> l2 = sim2.simulate("test5-modified.txt", null);
 				
@@ -219,7 +214,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/singleplayercrash.txt")
 						),
-						false, 3, null, false
+						false, new EvenlySpacedSaves(3), null, false
 					);
 				List<String> l1 = sim1.simulate("test6-gold.txt", null);
 				
@@ -229,7 +224,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/singleplayercrash.txt")
 						),
-						true, 3, null, false
+						true, new EvenlySpacedSaves(3), null, false
 					);
 				List<String> l2 = sim2.simulate("test6-modified.txt", null);
 				
@@ -248,7 +243,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/test7-singleplayerattackbug.txt")
 						),
-						false, 3, null, false
+						false, new EvenlySpacedSaves(3), null, false
 					);
 				List<String> l1 = sim1.simulate("test7-gold.txt", null);
 				
@@ -258,7 +253,7 @@ public class GameSimulator {
 						new FileInputStream(
 							new File("testcases/test7-singleplayerattackbug.txt")
 						),
-						true, 3, null, false
+						true, new EvenlySpacedSaves(3), null, false
 					);
 				List<String> l2 = sim2.simulate("test7-modified.txt", null);
 				
@@ -269,20 +264,37 @@ public class GameSimulator {
 		{
 			//Test Case 8 = first multiplayer test
 			
+			/*
 			//actual end time is 281180.  Need protocol replacement to
 			//make the full length pass, however.
-			twoPlayerTest(8, "simplemap.xml", "testcases/test8-host.txt", "testcases/test8-guest.txt", 250000l, 100);
+			twoPlayerTest(8, "simplemap.xml", "testcases/test8-host.txt", "testcases/test8-guest.txt", 250000l, new EvenlySpacedSaves(100));
 			
 			// Tests based on EOH 2012 data
-			twoPlayerTest(9, "simplemap.xml", "eoh2012logs/Day 1/log1-host.txt", "eoh2012logs/Day 1/log1-guest.txt", 267000, 100);
-			twoPlayerTest(10, "simplemap.xml", "eoh2012logs/Day 1/log4-host.txt", "eoh2012logs/Day 1/log4-guest.txt", 255000, 100); //end at 268000
-			twoPlayerTest(11, "simplemap.xml", "eoh2012logs/Day 1/log8-host.txt", "eoh2012logs/Day 1/log8-guest.txt", 600000, 100);
-			twoPlayerTest(12, "simplemap.xml", "eoh2012logs/Day 1/log9-host.txt", "eoh2012logs/Day 1/log9-guest.txt", 341000, 100);
-			twoPlayerTest(13, "simplemap.xml", "eoh2012logs/Day 1/log10-host.txt", "eoh2012logs/Day 1/log10-guest.txt", 596000, 100);
+			
+			// both 9 and 10 fail with DecisionCheckExceptions.
+			twoPlayerTest(9, "simplemap.xml", "eoh2012logs/Day 1/log1-host.txt", "eoh2012logs/Day 1/log1-guest.txt", 267000, new EvenlySpacedSaves(100));
+			twoPlayerTest(10, "simplemap.xml", "eoh2012logs/Day 1/log4-host.txt", "eoh2012logs/Day 1/log4-guest.txt", 255000, new EvenlySpacedSaves(100)); //end at 268000
+			
+			//passes
+			twoPlayerTest(11, "simplemap.xml", "eoh2012logs/Day 1/log8-host.txt", "eoh2012logs/Day 1/log8-guest.txt", 600000, new EvenlySpacedSaves(100));
+			twoPlayerTest(12, "simplemap.xml", "eoh2012logs/Day 1/log9-host.txt", "eoh2012logs/Day 1/log9-guest.txt", 341000, new EvenlySpacedSaves(100));
+			twoPlayerTest(13, "simplemap.xml", "eoh2012logs/Day 1/log10-host.txt", "eoh2012logs/Day 1/log10-guest.txt", 596000, new EvenlySpacedSaves(100));
+			twoPlayerTest(14, "simplemap.xml", "eoh2012logs/Day 1/log11-host.txt", "eoh2012logs/Day 1/log11-guest.txt", 438000, new EvenlySpacedSaves(100)); //ends at 509000.  a lot of decisions are unverified.
+			
+			//another 3 tests
+			twoPlayerTest(15, "simplemap.xml", "eoh2012logs/Day 1/log12-host.txt", "eoh2012logs/Day 1/log12-guest.txt", 580000, new EvenlySpacedSaves(100));
+			twoPlayerTest(16, "simplemap.xml", "eoh2012logs/Day 1/log13-host.txt", "eoh2012logs/Day 1/log13-guest.txt", 370000, new EvenlySpacedSaves(100)); //one of these two goes past 800,000.  Also, we have xml problems.
+			twoPlayerTest(17, "simplemap.xml", "eoh2012logs/Day 1/log14-host.txt", "eoh2012logs/Day 1/log14-guest.txt", 592000, new EvenlySpacedSaves(100)); //ends at 1216000.  As is, should pass, but for the full time it hits DecisionCheckException
+			*/
+			
+			long[] save_times = {0, 626800, 626900, 627000, 627100, 627200, 627300, 627520};
+			twoPlayerTest(18, "simplemap.xml", "testcases/log18-host.txt", "testcases/log18-guest.txt",
+					740000, new CustomSaves(save_times)); // goes to 768000
+
 		}
 	}
 	
-	public static void twoPlayerTest(int test_num, String map_file, String input_log1, String input_log2, long total_time, int num_save_points)
+	public static void twoPlayerTest(int test_num, String map_file, String input_log1, String input_log2, long total_time, SimSaves saves)
 	{
 		System.out.println("Running Test " + test_num + "...");
 		Simulation sim1, sim2;
@@ -292,14 +304,14 @@ public class GameSimulator {
 					new FileInputStream(
 						new File(input_log1)
 					),
-					false, num_save_points, total_time, false
+					false, saves, total_time, false
 				);
 
 			sim2 = loadSimFromFile(map_file, 2,
 					new FileInputStream(
 						new File(input_log2)
 					),
-					false, num_save_points, total_time, false
+					false, saves, total_time, false
 				);
 		} catch(FileNotFoundException fnfe) {
 			System.out.println("FileNotFound for Test " + test_num);
@@ -309,6 +321,7 @@ public class GameSimulator {
 		System.out.println("Test " + test_num + " has same orders: " + hasSameOrders(sim1, sim2));
 		//correctOrders(sim1, sim2, 281180l);
 		
+		// decisions made by player 2 will show up in player 1's logfile and vice versa.
 		List<Order> decisions2 = sim1.extractDecisions();
 		List<Order> decisions1 = sim2.extractDecisions();
 		
@@ -352,87 +365,67 @@ public class GameSimulator {
 		{
 			if (!compareResults(test_num, l1, l2, sim1, sim2))
 			{
-				// cl1 = check l1
-				List<String> cl1 = null, cl2 = null;
-				Simulation sim1_check = null, sim2_check = null;
-
 				// Part 3: rerun part 1 with everything in order.
-				boolean finished_cl1 = false;
-				boolean decision_check_exc_c1 = false;
-				
-				try {
-					sim1_check = loadSimFromFile(map_file, 2,
-						new FileInputStream(
-							new File(input_log1)
-						),
-						true, num_save_points, total_time, true
-					);
-				} catch (FileNotFoundException fnfe) {
-					System.err.println("Failed to find file " + input_log1);
-					return;
-				}
-				
-				try {
-					System.out.println("\tRunning part 1 in order...");
-					cl1 = sim1_check.simulate("test" + test_num + "-ca.txt", new RecordKeeper(decisions2));
-					finished_cl1 = true;
-				} catch (GameUpdater.DisagreementException e) {
-					e.printStackTrace();
-				} catch (RecordKeeper.DecisionCheckException e) {
-					e.printStackTrace();
-					
-					if (decision_check_exc1)
-						System.out.println("Both part 1 and the check terminated with DecisionCheckExceptions.");
-				}
-				
-				if (!finished_cl1)
-					System.out.println("ERROR: part 1 (in order) failed to finish");
-				else
-					compareResults(test_num, l1, cl1, sim1, sim1_check);
+				check_in_order(test_num, 1, map_file, input_log1, saves,
+						total_time, decision_check_exc1, l1, sim1, decisions1);
+				saveResultsToFile(l1, "test" + test_num + "p1.txt");
 				
 				// Part 4: rerun part 2 with everything in order.
-				boolean finished_cl2 = false;
-				boolean decision_check_exc_c2 = false;
-				
-				try {
-					sim2_check = loadSimFromFile(map_file, 2,
-						new FileInputStream(
-							new File(input_log2)
-						),
-						true, num_save_points, total_time, true
-					);
-				} catch (FileNotFoundException fnfe) {
-					System.err.println("Failed to find file " + input_log2);
-					return;
-				}
-				
-				try {
-					System.out.println("\tRunning part 2 in order...");
-					cl2 = sim2_check.simulate("test" + test_num + "-cb.txt", new RecordKeeper(decisions2));
-					finished_cl2 = true;
-				} catch (GameUpdater.DisagreementException e) {
-					e.printStackTrace();
-				} catch (RecordKeeper.DecisionCheckException e) {
-					e.printStackTrace();
-					
-					if (decision_check_exc2)
-						System.out.println("Both part 2 and the check terminated with DecisionCheckExceptions.");
-				}
-				
-				if (!finished_cl2)
-					System.out.println("ERROR: part 2 (in order) failed to finish");
-				else
-					compareResults(test_num, l2, cl2, sim2, sim2_check);
-				
-				saveResultsToFile(l1, "test" + test_num + "p1.txt");
+				check_in_order(test_num, 2, map_file, input_log2, saves,
+						total_time, decision_check_exc2, l2, sim2, decisions2);
 				saveResultsToFile(l2, "test" + test_num + "p2.txt");
-				
-				if (finished_cl1)
-					saveResultsToFile(cl1, "test" + test_num + "p1_check.txt");
-				
-				if (finished_cl2)
-					saveResultsToFile(cl2, "test" + test_num + "p2_check.txt");
 			}
+		}
+	}
+
+	public static void check_in_order(
+			int test_num,
+			int part_num,
+			String map_file,
+			String input_log,
+			SimSaves saves,
+			long total_time,
+			boolean decision_check_exc,
+			List<String> original_results,
+			Simulation original_sim,
+			List<Order> decisions_to_check
+		)
+	{
+		List<String> cl = null;
+		Simulation sim_check = null;
+		boolean finished_cl = false;
+		
+		try {
+			sim_check = loadSimFromFile(map_file, 2,
+				new FileInputStream(
+					new File(input_log)
+				),
+				true, saves, total_time, true
+			);
+		} catch (FileNotFoundException fnfe) {
+			System.err.println("Failed to find file " + input_log);
+			return;
+		}
+		
+		try {
+			System.out.println("\tRunning part " + part_num + " in order...");
+			cl = sim_check.simulate("test" + test_num + "-c" + part_num + ".txt", new RecordKeeper(decisions_to_check));
+			finished_cl = true;
+		} catch (GameUpdater.DisagreementException e) {
+			e.printStackTrace();
+		} catch (RecordKeeper.DecisionCheckException e) {
+			e.printStackTrace();
+			
+			if (decision_check_exc)
+				System.out.println("Both part " + part_num + " and the check terminated with DecisionCheckExceptions.");
+		}
+		
+		if (!finished_cl)
+			System.out.println("ERROR: part " + part_num + " (in order) failed to finish");
+		else
+		{
+			compareResults(test_num, original_results, cl, original_sim, sim_check);
+			saveResultsToFile(cl, "test" + test_num + "p" + part_num + "_check.txt");
 		}
 	}
 	
@@ -454,11 +447,13 @@ public class GameSimulator {
 				boolean match = l1.get(i).equals(l2.get(i));
 				if(!match)
 				{
+					//TODO: remove hackiness
 					//Parsing the time out of here is a little hacky, but it gets the job done.
 					String savept_str = l1.get(i).substring(0, l1.get(i).indexOf('\n'));
 					String time_str = savept_str.substring(savept_str.indexOf("@")+1);
+					Long save_time = Long.parseLong(time_str, 10);
 					
-					if (hasSameOrdersUpToTime(sim1, sim2, Long.parseLong(time_str, 10)))
+					if (hasSameOrdersUpToAction(sim1, sim2, sim1.getSaveAt(save_time), sim2.getSaveAt(save_time)))
 					{
 						System.out.println("\tSave point " + i + " does not match: " + savept_str);
 					}
@@ -484,10 +479,15 @@ public class GameSimulator {
 	
 	public static boolean hasSameOrders(Simulation sim1, Simulation sim2)
 	{
-		return hasSameOrdersUpToTime(sim1, sim2, -1l);
+		return hasSameOrdersUpToAction(sim1, sim2, null, null);
 	}
 	
-	public static boolean hasSameOrdersUpToTime(Simulation sim1, Simulation sim2, long time)
+	public static boolean hasSameOrdersUpToAction(
+			Simulation sim1,
+			Simulation sim2,
+			SimulateAction last_action_sim1,
+			SimulateAction last_action_sim2
+		)
 	{
 		Set<Order> o1 = new HashSet<Order>();
 		Set<Order> o2 = new HashSet<Order>();
@@ -495,7 +495,7 @@ public class GameSimulator {
 		for (SimulateAction action : sim1.actions)
 		{
 			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER && 
-					(time == -1 || action.do_at_time <= time) )
+					(last_action_sim1 == null || action.number <= last_action_sim1.number) )
 			{
 				boolean retval = o1.add(action.the_order);
 				if (!retval)
@@ -506,7 +506,7 @@ public class GameSimulator {
 		for (SimulateAction action : sim2.actions)
 		{
 			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER &&
-					(time == -1 || action.do_at_time <= time) )
+					(last_action_sim2 == null || action.number <= last_action_sim2.number) )
 			{
 				boolean retval = o2.add(action.the_order);
 				if (!retval)
@@ -589,10 +589,10 @@ public class GameSimulator {
 						);
 		}
 		
-		sim1.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.UPDATE));
-		sim1.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.SAVE));
-		sim2.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.UPDATE));
-		sim2.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.SAVE));
+		sim1.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.UPDATE, SimulateAction.ORDER_TYPE.NONE_SPECIFIED));
+		sim1.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.SAVE, SimulateAction.ORDER_TYPE.NONE_SPECIFIED));
+		sim2.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.UPDATE, SimulateAction.ORDER_TYPE.NONE_SPECIFIED));
+		sim2.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.SAVE, SimulateAction.ORDER_TYPE.NONE_SPECIFIED));
 	}
 	
 	public static void saveResultsToFile(List<String> results, String filename)
@@ -628,9 +628,96 @@ public class GameSimulator {
 											 int num_players,
 											 InputStream file,
 											 boolean remove_updates,
-											 int num_updates_and_saves,
+											 SimSaves save_points,
 											 Long end_time,
 											 boolean orders_at_actual_times)
+	{
+		// Load actions from given file
+		List<SimulateAction> actions = loadActionsFromFile(file);
+
+		// Find last update & gather all actions we want
+		// to use into new_actions
+		List<SimulateAction> new_actions = filterActions(actions, remove_updates, end_time);
+	
+		// find end time
+		if (end_time == null)
+			end_time = findEndTime(actions);
+		
+		// add save points throughout the sim
+		new_actions.addAll(save_points.updatesAndSaves(end_time));
+		
+		// adjust to actual times if requested (throw out network lag)
+		if (orders_at_actual_times)
+		{
+			moveOrdersToActualTimes(new_actions);
+		}
+		
+		return new Simulation(map, num_players, new_actions);
+	}
+	
+	public static abstract class SimSaves
+	{
+		public abstract List<Long> savePoints(long end_time);
+		
+		public List<SimulateAction> updatesAndSaves(long end_time)
+		{
+			List<SimulateAction> actions = new ArrayList<SimulateAction>();
+			
+			for (Long t : savePoints(end_time))
+			{
+				actions.add(new SimulateAction(t, SimulateAction.ACTION_TYPE.UPDATE));
+				actions.add(new SimulateAction(t, SimulateAction.ACTION_TYPE.SAVE));
+			}
+			
+			return actions;
+		}
+	}
+	
+	public static class EvenlySpacedSaves extends SimSaves
+	{
+		int num_updates_and_saves;
+		
+		public EvenlySpacedSaves(int num_updates_and_saves)
+		{
+			this.num_updates_and_saves = num_updates_and_saves;
+		}
+		
+		public List<Long> savePoints(long end_time)
+		{
+			List<Long> saves = new ArrayList<Long>();
+			
+			for(int i=1; i <= num_updates_and_saves; i++)
+			{
+				saves.add(end_time*i/num_updates_and_saves);
+			}
+			
+			return saves;
+		}
+	}
+	
+	public static class CustomSaves extends SimSaves
+	{
+		long[] save_times;
+		
+		public CustomSaves(long[] save_times)
+		{
+			this.save_times = save_times;
+		}
+		
+		public List<Long> savePoints(long end_time)
+		{
+			List<Long> saves = new ArrayList<Long>();
+			for (long s : save_times)
+			{
+				saves.add(s);
+			}
+			saves.add(end_time);
+			
+			return saves;
+		}
+	}
+	
+	private static List<SimulateAction> loadActionsFromFile(InputStream file)
 	{
 		List<SimulateAction> actions = new ArrayList<SimulateAction>();
 		XMLDecoder d = new XMLDecoder(file);
@@ -645,10 +732,33 @@ public class GameSimulator {
 		catch(ArrayIndexOutOfBoundsException e){}
 		d.close();
 		
-		ArrayList<SimulateAction> new_actions = new ArrayList<SimulateAction>();
+		return actions;
+	}
+	
+	private static long findEndTime(List<SimulateAction> sorted_actions)
+	{
 		SimulateAction last = null;
 
-		//Find last update
+		// Find last update & gather all actions we want
+		// to use into new_actions
+		for (int i=0; i < sorted_actions.size(); i++)
+		{
+			SimulateAction action = sorted_actions.get(i);
+			
+			if (action.type.equals(SimulateAction.ACTION_TYPE.UPDATE))
+			{
+				// handle updates specially
+				last = action; //actions are ordered, so this is new candidate for the last update.
+			}
+		}
+		
+		return last.do_at_time;
+	}
+	
+	private static List<SimulateAction> filterActions(List<SimulateAction> actions, boolean remove_updates, Long end_time)
+	{
+		List<SimulateAction> new_actions = new ArrayList<SimulateAction>();
+
 		for (int i=0; i < actions.size(); i++)
 		{
 			SimulateAction action = actions.get(i);
@@ -656,239 +766,30 @@ public class GameSimulator {
 			//destroy anything happening after end_time.
 			if (end_time != null && action.do_at_time > end_time)
 			{
-				actions.remove(i);
-				i--;
 				continue;
 			}
-			
-			if (action.type.equals(SimulateAction.ACTION_TYPE.UPDATE))
+			else if (action.type.equals(SimulateAction.ACTION_TYPE.UPDATE))
 			{
-				last = action;
+				if (!remove_updates)
+					new_actions.add(action);
 			}
 			else
+			{
 				new_actions.add(action);
-		}
-			
-		if (remove_updates)
-		{
-			actions = new_actions;
-		}
-		
-		if (end_time == null)
-			end_time = last.do_at_time;
-		
-		for(int i=1; i <= num_updates_and_saves; i++)
-		{
-			SimulateAction update = new SimulateAction(end_time*i/num_updates_and_saves,
-													   SimulateAction.ACTION_TYPE.UPDATE);
-			actions.add(update);
-			actions.add(new SimulateAction(end_time*i/num_updates_and_saves,
-										   SimulateAction.ACTION_TYPE.SAVE));
-		}
-		
-		if (orders_at_actual_times)
-		{
-			for (SimulateAction action : actions)
-			{
-				if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER)
-				{
-					action.do_at_time = action.the_order.scheduled_time - 1;
-				}
 			}
 		}
 		
-		Collections.sort(actions, new SimulateAction.Comparer());
-		
-		return new Simulation(map, num_players, actions);
+		return new_actions;
 	}
 	
-	public static class Simulation
+	private static void moveOrdersToActualTimes(List<SimulateAction> actions)
 	{
-		final int num_players;
-		List<SimulateAction> actions;
-		String map_location;
-		
-		public Simulation(String map_location, int num_players, List<SimulateAction> actions)
+		for (SimulateAction action : actions)
 		{
-			this.num_players = num_players;
-			this.actions = actions;
-			this.map_location = map_location;
-		}
-				
-		List<String> simulate(String logfile_name, RecordKeeper checker)
-		{
-			GameControl GC = new GameControl(null, checker);
-			GameInterface.GC = GC;
-			GC.startTest(num_players, true, new File(map_location));
-			GC.updater.setupLogFile((logfile_name == null) ? "log.txt" : logfile_name);
-			
-			ArrayList<String> results = new ArrayList<String>();
-			
-			for(SimulateAction action : actions)
+			if (action.type == SimulateAction.ACTION_TYPE.SCHEDULE_ORDER)
 			{
-				((SimulatedTimeControl)GC.updater.TC).advanceTime(action.do_at_time);
-				switch(action.type)
-				{
-					case UPDATE:
-						try {
-							GC.updater.updateGame();
-						} catch (DataSaverControl.DataNotYetSavedException e) {
-							e.printStackTrace();
-						}
-						break;
-					case SCHEDULE_ORDER:
-						GC.updater.scheduleOrder(action.the_order);
-						break;
-					case SAVE:
-						ByteArrayOutputStream os = new ByteArrayOutputStream();
-						XMLEncoder encoder = new XMLEncoder(os);
-						encoder.setExceptionListener(new GameUpdater.MyExceptionListener());
-						encoder.writeObject(GC.players);
-						encoder.writeObject(GC.map);
-						encoder.close();
-						String output = "Save @" + GC.updater.getTime() +"\n";
-						output += os.toString();
-						results.add(output);
-						break;
-					case RECEIVED_DECISION:
-						GC.updater.decideOrder(new Message(Message.Type.DECISION, action.the_order));
-						break;
-				}
+				action.do_at_time = action.the_order.scheduled_time - 1;
 			}
-			GC.updater.logFile.close();
-			return results;
-		}
-		
-		/**
-		 * This function finds all decisions that the simulation recieves, and packages them into a list
-		 * 
-		 * TODO: consider adding filtering based one which players the decisions are coming from
-		 * 
-		 * @return the list of orders that are decided
-		 */
-		List<Order> extractDecisions(){
-			
-			List<Order> decided = new ArrayList<Order>();
-			
-			for (SimulateAction action : actions)
-			{
-				if (action.type == SimulateAction.ACTION_TYPE.RECEIVED_DECISION)
-				{
-					decided.add(action.the_order);
-				}
-			}
-			
-			return decided;
-		}
-	}
-	
-	public static class SimulateAction
-	{
-		public static enum ACTION_TYPE{UPDATE,SCHEDULE_ORDER,SAVE, RECEIVED_DECISION;}
-		public static enum ORDER_TYPE{NONE_SPECIFIED,LOCAL,REMOTE;}
-		
-		long do_at_time;
-		Order the_order;
-		ACTION_TYPE type;
-		ORDER_TYPE order_type;
-		
-		public SimulateAction(long time, Order o, ACTION_TYPE t, ORDER_TYPE ot)
-		{
-			do_at_time = time;
-			the_order = o;
-			type=t;
-			order_type=ot;
-		}
-		
-		@Deprecated
-		public SimulateAction(long time, Order o, ACTION_TYPE t)
-		{
-			do_at_time = time;
-			the_order = o;
-			type=t;
-			order_type=ORDER_TYPE.NONE_SPECIFIED;
-		}
-		
-		public SimulateAction(long time, ACTION_TYPE t)
-		{
-			do_at_time = time;
-			type = t;
-			if(type == ACTION_TYPE.SCHEDULE_ORDER)
-				throw new IllegalArgumentException();
-			the_order = null;
-			order_type = ORDER_TYPE.NONE_SPECIFIED;
-		}
-		
-		public static class Comparer implements Comparator<SimulateAction>, Serializable
-		{
-			private static final long serialVersionUID = 6664455814705885702L;
-
-			@Override
-			/**Compares OrderSpec's by comparing send_at_times*/
-			public int compare(SimulateAction a1, SimulateAction a2) {
-				
-				if(a2 == null || a1==null)
-				{
-					throw new IllegalArgumentException();
-				}
-				else
-				{
-					if(a2.do_at_time > a1.do_at_time)
-						return -1; //object is less than o
-					else if(a2.do_at_time == a1.do_at_time)
-						return 0; //object "equals" o
-					else
-						return 1; //object greater than o
-				}
-			}
-		}
-		
-		@Deprecated
-		public SimulateAction()
-		{
-			order_type=ORDER_TYPE.NONE_SPECIFIED;
-		}
-		
-		public long getDo_at_time(){return do_at_time;}
-		public ORDER_TYPE getOrder_type(){return order_type;}
-		public void setOrder_type(ORDER_TYPE ot){order_type=ot;}
-		public void setDo_at_time(long t){do_at_time=t;}
-		public Order getThe_order(){return the_order;}
-		public void setThe_order(Order o){the_order = o;}
-		public ACTION_TYPE getType(){return type;}
-		public void setType(ACTION_TYPE t){type=t;}
-	}
-	
-	public static class SimulatedTimeControl implements TimeManager
-	{
-		/**in milliseconds*/
-		long cur_time;
-		
-		public SimulatedTimeControl()
-		{
-			cur_time = 0;
-		}
-		
-		@Override
-		public long getNanoTime() {
-			return 1000000*getTime();
-		}
-
-		@Override
-		public long getNextTimeGrain() {
-			return TimeControl.getTimeGrainAfter(getTime());
-		}
-
-		@Override
-		public long getTime() {
-			return cur_time;
-		}
-		
-		public void advanceTime(long t)
-		{
-			if (t < cur_time)
-				throw new RuntimeException("Monotonicity Error");
-			cur_time = t;
 		}
 	}
 }

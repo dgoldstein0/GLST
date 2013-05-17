@@ -210,6 +210,12 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	public ID getId(){return id;}
 	public Player getOwner() {return owner;}
 	public void setOwner(Player p){owner = p;}
+	public boolean getIs_alive() {return is_alive;}
+	public void setIs_alive(boolean b) {is_alive = b;}
+	public GSystem getLocation() {return location;}
+	public void setLocation(GSystem sys) {location = sys;}
+	public FlyerAI getCurrent_flying_AI(){return current_flying_AI;}
+	public void setCurrent_flying_AI(FlyerAI ai){current_flying_AI = ai;}
 	
 	public static abstract class FlyerId<T extends FlyerId<T>>
 	{

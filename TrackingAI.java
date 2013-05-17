@@ -3,7 +3,7 @@ public strictfp class TrackingAI extends FlyerAI
 	double dest_tolerance; //how close we should be to destination before match speed by default
 	IN_RANGE_BEHAVIOR in_range_behavior; //if the AI should try to match the speed of its destination or not
 	
-	static enum IN_RANGE_BEHAVIOR{NO_SLOWDOWN, MATCH_SPEED, STOP};
+	public static enum IN_RANGE_BEHAVIOR{NO_SLOWDOWN, MATCH_SPEED, STOP};
 	
 	/**TrackingAI constructor.
 	 *
@@ -22,7 +22,7 @@ public strictfp class TrackingAI extends FlyerAI
 	 */
 	public TrackingAI(Flyer<?,?,?> f, double tol, IN_RANGE_BEHAVIOR ms)
 	{
-		the_flyer = f;
+		super(f);
 		dest_tolerance = tol;
 		in_range_behavior = ms;
 	}
@@ -80,4 +80,10 @@ public strictfp class TrackingAI extends FlyerAI
 		else //destination is backward, stop to turn around
 			return 0.0d;
 	}
+	
+	public TrackingAI(){}
+	public double getDest_tolerance(){return dest_tolerance;}
+	public void setDest_tolerance(double d){dest_tolerance = d;}
+	public IN_RANGE_BEHAVIOR getIn_range_behavior(){return in_range_behavior;} 
+	public void setIn_range_behavior(IN_RANGE_BEHAVIOR b){in_range_behavior = b;}
 }

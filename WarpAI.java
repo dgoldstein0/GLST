@@ -2,7 +2,7 @@ public strictfp class WarpAI extends FlyerAI
 {
 	public WarpAI(Ship f)
 	{
-		the_flyer=f;
+		super(f);
 	}
 	
 	public double calcDesiredDirection(long t)
@@ -21,6 +21,5 @@ public strictfp class WarpAI extends FlyerAI
 		return the_flyer.type.max_speed*cosine*Math.abs(cosine);
 	}
 	
-	public Ship getThe_flyer(){return (Ship)the_flyer;}
-	public void setThe_flyer(Ship f){the_flyer=f;}
+	public WarpAI(){}
 }

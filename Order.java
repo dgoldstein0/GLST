@@ -24,7 +24,7 @@ public strictfp abstract class Order implements Comparable<Order>
 	
 	public Order(long time, Player orderer)
 	{
-		scheduled_time = time;
+		scheduled_time = TimeControl.roundUpToTimeGrain(time);
 		p_id = orderer.id;
 		order_number = orderer.getNextOrderNumber();
 		decision = Decision.UNDECIDED;
@@ -43,7 +43,7 @@ public strictfp abstract class Order implements Comparable<Order>
 	
 	public Order(){}
 	public long getScheduled_time(){return scheduled_time;}
-	public void setScheduled_time(long t){scheduled_time=t;}
+	public void setScheduled_time(long t){scheduled_time=TimeControl.roundUpToTimeGrain(t);}
 	public void setP_id(int p){p_id=p;}
 	public int getP_id(){return p_id;}
 	public void setOrder_number(int n){order_number=n;}

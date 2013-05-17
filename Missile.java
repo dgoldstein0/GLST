@@ -2,7 +2,7 @@ import java.util.*;
 
 public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator<Missile.MissileId>>
 {
-	private static final double Collide_Range=10.0;
+	private static final double Collide_Range=10.0; //TODO: move this to GalacticStrategyConstants
 	boolean target_alive;
 
 	public Missile(Ship s, long time, Targetable<?> t)
