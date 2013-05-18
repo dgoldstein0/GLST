@@ -39,7 +39,7 @@ public class ShipAttackMoveOrder extends Order {
 			if(the_ship != null && the_dest != null && the_ship.isAlive()
 					&& the_ship.owner.getId() == p_id)
 			{
-				the_ship.orderToAttackMove(scheduled_time, the_dest);
+				the_ship.orderToAttackMove(the_dest);
 				decision = Decision.ACCEPT;
 				return true;
 			}
