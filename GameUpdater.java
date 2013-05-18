@@ -207,6 +207,9 @@ public class GameUpdater {
 		{
 			setLast_time_updated(update_to);
 			
+			if (GC.record_keeper != null)
+				GC.record_keeper.maybeSaveData(GC, update_to, RecordKeeper.SAVE_TYPE.BEFORE);
+			
 			/**update all players / intersystem data.*/
 			for(int i=0; i<GC.players.length; i++)
 			{
@@ -297,7 +300,9 @@ public class GameUpdater {
 			 * etc.) and Player data (money, metal, and ships in transit).
 			 */
 			GC.map.saveAllData(GC.players, update_to);
-			//GC.record_keeper.maybeSaveData(update_to);
+			
+			if (GC.record_keeper != null)
+				GC.record_keeper.maybeSaveData(GC, update_to, RecordKeeper.SAVE_TYPE.AFTER);
 		}
 		
 		setLast_time_updated(update_to);

@@ -34,13 +34,15 @@ public class GameSimulator {
 			List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
 			for(long num : random_times)
 				actions1.add(new SimulateAction(num,SimulateAction.ACTION_TYPE.UPDATE));
-			actions1.add(new SimulateAction(1000l,SimulateAction.ACTION_TYPE.SAVE));
-			Simulation sim1 = new Simulation("simplemap.xml",1,actions1);
+			
+			List<Long> save_points = new ArrayList<Long>();
+			save_points.add(1000l);
+			Simulation sim1 = new Simulation("simplemap.xml",1,actions1, save_points);
 			
 			List<SimulateAction> actions2 = new ArrayList<SimulateAction>();
 			actions2.add(new SimulateAction(1000l,SimulateAction.ACTION_TYPE.UPDATE));
-			actions2.add(new SimulateAction(1000l,SimulateAction.ACTION_TYPE.SAVE));
-			Simulation sim2 = new Simulation("simplemap.xml",1,actions2);
+			
+			Simulation sim2 = new Simulation("simplemap.xml",1,actions2, save_points);
 			compareResults(1, sim1.simulate(null, null), sim2.simulate(null, null), sim1, sim2);
 		}
 		
@@ -65,7 +67,7 @@ public class GameSimulator {
 			actions1.add(new SimulateAction(0l, shipyard_build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
 			actions1.add(new SimulateAction(75l, SimulateAction.ACTION_TYPE.UPDATE));
 			
-			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
+			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1, new ArrayList<Long>());
 			sim1.simulate(null, null);
 		}
 		
@@ -91,13 +93,15 @@ public class GameSimulator {
 			actions1.add(new SimulateAction(0l, shipyard_build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
 			actions1.add(new SimulateAction(85l,SimulateAction.ACTION_TYPE.UPDATE));
 			actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.UPDATE));
-			actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.SAVE));
 			long[] random_times = {198l,235l,240l,400l,405l,509l,737l,801l,840l,874l,940l,1000l};
 			for(long num : random_times)
 				actions1.add(new SimulateAction(num,SimulateAction.ACTION_TYPE.UPDATE));
-			actions1.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.SAVE));
 			
-			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
+			List<Long> saves = new ArrayList<Long>();
+			saves.add(100l);
+			saves.add(1000l);
+			
+			Simulation sim1 = new Simulation("simplemap.xml", 1, actions1, saves);
 			List<String> results1 = sim1.simulate(null, null);
 			
 			
@@ -106,11 +110,10 @@ public class GameSimulator {
 			actions2.add(new SimulateAction(85l, SimulateAction.ACTION_TYPE.UPDATE));
 			actions2.add(new SimulateAction(86l, shipyard_build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
 			actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.UPDATE));
-			actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.SAVE));
 			actions2.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.UPDATE));
-			actions2.add(new SimulateAction(1000l, SimulateAction.ACTION_TYPE.SAVE));
+
 			
-			Simulation sim2 = new Simulation("simplemap.xml", 1, actions2);
+			Simulation sim2 = new Simulation("simplemap.xml", 1, actions2, saves);
 			List<String> results2 = sim2.simulate(null, null);
 			
 			compareResults(3, results1, results2, sim1, sim2);
@@ -137,18 +140,19 @@ public class GameSimulator {
 				
 				build_order.setScheduled_time(73l); //note the time here
 				
+				List<Long> saves = new ArrayList<Long>();
+				saves.add(100l);
+				saves.add(50000l);
 				
 				List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
 				actions1.add(new SimulateAction(0l, build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
 				actions1.add(new SimulateAction(80l,SimulateAction.ACTION_TYPE.UPDATE));
 				actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.UPDATE));
-				actions1.add(new SimulateAction(100l,SimulateAction.ACTION_TYPE.SAVE));
 				long[] random_times = {198l,235l,240l,400l,405l,509l,737l,801l,840l,874l,940l,50000l};
 				for(long num : random_times)
 					actions1.add(new SimulateAction(num,SimulateAction.ACTION_TYPE.UPDATE));
-				actions1.add(new SimulateAction(50000l, SimulateAction.ACTION_TYPE.SAVE));
-				
-				Simulation sim1 = new Simulation("simplemap.xml", 1, actions1);
+
+				Simulation sim1 = new Simulation("simplemap.xml", 1, actions1, saves);
 				List<String> results1 = sim1.simulate("log1.txt", null);
 				
 				
@@ -157,11 +161,9 @@ public class GameSimulator {
 				actions2.add(new SimulateAction(80l, SimulateAction.ACTION_TYPE.UPDATE));
 				actions2.add(new SimulateAction(85l, build_order, SimulateAction.ACTION_TYPE.SCHEDULE_ORDER));
 				actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.UPDATE));
-				actions2.add(new SimulateAction(100l, SimulateAction.ACTION_TYPE.SAVE));
 				actions2.add(new SimulateAction(50000l, SimulateAction.ACTION_TYPE.UPDATE));
-				actions2.add(new SimulateAction(50000l, SimulateAction.ACTION_TYPE.SAVE));
 				
-				Simulation sim2 = new Simulation("simplemap.xml", 1, actions2);
+				Simulation sim2 = new Simulation("simplemap.xml", 1, actions2, saves);
 				List<String> results2 = sim2.simulate("log2.txt", null);
 				
 				
@@ -287,7 +289,7 @@ public class GameSimulator {
 			twoPlayerTest(17, "simplemap.xml", "eoh2012logs/Day 1/log14-host.txt", "eoh2012logs/Day 1/log14-guest.txt", 592000, new EvenlySpacedSaves(100)); //ends at 1216000.  As is, should pass, but for the full time it hits DecisionCheckException
 			*/
 			
-			long[] save_times = {0, 626800, 626900, 627000, 627100, 627200, 627300, 627520};
+			long[] save_times = {0, 626800, 626900, 626920, 626940, 626960, 626980, 627000, 627100, 627200, 627300, 627520};
 			twoPlayerTest(18, "simplemap.xml", "testcases/log18-host.txt", "testcases/log18-guest.txt",
 					740000, new CustomSaves(save_times)); // goes to 768000
 
@@ -333,7 +335,7 @@ public class GameSimulator {
 		
 		try {
 			System.out.println("\tRunning part 1...");
-			l1 = sim1.simulate("test" + test_num +"-a.txt", new RecordKeeper(decisions1));
+			l1 = sim1.simulate("test" + test_num +"-a.txt", decisions1);
 			finished1 = true;
 		} catch (GameUpdater.DisagreementException e) {
 			e.printStackTrace();
@@ -344,7 +346,7 @@ public class GameSimulator {
 		
 		try {
 			System.out.println("\tRunning part 2...");
-			l2 = sim2.simulate("test" + test_num + "-b.txt", new RecordKeeper(decisions2));
+			l2 = sim2.simulate("test" + test_num + "-b.txt", decisions2);
 			finished2 = true;
 		} catch (GameUpdater.DisagreementException e) {
 			e.printStackTrace();
@@ -409,7 +411,7 @@ public class GameSimulator {
 		
 		try {
 			System.out.println("\tRunning part " + part_num + " in order...");
-			cl = sim_check.simulate("test" + test_num + "-c" + part_num + ".txt", new RecordKeeper(decisions_to_check));
+			cl = sim_check.simulate("test" + test_num + "-c" + part_num + ".txt", decisions_to_check);
 			finished_cl = true;
 		} catch (GameUpdater.DisagreementException e) {
 			e.printStackTrace();
@@ -450,18 +452,7 @@ public class GameSimulator {
 					//TODO: remove hackiness
 					//Parsing the time out of here is a little hacky, but it gets the job done.
 					String savept_str = l1.get(i).substring(0, l1.get(i).indexOf('\n'));
-					String time_str = savept_str.substring(savept_str.indexOf("@")+1);
-					Long save_time = Long.parseLong(time_str, 10);
-					
-					if (hasSameOrdersUpToAction(sim1, sim2, sim1.getSaveAt(save_time), sim2.getSaveAt(save_time)))
-					{
-						System.out.println("\tSave point " + i + " does not match: " + savept_str);
-					}
-					else
-					{
-						System.out.println("\tSave point " + i + " at time " + time_str + " has different orders, skipping.\n");
-						match = true; //suppress difference
-					}
+					System.out.println("\tSave point " + i + " does not match: " + savept_str);
 				}
 				else
 					System.out.println("\tSave point " + i + " matches: " + l2.get(i).substring(0, l2.get(i).indexOf('\n')));
@@ -535,6 +526,8 @@ public class GameSimulator {
 	}
 	
 	/**
+	 * BEFORE USING THIS, MAKE SURE IT DOES THE RIGHT THING!  THEN UNDEPRECATE. KTHX.
+	 * 
 	 * If this function has to do anything, it will stick extra orders at end_time.
 	 * This almost always means trouble.
 	 * 
@@ -542,6 +535,7 @@ public class GameSimulator {
 	 * @param sim2 the second simulation (game from p2's perspective)
 	 * @param end_time the end time of the game
 	 */
+	@Deprecated
 	public static void correctOrders(Simulation sim1, Simulation sim2, long end_time)
 	{
 		Set<Order> o1 = new HashSet<Order>();
@@ -589,10 +583,11 @@ public class GameSimulator {
 						);
 		}
 		
-		sim1.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.UPDATE, SimulateAction.ORDER_TYPE.NONE_SPECIFIED));
-		sim1.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.SAVE, SimulateAction.ORDER_TYPE.NONE_SPECIFIED));
+		//TODO: is +1 the right idea?
+		sim1.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.UPDATE, SimulateAction.ORDER_TYPE.NONE_SPECIFIED));		
 		sim2.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.UPDATE, SimulateAction.ORDER_TYPE.NONE_SPECIFIED));
-		sim2.actions.add(new SimulateAction(end_time+1, null, SimulateAction.ACTION_TYPE.SAVE, SimulateAction.ORDER_TYPE.NONE_SPECIFIED));
+		
+		//TODO: need to add save points at this new end_time+1
 	}
 	
 	public static void saveResultsToFile(List<String> results, String filename)
@@ -643,34 +638,18 @@ public class GameSimulator {
 		if (end_time == null)
 			end_time = findEndTime(actions);
 		
-		// add save points throughout the sim
-		new_actions.addAll(save_points.updatesAndSaves(end_time));
-		
 		// adjust to actual times if requested (throw out network lag)
 		if (orders_at_actual_times)
 		{
 			moveOrdersToActualTimes(new_actions);
 		}
 		
-		return new Simulation(map, num_players, new_actions);
+		return new Simulation(map, num_players, new_actions, save_points.savePoints(end_time));
 	}
 	
 	public static abstract class SimSaves
 	{
 		public abstract List<Long> savePoints(long end_time);
-		
-		public List<SimulateAction> updatesAndSaves(long end_time)
-		{
-			List<SimulateAction> actions = new ArrayList<SimulateAction>();
-			
-			for (Long t : savePoints(end_time))
-			{
-				actions.add(new SimulateAction(t, SimulateAction.ACTION_TYPE.UPDATE));
-				actions.add(new SimulateAction(t, SimulateAction.ACTION_TYPE.SAVE));
-			}
-			
-			return actions;
-		}
 	}
 	
 	public static class EvenlySpacedSaves extends SimSaves

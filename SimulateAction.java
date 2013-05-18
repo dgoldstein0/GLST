@@ -3,7 +3,7 @@ import java.util.Comparator;
 
 public class SimulateAction
 {
-	public static enum ACTION_TYPE{UPDATE,SCHEDULE_ORDER,SAVE, RECEIVED_DECISION;}
+	public static enum ACTION_TYPE{UPDATE,SCHEDULE_ORDER,RECEIVED_DECISION;}
 	public static enum ORDER_TYPE{NONE_SPECIFIED,LOCAL,REMOTE;}
 	
 	long do_at_time;

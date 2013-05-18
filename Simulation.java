@@ -1,5 +1,3 @@
-import java.beans.XMLEncoder;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +7,7 @@ public class Simulation
 {
 	final int num_players;
 	List<SimulateAction> actions;
+	List<Long> save_pts;
 	String map_location;
 	
 	/** Simulation constructor
@@ -18,27 +17,22 @@ public class Simulation
 	 * @param actions list of SimulateActions to run through in the simulation.
 	 * 		N.B.: this constructor will sort actions (so it is safe to pass it an unsorted
 	 * 		list - but it WILL be modified).
+	 * @param saves the list of times to save at.
 	 */
-	public Simulation(String map_location, int num_players, List<SimulateAction> actions)
+	public Simulation(String map_location, int num_players, List<SimulateAction> actions, List<Long> saves)
 	{
-		Collections.sort(actions, new SimulateAction.Comparer());
+		// Add an update at the last save point, to make sure we actually run that long.
+		if (saves.size() != 0)
+			actions.add(new SimulateAction(saves.get(saves.size()-1), SimulateAction.ACTION_TYPE.UPDATE));
 		
 		this.num_players = num_players;
 		this.actions = actions;
 		this.map_location = map_location;
+		save_pts = saves;
 		
+		// number them before sorting - this forces the sort to be a stable sort.
 		numberActions();
-	}
-	
-	public SimulateAction getSaveAt(Long save_time) {
-		
-		for (SimulateAction a : actions)
-		{
-			if (a.type == SimulateAction.ACTION_TYPE.SAVE && a.do_at_time == save_time)
-				return a;
-		}
-		
-		throw new RuntimeException("Save at time " + save_time + " doesn't exist.");
+		Collections.sort(actions, new SimulateAction.Comparer());
 	}
 
 	private void numberActions()
@@ -49,14 +43,13 @@ public class Simulation
 		}
 	}
 			
-	List<String> simulate(String logfile_name, RecordKeeper checker)
+	List<String> simulate(String logfile_name, List<Order> decisions)
 	{
+		RecordKeeper checker = new RecordKeeper(decisions, save_pts);
 		GameControl GC = new GameControl(null, checker);
 		GameInterface.GC = GC;
 		GC.startTest(num_players, true, new File(map_location));
 		GC.updater.setupLogFile((logfile_name == null) ? "log.txt" : logfile_name);
-		
-		ArrayList<String> results = new ArrayList<String>();
 		
 		for(SimulateAction action : actions)
 		{
@@ -73,24 +66,14 @@ public class Simulation
 				case SCHEDULE_ORDER:
 					GC.updater.scheduleOrder(action.the_order);
 					break;
-				case SAVE:
-					ByteArrayOutputStream os = new ByteArrayOutputStream();
-					XMLEncoder encoder = new XMLEncoder(os);
-					encoder.setExceptionListener(new GameUpdater.MyExceptionListener());
-					encoder.writeObject(GC.players);
-					encoder.writeObject(GC.map);
-					encoder.close();
-					String output = "Save @" + GC.updater.getTime() +"\n";
-					output += os.toString();
-					results.add(output);
-					break;
 				case RECEIVED_DECISION:
 					GC.updater.decideOrder(new Message(Message.Type.DECISION, action.the_order));
 					break;
 			}
 		}
 		GC.updater.logFile.close();
-		return results;
+		
+		return checker.getSavedResults();
 	}
 	
 	/**
