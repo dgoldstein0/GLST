@@ -5,7 +5,7 @@ public strictfp class PlayerDataSaverControl extends DataSaverControl<Player, Pl
 	public PlayerDataSaverControl(Player p) {
 		super(p, new Creator<Player, PlayerDataSaver>(){
 				@Override
-				public PlayerDataSaver create() {return new PlayerDataSaver();}
+				public PlayerDataSaver create(Player p) {return new PlayerDataSaver();}
 				@Override
 				public PlayerDataSaver[] createArray() {return new PlayerDataSaver[GalacticStrategyConstants.data_capacity];}
 			});

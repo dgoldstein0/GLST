@@ -3,7 +3,7 @@ public strictfp class FleetDataSaverControl extends DataSaverControl<Fleet, Flee
 
 	public FleetDataSaverControl(Fleet f) {
 		super(f, new Creator<Fleet, FleetDataSaver >(){
-			public FleetDataSaver create(){return new FleetDataSaver();}
+			public FleetDataSaver create(Fleet f){return new FleetDataSaver();}
 			public FleetDataSaver[] createArray(){return new FleetDataSaver[GalacticStrategyConstants.data_capacity];}
 		});
 	}

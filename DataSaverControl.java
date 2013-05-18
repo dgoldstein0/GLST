@@ -19,7 +19,7 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 		
 		saved_data = c.createArray();
 		for(int i=0; i < saved_data.length; ++i)
-			saved_data[i] = c.create();
+			saved_data[i] = c.create(the_obj);
 	}
 	
 	//loading and saving data functions.
@@ -113,7 +113,7 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 	//class to create data savers
 	public static abstract class Creator<T extends Saveable<T>, S extends DataSaver<T>>
 	{
-		public abstract S create();
+		public abstract S create(T obj);
 		public abstract S[] createArray();
 	}
 	
