@@ -248,12 +248,6 @@ public class GameUpdater {
 				//update planets/facilities:
 				for(Satellite<?> sat : sys.orbiting)
 				{
-					//Q: do we really need planet/moon positions in here?
-					//Once we have ships flying around, some planets will need
-					//this calculation anyway.  Without good caching, we might
-					//do the move calculations several times.  So it is
-					//probably better for performance to go here.
-					
 					sat.orbit.move(update_to);
 					if(sat instanceof Planet)
 					{
