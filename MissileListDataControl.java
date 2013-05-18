@@ -3,7 +3,7 @@ public strictfp class MissileListDataControl extends DataSaverControl<MissileLis
 
 	public MissileListDataControl(MissileList m) {
 		super(m, new Creator<MissileList, MissileListDataSaver>(){
-				public MissileListDataSaver create(){return new MissileListDataSaver();}
+				public MissileListDataSaver create(MissileList ml){return new MissileListDataSaver();}
 				public MissileListDataSaver[] createArray(){return new MissileListDataSaver[GalacticStrategyConstants.data_capacity];}
 			});
 	}

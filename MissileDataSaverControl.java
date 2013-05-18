@@ -4,7 +4,7 @@ public strictfp class MissileDataSaverControl extends FlyerDataSaverControl<Miss
 	public MissileDataSaverControl(Missile m)
 	{
 		super(m, new Creator<Missile, MissileDataSaver>(){
-				public MissileDataSaver create(){return new MissileDataSaver();}
+				public MissileDataSaver create(Missile m){return new MissileDataSaver();}
 				public MissileDataSaver[] createArray(){return new MissileDataSaver[GalacticStrategyConstants.data_capacity];}
 			});
 	}

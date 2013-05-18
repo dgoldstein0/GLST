@@ -8,10 +8,11 @@ public strictfp class OwnableSatelliteDataSaverControl<T extends OwnableSatellit
 			sat,
 			new Creator<T,  OwnableSatelliteDataSaver<T>>()
 			{
-				public OwnableSatelliteDataSaver<T> create() {
+				public OwnableSatelliteDataSaver<T> create(T o) {
 					return new OwnableSatelliteDataSaver<T>();
 				}
 				
+				@SuppressWarnings("unchecked")
 				public OwnableSatelliteDataSaver<T>[] createArray() {
 					return new OwnableSatelliteDataSaver[GalacticStrategyConstants.data_capacity];
 				}

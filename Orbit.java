@@ -1,4 +1,4 @@
-public strictfp class Orbit
+public strictfp class Orbit implements Saveable<Orbit>
 {
 	//equiv to 2pi/sqrt(G), where G is the gravity constant
 	final static double PERIOD_CONSTANT=GalacticStrategyConstants.PERIOD_CONSTANT;
@@ -6,6 +6,7 @@ public strictfp class Orbit
 	final static int CLOCKWISE = 1;
 	final static int COUNTERCLOCKWISE=-1;
 
+	GenericDataSaverControl<Orbit> data_control;
 	
 	volatile double init_x;
 	volatile double init_y;
@@ -30,6 +31,7 @@ public strictfp class Orbit
 	
 	public Orbit(Satellite<?> theobj, Orbitable<?> boss_obj, double focus2_x, double focus2_y, double init_x, double init_y, int dir)
 	{
+		data_control = new GenericDataSaverControl<Orbit>(this);
 		boss=boss_obj;
 		obj=theobj;
 		
@@ -153,7 +155,7 @@ public strictfp class Orbit
 	}
 	
 	//methods required for save/load
-	public Orbit(){}
+	public Orbit(){data_control = new GenericDataSaverControl<Orbit>(this);}
 	public Orbitable<?> getBoss(){return boss;}
 	public void setBoss(Orbitable<?> p){boss=p;}
 	public Satellite<?> getObj(){return obj;}
@@ -178,4 +180,15 @@ public strictfp class Orbit
 	public synchronized void setB(double y){b=y;}
 	public synchronized double getC(){return c;}
 	public synchronized void setC(double z){c=z;}
+
+	@Override
+	public GenericDataSaverControl<Orbit> getDataControl() {
+		return data_control;
+	}
+
+	@Override
+	public void handleDataNotSaved() {
+		// TODO: is this the right thing to do?
+		throw new RuntimeException("Data not yet saved... fuck.");
+	}
 }
