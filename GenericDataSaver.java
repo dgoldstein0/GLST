@@ -1,5 +1,6 @@
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 
 
@@ -18,7 +19,11 @@ public class GenericDataSaver<T extends Saveable<T>> extends DataSaver<T> {
 			
 			for (int i=0; i < fields.length; i++)
 			{
-				if (fields[i].getName() == "data_control" || !fields[i].isEnumConstant())
+				int modifiers = fields[i].getModifiers();
+				if (fields[i].getName() == "data_control" ||
+					fields[i].isEnumConstant() ||
+					Modifier.isFinal(modifiers) ||
+					Modifier.isStatic(modifiers))
 					continue;
 				
 				saved_values.put(fields[i], null);
