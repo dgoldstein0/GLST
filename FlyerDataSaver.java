@@ -12,6 +12,7 @@ public strictfp class FlyerDataSaver<T extends Flyer<T, ?, ?>> extends DataSaver
 	Destination<?> dest;
 	Targetable<?> tgt;
 	boolean is_alive;
+	GSystem loc;
 
 	public FlyerDataSaver()
 	{
@@ -34,6 +35,7 @@ public strictfp class FlyerDataSaver<T extends Flyer<T, ?, ?>> extends DataSaver
 		dest = f.destination;
 		tgt = f.target;
 		is_alive = f.is_alive;
+		loc = f.location;
 	}
 	
 	protected void doSaveMoreData(T f){}
@@ -54,5 +56,6 @@ public strictfp class FlyerDataSaver<T extends Flyer<T, ?, ?>> extends DataSaver
 		f.destination = dest;
 		f.target = tgt;
 		f.is_alive = is_alive;
+		f.location = loc;
 	}
 }

@@ -79,7 +79,7 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 		//System.out.println("load data: t is " + Long.toString(t) + " and time is " + Long.toString(time) + ", so step back... " + Integer.toString(stepback));
 		if (stepback>50)
 		{
-			System.out.println("Error loading ship data: the delay is too long"); //BOOKMARK - how should these errors be dealt with
+			System.out.println("Error loading ship data: the delay is too long"); //TODO: how should these errors be dealt with
 		}
 		else if(stepback <= 0)
 		{

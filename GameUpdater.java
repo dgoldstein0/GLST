@@ -279,8 +279,6 @@ public class GameUpdater {
 			Order o;
 			while( (o = local_pending_execution.peek()) != null && o.scheduled_time <= update_to)
 			{
-				/**execute does all the necessary reversion itself.  It never reverts anything to earlier than
-				 * scheduled_time, which should be within one time grain less than update_to*/
 				Order cur_order = local_pending_execution.remove();
 				cur_order.execute(GC.map);
 				
@@ -295,16 +293,17 @@ public class GameUpdater {
 			 */
 			GC.map.saveAllData(GC.players, update_to);
 			
+			// Debugging hook
 			if (GC.record_keeper != null)
 				GC.record_keeper.maybeSaveData(GC, update_to, RecordKeeper.SAVE_TYPE.AFTER);
 		}
 		
 		setLast_time_updated(update_to);
 		
-		//This can flare up in the case that time_elapsed >= order time, but the last time grain
-		//run here happens to be before order time since both don't have to land on a time grain
-		//(at least, for some orders).  I.e. time_elapsed=56, order @ 53, will only update through
-		// time 40 (time_grain is 20)
+		// This should never happen, but is included just to be safe.
+		// It used to be possible that we'd have an order more recent
+		// than the time grain we were updating to, because the orders
+		// didn't used to fall on time grains.
 		if(!local_pending_execution.isEmpty())
 		{
 			System.out.println("We still have orders in the local queue.");
@@ -339,6 +338,7 @@ public class GameUpdater {
 			min_order.scheduled_time = minimum;
 			min_order.order_number = 0;
 			min_order.p_id = -1;
+			
 			SortedSet<Order> will_retire = already_executed.headSet(min_order);
 			ready_to_retire.addAll(will_retire);
 			
@@ -370,6 +370,7 @@ public class GameUpdater {
 			}
 		}
 		
+		// Update the interface
 		SwingUtilities.invokeLater(new InterfaceUpdater(time_elapsed));
 	}
 	

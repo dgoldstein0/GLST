@@ -17,11 +17,11 @@ public class RecordKeeper {
 	
 	public static enum SAVE_TYPE {BEFORE, AFTER};
 	
-	Map<Order, Order> decided_orders;
-	Map<Long, String> results_before;
-	Map<Long, String> results_after;
-	HashSet<Long> save_points;
-	boolean suppress_unchecked_decisions;
+	private Map<Order, Order> decided_orders;
+	private Map<Long, String> results_before;
+	private Map<Long, String> results_after;
+	private HashSet<Long> save_points;
+	private boolean suppress_unchecked_decisions;
 	
 	public RecordKeeper(List<Order> decisions, List<Long> saves)
 	{

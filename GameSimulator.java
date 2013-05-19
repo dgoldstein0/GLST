@@ -447,15 +447,19 @@ public class GameSimulator {
 			for(int i=0; i < l1.size(); ++i)
 			{
 				boolean match = l1.get(i).equals(l2.get(i));
+				//TODO: remove hackiness
+				//Parsing the time out of here is a little hacky, but it gets the job done.
+				String savept_str = l1.get(i).substring(0, l1.get(i).indexOf('\n'));
+				
 				if(!match)
 				{
-					//TODO: remove hackiness
-					//Parsing the time out of here is a little hacky, but it gets the job done.
-					String savept_str = l1.get(i).substring(0, l1.get(i).indexOf('\n'));
 					System.out.println("\tSave point " + i + " does not match: " + savept_str);
 				}
 				else
-					System.out.println("\tSave point " + i + " matches: " + l2.get(i).substring(0, l2.get(i).indexOf('\n')));
+				{
+					System.out.println("\tSave point " + i + " matches: " + savept_str);
+				}
+				
 				identical = identical && match;
 			}
 			
@@ -667,7 +671,10 @@ public class GameSimulator {
 			
 			for(int i=1; i <= num_updates_and_saves; i++)
 			{
-				saves.add(end_time*i/num_updates_and_saves);
+				// Rounding to time grain now required - new code looks for
+				// exact match between game time and save time before saving
+				// (as opposed to forcing the save time to occur.)
+				saves.add(TimeControl.roundUpToTimeGrain(end_time*i/num_updates_and_saves));
 			}
 			
 			return saves;
