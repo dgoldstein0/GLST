@@ -345,4 +345,41 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		else
 			return -1;
 	}
+	
+	@Override
+	public void recursiveSaveData(long time) {
+		data_control.saveData(time);
+		orbit.data_control.saveData(time);
+		
+		for(Integer id : facilities.keySet())
+		{
+			facilities.get(id).data_control.saveData(time);
+		}
+		
+		if (orbiting != null)
+		{
+			for(Satellite<?> sat : orbiting)
+			{
+				sat.recursiveSaveData(time);
+			}
+		}
+	}
+
+	@Override
+	public void recursiveRevert(long t) throws DataSaverControl.DataNotYetSavedException {
+		data_control.revertToTime(t);
+		orbit.data_control.revertToTime(t);
+		for(Integer id : facilities.keySet())
+		{
+			facilities.get(id).data_control.revertToTime(t);
+		}
+		
+		if (orbiting != null)
+		{
+			for(Satellite<?> sat : orbiting)
+			{
+				sat.recursiveRevert(t);
+			}
+		}
+	}
 }

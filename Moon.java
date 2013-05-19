@@ -34,24 +34,4 @@ public strictfp class Moon extends OwnableSatellite<Moon>
 	
 	@Override
 	public String imageLoc(){return "images/moon.jpg";}
-	
-	@Override
-	public void recursiveSaveData(long time) {
-		data_control.saveData(time);
-		orbit.data_control.saveData(time);
-		for(Integer id : facilities.keySet())
-		{
-			facilities.get(id).data_control.saveData(time);
-		}
-	}
-
-	@Override
-	public void recursiveRevert(long t) throws DataSaverControl.DataNotYetSavedException {
-		data_control.revertToTime(t);
-		orbit.data_control.revertToTime(t);
-		for(Integer id : facilities.keySet())
-		{
-			facilities.get(id).data_control.revertToTime(t);
-		}
-	}
 }
