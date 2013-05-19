@@ -32,9 +32,9 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	double pop_growth_rate;
 	int building_limit;
 	
-	int number_mines; //cache number of mines on satellite
+	public int number_mines; //cache number of mines on satellite
 	int last_number_mines;
-	int number_taxoffices; //cache number of taxoffices on satellite
+	public int number_taxoffices; //cache number of taxoffices on satellite
 	double base_mining_r;
 	double current_mining_r;
 	

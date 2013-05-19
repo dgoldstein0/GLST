@@ -86,7 +86,7 @@ public class GameSimulator {
 				eulenspiegel_desc.setId(0);
 			shipyard_build_order.setSat_desc(eulenspiegel_desc);
 			
-			shipyard_build_order.setScheduled_time(73l); //note the time here
+			shipyard_build_order.setScheduled_time(60l); //note the time here
 			
 			
 			List<SimulateAction> actions1 = new ArrayList<SimulateAction>();
@@ -117,8 +117,8 @@ public class GameSimulator {
 			List<String> results2 = sim2.simulate(null, null);
 			
 			compareResults(3, results1, results2, sim1, sim2);
-			//saveResultsToFile(results1, "test3p1.txt");
-			//saveResultsToFile(results2, "test3p2.txt");
+			saveResultsToFile(results1, "test3p1.txt");
+			saveResultsToFile(results2, "test3p2.txt");
 		}
 		
 		{
