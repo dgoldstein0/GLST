@@ -33,7 +33,7 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	FlyerAI current_flying_AI;
 	boolean is_alive;
 	
-	FlyerDataSaverControl<T, ? extends FlyerDataSaver<T> > data_control;
+	GenericDataSaverControl<T> data_control;
 	
 	//subclasses are responsible for instantiating data_control
 	public Flyer(String nm, ShipType st)
@@ -46,6 +46,7 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 		aggressors = new HashSet<Targetter<?>>();
 		destination=null;
 		target=null;
+		data_control = new GenericDataSaverControl<T>((T) this);
 	}
 	
 	public Flyer(){}
@@ -171,7 +172,7 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	}
 	
 	//for Saveable
-	public FlyerDataSaverControl<T, ? extends FlyerDataSaver<T>> getDataControl(){return data_control;}
+	public GenericDataSaverControl<T> getDataControl(){return data_control;}
 	
 	//for Targetable
 	public HashSet<Targetter<?>> getAggressors(){return aggressors;}

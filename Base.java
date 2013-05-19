@@ -11,7 +11,6 @@ public strictfp class Base extends Facility<Base>{
 		super(l, i, GalacticStrategyConstants.initial_base_endu);
 		soldier = GalacticStrategyConstants.initial_soldier;
 		max_soldier = GalacticStrategyConstants.default_max_soldier;
-		data_control = new BaseDataSaverControl(this);
 	}
 	
 	public void upgrade()

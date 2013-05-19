@@ -23,7 +23,6 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 		super(loc, i, GalacticStrategyConstants.initial_shipyard_endu);
 		manufac_queue=new Hashtable<Integer,Ship>(GalacticStrategyConstants.queue_capa);
 		time_on_current_ship = 0;
-		data_control = new ShipyardDataSaverControl(this);
 		next_queue_id=0;
 	}
 	

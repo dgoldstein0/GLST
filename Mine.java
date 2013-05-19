@@ -7,7 +7,6 @@ public strictfp class Mine extends Facility<Mine>{
 	{
 		super(loc, i, GalacticStrategyConstants.initial_mine_endu);
 		location.number_mines++;
-		data_control = new MineDataSaverControl(this);
 		
 		//set time to the next resource change, and save.  Need to align ourselves to the
 		//timing of resource updates, but can't do it via super() call because then our first

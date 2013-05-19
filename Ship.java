@@ -38,8 +38,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	{
 		super(t.name,t);
 		
-		data_control = new ShipDataSaverControl(this);
-		
 		energy = t.max_energy;
 		max_energy = energy;
 		soldier=t.soldier_capacity;//assume ships are fully loaded when built

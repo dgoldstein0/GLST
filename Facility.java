@@ -12,7 +12,7 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	int damage;
 	boolean is_alive;
 	
-	DataSaverControl<T, ? extends FacilityDataSaver<T> > data_control; //must be instantiated by subclasses
+	public GenericDataSaverControl<T> data_control;
 	
 	public Facility(OwnableSatellite<?> l, int i, int endu)
 	{
@@ -24,6 +24,7 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 		damage=0;
 		is_alive=true;
 		aggressors = new HashSet<Targetter<?>>();
+		data_control = new GenericDataSaverControl<T>((T) this);
 	}
 	
 	@Override
@@ -68,7 +69,7 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	
 	
 	@Override //for Saveable
-	public DataSaverControl<T, ? extends FacilityDataSaver<T> > getDataControl(){return data_control;}
+	public GenericDataSaverControl<T> getDataControl(){return data_control;}
 	
 	public int compareTo(T f)
 	{

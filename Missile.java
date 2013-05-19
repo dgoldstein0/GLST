@@ -9,9 +9,6 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 	{
 		super("", ShipType.MISSILE);
 		
-		//set up ship_data array, as per the subclass' responsibility
-		data_control = new MissileDataSaverControl(this);
-		
 		location = s.location;
 		id= new MissileId(s.next_missile_id++, s);
 		owner = s.owner;

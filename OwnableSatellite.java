@@ -45,17 +45,17 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	//final static int TAX_INTERVAL = 3000; //in milliseconds.  so taxes are compounded every three seconds.
 	//final static double TAX_PER_PERSON = .03; //money per person per tax interval
 	
-	OwnableSatelliteDataSaverControl<T> data_control;
+	GenericDataSaverControl<T> data_control;
 	
 	@Override
-	public OwnableSatelliteDataSaverControl<T> getDataControl(){return data_control;}
+	public GenericDataSaverControl<T> getDataControl(){return data_control;}
 	
 	public OwnableSatellite()
 	{
 		next_facility_id=0;
 		facilities = new HashMap<Integer, Facility<?>>();
 		bldg_in_progress = FacilityType.NO_BLDG;
-		data_control = new OwnableSatelliteDataSaverControl<T>((T)this);
+		data_control = new GenericDataSaverControl<T>((T)this);
 		//last_tax_time = 0;
 		owner = null;
 		lastcolor=Color.WHITE;

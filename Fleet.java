@@ -8,14 +8,14 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 	GSystem location;
 	Object lock = new Object();
 	
-	FleetDataSaverControl data_control;
+	GenericDataSaverControl<Fleet> data_control;
 	
 	public Fleet(GSystem loc, Player o)
 	{
 		ships = new TreeMap<Ship.ShipId, Ship>();
 		location = loc;
 		owner = o;
-		data_control = new FleetDataSaverControl(this);
+		data_control = new GenericDataSaverControl<Fleet>(this);
 		data_control.saveData(0);
 	}
 	
@@ -78,7 +78,7 @@ public strictfp class Fleet implements RelaxedSaveable<Fleet>
 	}
 
 	@Override
-	public FleetDataSaverControl getDataControl() {
+	public GenericDataSaverControl<Fleet> getDataControl() {
 		
 		return data_control;
 	}
