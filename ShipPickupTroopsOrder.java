@@ -21,16 +21,11 @@ public strictfp class ShipPickupTroopsOrder extends Order {
 		//validate order
 		if(the_ship != null && the_ship.owner.getId() == p_id)
 		{
-			ShipDataSaver data = (ShipDataSaver) the_ship.data_control.saved_data[the_ship.data_control.getIndexForTime(scheduled_time)];
-			if(data.is_alive && ((OwnableSatellite<?>)data.dest).owner == the_ship.owner && data.dest instanceof OwnableSatellite<?>)
+			if(the_ship.is_alive && the_ship.destination instanceof OwnableSatellite<?> && ((OwnableSatellite<?>)the_ship.destination).owner == the_ship.owner)
 			{
-				Base b = ((OwnableSatellite<?>)data.dest).data_control.saved_data[((OwnableSatellite<?>)data.dest).data_control.getIndexForTime(scheduled_time)].base;
-				if(b != null)
-				{					
-					the_ship.orderToPickupTroops(scheduled_time);
-					decision = Decision.ACCEPT;
-					return true;
-				}
+				the_ship.orderToPickupTroops(scheduled_time);
+				decision = Decision.ACCEPT;
+				return true;
 			}
 		}
 
