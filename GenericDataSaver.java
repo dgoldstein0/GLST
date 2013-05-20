@@ -26,6 +26,7 @@ public class GenericDataSaver<T extends Saveable<T>> extends DataSaver<T> {
 					Modifier.isStatic(modifiers))
 					continue;
 				
+				fields[i].setAccessible(true);
 				saved_values.put(fields[i], null);
 			}
 			
