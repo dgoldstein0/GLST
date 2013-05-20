@@ -8,9 +8,9 @@
  */
 public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends DataSaver<T> > {
 
-	int index;
-	final S[] saved_data;
-	final T the_obj;
+	protected int index;
+	protected final S[] saved_data;
+	protected final T the_obj;
 	
 	public DataSaverControl(T s, Creator<T, S> c)
 	{
