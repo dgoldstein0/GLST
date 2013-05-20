@@ -1,7 +1,7 @@
 import java.util.TreeMap;
 import java.util.Iterator;
 
-public strictfp class Fleet implements RelaxedSaveable<Fleet>
+public strictfp class Fleet implements Saveable<Fleet>
 {
 	TreeMap<Ship.ShipId, Ship> ships;
 	Player owner;

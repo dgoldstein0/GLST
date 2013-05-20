@@ -3,7 +3,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public strictfp class Player implements RelaxedSaveable<Player>
+public strictfp class Player implements Saveable<Player>
 {
 	String name;
 	

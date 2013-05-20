@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import javax.swing.SwingUtilities;
 
-public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Satellite<T> implements RelaxedSaveable<T>, Orbitable<T>
+public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Satellite<T> implements Saveable<T>, Orbitable<T>
 {
 	ArrayList<Satellite<?>> orbiting;
 	
