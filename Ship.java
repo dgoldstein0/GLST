@@ -555,9 +555,9 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public void shootMissile(long t, double dx, double dy){
 		if (MathFormula.SumofSquares(dx,dy) < GalacticStrategyConstants.Attacking_Range_Sq &&(nextAttackingtime<=t))
 		{
-			Missile m=new Missile(this, t, target); 
+			Missile m = new Missile(this, t, target); 
 			location.missiles.put(m.id, m);
-			nextAttackingtime= t+GalacticStrategyConstants.Attacking_cooldown;
+			nextAttackingtime= t + GalacticStrategyConstants.Attacking_cooldown;
 		}
 	}
 	

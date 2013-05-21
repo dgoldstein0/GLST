@@ -96,7 +96,7 @@ public strictfp abstract class Order implements Comparable<Order>
 	@Override
 	public int hashCode()
 	{
-		return (int) scheduled_time/20 + order_number*100000 + p_id * 100000000;
+		return (int) scheduled_time/20 + order_number*100000 + p_id * 100000005;
 	}
 	
 	/**the following nested class is for debugging purposes only*/

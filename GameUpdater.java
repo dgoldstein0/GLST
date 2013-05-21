@@ -198,7 +198,7 @@ public class GameUpdater {
 				
 				SortedSet<Order> orders_to_redo = already_executed.tailSet(temp);
 				local_pending_execution.addAll(orders_to_redo);
-				orders_to_redo.clear();
+				orders_to_redo.clear(); // removes these orders from already_executed.
 			}
 		}
 		
