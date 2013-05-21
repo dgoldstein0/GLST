@@ -266,7 +266,6 @@ public class GameSimulator {
 		{
 			//Test Case 8 = first multiplayer test
 			
-			/*
 			//actual end time is 281180.  Need protocol replacement to
 			//make the full length pass, however.
 			twoPlayerTest(8, "simplemap.xml", "testcases/test8-host.txt", "testcases/test8-guest.txt", 250000l, new EvenlySpacedSaves(100));
@@ -285,9 +284,8 @@ public class GameSimulator {
 			
 			//another 3 tests
 			twoPlayerTest(15, "simplemap.xml", "eoh2012logs/Day 1/log12-host.txt", "eoh2012logs/Day 1/log12-guest.txt", 580000, new EvenlySpacedSaves(100));
-			twoPlayerTest(16, "simplemap.xml", "eoh2012logs/Day 1/log13-host.txt", "eoh2012logs/Day 1/log13-guest.txt", 370000, new EvenlySpacedSaves(100)); //one of these two goes past 800,000.  Also, we have xml problems.
+			twoPlayerTest(16, "simplemap.xml", "eoh2012logs/Day 1/log13-host.txt", "eoh2012logs/Day 1/log13-guest.txt", 370000, new EvenlySpacedSaves(100)); //one of these two goes past 800,000.  Also, we have xml problems.  Also, fails because a decision has changed.
 			twoPlayerTest(17, "simplemap.xml", "eoh2012logs/Day 1/log14-host.txt", "eoh2012logs/Day 1/log14-guest.txt", 592000, new EvenlySpacedSaves(100)); //ends at 1216000.  As is, should pass, but for the full time it hits DecisionCheckException
-			*/
 			
 			long[] save_times = {0, 626800, 626900, 626920, 626940, 626960, 626980, 627000, 627100, 627200, 627300, 627520};
 			twoPlayerTest(18, "simplemap.xml", "testcases/log18-host.txt", "testcases/log18-guest.txt",
