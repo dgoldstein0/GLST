@@ -287,9 +287,8 @@ public class GameSimulator {
 			twoPlayerTest(16, "simplemap.xml", "eoh2012logs/Day 1/log13-host.txt", "eoh2012logs/Day 1/log13-guest.txt", 370000, new EvenlySpacedSaves(100)); //one of these two goes past 800,000.  Also, we have xml problems.  Also, fails because a decision has changed.
 			twoPlayerTest(17, "simplemap.xml", "eoh2012logs/Day 1/log14-host.txt", "eoh2012logs/Day 1/log14-guest.txt", 592000, new EvenlySpacedSaves(100)); //ends at 1216000.  As is, should pass, but for the full time it hits DecisionCheckException
 			
-			long[] save_times = {0, 626800, 626900, 626920, 626940, 626960, 626980, 627000, 627100, 627200, 627300, 627520};
 			twoPlayerTest(18, "simplemap.xml", "testcases/log18-host.txt", "testcases/log18-guest.txt",
-					740000, new CustomSaves(save_times)); // goes to 768000
+					768000, new EvenlySpacedSaves(100)); // goes to 768000
 
 		}
 	}
