@@ -47,24 +47,21 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 
 	final public void revertToTime(long t) throws DataSaverControl.DataNotYetSavedException
 	{		
-		if(saved_data[getPreviousIndex(index)].isDataSaved() && saved_data[getPreviousIndex(index)].t > t) //this check helps ensure we do not get into an infinite recursion.
+		int indx=getIndexForTime(t);
+		//System.out.println(the_obj.getClass().toString() + " revert to time=" + Long.toString(t) + " index=" + Integer.toString(indx));
+		if (saved_data[indx].isDataSaved() && saved_data[indx].t == t)
+		{	
+			saved_data[indx].loadData(the_obj);
+			
+			index = getNextIndex(indx); //index points to NEXT DataSaver
+		}
+		else
 		{
-			int indx=getIndexForTime(t);
-			//System.out.println(the_obj.getClass().toString() + " revert to time=" + Long.toString(t) + " index=" + Integer.toString(indx));
-			if (saved_data[indx].isDataSaved())
-			{	
-				saved_data[indx].loadData(the_obj);
-				
-				index = getNextIndex(indx); //index points to NEXT DataSaver
-			}
-			else
-			{
-				//the object did not exist at the indicated time.  Delete it...
-				//(consider possibly save it for re-creation?)
-				
-				//remove the object from the data structure
-				the_obj.handleDataNotSaved();
-			}
+			//the object did not exist at the indicated time.  Delete it...
+			//(consider possibly save it for re-creation?)
+			
+			//remove the object from the data structure
+			the_obj.handleDataNotSaved();
 		}
 	}
 	
