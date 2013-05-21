@@ -690,7 +690,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				(int)MathFormula.randomize(typePlanet.pop_capacity,typePlanet.pop_capacity*GalacticStrategyConstants.rand_mod), 
 				DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, typePlanet.PopGrowthRate, typePlanet.building_Num, 
 				MathFormula.randomize(typePlanet.mining_rate,typePlanet.mining_rate*GalacticStrategyConstants.rand_mod));
-		theplanet.orbit = new Orbit((Satellite<Planet>)theplanet, (Orbitable<GSystem>)system, x, y, x, y, 1);
+		theplanet.orbit = new Orbit((Satellite<Planet>)theplanet, (Orbitable<GSystem>)system, x, y, x, y, Orbit.DIRECTION.CLOCKWISE);
 		system.orbiting.add(theplanet);
 		selected_obj = theplanet;
 		wait_to_add = AddSystem.ADD_FOCUS;
@@ -700,7 +700,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	private void addMoon(int x, int y)
 	{
 		Moon themoon = new Moon(((Planet)selected_obj).orbiting.size(), DEFAULT_MOON_MASS, "", DEFAULT_MOON_SIZE);
-		themoon.orbit = new Orbit((Satellite<Moon>)themoon, (Orbitable<Planet>)selected_obj,x,y,x,y,1);
+		themoon.orbit = new Orbit((Satellite<Moon>)themoon, (Orbitable<Planet>)selected_obj,x,y,x,y, Orbit.DIRECTION.CLOCKWISE);
 		((Planet)selected_obj).orbiting.add(themoon);
 		
 		selected_obj = themoon;

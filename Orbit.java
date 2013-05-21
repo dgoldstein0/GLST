@@ -3,8 +3,14 @@ public strictfp class Orbit implements Saveable<Orbit>
 	//equiv to 2pi/sqrt(G), where G is the gravity constant
 	final static double PERIOD_CONSTANT=GalacticStrategyConstants.PERIOD_CONSTANT;
 
-	final static int CLOCKWISE = 1;
-	final static int COUNTERCLOCKWISE=-1;
+	public static enum DIRECTION{
+		CLOCKWISE(1), COUNTERCLOCKWISE(-1);
+		
+		final private int dir;
+		DIRECTION(int dir){this.dir=dir;}
+		
+		public int asInt(){return dir;}
+	};
 
 	GenericDataSaverControl<Orbit> data_control;
 	
@@ -20,7 +26,7 @@ public strictfp class Orbit implements Saveable<Orbit>
 	
 	double period;
 	double time_offset;
-	int direction; //1=clockwise, -1=counterclockwise - use constants CLOCKWISE and COUNTERCLOCKWISE
+	DIRECTION direction; //1=clockwise, -1=counterclockwise - use constants CLOCKWISE and COUNTERCLOCKWISE
 	
 	double a;
 	double b;
@@ -29,7 +35,7 @@ public strictfp class Orbit implements Saveable<Orbit>
 	Orbitable<?> boss; //the object that is the other focus of this orbit
 	Satellite<?> obj; //the object using this orbit
 	
-	public Orbit(Satellite<?> theobj, Orbitable<?> boss_obj, double focus2_x, double focus2_y, double init_x, double init_y, int dir)
+	public Orbit(Satellite<?> theobj, Orbitable<?> boss_obj, double focus2_x, double focus2_y, double init_x, double init_y, DIRECTION dir)
 	{
 		data_control = new GenericDataSaverControl<Orbit>(this);
 		boss=boss_obj;
@@ -103,7 +109,7 @@ public strictfp class Orbit implements Saveable<Orbit>
 	
 	public synchronized void move(double time)
 	{		
-		double frac_time = (time_offset + ((double)direction)*time)/period;
+		double frac_time = (time_offset + ((double)direction.asInt())*time)/period;
 		frac_time=frac_time-Math.floor(frac_time);
 		
 		double theta1;
@@ -172,8 +178,18 @@ public strictfp class Orbit implements Saveable<Orbit>
 	public void setCur_y(double y){cur_y=y;}
 	public synchronized double getPeriod(){return period;}
 	public synchronized void setPeriod(double d){period=d;}
-	public int getDirection(){return direction;}
-	public void setDirection(int d){direction=d;}
+	public DIRECTION getDirection(){return direction;}
+	
+	// For backwards compatibility
+	public void setDirection(int d){
+		for (DIRECTION dir : DIRECTION.values()) {
+			if (dir.asInt() == d)
+				direction=dir;
+		}
+	}
+	
+	public void setDirection(DIRECTION d){direction = d;}
+	
 	public synchronized double getA(){return a;}
 	public synchronized void setA(double x){a=x;}
 	public synchronized double getB(){return b;}
