@@ -12,7 +12,7 @@ public strictfp class Orbit implements Saveable<Orbit>
 		public int asInt(){return dir;}
 	};
 
-	GenericDataSaverControl<Orbit> data_control;
+	DataSaverControl<Orbit> data_control;
 	
 	volatile double init_x;
 	volatile double init_y;
@@ -37,7 +37,7 @@ public strictfp class Orbit implements Saveable<Orbit>
 	
 	public Orbit(Satellite<?> theobj, Orbitable<?> boss_obj, double focus2_x, double focus2_y, double init_x, double init_y, DIRECTION dir)
 	{
-		data_control = new GenericDataSaverControl<Orbit>(this);
+		data_control = new DataSaverControl<Orbit>(this);
 		boss=boss_obj;
 		obj=theobj;
 		
@@ -161,7 +161,7 @@ public strictfp class Orbit implements Saveable<Orbit>
 	}
 	
 	//methods required for save/load
-	public Orbit(){data_control = new GenericDataSaverControl<Orbit>(this);}
+	public Orbit(){data_control = new DataSaverControl<Orbit>(this);}
 	public Orbitable<?> getBoss(){return boss;}
 	public void setBoss(Orbitable<?> p){boss=p;}
 	public Satellite<?> getObj(){return obj;}
@@ -198,7 +198,7 @@ public strictfp class Orbit implements Saveable<Orbit>
 	public synchronized void setC(double z){c=z;}
 
 	@Override
-	public GenericDataSaverControl<Orbit> getDataControl() {
+	public DataSaverControl<Orbit> getDataControl() {
 		return data_control;
 	}
 

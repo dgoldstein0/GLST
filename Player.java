@@ -22,7 +22,7 @@ public strictfp class Player implements Saveable<Player>
 	 */
 	private double metal;
 	
-	GenericDataSaverControl<Player> data_control;
+	DataSaverControl<Player> data_control;
 	
 	Color color;
 	int id; //id is used to identify players.  These are assigned by the host of the game.
@@ -65,7 +65,7 @@ public strictfp class Player implements Saveable<Player>
 	
 	private void setDefaultValues()
 	{
-		data_control = new GenericDataSaverControl<Player>(this);
+		data_control = new DataSaverControl<Player>(this);
 		next_order_number = 0;
 		money=GalacticStrategyConstants.DEFAULT_MONEY;
 		metal=GalacticStrategyConstants.DEFAULT_METAL;
@@ -136,7 +136,7 @@ public strictfp class Player implements Saveable<Player>
 	public void setShips_in_transit(ArrayList<Ship> s){ships_in_transit=s;}
 	
 	@Override
-	public GenericDataSaverControl<Player> getDataControl() {
+	public DataSaverControl<Player> getDataControl() {
 		return data_control;
 	}
 	

@@ -5,12 +5,12 @@ import java.util.Set;
 public strictfp class MissileList implements Saveable<MissileList> {
 	
 	TreeMap<Missile.MissileId, Missile> table;
-	GenericDataSaverControl<MissileList> data_control;
+	DataSaverControl<MissileList> data_control;
 	
 	public MissileList()
 	{
 		table = new TreeMap<Missile.MissileId, Missile>();
-		data_control = new GenericDataSaverControl<MissileList>(this);
+		data_control = new DataSaverControl<MissileList>(this);
 	}
 
 	public synchronized Missile get(Missile.MissileId key)
@@ -38,7 +38,7 @@ public strictfp class MissileList implements Saveable<MissileList> {
 	}
 
 	@Override
-	public DataSaverControl<MissileList, ? extends DataSaver<MissileList>> getDataControl() {
+	public DataSaverControl<MissileList> getDataControl() {
 		
 		return data_control;
 	}

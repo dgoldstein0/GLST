@@ -1,25 +1,56 @@
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
- * saved_data array is instantiated via the Creator object passed into the constructor
  * @author David
  *
- * @param <T> the inheriting class
- * @param <S> the DataSaver type for the inheriting class
+ * @param <T> the class that we want to save data from.
  */
-public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends DataSaver<T> > {
+public strictfp class DataSaverControl<T extends Saveable<T>> {
 
 	protected int index;
-	protected final S[] saved_data;
+	protected final DataSaver<T>[] saved_data;
 	protected final T the_obj;
 	
-	public DataSaverControl(T s, Creator<T, S> c)
+	public DataSaverControl(T s)
 	{
-		index=0;
-		the_obj=s;
+		index = 0;
+		the_obj = s;
 		
-		saved_data = c.createArray();
+		saved_data = new DataSaver[GalacticStrategyConstants.data_capacity];
 		for(int i=0; i < saved_data.length; ++i)
-			saved_data[i] = c.create(the_obj);
+			saved_data[i] = new DataSaver<T>(getFields(the_obj));
+	}
+	
+	private List<Field> getFields(T obj)
+	{
+		Class<?> cls;
+		List<Field> fields_to_save = new ArrayList<Field>();
+		
+		cls = obj.getClass();
+		do {
+			Field[] fields = cls.getDeclaredFields();
+			
+			for (int i=0; i < fields.length; i++)
+			{
+				int modifiers = fields[i].getModifiers();
+				if (fields[i].getName() == "data_control" ||
+					fields[i].isEnumConstant() ||
+					Modifier.isFinal(modifiers) ||
+					Modifier.isStatic(modifiers))
+					continue;
+				
+				fields[i].setAccessible(true);
+				fields_to_save.add(fields[i]);
+			}
+			
+			cls = cls.getSuperclass();
+		} while (cls != null);
+		
+		return fields_to_save;
 	}
 	
 	//loading and saving data functions.
@@ -30,7 +61,7 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 
 		int prev_index = getPreviousIndex(index);
 		
-		if(saved_data[prev_index].t == correct_time)
+		if(saved_data[prev_index].getTime() == correct_time)
 		{
 			saved_data[prev_index].saveData(the_obj, correct_time);
 			if (correct_time != 0)
@@ -47,9 +78,9 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 
 	final public void revertToTime(long t) throws DataSaverControl.DataNotYetSavedException
 	{		
-		int indx=getIndexForTime(t);
-		//System.out.println(the_obj.getClass().toString() + " revert to time=" + Long.toString(t) + " index=" + Integer.toString(indx));
-		if (saved_data[indx].isDataSaved() && saved_data[indx].t == t)
+		int indx = getIndexForTime(t);
+
+		if (saved_data[indx].isDataSaved())
 		{	
 			saved_data[indx].loadData(the_obj);
 			
@@ -67,14 +98,12 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 	
 	public int getIndexForTime(long t) throws DataNotYetSavedException
 	{
-		//System.out.println("t is " + Long.toString(t) + " and game time is " + Long.toString(GameInterface.GC.TC.getTime()));
+		int stepback = (int) ((saved_data[getPreviousIndex(index)].getTime()-t)/GalacticStrategyConstants.TIME_GRANULARITY + 1);
+		stepback += (t % GalacticStrategyConstants.TIME_GRANULARITY != 0) ? 1 : 0;
 		
-		int stepback=(int) ((saved_data[getPreviousIndex(index)].t-t)/GalacticStrategyConstants.TIME_GRANULARITY + 1);
-		stepback += (t%GalacticStrategyConstants.TIME_GRANULARITY != 0) ? 1 : 0;
-		
-		int indx=-1;
+		int indx = -1;
 		//System.out.println("load data: t is " + Long.toString(t) + " and time is " + Long.toString(time) + ", so step back... " + Integer.toString(stepback));
-		if (stepback>50)
+		if (stepback > GalacticStrategyConstants.data_capacity)
 		{
 			System.out.println("Error loading ship data: the delay is too long"); //TODO: how should these errors be dealt with
 		}
@@ -91,8 +120,10 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 				indx=index+GalacticStrategyConstants.data_capacity-stepback;			
 		}
 		
-		if (saved_data[indx].t != t)
-			throw new RuntimeException("saved_data[" + indx + "].t is " + saved_data[indx].t + " and t is " + t);
+		if (saved_data[indx].getTime() != t)
+			throw new RuntimeException(
+				"saved_data[" + indx + "].t is " + saved_data[indx].getTime() + " and t is " + t
+			);
 		
 		return indx;
 	}
@@ -105,13 +136,6 @@ public strictfp abstract class DataSaverControl<T extends Saveable<T>, S extends
 	protected int getPreviousIndex(int i)
 	{
 		return (i != 0)? i-1 : saved_data.length-1;
-	}
-	
-	//class to create data savers
-	public static abstract class Creator<T extends Saveable<T>, S extends DataSaver<T>>
-	{
-		public abstract S create(T obj);
-		public abstract S[] createArray();
 	}
 	
 	public static class DataNotYetSavedException extends RuntimeException
