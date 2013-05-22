@@ -51,8 +51,6 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	
 	public Flyer(){}
 	
-	@Override
-	public void handleDataNotSaved(){removeFromGame();}
 	public abstract void removeFromGame();
 	public boolean isAlive(){return is_alive;}
 	public abstract boolean update(long time, ITERATOR iterator);

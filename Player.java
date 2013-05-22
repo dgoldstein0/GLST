@@ -139,11 +139,6 @@ public strictfp class Player implements Saveable<Player>
 	public DataSaverControl<Player> getDataControl() {
 		return data_control;
 	}
-	
-	@Override
-	public void handleDataNotSaved() {
-		// TODO Auto-generated method stub
-	}
 
 	public int getNextOrderNumber() {
 		return ++next_order_number;

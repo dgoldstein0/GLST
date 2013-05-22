@@ -65,9 +65,6 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		number_taxoffices=0;
 	}
 	
-	@Override
-	public void handleDataNotSaved(){System.out.println("OwnableSatellite data not saved.  Ridiculous!");}
-	
 	public void update(long time_elapsed)
 	{
 		time=time_elapsed;

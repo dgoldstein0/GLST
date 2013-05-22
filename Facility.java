@@ -50,9 +50,6 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 		return new FacilityDescriber<T>((Facility<T>)this);
 	}
 	
-	@Override
-	public void handleDataNotSaved(){removeFromGame();}
-	
 	public void removeFromGame()
 	{
 		synchronized(location.facilities)

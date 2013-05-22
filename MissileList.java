@@ -42,12 +42,6 @@ public strictfp class MissileList implements Saveable<MissileList> {
 		
 		return data_control;
 	}
-
-	@Override
-	public void handleDataNotSaved() {
-		
-		System.out.println("Impossible: MissileList.handleDataNotSaved has been invoked.");
-	}
 	
 	public synchronized TreeMap<Missile.MissileId, Missile> getTable(){return table;}
 	public synchronized void setTable(TreeMap<Missile.MissileId, Missile> t){table=t;}

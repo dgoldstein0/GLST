@@ -201,10 +201,4 @@ public strictfp class Orbit implements Saveable<Orbit>
 	public DataSaverControl<Orbit> getDataControl() {
 		return data_control;
 	}
-
-	@Override
-	public void handleDataNotSaved() {
-		// TODO: is this the right thing to do?
-		throw new RuntimeException("Data not yet saved... fuck.");
-	}
 }

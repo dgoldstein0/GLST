@@ -88,11 +88,7 @@ public strictfp class DataSaverControl<T extends Saveable<T>> {
 		}
 		else
 		{
-			//the object did not exist at the indicated time.  Delete it...
-			//(consider possibly save it for re-creation?)
-			
-			//remove the object from the data structure
-			the_obj.handleDataNotSaved();
+			throw new DataNotSavedException("Data for object not saved for time " + t);
 		}
 	}
 	
@@ -105,19 +101,21 @@ public strictfp class DataSaverControl<T extends Saveable<T>> {
 		//System.out.println("load data: t is " + Long.toString(t) + " and time is " + Long.toString(time) + ", so step back... " + Integer.toString(stepback));
 		if (stepback > GalacticStrategyConstants.data_capacity)
 		{
-			System.out.println("Error loading ship data: the delay is too long"); //TODO: how should these errors be dealt with
+			//TODO: is this the right way to deal with these errors?
+			throw new RuntimeException("Error loading ship data: the delay is too long");
 		}
 		else if(stepback <= 0)
 		{
-			System.out.println("Major consistency error: stepback in getIndexForTime is " + Integer.toString(stepback) + "with t=" + Long.toString(t));
-			throw new DataNotYetSavedException(stepback);
+			throw new DataNotYetSavedException(
+				"Major consistency error: stepback in getIndexForTime is " +
+				Integer.toString(stepback) + "with t=" + Long.toString(t)
+			);
 		}
 		else
 		{
-			if (stepback<=index)
-				indx=index-stepback;
-			else
-				indx=index+GalacticStrategyConstants.data_capacity-stepback;			
+			indx = index - stepback;
+			if (stepback > index)
+				indx += GalacticStrategyConstants.data_capacity;			
 		}
 		
 		if (saved_data[indx].getTime() != t)
@@ -144,12 +142,24 @@ public strictfp class DataSaverControl<T extends Saveable<T>> {
 		 * Auto-generated serialVersionUID for Serializable
 		 */
 		private static final long serialVersionUID = 3998188571908079611L;
-		
-		final int stepback;
-		
-		public DataNotYetSavedException(int step)
+
+		public DataNotYetSavedException(String msg)
 		{
-			stepback = step;
+			super(msg);
+		}
+	}
+	
+	public static class DataNotSavedException extends RuntimeException
+	{
+
+		/**
+		 * Auto-generated serialVersionUID for Serializable 
+		 */
+		private static final long serialVersionUID = 2709446774330687410L;
+		
+		public DataNotSavedException(String s)
+		{
+			super(s);
 		}
 	}
 }

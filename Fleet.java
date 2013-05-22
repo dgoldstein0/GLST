@@ -82,12 +82,6 @@ public strictfp class Fleet implements Saveable<Fleet>
 		
 		return data_control;
 	}
-
-	@Override
-	public void handleDataNotSaved() {
-		
-		throw new RuntimeException("handleDataNotSaved called for Fleet!  This is impossible!");
-	}
 	
 	public class ShipIterator implements Iterator<Ship.ShipId>
 	{
