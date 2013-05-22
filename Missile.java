@@ -26,8 +26,8 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		target_alive=true;
 		
 		//TODO: why do getXCoord and getYCoord take time values?
-		dest_x_coord = destination.getXCoord(time);
-		dest_y_coord = destination.getYCoord(time);
+		dest_x_coord = destination.getXCoord();
+		dest_y_coord = destination.getYCoord();
 		current_flying_AI = new TrackingAI(this, 0.0, TrackingAI.IN_RANGE_BEHAVIOR.NO_SLOWDOWN);
 	}
 	
@@ -68,8 +68,8 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		//TODO: when is target not alive, and destination not a DestinationPoint?
 		if(target_alive)
 		{
-			double x_dif=this.pos_x-target.getXCoord(t);
-			double y_dif=this.pos_y-target.getYCoord(t);
+			double x_dif=this.pos_x-target.getXCoord();
+			double y_dif=this.pos_y-target.getYCoord();
 			return (x_dif*x_dif+y_dif*y_dif<Collide_Range*Collide_Range);
 		}
 		else
@@ -120,10 +120,9 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 	public void targetIsDestroyed(long t)
 	{
 		//also see Ship's targetIsDestroyed function.
-		//Need to subtract a time grain to make sure we don't get any DataNotYetSavedExceptions.
 		destination = new DestinationPoint(
-						target.getXCoord(t),
-						target.getYCoord(t)
+						target.getXCoord(),
+						target.getYCoord()
 					);
 		target_alive = false;
 		target = null;

@@ -119,50 +119,43 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 		return type.accel_rate;
 	}
 	
-	public double destinationX(long t)
+	public double destinationX()
 	{
-		dest_x_coord = destination.getXCoord(t);
+		dest_x_coord = destination.getXCoord();
 		return dest_x_coord;
 	}
 	
-	public double destinationY(long t)
+	public double destinationY()
 	{
-		dest_y_coord = destination.getYCoord(t);
+		dest_y_coord = destination.getYCoord();
 		return dest_y_coord;
 	}
 	
-	public double destinationVelX(long t)
+	public double destinationVelX()
 	{
-		return destination.getXVel(t);
+		return destination.getXVel();
 	}
 	
-	public double destinationVelY(long t)
+	public double destinationVelY()
 	{
-		return destination.getYVel(t);
+		return destination.getYVel();
 	}
 	
 	//methods to implement destination
 	@Override
 	public String imageLoc(){return type.img.img_path;}
 	
-	@Override
-	public double getXCoord(long t)
-	{
-		return pos_x;
-	}
+	@Override public double getXCoord() {return pos_x;}
+	@Override public double getYCoord() {return pos_y;}
 	
 	@Override
-	public double getYCoord(long t)
-	{
-		return pos_y;
-	}
-	
-	public double getXVel(long t)
+	public double getXVel()
 	{
 		return speed*Math.cos(direction);
 	}
 	
-	public double getYVel(long t)
+	@Override
+	public double getYVel()
 	{
 		return speed*Math.sin(direction);
 	}

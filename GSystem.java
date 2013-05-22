@@ -33,9 +33,9 @@ public strictfp class GSystem implements Orbitable<GSystem>
 	int height;
 	
 	//only used in the designer for multi-system drags.
-	//Probably don't belong here...
-	int x_adj;
-	int y_adj;
+	//TODO: Probably don't belong here...
+	public int x_adj;
+	public int y_adj;
 	
 	public GSystem(int i, int x, int y, String nm, ArrayList<Satellite<?>> orbiting, HashSet<Star> stars, int nav)
 	{
@@ -221,11 +221,11 @@ public strictfp class GSystem implements Orbitable<GSystem>
 		}
 	}
 	
-	public double getXCoord(long t){return absoluteCurX();}
-	public double getYCoord(long t){return absoluteCurY();}
-	public double getXVel(long t){return 0.0;}
-	public double getYVel(long t){return 0.0;}
-	public String imageLoc(){return "";}
+	@Override public double getXCoord(){return absoluteCurX();}
+	@Override public double getYCoord(){return absoluteCurY();}
+	@Override public double getXVel(){return 0.0;}
+	@Override public double getYVel(){return 0.0;}
+	@Override public String imageLoc(){return "";}
 	
 	//methods required for save/load
 	public GSystem()

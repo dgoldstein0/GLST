@@ -36,7 +36,7 @@ public strictfp class ShipMoveOrder extends Order
 		if (the_ship != null && the_dest != null && the_ship.isAlive()
 				&& the_ship.owner.getId() == p_id)
 		{			
-			the_ship.orderToMove(scheduled_time, the_dest);
+			the_ship.orderToMove(the_dest);
 			decision = Decision.ACCEPT;
 			return true;
 		}

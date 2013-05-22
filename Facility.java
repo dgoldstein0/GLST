@@ -94,10 +94,10 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 	
 	public Facility(){}
 	
-	@Override public double getXCoord(long t){return location.getXCoord(t);}
-	@Override public double getYCoord(long t){return location.getYCoord(t);}
-	@Override public double getXVel(long t){return location.getXVel(t);}
-	@Override public double getYVel(long t){return location.getYVel(t);}
+	@Override public double getXCoord(){return location.getXCoord();}
+	@Override public double getYCoord(){return location.getYCoord();}
+	@Override public double getXVel(){return location.getXVel();}
+	@Override public double getYVel(){return location.getYVel();}
 	
 	@Override public HashSet<Targetter<?>> getAggressors(){return aggressors;}
 	

@@ -29,13 +29,13 @@ public strictfp class DestinationPoint implements Destination<DestinationPoint>,
 	}
 	
 	@Override
-	public double getXCoord(long t){return x;}
+	public double getXCoord(){return x;}
 	@Override
-	public double getYCoord(long t){return y;}
+	public double getYCoord(){return y;}
 	@Override
-	public double getXVel(long t){return 0.0d;}
+	public double getXVel(){return 0.0d;}
 	@Override
-	public double getYVel(long t){return 0.0d;}
+	public double getYVel(){return 0.0d;}
 	
 	@Override
 	public String imageLoc(){return "images/destinationpoint.jpg";}

@@ -33,8 +33,8 @@ public strictfp class TrackingAI extends FlyerAI
 	 */
 	public double calcDesiredDirection(long t)
 	{
-		double dest_vec_x = the_flyer.destinationX(t) - the_flyer.pos_x;
-		double dest_vec_y = the_flyer.destinationY(t) - the_flyer.pos_y;
+		double dest_vec_x = the_flyer.destinationX() - the_flyer.pos_x;
+		double dest_vec_y = the_flyer.destinationY() - the_flyer.pos_y;
 	
 		return Math.atan2(dest_vec_y, dest_vec_x);
 	}
@@ -49,18 +49,18 @@ public strictfp class TrackingAI extends FlyerAI
 		//if close to dest
 		
 		//the speed the ship may want to match.  The cosines are used to slow down the ship when it is not heading directly at its destination
-		double speed_to_match= Math.hypot(the_flyer.destinationVelX(t),the_flyer.destinationVelY(t))*Math.cos(desired_direction)*Math.abs(Math.cos(desired_direction));
+		double speed_to_match= Math.hypot(the_flyer.destinationVelX(),the_flyer.destinationVelY())*Math.cos(desired_direction)*Math.abs(Math.cos(desired_direction));
 			
 		//the time it would take for the ship to match the speed of its target from its current speed
 		double time_to_chng = (the_flyer.speed-speed_to_match)/(the_flyer.type.accel_rate);
 		
 		//the time it would take for the ship to travel the remaining distance to its destination
-		double time_to_dest = Math.hypot(the_flyer.pos_x - the_flyer.destinationX(t),the_flyer.pos_y - the_flyer.destinationY(t))/the_flyer.speed;
+		double time_to_dest = Math.hypot(the_flyer.pos_x - the_flyer.destinationX(),the_flyer.pos_y - the_flyer.destinationY())/the_flyer.speed;
 		
 		//The "if" here asks: should the Flyer should try to slow down to stop/match speed of destination AND...
 			//is the flyer close enough to its destination that we can say it is there already? OR
 			//(heuristic) is the time needed to match speed greater than time to arrival if traveling at constant speed (same as v^2 > a*d if the destination is not moving) 
-		if(in_range_behavior != IN_RANGE_BEHAVIOR.NO_SLOWDOWN && (Math.hypot(the_flyer.pos_x - the_flyer.destinationX(t),the_flyer.pos_y - the_flyer.destinationY(t)) < dest_tolerance
+		if(in_range_behavior != IN_RANGE_BEHAVIOR.NO_SLOWDOWN && (Math.hypot(the_flyer.pos_x - the_flyer.destinationX(),the_flyer.pos_y - the_flyer.destinationY()) < dest_tolerance
 			|| time_to_chng > time_to_dest))
 		{
 			switch(in_range_behavior)

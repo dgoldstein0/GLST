@@ -120,7 +120,7 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 			newship=manufac_queue.get(first);//produce the 1st one in the queue
 			manufac_queue.remove(first);
 		}
-		newship.assemble(this, t);
+		newship.assemble(this);
 	}
 	
 	public void updateStatus(long t)
