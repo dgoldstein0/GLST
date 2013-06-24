@@ -34,7 +34,7 @@ public strictfp class GameControl
 	volatile ServerSocket the_server_socket; 
 	volatile Socket the_socket;
 	volatile OutputStream OS;
-	volatile InputStream IS;
+	volatile BufferedReader input_reader;
 	
 	Thread serverThread; //waits for connections
 	Thread lobbyThread; //reads data and updates the GameLobby
@@ -150,7 +150,6 @@ public strictfp class GameControl
 		try
 		{
 			PrintWriter writer = new PrintWriter(OS, true);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(IS));
 			
 			if(players[player_id].hosting)
 			{
@@ -163,8 +162,8 @@ public strictfp class GameControl
 				while(retry)
 				{
 					if(!Thread.interrupted()){
-						if(reader.ready()){
-							reader.readLine();//wait for client
+						if(input_reader.ready()){
+							input_reader.readLine();//wait for client
 							sendMap();
 							retry=false;
 						} else {
@@ -183,16 +182,14 @@ public strictfp class GameControl
 				long pongtime=0;
 				String pongmsg="";
 				
-				//TODO: if possible, get rid of all these damn pings.  This is not totally reliable.
-				//As of 3/10/2012, upping old limit from 100 to 1000.
 				for(int i=0; !pong && i<1000; i++)
 				{
 					writer.println("ping" + Integer.toString(i));
 					pingtimes[i] = System.nanoTime();
 					System.out.println("ping" + Integer.toString(i));
 					//pong
-					if(reader.ready()) {
-						pongmsg = reader.readLine();
+					if(input_reader.ready()) {
+						pongmsg = input_reader.readLine();
 						pongtime=System.nanoTime();
 						pong=true;
 						System.out.println("that was a pong!");
@@ -211,22 +208,18 @@ public strictfp class GameControl
 				}
 				
 				//figure out which ping was returned, and compute estimate
-				
-				int offset_estimate = (int)((pongtime-pingtimes[Integer.parseInt(pongmsg)])/2);
-				//System.out.println("Offset estimated: "+Integer.toString(offset_estimate));
+				int pong_num = Integer.parseInt(pongmsg);
+				int offset_estimate = (int)((pongtime-pingtimes[pong_num])/2);
+				System.out.println("Offset estimated: " + Integer.toString(offset_estimate) + " from pong " + pong_num);
 				
 				//send offset_estimate
 				writer.println(Integer.toString(offset_estimate));
-				//System.out.println("estimate sent");
 				
 				//Start time
 				updater.setTimeManager(new TimeControl(0));
-				//System.out.println("time started!");
 				
 				//send start signal
-				
 				writer.println("Start");
-				//System.out.println("Start signal sent!");
 			}
 			else
 			{
@@ -238,7 +231,7 @@ public strictfp class GameControl
 				
 				//return message for offset estimate
 				System.out.println("waiting for ping");
-				String pingmsg= reader.readLine(); //impractical to make this non-blocking, since it will mess up timing measure
+				String pingmsg= input_reader.readLine(); //impractical to make this non-blocking, since it will mess up timing measure
 				System.out.println("pong time");
 				
 				if(pingmsg == null) //only if the connection is closed
@@ -247,15 +240,15 @@ public strictfp class GameControl
 				writer.println(pingmsg.substring(4));
 				System.out.println("pong!");
 				
-				//recieve offset_estimate
+				//receive offset_estimate
 				String received="";
 				do
 				{
 					boolean new_line_read=false;
 					while(!new_line_read){ //readLine in a nonblocking manner, ending startGame on interrupts
 						if(!Thread.interrupted()){
-							if(reader.ready()){
-								received=reader.readLine();
+							if(input_reader.ready()){
+								received=input_reader.readLine();
 								System.out.println(received);
 								new_line_read=true;
 							} else {
@@ -273,7 +266,7 @@ public strictfp class GameControl
 				System.out.println("offset recieved");
 				
 				//start time when start signal is received
-				reader.readLine();
+				input_reader.readLine();
 				updater.setTimeManager(new TimeControl(offset));
 			}
 		}
@@ -294,27 +287,35 @@ public strictfp class GameControl
 		readThread = new Thread(new EventReader());
 		readThread.start();
 		
-		//set up systems for the game
-		for(GSystem sys : map.systems)
-			sys.setUpForGame(this);
-		
-		//start everyone in assigned locations
-		for(int i=0; i<map.start_locations.size(); i++)
-		{
-			OwnableSatellite<?> p = map.start_locations.get(i);
-			p.setOwner(players[i]);
-			Base b = new Base(p, p.next_facility_id++, (long)0);
-			p.facilities.put(b.id,b);
-			p.the_base = b;
-		}
-		
-		map.saveOwnablesData(0);
+		gameSetup();
 		
 		//start game graphics...
 		GI.drawGalaxy(GameInterface.GALAXY_STATE.NORMAL);
 		
 		//set game to update itself
 		updater.startUpdating();
+	}
+	
+	private void gameSetup()
+	{
+		//set up systems for the game
+		for(GSystem sys : map.systems)
+			sys.setUpForGame(this);
+		
+		//start all players in assigned locations
+		for (int i = 0; i < players.length; i++)
+		{
+			if (players[i] != null)
+			{
+				OwnableSatellite<?> sat = map.start_locations.get(i);
+				sat.setOwner(players[i]);
+				Base b = new Base(sat, sat.next_facility_id++, (long)0);
+				sat.facilities.put(b.id,b);
+				sat.the_base = b;
+			}
+		}
+		
+		map.saveOwnablesData(0);
 	}
 	
 	public void startGameViaThread()
@@ -398,27 +399,9 @@ public strictfp class GameControl
 			}
 		}
 		
-		
 		try
 		{
-			//set up systems for the game
-			for(GSystem sys : map.systems)
-				sys.setUpForGame(this);
-			
-			//start all players in assigned locations
-			for (int i = 0; i < players.length; i++)
-			{
-				if (players[i] != null)
-				{
-					OwnableSatellite<?> sat = map.start_locations.get(i);
-					sat.setOwner(players[i]);
-					Base b = new Base(sat, sat.next_facility_id++, (long)0);
-					sat.facilities.put(b.id,b);
-					sat.the_base = b;
-				}
-			}
-			
-			map.saveOwnablesData(0);
+			gameSetup();
 			
 			if(!automate)
 			{
@@ -446,12 +429,10 @@ public strictfp class GameControl
 	
 	public void handleError(String header, String message, boolean do_gui)
 	{
-		if(do_gui)
-		{
+		if(do_gui) {
 			JOptionPane.showMessageDialog(GI.frame, message, header, JOptionPane.ERROR_MESSAGE);
 		}
-		else
-		{
+		else {
 			System.err.println(header + ": " + message);
 		}
 	}
@@ -480,20 +461,21 @@ public strictfp class GameControl
 	
 	public class HostRunnable implements Runnable
 	{
-		public HostRunnable()
-		{
+		public HostRunnable() {
 		}
 		
 		public void run()
 		{
 			System.out.println("Host runnable running...");
-			try
-			{
+			
+			// close if already exists
+			try {
 				if(the_server_socket != null)
 					the_server_socket.close();
 			}
 			catch(IOException e){}
 			
+			// open new socket
 			try{the_server_socket = new ServerSocket(DEFAULT_PORT_NUMBER);}
 			catch (IOException e)
 			{
@@ -509,8 +491,7 @@ public strictfp class GameControl
 			}
 			catch(IOException e){}
 			
-			try
-			{
+			try {
 				the_server_socket.setSoTimeout(500);
 				boolean go=true;
 				while(!Thread.interrupted() && go)
@@ -518,14 +499,13 @@ public strictfp class GameControl
 					try
 					{
 						System.out.println("Waiting for connections...");
-						the_socket = the_server_socket.accept();
+						setUpIOStreams(the_server_socket.accept());
 						go=false;
-						setUpIOStreams();
 						
 						//send player roster.  start with the number of players, and then send the_player and then go through players hashset
 						PrintWriter w = new PrintWriter(OS, true); //this should auto-flush
-						BufferedReader r = new BufferedReader(new InputStreamReader(IS));
 						
+						System.out.println("Sending # of players");
 						//r.readLine(); //wait until client is ready
 						int num_players = players.length;
 						w.println(Integer.toString(num_players));
@@ -538,12 +518,11 @@ public strictfp class GameControl
 							} else {
 								w.println("skip player>>");
 							}
-						}
-						
+						}					
 						
 						//request name
 						String name;
-						name=r.readLine();
+						name=input_reader.readLine();
 						Player p = new Player(name, false);
 						
 						//assign id number.  each ID is 1 more than last assigned
@@ -583,8 +562,7 @@ public strictfp class GameControl
 	{
 		System.out.println("joinAsClient started");
 		
-		try
-		{
+		try {
 			if(the_socket != null)
 				the_socket.close();
 		}
@@ -628,30 +606,27 @@ public strictfp class GameControl
 		{	
 			InetAddress ipaddress=InetAddress.getByAddress(ip_in_byte);
 			//InetAddress ipaddress=InetAddress.getLocalHost();
-			the_socket = new Socket(ipaddress, DEFAULT_PORT_NUMBER);
-			setUpIOStreams();
+			setUpIOStreams(new Socket(ipaddress, DEFAULT_PORT_NUMBER));
 			
 			//receive other players' names and id's
-			BufferedReader r = new BufferedReader(new InputStreamReader(IS));
 			PrintWriter pw = new PrintWriter(OS, true); //this version of the constructor sets up automatic flushing
 			
-			int num_players = Integer.parseInt(r.readLine());
+			int num_players = Integer.parseInt(input_reader.readLine());
 			for(int i=0; i<num_players; i++){
-				String name_input = r.readLine();
+				String name_input = input_reader.readLine();
 				if(!name_input.equals("skip player>>")) {
 					Player p = new Player(name_input, false);
-					p.setId(Integer.parseInt(r.readLine()));
-					p.setReady(Boolean.parseBoolean(r.readLine()));
+					p.setId(Integer.parseInt(input_reader.readLine()));
+					p.setReady(Boolean.parseBoolean(input_reader.readLine()));
 					players[p.getId()] = p;
 				}
 			}
 			
-			
 			//send name
 			pw.println(the_player.getName());
 			
-			//recieve player id number
-			player_id = Integer.parseInt(r.readLine());
+			//receive player id number
+			player_id = Integer.parseInt(input_reader.readLine());
 			the_player.setId(player_id);
 			players[player_id] = the_player;
 			
@@ -702,11 +677,10 @@ public strictfp class GameControl
 		public void run()
 		{
 			//TODO: this only works for one other player
-			BufferedReader r = new BufferedReader(new InputStreamReader(IS));
 			try {
 				while(!Thread.interrupted()){
-					if(r.ready()) {
-						String notification = r.readLine();
+					if(input_reader.ready()) {
+						String notification = input_reader.readLine();
 						if(notification != null)
 						{
 							String[] split_notification = notification.split(":");
@@ -812,10 +786,11 @@ public strictfp class GameControl
 		}
 	}
 	
-	private void setUpIOStreams() throws IOException
+	private void setUpIOStreams(Socket s) throws IOException
 	{
-		IS = the_socket.getInputStream();
-		OS = the_socket.getOutputStream();
+		the_socket = s;
+		input_reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+		OS = s.getOutputStream();
 	}
 	
 	public void notifyAllPlayers(Order o)
@@ -853,16 +828,14 @@ public strictfp class GameControl
 	
 	public void downloadAndLoadMap(boolean SAVE) throws IOException //for the client
 	{
-		BufferedReader reader = new BufferedReader(new InputStreamReader(IS));
-
-		String line=reader.readLine();
+		String line=input_reader.readLine();
 		StringBuffer str = new StringBuffer("");
 		Boolean kill=false;
 		while(line != null && !kill)
 		{
 			str.append(line);
 			if(line.indexOf("</java>") == -1)
-				line = reader.readLine();
+				line = input_reader.readLine();
 			else
 				kill=true;
 		}
@@ -921,7 +894,6 @@ public strictfp class GameControl
 			
 		public void run()
 		{
-			BufferedReader br = new BufferedReader(new InputStreamReader(IS));
 			try
 			{
 				Boolean connected=true;
@@ -937,7 +909,7 @@ public strictfp class GameControl
 						str.append(line);
 						if(line.indexOf("</java>") == -1)
 						{
-							line = br.readLine();
+							line = input_reader.readLine();
 							if(line==null)
 							{
 								kill=true;
@@ -1012,8 +984,8 @@ public strictfp class GameControl
 				OS.close();
 		}catch(IOException e){e.printStackTrace();}
 		try{
-			if(IS != null)
-				IS.close();
+			if(input_reader != null)
+				input_reader.close();
 		}catch(IOException e){e.printStackTrace();}
 		try{
 			if(the_socket != null)
