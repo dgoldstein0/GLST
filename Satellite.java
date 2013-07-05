@@ -33,22 +33,22 @@ public strictfp abstract class Satellite<T extends Satellite<T>> extends Stellar
 	@Override
 	public double getXCoord()
 	{
-		return orbit.cur_x;
+		return orbit.absoluteCurX();
 	}
 	@Override
 	public double getYCoord()
 	{
-		return orbit.cur_y;
+		return orbit.absoluteCurY();
 	}
 	@Override
 	public double getXVel()
 	{
-		return orbit.vel_x;
+		return orbit.getAbsVelX();
 	}
 	@Override
 	public double getYVel()
 	{
-		return orbit.vel_y;
+		return orbit.getAbsVelY();
 	}
 
 	public abstract void recursiveSaveData(long time);
