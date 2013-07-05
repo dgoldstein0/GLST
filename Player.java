@@ -2,6 +2,7 @@ import javax.swing.JOptionPane;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public strictfp class Player implements Saveable<Player>
 {
@@ -30,7 +31,7 @@ public strictfp class Player implements Saveable<Player>
 	/**
 	 * Used to give logical timestamps to orders at creation time.
 	 */
-	private int next_order_number;
+	private AtomicInteger next_order_number;
 	
 	boolean ready;
 	boolean hosting; //true if running as server, false if running as client
@@ -66,7 +67,7 @@ public strictfp class Player implements Saveable<Player>
 	private void setDefaultValues()
 	{
 		data_control = new DataSaverControl<Player>(this);
-		next_order_number = 0;
+		next_order_number = new AtomicInteger(0);
 		money=GalacticStrategyConstants.DEFAULT_MONEY;
 		metal=GalacticStrategyConstants.DEFAULT_METAL;
 		ships_in_transit = new ArrayList<Ship>();
@@ -141,7 +142,7 @@ public strictfp class Player implements Saveable<Player>
 	}
 
 	public int getNextOrderNumber() {
-		return ++next_order_number;
+		return next_order_number.getAndIncrement();
 	}
 
 	public void update(long time)
