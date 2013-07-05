@@ -99,6 +99,14 @@ public strictfp abstract class Order implements Comparable<Order>
 		return (int) scheduled_time/20 + order_number*100000 + p_id * 100000005;
 	}
 	
+	@Override
+	public String toString() {
+		return this.getClass().getName() + "\n"
+				+ "\torder number: " + order_number +"\n"
+				+ "\tp_id: " + p_id + "\n"
+				+ "\tscheduled_time: " + scheduled_time + "\n";
+	}
+	
 	/**the following nested class is for debugging purposes only*/
 	public static class OrderDroppedException extends RuntimeException
 	{
