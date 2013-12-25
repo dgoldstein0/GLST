@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <java version="1.6.0_17" class="java.beans.XMLDecoder"> 
- <object class="Galaxy"> 
+ <object class="galactic_strategy.game_objects.Galaxy"> 
   <void property="name"> 
    <string>Simple Map</string> 
   </void> 
   <void property="start_locations"> 
    <void method="add"> 
-    <object id="Planet0" class="Planet"> 
+    <object id="Planet0" class="galactic_strategy.game_objects.Planet"> 
      <void property="mass"> 
       <double>10.0</double> 
      </void> 
@@ -14,7 +14,7 @@
       <string>Eulenspiegel</string> 
      </void> 
      <void property="orbit"> 
-      <object id="Orbit0" class="Orbit"> 
+      <object id="Orbit0" class="galactic_strategy.game_objects.Orbit"> 
        <void property="a"> 
         <double>217.05003124159316</double> 
        </void> 
@@ -22,9 +22,9 @@
         <double>205.82857809832083</double> 
        </void> 
        <void property="boss"> 
-        <object id="GSystem0" class="GSystem"> 
+        <object id="GSystem0" class="galactic_strategy.game_objects.GSystem"> 
          <void property="fleets"> 
-          <array class="Fleet" length="2"/> 
+          <array class="galactic_strategy.game_objects.Fleet" length="2"/> 
          </void> 
          <void property="height"> 
           <int>585</int> 
@@ -44,7 +44,7 @@
             <object idref="Planet0"/> 
            </void> 
            <void method="add"> 
-            <object id="Planet1" class="Planet"> 
+            <object id="Planet1" class="galactic_strategy.game_objects.Planet"> 
              <void property="id"> 
               <int>1</int> 
              </void> 
@@ -55,7 +55,7 @@
               <string>Frolova</string> 
              </void> 
              <void property="orbit"> 
-              <object id="Orbit1" class="Orbit"> 
+              <object id="Orbit1" class="galactic_strategy.game_objects.Orbit"> 
                <void property="a"> 
                 <double>223.84602771311933</double> 
                </void> 
@@ -78,7 +78,7 @@
                 <int>1</int> 
                </void> 
                <void property="focus2"> 
-                <object class="Focus"> 
+                <object class="galactic_strategy.game_objects.Focus"> 
                  <void property="owner"> 
                   <object idref="Orbit1"/> 
                  </void> 
@@ -116,7 +116,7 @@
             </object> 
            </void> 
            <void method="add"> 
-            <object id="Planet2" class="Planet"> 
+            <object id="Planet2" class="galactic_strategy.game_objects.Planet"> 
              <void property="id"> 
               <int>2</int> 
              </void> 
@@ -127,7 +127,7 @@
               <string>Sunkel</string> 
              </void> 
              <void property="orbit"> 
-              <object id="Orbit2" class="Orbit"> 
+              <object id="Orbit2" class="galactic_strategy.game_objects.Orbit"> 
                <void property="a"> 
                 <double>164.58610087718833</double> 
                </void> 
@@ -150,7 +150,7 @@
                 <int>1</int> 
                </void> 
                <void property="focus2"> 
-                <object class="Focus"> 
+                <object class="galactic_strategy.game_objects.Focus"> 
                  <void property="owner"> 
                   <object idref="Orbit2"/> 
                  </void> 
@@ -182,7 +182,7 @@
              <void property="orbiting"> 
               <object class="java.util.ArrayList"> 
                <void method="add"> 
-                <object id="Moon0" class="Moon"> 
+                <object id="Moon0" class="galactic_strategy.game_objects.Moon"> 
                  <void property="mass"> 
                   <double>1.0</double> 
                  </void> 
@@ -190,7 +190,7 @@
                   <string>Holger</string> 
                  </void> 
                  <void property="orbit"> 
-                  <object id="Orbit3" class="Orbit"> 
+                  <object id="Orbit3" class="galactic_strategy.game_objects.Orbit"> 
                    <void property="a"> 
                     <double>29.478222637705414</double> 
                    </void> 
@@ -213,7 +213,7 @@
                     <int>1</int> 
                    </void> 
                    <void property="focus2"> 
-                    <object class="Focus"> 
+                    <object class="galactic_strategy.game_objects.Focus"> 
                      <void property="owner"> 
                       <object idref="Orbit3"/> 
                      </void> 
@@ -253,7 +253,7 @@
          <void property="stars"> 
           <object class="java.util.HashSet"> 
            <void method="add"> 
-            <object class="Star"> 
+            <object class="galactic_strategy.game_objects.Star"> 
              <void property="color"> 
               <int>2</int> 
              </void> 
@@ -303,7 +303,7 @@
         <int>1</int> 
        </void> 
        <void property="focus2"> 
-        <object class="Focus"> 
+        <object class="galactic_strategy.game_objects.Focus"> 
          <void property="owner"> 
           <object idref="Orbit0"/> 
          </void> 
@@ -341,7 +341,7 @@
     </object> 
    </void> 
    <void method="add"> 
-    <object id="Planet3" class="Planet"> 
+    <object id="Planet3" class="galactic_strategy.game_objects.Planet"> 
      <void property="mass"> 
       <double>10.0</double> 
      </void> 
@@ -349,7 +349,7 @@
       <string>Philippa</string> 
      </void> 
      <void property="orbit"> 
-      <object id="Orbit4" class="Orbit"> 
+      <object id="Orbit4" class="galactic_strategy.game_objects.Orbit"> 
        <void property="a"> 
         <double>232.3507213627953</double> 
        </void> 
@@ -357,9 +357,9 @@
         <double>227.9650087575094</double> 
        </void> 
        <void property="boss"> 
-        <object id="GSystem1" class="GSystem"> 
+        <object id="GSystem1" class="galactic_strategy.game_objects.GSystem"> 
          <void property="fleets"> 
-          <array class="Fleet" length="2"/> 
+          <array class="galactic_strategy.game_objects.Fleet" length="2"/> 
          </void> 
          <void property="height"> 
           <int>585</int> 
@@ -376,7 +376,7 @@
             <object idref="Planet3"/> 
            </void> 
            <void method="add"> 
-            <object id="Planet4" class="Planet"> 
+            <object id="Planet4" class="galactic_strategy.game_objects.Planet"> 
              <void property="id"> 
               <int>1</int> 
              </void> 
@@ -387,7 +387,7 @@
               <string>Freud</string> 
              </void> 
              <void property="orbit"> 
-              <object id="Orbit5" class="Orbit"> 
+              <object id="Orbit5" class="galactic_strategy.game_objects.Orbit"> 
                <void property="a"> 
                 <double>253.40815809891023</double> 
                </void> 
@@ -410,7 +410,7 @@
                 <int>1</int> 
                </void> 
                <void property="focus2"> 
-                <object class="Focus"> 
+                <object class="galactic_strategy.game_objects.Focus"> 
                  <void property="owner"> 
                   <object idref="Orbit5"/> 
                  </void> 
@@ -448,7 +448,7 @@
             </object> 
            </void> 
            <void method="add"> 
-            <object id="Planet5" class="Planet"> 
+            <object id="Planet5" class="galactic_strategy.game_objects.Planet"> 
              <void property="id"> 
               <int>2</int> 
              </void> 
@@ -459,7 +459,7 @@
               <string>Lanzerotti</string> 
              </void> 
              <void property="orbit"> 
-              <object id="Orbit6" class="Orbit"> 
+              <object id="Orbit6" class="galactic_strategy.game_objects.Orbit"> 
                <void property="a"> 
                 <double>302.56868915184134</double> 
                </void> 
@@ -482,7 +482,7 @@
                 <int>1</int> 
                </void> 
                <void property="focus2"> 
-                <object class="Focus"> 
+                <object class="galactic_strategy.game_objects.Focus"> 
                  <void property="owner"> 
                   <object idref="Orbit6"/> 
                  </void> 
@@ -524,7 +524,7 @@
          <void property="stars"> 
           <object class="java.util.HashSet"> 
            <void method="add"> 
-            <object class="Star"> 
+            <object class="galactic_strategy.game_objects.Star"> 
              <void property="color"> 
               <int>1</int> 
              </void> 
@@ -574,7 +574,7 @@
         <int>1</int> 
        </void> 
        <void property="focus2"> 
-        <object class="Focus"> 
+        <object class="galactic_strategy.game_objects.Focus"> 
          <void property="owner"> 
           <object idref="Orbit4"/> 
          </void> 
