@@ -259,7 +259,12 @@ public class SystemPainter extends JPanel
 				if(draw_select_box)
 				{
 					g2.setColor(Color.GRAY);
-					g2.draw(new Rectangle2D.Double(drawX(Math.min(select_x1, select_x2)), drawY(Math.min(select_y1, select_y2)), scale*Math.abs(select_x1-select_x2), scale*Math.abs(select_y1-select_y2)));
+					g2.draw(new Rectangle2D.Double(
+							drawX(Math.min(select_x1, select_x2)),
+							drawY(Math.min(select_y1, select_y2)),
+							scale*Math.abs(select_x1-select_x2),
+							scale*Math.abs(select_y1-select_y2)
+					));
 				}
 			}
 		}
@@ -309,8 +314,8 @@ public class SystemPainter extends JPanel
 					g2.draw(new Ellipse2D.Double(
 							drawX(s.getPos_x() - ship_dim/2.0),
 							drawY(s.getPos_y() - ship_dim/2.0),
-							ship_dim,
-							ship_dim
+							ship_dim*scale,
+							ship_dim*scale
 					));
 					g2.setColor(Color.ORANGE);
 					g2.drawLine(
@@ -412,8 +417,15 @@ public class SystemPainter extends JPanel
 		g2.setPaint(type.getScaledImage(scale, s.getOwner().getColor()));
 		
 		ImageResource img = type.img;
-		g2.translate(drawX(s.getPos_x()-img.scale*img.getWidth()/2.0), drawY(s.getPos_y()-img.scale*img.getHeight()/2.0));
-		g2.rotate(s.getDirection() + Math.PI/2, img.scale*img.getWidth()*scale/2.0, img.scale*img.getHeight()*scale/2.0);
+		g2.translate(
+				drawX(s.getPos_x()-img.scale*img.getWidth()/2.0),
+				drawY(s.getPos_y()-img.scale*img.getHeight()/2.0)
+			);
+		g2.rotate(
+				s.getDirection() + Math.PI/2,
+				img.scale*img.getWidth()*scale/2.0,
+				img.scale*img.getHeight()*scale/2.0
+			);
 		g2.fill(new Rectangle2D.Double(0.0, 0.0, img.scale*img.getWidth()*scale, img.scale*scale*img.getHeight()));
 		
 		/*if(c != null)
