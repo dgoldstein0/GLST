@@ -426,7 +426,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		c_edit.setEnabled(select);
 	}
 	
-	private void locateObj(int x, int y) throws NoObjectLocatedException
+	private Selectable locateObj(int x, int y)
 	{
 		//search for stars, then orbiting objects and their orbiting
 		final double OBJ_TOL = Constants.SELECTION_TOLERANCE/scale; //tolerance
@@ -439,8 +439,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				//search for star...
 				if(st.shouldSelect(x, y, OBJ_TOL))
 				{
-					selected_obj = st;
-					return;
+					return st;
 				}
 			}
 		}
@@ -454,21 +453,19 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				//search for orbiting...
 				if(orbiting.shouldSelect(x, y, OBJ_TOL))
 				{
-					selected_obj = orbiting;
-					return;
+					return orbiting;
 				}
 				
-				if(orbiting instanceof Planet)
+				if (orbiting instanceof Planet)
 				{
 					Planet cur_planet = (Planet)orbiting;
 					List<Satellite<?>> orbiting2 = cur_planet.getOrbiting();
 					if (orbiting2 != null) {
-						for(Satellite<?> sat : orbiting2)
+						for (Satellite<?> sat : orbiting2)
 						{
-							if(sat.absoluteCurX()-OBJ_TOL <= x && x <= sat.absoluteCurX()+OBJ_TOL && sat.absoluteCurY()-OBJ_TOL <= y && y <= sat.absoluteCurY()+OBJ_TOL)
+							if (sat.shouldSelect(x, y, OBJ_TOL))
 							{
-								selected_obj = sat;
-								return;
+								return sat;
 							}
 						}
 					}
@@ -483,8 +480,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 					Focus focus2 = o.getFocus2();
 					if (focus2.shouldSelect(x, y, OBJ_TOL))
 					{
-						selected_obj = focus2;//select the focus!
-						return;
+						return focus2;
 					}
 				}
 			}
@@ -493,26 +489,12 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				Focus focus = (Focus) selected_obj;
 				if(focus.shouldSelect(x, y, OBJ_TOL))
 				{
-					return; //the Focus is already selected!
+					return focus; //the Focus is already selected!
 				}
 			}
 		}
 		
-		throw new NoObjectLocatedException(x, y);
-	}
-	
-	private static class NoObjectLocatedException extends Exception
-	{
-		int x;
-		int y;
-		
-		private NoObjectLocatedException(int x, int y)
-		{
-			super("NoObjectLocatedException from point ("+Integer.toString(x)+","+Integer.toString(y)+").");
-			
-			this.x=x;
-			this.y=y;
-		}
+		return null;
 	}
 	
 	//keylistener code
@@ -544,15 +526,11 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	{
 		if(wait_to_add==AddSystem.ADD_NOTHING)
 		{
-			try
-			{
-				locateObj(screenToDataX(e.getX()),screenToDataY(e.getY()));
+			selected_obj = locateObj(screenToDataX(e.getX()),screenToDataY(e.getY()));
+			if (selected_obj != null) {
 				ObjectSelected(true);
 				drawSystem();
-				
 				drag_start=true;
-			}
-			catch(NoObjectLocatedException x){//drag_start=false; //this happens automatically, in mouseReleased.
 			}
 		}
 	}
@@ -569,18 +547,9 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		{
 			if(wait_to_add==AddSystem.ADD_NOTHING)
 			{
-				try
-				{
-					locateObj(screenToDataX(e.getX()),screenToDataY(e.getY()));
-					ObjectSelected(true);
-					drawSystem();
-				}
-				catch(NoObjectLocatedException x)
-				{
-					ObjectSelected(false);
-					selected_obj=null;
-					drawSystem();
-				}
+				selected_obj = locateObj(screenToDataX(e.getX()),screenToDataY(e.getY()));
+				ObjectSelected(selected_obj != null);
+				drawSystem();
 				
 				if(selected_obj instanceof StellarObject && e.getClickCount()==2)
 					editSelected();
