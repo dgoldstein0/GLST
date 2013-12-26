@@ -788,10 +788,11 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 			else if(selected_obj instanceof Satellite<?>) //picks up planets, moons and asteroids here
 			{
 				Orbit o = ((Satellite<?>) selected_obj).getOrbit();
-				o.setCur_x(screenToDataX(e.getX())-o.absoluteCurX());
-				o.setCur_y(screenToDataY(e.getY())-o.absoluteCurY());
-				o.setInit_x(screenToDataX(e.getX())-o.absoluteInitX());
-				o.setInit_y(screenToDataY(e.getY())-o.absoluteInitY());
+				Orbitable<?> boss = o.getBoss();
+				o.setCur_x(screenToDataX(e.getX())-boss.absoluteCurX());
+				o.setCur_y(screenToDataY(e.getY())-boss.absoluteCurY());
+				o.setInit_x(screenToDataX(e.getX())-boss.absoluteInitX());
+				o.setInit_y(screenToDataY(e.getY())-boss.absoluteInitY());
 				o.calculateOrbit();
 				drawSystem();
 			} else {
