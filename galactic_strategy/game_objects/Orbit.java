@@ -47,13 +47,13 @@ public strictfp class Orbit implements Saveable<Orbit>
 		boss=boss_obj;
 		obj=theobj;
 		
-		direction=dir;
-		this.init_x=init_x-boss.absoluteCurX();
-		this.init_y=init_y-boss.absoluteCurY();
+		direction = dir;
+		this.init_x = init_x - boss.absoluteCurX();
+		this.init_y = init_y - boss.absoluteCurY();
 		focus2 = new Focus(focus2_x-boss.absoluteCurX(),focus2_y-boss.absoluteCurY(),this);
 		
-		cur_x=init_x-boss.absoluteCurX();
-		cur_y=init_y-boss.absoluteCurY();
+		cur_x = this.init_x;
+		cur_y = this.init_y;
 		
 		calculateOrbit();
 	}
