@@ -29,6 +29,10 @@ import java.util.TimerTask;
 
 public class SystemViewer extends JDialog implements ActionListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, WindowListener
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8031299548016621566L;
 	static int DEFAULT_STAR_SIZE=Constants.DEFAULT_STAR_SIZE;
 	static int DEFAULT_STAR_ZONE_SIZE=Constants.DEFAULT_STAR_ZONE_SIZE;
 	static int DEFAULT_PLANET_SIZE = Constants.DEFAULT_PLANET_SIZE;
@@ -955,6 +959,11 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	Action delete_action = new AbstractAction()
 	{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -3690978626158556062L;
+
 		public void actionPerformed(ActionEvent e)
 		{
 			if(selected_obj instanceof StellarObject)
@@ -988,6 +997,8 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private class editDialog extends JDialog implements ActionListener, ChangeListener
 	{
+		private static final long serialVersionUID = 661011472491585719L;
+
 		private editDialog()
 		{
 			super(frame, "Edit Object", true);
