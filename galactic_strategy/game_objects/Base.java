@@ -71,7 +71,7 @@ public strictfp class Base extends Facility<Base>{
 			//figure the results
 			if(soldier < 1)
 			{
-				location.setOwnerAtTime(enemy.getOwner(), t);
+				location.changeOwnerAtTime(enemy.getOwner(), t);
 				
 				//TODO: notify player
 			}
@@ -90,7 +90,7 @@ public strictfp class Base extends Facility<Base>{
 		{
 			is_alive=false;
 			location.facilities.remove(id);
-			location.setOwner(null);
+			location.changeOwner(null);
 			location.the_base = null;
 		}
 	}

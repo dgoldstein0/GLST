@@ -168,4 +168,6 @@ public strictfp class DataSaverControl<T extends Saveable<T>> {
 			super(s);
 		}
 	}
+	
+	public T getThe_obj() {return the_obj;}
 }

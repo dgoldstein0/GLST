@@ -280,7 +280,7 @@ public class GameSimulator {
 			
 			//actual end time is 281180.  Need protocol replacement to
 			//make the full length pass, however.
-			/*
+			
 			twoPlayerTest(8, "simplemap.xml", "testcases/test8-host.txt", "testcases/test8-guest.txt", 250000l, new EvenlySpacedSaves(100));
 			
 			// Tests based on EOH 2012 data
@@ -301,7 +301,7 @@ public class GameSimulator {
 			twoPlayerTest(17, "simplemap.xml", "eoh2012logs/Day 1/log14-host.txt", "eoh2012logs/Day 1/log14-guest.txt", 592000, new EvenlySpacedSaves(100)); //ends at 1216000.  As is, should pass, but for the full time it hits DecisionCheckException
 			
 			twoPlayerTest(18, "simplemap.xml", "testcases/log18-host.txt", "testcases/log18-guest.txt",
-					768000, new EvenlySpacedSaves(100)); // goes to 768000*/
+					768000, new EvenlySpacedSaves(100)); // goes to 768000
 			twoPlayerTest(19, "simplemap.xml", "testcases/log19-host.txt", "testcases/log19-guest.txt",
 					350000, new EvenlySpacedSaves(100));
 

@@ -63,6 +63,10 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	
 	public OwnableSatellite()
 	{
+		init();
+	}
+	
+	private void init() {
 		next_facility_id=0;
 		facilities = new HashMap<Integer, Facility<?>>();
 		bldg_in_progress = FacilityType.NO_BLDG;
@@ -238,7 +242,7 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	}
 	
 	
-	public void setOwnerAtTime(Player p, long time)
+	public void changeOwnerAtTime(Player p, long time)
 	{
 		if(owner != null)
 			update(time);
@@ -260,23 +264,27 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		//start counting taxes from here
 		//last_tax_time = time;
 		
-		setOwner(p);
+		changeOwner(p);
 		
 		SwingUtilities.invokeLater(new DestDisplayUpdater(this));
 	}
 	
 	public abstract GSystem getGSystem();
-	
-	public HashMap<Integer, Facility<?>> getFacilities(){return facilities;}
-	public void setFacilities(HashMap<Integer, Facility<?>> fac){facilities=fac;}
-	public Player getOwner(){return owner;}
-	public void setOwner(Player p)
+	public void changeOwner(Player p)
 	{
 		if(owner != null)
 			getGSystem().decreaseClaim(owner);
 		owner=p;
-		getGSystem().increaseClaim(p);
+		if (p != null)
+			getGSystem().increaseClaim(p);
 	}
+	
+	
+	public HashMap<Integer, Facility<?>> getFacilities(){return facilities;}
+	public void setFacilities(HashMap<Integer, Facility<?>> fac){facilities=fac;}
+	public Player getOwner(){return owner;}
+	public void setOwner(Player p){owner = p;}
+	
 	public void setlastcolor(Color color){lastcolor=color;}
 	public Color getlastcolor(){return lastcolor;}
 	public double getBase_mining_rate(){return base_mining_r;}

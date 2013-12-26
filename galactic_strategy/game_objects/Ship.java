@@ -1,7 +1,5 @@
 package galactic_strategy.game_objects;
 import galactic_strategy.Constants;
-import galactic_strategy.game_objects.Fleet.ShipIterator;
-import galactic_strategy.game_objects.TrackingAI.IN_RANGE_BEHAVIOR;
 import galactic_strategy.sync_engine.Describer;
 import galactic_strategy.sync_engine.ShipDescriber;
 import galactic_strategy.ui.GameInterface;
@@ -406,14 +404,14 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					synchronized(sat.facilities)
 					{
 						if(sat.the_base == null) //if base isn't finished being built, player can take over without a fight
-							sat.setOwnerAtTime(getOwner(), t);
+							sat.changeOwnerAtTime(getOwner(), t);
 						else
 							sat.the_base.attackedByTroops(t, this);
 					}
 				}
 				else
 				{
-					((OwnableSatellite<?>)getDestination()).setOwnerAtTime(getOwner(), t);
+					((OwnableSatellite<?>)getDestination()).changeOwnerAtTime(getOwner(), t);
 				}
 			}
 		}

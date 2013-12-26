@@ -80,7 +80,7 @@ public class RecordKeeper {
 		if (save_points.contains(update_to))
 		{
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			XMLEncoder encoder = new XMLEncoder(os);
+			XMLEncoder encoder = new GlstXMLEncoder(os);
 			encoder.setExceptionListener(new GameUpdater.MyExceptionListener());
 			encoder.writeObject(GC.getPlayers());
 			encoder.writeObject(GC.getMap());
