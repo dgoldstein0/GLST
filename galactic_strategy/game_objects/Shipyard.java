@@ -144,8 +144,7 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 						//update the queue display... if it is being displayed.
 						SwingUtilities.invokeLater(new QueueUpdater(this));
 						
-						if(manufac_queue.size() == 0)
-							time_on_current_ship = 0;
+						time_on_current_ship = 0;
 					}
 
 				}
