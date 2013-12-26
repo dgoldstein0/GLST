@@ -86,6 +86,9 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	int c_x;
 	int c_y;
 	
+	// keeps track of the type of the next planet to create (between clicking add and placing the planet)
+	private OwnableSatelliteType planet_type;
+	
 	//objects used to track time flow for time simulation
 	TimeControl TC;
 	TaskManager TM;
@@ -248,11 +251,13 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				wait_to_add=AddSystem.ADD_STAR;
 			else if(obj_to_add=="Planet"){
 				wait_to_add=AddSystem.ADD_PLANET;
+				planet_type = choosePlanetType();
 			}
 			else if(obj_to_add=="Asteroid")
 				wait_to_add=AddSystem.ADD_ASTEROID;
 			else if(obj_to_add=="Moon")
 				wait_to_add=AddSystem.ADD_MOON;
+			
 			t_recenter.setEnabled(false);
 			c_recenter.setEnabled(false);
 		}
@@ -309,8 +314,10 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				if(!addStar(screenToDataX(c_x), screenToDataY(c_y)))
 					JOptionPane.showMessageDialog(this, "You can't place a star there!", "Invalid star location", JOptionPane.ERROR_MESSAGE);
 			}
-			else if(obj_to_add=="Planet")
-				addPlanet(screenToDataX(c_x),screenToDataY(c_y));
+			else if(obj_to_add=="Planet") {
+				OwnableSatelliteType planet_type = choosePlanetType();
+				addPlanet(planet_type, screenToDataX(c_x),screenToDataY(c_y));
+			}
 			//else if(obj_to_add=="Asteroid")
 			//	;//no routine yet
 			else if(obj_to_add=="Moon")
@@ -582,7 +589,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 						addStar(screenToDataX(e.getX()), screenToDataY(e.getY()));
 						break;
 					case ADD_PLANET:
-						addPlanet(screenToDataX(e.getX()),screenToDataY(e.getY()));
+						addPlanet(planet_type, screenToDataX(e.getX()),screenToDataY(e.getY()));
 						break;
 					case ADD_ASTEROID:
 						break;
@@ -692,27 +699,8 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		return (int)((y-painter.getHeight()/2)/scale)+center_y;
 	}
 	
-	private void addPlanet(int x, int y)
-	{		
-		String planet_to_add;
-		OwnableSatelliteType typePlanet=OwnableSatelliteType.Void;
-		String[] new_options = {"Super Planet", "Paradise Planet", "Mountainous Planet", "Typical Planet", "Wasteland Planet"};
-		planet_to_add=(String)JOptionPane.showInputDialog(this, "Select the type of Planet to add", "Add Planet", JOptionPane.QUESTION_MESSAGE, null, new_options, new_options[0]);
-		if(planet_to_add.equals("Super Planet")){
-			typePlanet = OwnableSatelliteType.SuperPlanet;
-		}
-		else if(planet_to_add.equals("Paradise Planet")){
-			typePlanet = OwnableSatelliteType.Paradise;
-		}
-		else if(planet_to_add.equals("Mountainous Planet")){
-			typePlanet = OwnableSatelliteType.MineralRich;
-		}
-		else if(planet_to_add.equals( "Typical Planet")){
-			typePlanet = OwnableSatelliteType.Average;
-		}
-		else if(planet_to_add.equals("Wasteland Planet")){
-			typePlanet = OwnableSatelliteType.DesertPlanet;
-		}
+	private void addPlanet(OwnableSatelliteType typePlanet, int x, int y)
+	{				
 		Planet theplanet = new Planet(
 				system.getOrbiting().size(), "", 
 				(int)MathFormula.randomize(typePlanet.initial_pop,Constants.rand_mod*typePlanet.initial_pop), 
@@ -720,11 +708,40 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 				DEFAULT_PLANET_SIZE, DEFAULT_PLANET_MASS, typePlanet.PopGrowthRate, typePlanet.building_Num, 
 				MathFormula.randomize(typePlanet.mining_rate, typePlanet.mining_rate*Constants.rand_mod)
 		);
-		theplanet.setOrbit(new Orbit((Satellite<Planet>)theplanet, (Orbitable<GSystem>)system, x, y, x, y, Orbit.DIRECTION.CLOCKWISE));
+		theplanet.setOrbit(new Orbit(theplanet, (Orbitable<GSystem>)system, x, y, x, y, Orbit.DIRECTION.CLOCKWISE));
 		system.getOrbiting().add(theplanet);
 		selected_obj = theplanet;
 		wait_to_add = AddSystem.ADD_FOCUS;
 		drawSystem();
+	}
+
+	private OwnableSatelliteType choosePlanetType() {
+		OwnableSatelliteType typePlanet = null;
+		
+		List<String> new_options = new ArrayList<String>();
+		for (OwnableSatelliteType type : OwnableSatelliteType.values()) {
+			if (type != OwnableSatelliteType.Moon) {
+				new_options.add(type.namePlanet);
+			}
+		}
+		String planet_type = (String)JOptionPane.showInputDialog(
+			this,
+			"Select the type of Planet to add",
+			"Add Planet",
+			JOptionPane.QUESTION_MESSAGE,
+			null,
+			new_options.toArray(),
+			new_options.get(0)
+		);
+		
+		for (OwnableSatelliteType type : OwnableSatelliteType.values()) {
+			if (planet_type == type.namePlanet) {
+				typePlanet = type;
+				break;
+			}
+		}
+		assert typePlanet != null;
+		return typePlanet;
 	}
 	
 	private void addMoon(int x, int y)
