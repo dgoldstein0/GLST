@@ -82,19 +82,7 @@ public class GameMenu extends JDialog implements ActionListener
 			GC.setPlayers(new Player[Constants.MAX_PLAYERS]);
 			setVisible(false); //hide the menu
 			//destroy the graphics.
-			GC.GI.graphics_started=false;
-			GC.GI.sat_or_ship_disp = GameInterface.PANEL_DISP.NONE;
-			GC.GI.theinterface.removeAll(); //removes the system/galaxy display
-			GC.GI.theinterface.repaint();
-			GC.GI.stat_and_order.removeAll();
-			GC.GI.stat_and_order.repaint();
-			GC.GI.system_list.removeAll();
-			GC.GI.system_list.repaint();
-			GC.GI.selected_sys.clear();
-			GC.GI.selected_in_sys.clear();;
-			GC.GI.labels_made=false;
-			GC.GI.prev_sys=null;
-			GC.GI.prev_selected=null;
+			GC.GI.reset();
 			frame.setVisible(true);
 			GC.startupDialog();
 		}

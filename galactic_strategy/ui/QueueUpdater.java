@@ -19,7 +19,7 @@ public class QueueUpdater implements Runnable {
 		{
 			PlanetMoonCommandPanel panel = GameInterface.GC.GI.SatellitePanel;
 			if(panel != null && yard.getOwner().getId() == GameInterface.GC.getPlayer_id()
-					&& GameInterface.GC.GI.sat_or_ship_disp == GameInterface.PANEL_DISP.SAT_PANEL
+					&& GameInterface.GC.GI.displayed_control_panel == GameInterface.PANEL_DISP.SAT_PANEL
 					&& panel.the_sat == yard.getLocation()
 					&& (panel.state == PlanetMoonCommandPanel.PANEL_STATE.SHIP_QUEUE_DISPLAYED || 
 							(panel.state == PlanetMoonCommandPanel.PANEL_STATE.SHIP_CHOICES_DISPLAYED

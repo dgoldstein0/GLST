@@ -47,10 +47,10 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 {
 	
 	private JFrame frame;
-	JPanel panel,topbar;
+	JPanel panel, topbar;
 	JLabel time;
 	private JLabel metal;
-	JLabel money;	
+	private JLabel money;	
 	JButton menubutton;
 	GameMenu menu;
 	JTabbedPane tabbedPane;
@@ -113,8 +113,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	
 	JPanel system_list;
 	
-	public enum PANEL_DISP{SAT_PANEL, SHIP_PANEL, SYS_PANEL, NONE};
-	public PANEL_DISP sat_or_ship_disp;
+	public enum PANEL_DISP{SAT_PANEL, SHIP_PANEL, SYS_PANEL, FORMATION_PANEL, NONE};
+	public PANEL_DISP displayed_control_panel;
 	
 	public PlanetMoonCommandPanel SatellitePanel;
 	public ShipCommandPanel ShipPanel;
@@ -328,7 +328,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		FormationPanel = new FormationCommandPanel();
 		
 		graphics_started=false;
-		sat_or_ship_disp = PANEL_DISP.NONE;
+		displayed_control_panel = PANEL_DISP.NONE;
 	}
 	
 	/**call to switch the view to the galaxy
@@ -381,7 +381,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		{
 			theinterface.removeAll();
 			theinterface.add(SystemPanel); //automatically adds to center
-			sat_or_ship_disp = PANEL_DISP.NONE;
+			displayed_control_panel = PANEL_DISP.NONE;
 			displaySystemPanel(sys);
 			mode=GalaxyOrSystem.System;
 		}
@@ -448,63 +448,62 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	{
 		SatellitePanel.setSat(s);
 		
-		if(sat_or_ship_disp != PANEL_DISP.SAT_PANEL)
+		if(displayed_control_panel != PANEL_DISP.SAT_PANEL)
 		{
 			stat_and_order.removeAll();
 			stat_and_order.repaint();
 			stat_and_order.add(SatellitePanel);
-			sat_or_ship_disp = PANEL_DISP.SAT_PANEL;
+			displayed_control_panel = PANEL_DISP.SAT_PANEL;
 		}
 		
 		frame.setVisible(true);
 	}
 	public void displaySystemPanel(GSystem newsystem)
 	{
-		if(sat_or_ship_disp != PANEL_DISP.SYS_PANEL)
+		if(displayed_control_panel != PANEL_DISP.SYS_PANEL)
 		{
 			stat_and_order.removeAll();
 			stat_and_order.repaint();
 			stat_and_order.add(SysPanel);
-			sat_or_ship_disp = PANEL_DISP.SYS_PANEL;
+			displayed_control_panel = PANEL_DISP.SYS_PANEL;
 		}
 		SysPanel.setSystem(newsystem);
 		
 		frame.setVisible(true);
 	}
 	
-	public void refreshShipPanel(){
+	public void refreshShipPanel() {
 		if (selected_in_sys.size() == 0)
 			displaySystemPanel(sys);
 		else if (selected_in_sys.size() == 1 && selected_in_sys.get(0) instanceof Ship)
 			displayShipPanel((Ship) selected_in_sys.get(0));
 		else {
-			List<Ship> ships = new ArrayList<Ship>();
-			for (Selectable s : selected_in_sys) {
-				if (s instanceof Ship) {
-					ships.add((Ship) s);
-				}
-			}
-			
-			// TODO: maybe call this regardless of if all selected things are ships?
-			if (selected_in_sys.size() == ships.size()) {
-				displayFormationPanel(ships);
-			}
+			// uh... shouldn't be able to happen?
+			throw new RuntimeException();
 		}
 	}
 	
-	private void displayFormationPanel(List<Ship> selected_in_sys2) {
-		// TODO make this do something
+	private void displayFormationPanel(List<Ship> selected_in_sys) {
+		if (displayed_control_panel != PANEL_DISP.FORMATION_PANEL)
+		{
+			stat_and_order.removeAll();
+			stat_and_order.repaint();
+			stat_and_order.add(FormationPanel);
+			displayed_control_panel = PANEL_DISP.FORMATION_PANEL;
+		}
+		FormationPanel.setShips(selected_in_sys);
+		frame.setVisible(true);
 	}
 
 
 	public void displayShipPanel(Ship s)
 	{
-		if(sat_or_ship_disp != PANEL_DISP.SHIP_PANEL)
+		if(displayed_control_panel != PANEL_DISP.SHIP_PANEL)
 		{
 			stat_and_order.removeAll();
 			stat_and_order.repaint();
 			stat_and_order.add(ShipPanel);
-			sat_or_ship_disp = PANEL_DISP.SHIP_PANEL;
+			displayed_control_panel = PANEL_DISP.SHIP_PANEL;
 		}
 		
 		ShipPanel.setShip(s);
@@ -514,11 +513,11 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	
 	public void displayNoPanel()
 	{
-		if(sat_or_ship_disp != PANEL_DISP.NONE)
+		if(displayed_control_panel != PANEL_DISP.NONE)
 		{
 			stat_and_order.removeAll();
 			stat_and_order.repaint();
-			sat_or_ship_disp = PANEL_DISP.NONE;
+			displayed_control_panel = PANEL_DISP.NONE;
 			SatellitePanel.state=PlanetMoonCommandPanel.PANEL_STATE.NOT_DISPLAYED; //this is necessary to remove the bug
 				//that when a facility finishes being built, and the player has nothing in the system selected,
 				//and then selects a planet with no facilities, the newly built facility appears in the interface
@@ -670,8 +669,13 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 				
 			List<Selectable> mod_selection = (drag_modifier == MODIFIER.ALT) ? maybe_deselect_in_sys : maybe_select_in_sys;
 			mod_selection.clear();
-			selectInSystemInRange(mod_selection,	Math.min(mouse_down_x, cur_x), Math.min(mouse_down_y, cur_y),
-													Math.max(mouse_down_x, cur_x), Math.max(mouse_down_y,cur_y));
+			selectInSystemInRange(
+					mod_selection,
+					Math.min(mouse_down_x, cur_x),
+					Math.min(mouse_down_y, cur_y),
+					Math.max(mouse_down_x, cur_x),
+					Math.max(mouse_down_y,cur_y)
+				);
 		
 			if(!mod_selection.contains(first_maybe_select))
 			{
@@ -765,10 +769,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 
 	public void mouseReleased(MouseEvent e) {
 		if(graphics_started) {
-			if(isGalaxyDisplayed())
-			{
-				switch(galaxy_state)
-				{
+			if(isGalaxyDisplayed()) {
+				switch(galaxy_state) {
 					case PREVIEW:
 						galaxy_state = GALAXY_STATE.NORMAL;
 						selected_in_sys.clear();
@@ -822,12 +824,9 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 						System.out.println("galaxy state " + galaxy_state.name() +" not supported in GameInterface.mouseReleased :(");
 						break;
 				}
-			}
-			else
-			{ //system is displayed
-				if(sys.getOwner_id() == GC.getPlayer_id() || sys.getOwner_id() == -1 || !Constants.fogofwar){
-					if(mouse_was_dragged)
-					{
+			} else { //system is displayed
+				if (sys.getOwner_id() == GC.getPlayer_id() || sys.getOwner_id() == -1 || !Constants.fogofwar) {
+					if (mouse_was_dragged) {
 						doMouseDragged(e);
 						mouse_was_dragged=false;
 						
@@ -837,57 +836,50 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 						maybe_select_in_sys.clear();
 						maybe_deselect_in_sys.clear();
 						
-						if(selected_in_sys.size() == 1)
-						{
-							if(selected_in_sys.get(0) instanceof Ship)
+						if (selected_in_sys.size() == 1) {
+							if (selected_in_sys.get(0) instanceof Ship) {
 								displayShipPanel((Ship) selected_in_sys.get(0));
-							else if(selected_in_sys.get(0) instanceof Satellite<?>)
+							} else if (selected_in_sys.get(0) instanceof Satellite<?>)
 								displaySatellitePanel((Satellite<?>) selected_in_sys.get(0));
 							else displaySystemPanel(sys);
-						}
-						else if(selected_in_sys.size() > 1)
-						{
+						} else if(selected_in_sys.size() > 1) {
 							//mass ship selection
-							displayShipPanel((Ship) selected_in_sys.get(0));
-						}
-						else
+							List<Ship> ships = new ArrayList<Ship>();
+							for (Selectable s : selected_in_sys) {
+								if (s instanceof Ship) {
+									ships.add((Ship) s);
+								}
+							}
+							displayFormationPanel(ships);
+						} else {
 							displaySystemPanel(sys);
+						}
 					
 						system_state = SYS_NORMAL;
-					}
-					else
-					{
-						if(e.getX() >= theinterface.getWidth() - ImageResource.RETURN_ARROW.getWidth() && e.getY() <= ImageResource.RETURN_ARROW.getHeight())
+					} else {
+						if (e.getX() >= theinterface.getWidth() - ImageResource.RETURN_ARROW.getWidth() && e.getY() <= ImageResource.RETURN_ARROW.getHeight())
 							drawGalaxy(GALAXY_STATE.NORMAL); //back arrow clicked
-						else
-						{
-							if(system_state == SYS_NORMAL && e.getButton() == MouseEvent.BUTTON1)
-							{
+						else {
+							if(system_state == SYS_NORMAL && e.getButton() == MouseEvent.BUTTON1) {
 								//look for object to select
 								selectInSystemAt(e.getX(), e.getY());
 								redraw();
-							}
-							else if(system_state == SELECT_DESTINATION)
-							{
+							} else if(system_state == SELECT_DESTINATION) {
 								setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),false);
 								system_state = SYS_NORMAL;
-							}
-							else if(system_state == ATTACK_MOVE_DESTINATION)
-							{
+							} else if(system_state == ATTACK_MOVE_DESTINATION) {
 								setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),true);
 								system_state = SYS_NORMAL;
-							}
-							else if(selected_in_sys.size() != 0 && selected_in_sys.get(0) instanceof Ship &&
+							} else if(selected_in_sys.size() != 0 && selected_in_sys.get(0) instanceof Ship &&
 									e.getButton() == MouseEvent.BUTTON3 &&
-									((Ship)selected_in_sys.get(0)).getOwner().getId() == GC.getPlayer_id())
-							{
+									((Ship)selected_in_sys.get(0)).getOwner().getId() == GC.getPlayer_id()) {
 								setDestination(sysScreenToDataX(e.getX()), sysScreenToDataY(e.getY()),false);
 							}
 						}
 					}
-				}
-				else
+				} else {
 					mouse_was_dragged=false;
+				}
 			}
 		}
 	}
@@ -923,21 +915,6 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	
 	private void selectInSystemAt(int mouse_x, int mouse_y)
 	{
-		//TODO: remove unused code...
-		
-		/*final double OBJ_TOL = GalacticStrategyConstants.SELECTION_TOLERANCE/sys_scale; //tolerance
-		double x = sysScreenToDataX(mouse_x);
-		double y = sysScreenToDataY(mouse_y);
-		
-		ArrayList<Selectable> select_items = new ArrayList<Selectable>();
-		
-		selectInSystemInRange(select_items, x-OBJ_TOL, y-OBJ_TOL, x+OBJ_TOL, y+OBJ_TOL);*/
-		
-		/*if(select_items.size() > 1)
-			buildSelectContextMenu(select_items, mouse_x, mouse_y);
-		else if(select_items.size()==1)
-			selectObjInSystem(select_items.get(0));*/
-		
 		if(mouseover_obj != null)
 			selectObjInSystem(mouseover_obj);
 		else //if nothing found
@@ -1031,20 +1008,6 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 				System.out.println("selection unsupported by selectObjInSystem!!");
 				break;
 		}
-	}
-	
-	@Deprecated
-	public void buildSelectContextMenu(ArrayList<Selectable> select_which, int x, int y)
-	{
-		select_menu.removeAll();
-		for(Selectable s : select_which)
-		{
-			SelectableMenuItem menu_item = new SelectableMenuItem(s);
-			menu_item.addActionListener(menu_item);
-			select_menu.add(menu_item);
-		}
-		
-		select_menu.show(theinterface,x,y);
 	}
 	
 	private void setDestination(double x, double y, boolean AttackMove)
@@ -1214,6 +1177,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	}
 	
 	//used by systemPanel
+	@Override
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
 		if(isSystemDisplayed())
@@ -1244,18 +1208,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 			sys_center_y = (int)((theinterface.getHeight()+Constants.SYS_HEIGHT)/2.0 - theinterface.getHeight()/(2*sys_scale));
 	}
 	
-	@Override
-	public void windowActivated(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowClosed(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
+	@Override public void windowActivated(WindowEvent arg0) {}
+	@Override public void windowClosed(WindowEvent arg0) {}
 	@Override
 	public void windowClosing(WindowEvent arg0) {
 		
@@ -1263,40 +1217,21 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		System.exit(0);
 	}
 
-	@Override
-	public void windowDeactivated(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowIconified(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowOpened(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+	@Override public void windowDeactivated(WindowEvent arg0) {}
+	@Override public void windowDeiconified(WindowEvent arg0) {}
+	@Override public void windowIconified(WindowEvent arg0) {}
+	@Override public void windowOpened(WindowEvent arg0) {}
 	
-	public void componentHidden(ComponentEvent e){}
-	public void componentMoved(ComponentEvent e){}
-	public void componentShown(ComponentEvent e){}
+	@Override public void componentHidden(ComponentEvent e){}
+	@Override public void componentMoved(ComponentEvent e){}
+	@Override public void componentShown(ComponentEvent e){}
 	
+	@Override
 	public void componentResized(ComponentEvent e)
 	{
 		enforceSystemBounds();
 		redraw();
 	}
-
 
 	public JFrame getFrame() {
 		return frame;
@@ -1306,5 +1241,22 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 		time.setText("Time: " + time_elapsed/1000);
 		this.metal.setText("Metal: " + metal);
 		this.money.setText(GameInterface.indentation + "Money: " + money);
+	}
+
+
+	public void reset() {
+		graphics_started=false;
+		displayed_control_panel = GameInterface.PANEL_DISP.NONE;
+		theinterface.removeAll(); //removes the system/galaxy display
+		theinterface.repaint();
+		stat_and_order.removeAll();
+		stat_and_order.repaint();
+		system_list.removeAll();
+		system_list.repaint();
+		selected_sys.clear();
+		selected_in_sys.clear();;
+		labels_made=false;
+		prev_sys=null;
+		prev_selected=null;
 	}
 }

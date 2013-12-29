@@ -1059,7 +1059,7 @@ public strictfp class GameControl
 		{
 			GI.update(time_elapsed);
 			
-			switch(GI.sat_or_ship_disp)
+			switch(GI.displayed_control_panel)
 			{
 				case SAT_PANEL:
 					GI.SatellitePanel.update(time_elapsed);

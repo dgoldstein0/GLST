@@ -119,15 +119,15 @@ public class SystemCommandPanel extends JPanel implements MouseListener
 		// TODO Auto-generated method stub
 		
 		if(arg0.getSource()==MyShips)
+		{
+			GameInterface.GC.GI.selected_in_sys.clear();
+			GameInterface.GC.GI.maybe_select_in_sys.clear();
+			for(Fleet.ShipIterator j=currentSystem.getFleets()[GameInterface.GC.getPlayer_id()].iterator();j.hasNext();)
 			{
-				GameInterface.GC.GI.selected_in_sys.clear();
-				GameInterface.GC.GI.maybe_select_in_sys.clear();
-				for(Fleet.ShipIterator j=currentSystem.getFleets()[GameInterface.GC.getPlayer_id()].iterator();j.hasNext();)
-				{
-					GameInterface.GC.GI.selected_in_sys.add(currentSystem.getFleets()[GameInterface.GC.getPlayer_id()].getShips().get(j.next()));
-				}
-				GameInterface.GC.GI.refreshShipPanel();
+				GameInterface.GC.GI.selected_in_sys.add(currentSystem.getFleets()[GameInterface.GC.getPlayer_id()].getShips().get(j.next()));
 			}
+			GameInterface.GC.GI.refreshShipPanel();
+		}
 		else
 		{
 			for(int i=0;i<MyPlanets_list.size();i++ )

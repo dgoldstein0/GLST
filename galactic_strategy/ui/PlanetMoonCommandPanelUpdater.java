@@ -14,7 +14,7 @@ public class PlanetMoonCommandPanelUpdater implements Runnable {
 	@Override
 	public void run() {
 			PlanetMoonCommandPanel panel = GameInterface.GC.GI.SatellitePanel;
-			if(panel != null && GameInterface.GC.GI.sat_or_ship_disp == GameInterface.PANEL_DISP.SAT_PANEL
+			if(panel != null && GameInterface.GC.GI.displayed_control_panel == GameInterface.PANEL_DISP.SAT_PANEL
 					&& panel.the_sat == sat)
 			{
 				panel.setSat(sat);
