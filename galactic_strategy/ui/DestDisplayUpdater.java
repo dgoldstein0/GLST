@@ -1,12 +1,12 @@
 package galactic_strategy.ui;
 
-import galactic_strategy.game_objects.Destination;
+import galactic_strategy.game_objects.AbstractDestination;
 
 public class DestDisplayUpdater implements Runnable
 {
-	final Destination<?> the_sat;
+	final AbstractDestination<?> the_sat;
 	
-	public DestDisplayUpdater(Destination<?> sat)
+	public DestDisplayUpdater(AbstractDestination<?> sat)
 	{
 		the_sat = sat;
 	}

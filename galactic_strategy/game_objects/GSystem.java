@@ -11,6 +11,7 @@ import galactic_strategy.ui.GameInterface;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 public strictfp class GSystem implements Orbitable<GSystem>
 {
@@ -25,7 +26,7 @@ public strictfp class GSystem implements Orbitable<GSystem>
 	long time_last_color_valid_until; //the time until which the last_color will be used
 	Color last_color; //the last return value of currentColor()
 	
-	ArrayList<Satellite<?>> orbiting;
+	List<Satellite<?>> orbiting;
 	HashSet<Star> stars;
 	
 	//missiles synchronizes on itself
@@ -157,13 +158,13 @@ public strictfp class GSystem implements Orbitable<GSystem>
 	 * works by recursively calling itself on the sets of objects orbiting
 	 * the objects in the given list.
 	 * 
-	 * @param sats an ArrayList of orbiting satellites.  This can be the set of
+	 * @param orbiting2 an ArrayList of orbiting satellites.  This can be the set of
 	 * 		the major satellites in the system, or a set of sub-satellites (Moons),
 	 * 		or anything else.
 	 */
-	private void recalculateSatelliteClaims(ArrayList<Satellite<?>> sats)
+	private void recalculateSatelliteClaims(List<Satellite<?>> orbiting2)
 	{
-		for (Satellite<?> s : sats)
+		for (Satellite<?> s : orbiting2)
 		{
 			if (s instanceof OwnableSatellite<?>)
 			{
@@ -245,8 +246,8 @@ public strictfp class GSystem implements Orbitable<GSystem>
 		missiles = new MissileList();
 	}
 	
-	public ArrayList<Satellite<?>> getOrbiting(){return orbiting;}
-	public void setOrbiting(ArrayList<Satellite<?>> s){orbiting=s;}
+	public List<Satellite<?>> getOrbiting(){return orbiting;}
+	public void setOrbiting(List<Satellite<?>> s){orbiting=s;}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 	public HashSet<Star> getStars(){return stars;}

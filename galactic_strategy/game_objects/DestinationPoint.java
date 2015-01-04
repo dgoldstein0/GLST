@@ -2,7 +2,7 @@ package galactic_strategy.game_objects;
 
 import galactic_strategy.sync_engine.Describer;
 
-public strictfp class DestinationPoint implements Destination<DestinationPoint>, Describer<DestinationPoint>
+public strictfp class DestinationPoint implements DescribableDestination<DestinationPoint>, Describer<DestinationPoint>
 {
 	double x,y;
 	
@@ -27,8 +27,7 @@ public strictfp class DestinationPoint implements Destination<DestinationPoint>,
 	
 	@Override
 	public Describer<DestinationPoint> describer() {
-		
-		// See comment in retrieveObject
+		// returning a copy avoids issues with deduplication by our xml logging.
 		return new DestinationPoint(x, y);
 	}
 	

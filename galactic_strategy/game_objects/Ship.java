@@ -41,7 +41,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	double exit_vec_len;
 	double exit_direction;
 	long arrival_time;
-	Destination<?> SecondDest;
+	AbstractDestination<?> SecondDest;
 	
 	public Ship(ShipType t)
 	{
@@ -197,7 +197,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		return false;
 	}
 	
-	private void setOtherDest(long t, Destination<?> d)
+	private void setOtherDest(long t, AbstractDestination<?> d)
 	{
 		if(d instanceof Flyer<?,?,?>)
 			SecondDest = new DestinationPoint(d.getXCoord(), d.getYCoord());
@@ -205,8 +205,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			SecondDest = d;
 	}
 
-	public boolean reachedDest(Destination<?> s){
-		boolean isClose = Constants.CloseEnoughDistance > findSqDestinationDistance(s);
+	public boolean reachedDest(AbstractDestination<?> s){
+		boolean isClose = Constants.CloseEnoughDistance > findSqDistance(s);
 		return isClose;
 	}
 	
@@ -221,7 +221,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					currentShip = location.fleets[i].ships.get(j.next());
 					if(currentShip!=null)
 					{
-						currentDistance = findSqShipDistance(currentShip);
+						currentDistance = findSqDistance(currentShip);
 						if(currentDistance < Constants.Detection_Range_Sq){
 							if(closestShip==null||closestDistance>currentDistance){
 									closestShip = currentShip;
@@ -235,12 +235,11 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	return closestShip;
 	}
 	
-	public double findSqShipDistance(Ship target)
+	public double findSqDistance(AbstractDestination<?> target)
 	{
-		double deltaX=target.getPos_x()-pos_x;
-		double deltaY=target.getPos_y()-pos_y;
+		double deltaX=target.getXCoord()-pos_x;
+		double deltaY=target.getYCoord()-pos_y;
 		return MathFormula.SumofSquares(deltaX, deltaY);
-		
 	}
 	
 	public void setupAttack(long t, Targetable<?> tgt){
@@ -260,13 +259,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			target.removeAggressor(this);
 			target=null;
 		}
-	}
-	
-	public double findSqDestinationDistance(Destination<?> Dest){
-		double deltaX = Dest.getXCoord()-pos_x;
-		double deltaY = Dest.getYCoord()-pos_y;
-		return MathFormula.SumofSquares(deltaX, deltaY);
-		
 	}
 	
 	//this function is called when time is rolled back to before the ship existed
@@ -318,7 +310,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		return (mode != MODES.ENTER_WARP); //only enforce if mode is NOT enter warp, i.e. ships can go superspeed when warping
 	}
 	
-	public void orderToMove(Destination<?> d)
+	public void orderToMove(AbstractDestination<?> d)
 	{
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP) //to ensure if the interface tries to issue an order, it can't
 		{
@@ -335,7 +327,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		}
 	}
 	
-	public void AIMove(Destination<?> d)
+	public void AIMove(AbstractDestination<?> d)
 	{
 		setDestination(d);
 		setDest_x_coord(d.getXCoord());
@@ -343,7 +335,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		current_flying_AI = new TrackingAI(this, Constants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
 	}
 	
-	public void orderToAttackMove(Destination<?> d)
+	public void orderToAttackMove(AbstractDestination<?> d)
 	{
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP)
 		{
@@ -612,7 +604,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	private void targetLost(long t, LOST_REASON reason, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
 	{
 		//System.out.println("target lost");
-		if (getDestination()==(Destination<?>)target && (mode==MODES.ATTACKING||mode==MODES.USERATTACKING))
+		if (getDestination()==(AbstractDestination<?>)target && (mode==MODES.ATTACKING||mode==MODES.USERATTACKING))
 		{
 			//System.out.println("\tchanging destination...");
 			//Need to look backwards a time grain because otherwise we will get DataNotYetSavedException
@@ -668,8 +660,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public void setEnergy(int f){energy=f;}
 	public int getMax_energy(){return max_energy;}
 	public void setMax_energy(int mf){max_energy=mf;}
-	public Destination<?> getSecondDest(){return SecondDest;}
-	public void setSecondDest(Destination<?> dest){SecondDest=dest;}
+	public AbstractDestination<?> getSecondDest(){return SecondDest;}
+	public void setSecondDest(AbstractDestination<?> dest){SecondDest=dest;}
 	
 	public float getSoldier() {return soldier;}
 	public MODES getMode(){return mode;}

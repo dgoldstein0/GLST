@@ -445,7 +445,7 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 		}
 		
 		//search orbiting planets/objects
-		ArrayList<Satellite<?>> orbiting_sats = system.getOrbiting();
+		List<Satellite<?>> orbiting_sats = system.getOrbiting();
 		if(orbiting_sats != null)
 		{
 			for(Satellite<?> orbiting : orbiting_sats)

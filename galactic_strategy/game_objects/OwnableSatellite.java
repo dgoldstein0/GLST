@@ -12,12 +12,13 @@ import galactic_strategy.ui.ObjBuilder;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.SwingUtilities;
 
 public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> extends Satellite<T> implements Saveable<T>, Orbitable<T>
 {
-	ArrayList<Satellite<?>> orbiting;
+	List<Satellite<?>> orbiting;
 	
 	/**@GuardedBy facilities*/
 	HashMap<Integer, Facility<?> > facilities;
@@ -307,8 +308,8 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 	public int getNext_facility_id(){return next_facility_id;}
 	public void setNext_facility_id(int n){next_facility_id=n;}
 	
-	public ArrayList<Satellite<?>> getOrbiting(){return orbiting;}
-	public void setOrbiting(ArrayList<Satellite<?>> o){orbiting=o;}
+	public List<Satellite<?>> getOrbiting(){return orbiting;}
+	public void setOrbiting(List<Satellite<?>> o){orbiting=o;}
 	
 	public long getTime(){return time;}
 	public void setTime(long t){time=t;}

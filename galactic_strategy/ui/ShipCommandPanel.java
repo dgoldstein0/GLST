@@ -2,7 +2,7 @@ package galactic_strategy.ui;
 
 import galactic_strategy.Constants;
 import galactic_strategy.Player;
-import galactic_strategy.game_objects.Destination;
+import galactic_strategy.game_objects.AbstractDestination;
 import galactic_strategy.game_objects.OwnableSatellite;
 import galactic_strategy.game_objects.Ship;
 import galactic_strategy.user_actions.ShipInvadeOrder;
@@ -174,7 +174,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		}
 	}
 	
-	public void updateDestDisplay(Destination<?> d)
+	public void updateDestDisplay(AbstractDestination<?> d)
 	{
 		if(d instanceof OwnableSatellite<?> && ((OwnableSatellite<?>)d).getOwner() != null)
 		{

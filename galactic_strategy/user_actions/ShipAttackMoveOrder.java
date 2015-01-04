@@ -1,6 +1,6 @@
 package galactic_strategy.user_actions;
 import galactic_strategy.Player;
-import galactic_strategy.game_objects.Destination;
+import galactic_strategy.game_objects.DescribableDestination;
 import galactic_strategy.game_objects.Galaxy;
 import galactic_strategy.game_objects.Ship;
 import galactic_strategy.sync_engine.DataSaverControl;
@@ -9,12 +9,12 @@ import galactic_strategy.sync_engine.Describer;
 public class ShipAttackMoveOrder extends Order {
 
 	Ship the_ship;
-	Destination<?> the_dest;
+	DescribableDestination<?> the_dest;
 	
 	Describer<Ship> ship_desc;
-	Describer<? extends Destination<?>> dest_desc;
+	Describer<? extends DescribableDestination<?>> dest_desc;
 
-	public ShipAttackMoveOrder (Player p, Ship s, long t, Destination<?> d)
+	public ShipAttackMoveOrder (Player p, Ship s, long t, DescribableDestination<?> d)
 	{
 		super(t, p);
 		mode = Order.MODE.ORIGIN;
@@ -61,6 +61,6 @@ public class ShipAttackMoveOrder extends Order {
 	public ShipAttackMoveOrder(){mode=Order.MODE.NETWORK;}
 	public Describer<Ship> getShip_desc(){return ship_desc;}
 	public void setShip_desc(Describer<Ship> sd){ship_desc=sd;}
-	public Describer<? extends Destination<?>> getDest_desc(){return dest_desc;}
-	public void setDest_desc(Describer<? extends Destination<?>> d){dest_desc=d;}
+	public Describer<? extends DescribableDestination<?>> getDest_desc(){return dest_desc;}
+	public void setDest_desc(Describer<? extends DescribableDestination<?>> d){dest_desc=d;}
 }

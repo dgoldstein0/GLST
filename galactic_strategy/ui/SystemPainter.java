@@ -176,7 +176,7 @@ public class SystemPainter extends JPanel
 					//draw objects orbiting planets					
 					if(orbiting instanceof Planet)
 					{
-						ArrayList<Satellite<?>> planet_sats = ((Planet)orbiting).getOrbiting();
+						List<Satellite<?>> planet_sats = ((Planet)orbiting).getOrbiting();
 						if (planet_sats != null) {
 							for(Satellite<?> sat : planet_sats)
 							{

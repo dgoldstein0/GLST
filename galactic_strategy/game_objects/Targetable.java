@@ -4,7 +4,7 @@ import galactic_strategy.sync_engine.Saveable;
 
 import java.util.HashSet;
 
-public strictfp interface Targetable<T extends Targetable<T>> extends Destination<T>, Saveable<T>
+public strictfp interface Targetable<T extends Targetable<T>> extends DescribableDestination<T>, Saveable<T>
 {
 	public abstract void addDamage(long t, int d);
 	public abstract void destroyed(long t);

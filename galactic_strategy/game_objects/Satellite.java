@@ -5,7 +5,7 @@ import galactic_strategy.sync_engine.Describer;
 import galactic_strategy.sync_engine.SatelliteDescriber;
 import galactic_strategy.ui.Selectable;
 
-public strictfp abstract class Satellite<T extends Satellite<T>> extends StellarObject implements Destination<T>
+public strictfp abstract class Satellite<T extends Satellite<T>> extends StellarObject implements DescribableDestination<T>
 {
 	Orbit orbit;
 	int id;

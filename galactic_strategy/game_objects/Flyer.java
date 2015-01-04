@@ -23,7 +23,7 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	
 	HashSet<Targetter<?>> aggressors; //all the ships/ missiles targeting this
 	
-	private Destination<?> destination;
+	private AbstractDestination<?> destination;
 	//save in case SystemPainter wants to paint crosshairs
 	private double dest_x_coord;
 	private double dest_y_coord;
@@ -39,11 +39,10 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	FlyerAI current_flying_AI;
 	boolean is_alive;
 	
-	DataSaverControl<T> data_control;
-	
 	//subclasses are responsible for instantiating data_control
 	public Flyer(String nm, ShipType st)
 	{
+		super();
 		name=nm;
 		type=st;
 		
@@ -52,7 +51,6 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 		aggressors = new HashSet<Targetter<?>>();
 		destination=null;
 		target=null;
-		data_control = new DataSaverControl<T>((T) this);
 	}
 	
 	public Flyer(){}
@@ -166,9 +164,6 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 		return speed*Math.sin(direction);
 	}
 	
-	//for Saveable
-	public DataSaverControl<T> getDataControl(){return data_control;}
-	
 	//for Targetable
 	public HashSet<Targetter<?>> getAggressors(){return aggressors;}
 	public void addAggressor(Targetter<?> t)
@@ -213,11 +208,11 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	public FlyerAI getCurrent_flying_AI(){return current_flying_AI;}
 	public void setCurrent_flying_AI(FlyerAI ai){current_flying_AI = ai;}
 	
-	public Destination<?> getDestination() {
+	public AbstractDestination<?> getDestination() {
 		return destination;
 	}
 
-	public void setDestination(Destination<?> destination) {
+	public void setDestination(AbstractDestination<?> destination) {
 		this.destination = destination;
 	}
 

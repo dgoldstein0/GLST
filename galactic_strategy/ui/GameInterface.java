@@ -2,7 +2,7 @@ package galactic_strategy.ui;
 
 import galactic_strategy.Constants;
 import galactic_strategy.GameControl;
-import galactic_strategy.game_objects.Destination;
+import galactic_strategy.game_objects.DescribableDestination;
 import galactic_strategy.game_objects.DestinationPoint;
 import galactic_strategy.game_objects.Fleet;
 import galactic_strategy.game_objects.GSystem;
@@ -1012,13 +1012,13 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 	
 	private void setDestination(double x, double y, boolean AttackMove)
 	{
-		Destination<?> dest = new DestinationPoint(x,y);
+		DescribableDestination<?> dest = new DestinationPoint(x,y);
 		final double OBJ_TOL = Constants.SELECTION_TOLERANCE/sys_scale; //tolerance
 		
 		//1st search out satellites
 		
 		//search orbiting planets/objects
-		ArrayList<Satellite<?>> orbiting = sys.getOrbiting();
+		List<Satellite<?>> orbiting = sys.getOrbiting();
 		if(orbiting != null)
 		{
 			for(Satellite<?> sat : orbiting)
@@ -1033,7 +1033,7 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 				if(sat instanceof Planet)
 				{
 					Planet cur_planet = (Planet) sat;
-					ArrayList<Satellite<?>> orbiting2 = cur_planet.getOrbiting();
+					List<Satellite<?>> orbiting2 = cur_planet.getOrbiting();
 					if (orbiting2 != null) {
 						for(Satellite<?> sat2 : orbiting2)
 						{
