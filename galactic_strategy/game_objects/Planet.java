@@ -1,5 +1,4 @@
 package galactic_strategy.game_objects;
-import galactic_strategy.Player;
 
 import java.util.ArrayList;
 import java.util.HashMap;

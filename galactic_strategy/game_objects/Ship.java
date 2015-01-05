@@ -80,7 +80,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	}
 	
 	//updates the ship an increment towards time t - moving and attacking.  return value is meaningless/ignored
-	//DOES NOT SAVE DATA
 	@Override
 	public boolean update(long t, Fleet.ShipIterator shipIteration)
 	{
@@ -191,6 +190,11 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					if(!doTransferTroops() || soldier >= type.soldier_capacity)
 						mode=MODES.ORBITING;
 					break;
+				case IN_WARP:
+					throw new IllegalStateException(
+							"Should never call update on a warping ship - this suggests the ship is" +
+							" in a system, while it should be moving between systems."
+						);
 			}
 		} while (mode != orig_mode);
 		

@@ -2,7 +2,6 @@ package galactic_strategy.game_objects;
 
 import galactic_strategy.Constants;
 import galactic_strategy.Player;
-import galactic_strategy.sync_engine.DataSaverControl;
 
 import java.util.HashSet;
 import java.util.Iterator;

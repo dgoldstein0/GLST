@@ -1,8 +1,5 @@
 package galactic_strategy.game_objects;
 
-import galactic_strategy.Player;
-
-
 public strictfp class Moon extends OwnableSatellite<Moon>
 {
 	public Moon(int i, double m, String nm, int sz)

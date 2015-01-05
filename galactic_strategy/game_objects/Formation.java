@@ -20,7 +20,9 @@ public strictfp class Formation<T extends Formation<T>> implements Saveable<T> {
 	}
 	
 	private Formation(){
-		data_control = new DataSaverControl<T>((T) this);
+		@SuppressWarnings("unchecked")
+		T typed_this = (T) this;
+		data_control = new DataSaverControl<T>(typed_this);
 	}
 	
 	

@@ -1266,6 +1266,8 @@ public class GDFrame implements Runnable, ActionListener, ChangeListener, MouseM
 	
 	private static class NoSystemLocatedException extends Exception
 	{
+		private static final long serialVersionUID = -6068538453351621477L;
+
 		private NoSystemLocatedException(int x, int y)
 		{
 			super("NoSystemLocatedException from point ("+Integer.toString(x)+","+Integer.toString(y)+").");

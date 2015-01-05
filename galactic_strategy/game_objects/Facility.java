@@ -30,7 +30,10 @@ public strictfp abstract class Facility<T extends Facility<T>> implements Target
 		damage=0;
 		is_alive=true;
 		aggressors = new HashSet<Targetter<?>>();
-		data_control = new DataSaverControl<T>((T) this);
+		
+		@SuppressWarnings("unchecked")
+		T typed_this = (T) this;
+		data_control = new DataSaverControl<T>(typed_this);
 	}
 	
 	@Override

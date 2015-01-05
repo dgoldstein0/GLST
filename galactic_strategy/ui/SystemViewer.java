@@ -576,6 +576,8 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 					case RECENTER:
 						setCenter(screenToDataX(e.getX()),screenToDataY(e.getY()));
 						break;
+					case ADD_NOTHING:
+						throw new RuntimeException("Something went wrong, this should be unreachable");
 				}
 				if(wait_to_add != AddSystem.ADD_FOCUS)
 				{
@@ -719,8 +721,9 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	private void addMoon(int x, int y)
 	{
-		Moon themoon = new Moon(((Planet)selected_obj).getOrbiting().size(), DEFAULT_MOON_MASS, "", DEFAULT_MOON_SIZE);
-		themoon.setOrbit(new Orbit((Satellite<Moon>)themoon, (Orbitable<Planet>)selected_obj,x,y,x,y, Orbit.DIRECTION.CLOCKWISE));
+		Planet p = (Planet) selected_obj;
+		Moon themoon = new Moon(p.getOrbiting().size(), DEFAULT_MOON_MASS, "", DEFAULT_MOON_SIZE);
+		themoon.setOrbit(new Orbit(themoon, p, x, y, x, y, Orbit.DIRECTION.CLOCKWISE));
 		((Planet)selected_obj).getOrbiting().add(themoon);
 		
 		selected_obj = themoon;
@@ -800,26 +803,29 @@ public class SystemViewer extends JDialog implements ActionListener, MouseListen
 	
 	public void mouseMoved(MouseEvent e)
 	{
-		if(wait_to_add != AddSystem.ADD_NOTHING)
+		switch(wait_to_add)
 		{
-			switch(wait_to_add)
-			{
-				case ADD_STAR:
-					if(locationStarSuitable(screenToDataX(e.getX()), screenToDataY(e.getY())))
-						painter.paintGhostObj(system, wrapInList(selected_obj), screenToDataX(e.getX()), screenToDataY(e.getY()), DEFAULT_STAR_SIZE, center_x, center_y, scale);
-					else
-						drawSystem();
-					break;
-				case ADD_FOCUS:
-					Orbit o = ((Satellite<?>)selected_obj).getOrbit();
-					o.getFocus2().setX(screenToDataX(e.getX())-o.getBoss().absoluteInitX());
-					o.getFocus2().setY(screenToDataY(e.getY())-o.getBoss().absoluteInitY());
-					o.calculateOrbit();
+			case ADD_STAR:
+				if(locationStarSuitable(screenToDataX(e.getX()), screenToDataY(e.getY())))
+					painter.paintGhostObj(system, wrapInList(selected_obj), screenToDataX(e.getX()), screenToDataY(e.getY()), DEFAULT_STAR_SIZE, center_x, center_y, scale);
+				else
 					drawSystem();
-					break;
-			}
+				break;
+			case ADD_FOCUS:
+				Orbit o = ((Satellite<?>)selected_obj).getOrbit();
+				o.getFocus2().setX(screenToDataX(e.getX())-o.getBoss().absoluteInitX());
+				o.getFocus2().setY(screenToDataY(e.getY())-o.getBoss().absoluteInitY());
+				o.calculateOrbit();
+				drawSystem();
+				break;
+			case ADD_NOTHING:
+				break;
+			default:
+				break;
 		}
 
+		// TODO this code looks buggy... does it actually work?  Or does it do odd things for the ADD_NOTHING and other cases?
+		
 		boolean previously_moving = true;
 		if(move_center_x_speed==0 && move_center_y_speed==0)
 			previously_moving = false;

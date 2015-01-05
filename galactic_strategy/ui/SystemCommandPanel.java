@@ -7,19 +7,21 @@ import galactic_strategy.game_objects.Satellite;
 import galactic_strategy.game_objects.ShipType;
 
 import java.awt.event.*;
-import java.awt.FlowLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.*;
 
 import javax.swing.*;
-import javax.swing.GroupLayout.Alignment;
 
 //Currently only supports Display for 2 players
 public class SystemCommandPanel extends JPanel implements MouseListener
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3542119447543187278L;
 	JPanel MyPlanets;
 	JPanel MyShips;
 	GSystem currentSystem;

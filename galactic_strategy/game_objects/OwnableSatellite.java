@@ -10,7 +10,6 @@ import galactic_strategy.ui.GameInterface;
 import galactic_strategy.ui.ObjBuilder;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -71,7 +70,11 @@ public strictfp abstract class OwnableSatellite<T extends OwnableSatellite<T>> e
 		next_facility_id=0;
 		facilities = new HashMap<Integer, Facility<?>>();
 		bldg_in_progress = FacilityType.NO_BLDG;
-		data_control = new DataSaverControl<T>((T)this);
+		
+		@SuppressWarnings("unchecked")
+		T typed_this = (T) this;
+		
+		data_control = new DataSaverControl<T>(typed_this);
 		//last_tax_time = 0;
 		owner = null;
 		lastcolor=Color.WHITE;

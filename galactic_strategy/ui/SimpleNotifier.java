@@ -10,6 +10,8 @@ import java.util.TimerTask;
 
 public class SimpleNotifier extends JPanel
 {
+	private static final long serialVersionUID = 7337225346044823998L;
+	
 	private JLabel msg_label;
 	private Timer t;
 	private HideTask task;

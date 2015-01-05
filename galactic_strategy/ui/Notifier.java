@@ -10,6 +10,8 @@ import java.util.TimerTask;
 
 public class Notifier extends JPanel
 {
+	private static final long serialVersionUID = 2147063507581033358L;
+	
 	private JLabel msg_label;
 	private Timer t;
 	private HideTask task;

@@ -62,8 +62,8 @@ public strictfp class TrackingAI extends FlyerAI
 		//The "if" here asks: should the Flyer should try to slow down to stop/match speed of destination AND...
 			//is the flyer close enough to its destination that we can say it is there already? OR
 			//(heuristic) is the time needed to match speed greater than time to arrival if traveling at constant speed (same as v^2 > a*d if the destination is not moving) 
-		if(in_range_behavior != IN_RANGE_BEHAVIOR.NO_SLOWDOWN && (Math.hypot(the_flyer.pos_x - the_flyer.destinationX(),the_flyer.pos_y - the_flyer.destinationY()) < dest_tolerance
-			|| time_to_chng > time_to_dest))
+		if(Math.hypot(the_flyer.pos_x - the_flyer.destinationX(),the_flyer.pos_y - the_flyer.destinationY()) < dest_tolerance
+			|| time_to_chng > time_to_dest)
 		{
 			switch(in_range_behavior)
 			{
@@ -71,6 +71,8 @@ public strictfp class TrackingAI extends FlyerAI
 					return speed_to_match;
 				case STOP:
 					return 0.0;
+				case NO_SLOWDOWN:
+					break;
 			}
 		}
 		

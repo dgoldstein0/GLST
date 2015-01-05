@@ -11,8 +11,6 @@ import galactic_strategy.game_objects.Satellite;
 import galactic_strategy.game_objects.Ship;
 import galactic_strategy.testing.RecordKeeper;
 import galactic_strategy.testing.SimulateAction;
-import galactic_strategy.testing.RecordKeeper.SAVE_TYPE;
-import galactic_strategy.testing.SimulateAction.ACTION_TYPE;
 import galactic_strategy.user_actions.Order;
 
 import java.beans.ExceptionListener;

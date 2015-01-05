@@ -16,6 +16,8 @@ public strictfp abstract class Targetter<T extends Targetter<T>> implements Targ
 	//for Saveable
 	public DataSaverControl<T> getDataControl(){return data_control;}
 	public Targetter(){
-		data_control = new DataSaverControl<T>((T) this);
+		@SuppressWarnings("unchecked")
+		T typed_this = (T) this;
+		data_control = new DataSaverControl<T>(typed_this);
 	}
 }

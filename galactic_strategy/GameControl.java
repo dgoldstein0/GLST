@@ -1069,6 +1069,11 @@ public strictfp class GameControl
 				case SYS_PANEL:
 					GI.SysPanel.update();
 					break;
+				case FORMATION_PANEL:
+					// TODO this should probably do something
+					break;
+				case NONE:
+					break;
 			}
 
 			GI.updateStats(time_elapsed, Math.round(players[player_id].getMoney()), Math.round(players[player_id].getMetal()));
