@@ -980,8 +980,8 @@ public class GameInterface implements MouseListener, WindowListener, ComponentLi
 				Ship s = ships.get(j);
 				
 				double half_dim = s.getType().getDim()*s.getType().img.scale/2;
-				if(s.getPos_x() - half_dim <= x2 && x1 <= s.getPos_x() + half_dim
-					&& s.getPos_y() - half_dim <= y2 && y1 <= s.getPos_y() + half_dim)
+				if(s.flying_part.getPos_x() - half_dim <= x2 && x1 <= s.flying_part.getPos_x() + half_dim
+					&& s.flying_part.getPos_y() - half_dim <= y2 && y1 <= s.flying_part.getPos_y() + half_dim)
 				{
 					select_items.add(s);
 				}

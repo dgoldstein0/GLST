@@ -36,6 +36,9 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	//used for warping
 	GSystem warp_destination;
+	// x,y for warping
+	private double warp_x;
+	private double warp_y;
 	double exit_vec_x; //exit_vec ends up being a unit vector after orderToWarp, and the length is stored in exit_vec_len
 	double exit_vec_y;
 	double exit_vec_len;
@@ -57,17 +60,17 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	public Describer<Ship> describer(){return new ShipDescriber(owner, this);}
 	
-	//TODO: the time dependence of this function needs to be established
 	public void assemble(Shipyard builder)
 	{
 		owner=builder.location.owner;
 		
-		pos_x = builder.default_x + builder.location.absoluteCurX();
-		pos_y = builder.default_y + builder.location.absoluteCurY();
+		double pos_x = builder.default_x + builder.location.absoluteCurX();
+		double pos_y = builder.default_y + builder.location.absoluteCurY();
 		double vel_x=builder.location.orbit.getAbsVelX();
 		double vel_y=builder.location.orbit.getAbsVelY();
-		direction = Math.atan2(vel_y, vel_x);
-		speed = Math.hypot(vel_x, vel_y);
+		double direction = Math.atan2(vel_y, vel_x);
+		double speed = Math.hypot(vel_x, vel_y);
+		flying_part.setInitialPositionAndVelocity(pos_x, pos_y, speed, direction);
 		
 		//TODO: replace with recursive functions
 		if(builder.location instanceof Planet)
@@ -83,7 +86,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	@Override
 	public boolean update(long t, Fleet.ShipIterator shipIteration)
 	{
-		moveIncrement(t);
+		flying_part.moveIncrement(t);
 		MODES orig_mode;
 		
 		/* this do-while is necessary because it lets the ship go through
@@ -98,15 +101,16 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					SecondDest=null;
 					Ship targettoattack = identifyClosestEnemy();
 					if(targettoattack != null){
-						setOtherDest(t, getDestination());
+						setOtherDest(t, flying_part.getDestination());
 						setupAttack(t, targettoattack);
 						mode = MODES.ATTACKING;
 					} 
 					break;
 				case MOVING:
 					SecondDest = null;
-					if((!(getDestination() instanceof Ship)) && reachedDest(getDestination())){
-						if(getDestination() instanceof Satellite<?>)
+					AbstractDestination<?> destination = flying_part.getDestination();
+					if((!(destination instanceof Ship)) && flying_part.reachedDest()){
+						if(destination instanceof Satellite<?>)
 							{mode = MODES.ORBITING;}
 						else mode = MODES.IDLE;
 					}
@@ -118,7 +122,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					SecondDest=null;
 					Ship possibletarget = identifyClosestEnemy();
 					if (possibletarget != null) {
-						setOtherDest(t, getDestination());
+						setOtherDest(t, flying_part.getDestination());
 						setupAttack(t, possibletarget);
 						mode = MODES.ATTACKING;
 					} 
@@ -135,37 +139,39 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					was_target=null;
 					break;
 				case ATTACKING:
-					attack(t);
+					shootMissile(t);
 					break;
 				case USERATTACKING:
-					attack(t);
+					shootMissile(t);
 					break;
 				case ATTACKMOVE:
 					Ship atkMoveTarget = identifyClosestEnemy();
-					if(atkMoveTarget != null){
-						setOtherDest(t, getDestination());
+					if (atkMoveTarget != null){
+						setOtherDest(t, flying_part.getDestination());
 						setupAttack(t, atkMoveTarget);
 						mode = MODES.ATTACKING;
 						break;
 					} 
-					if(reachedDest(getDestination())){
-						if(getDestination() instanceof OwnableSatellite<?>)
-							{mode = MODES.PROTECTORBIT;}
+					if (flying_part.reachedDest()){
+						if(flying_part.getDestination() instanceof OwnableSatellite<?>) {
+							mode = MODES.PROTECTORBIT;
+						}
 						else
 							mode = MODES.IDLE;
 					}
 					break;
 				case USERATTACKMOVE:
 					Ship useratkMoveTarget = identifyClosestEnemy();
-					if(useratkMoveTarget != null){
-						setOtherDest(t, getDestination());
+					if (useratkMoveTarget != null){
+						setOtherDest(t, flying_part.getDestination());
 						setupAttack(t, useratkMoveTarget);
 						mode = MODES.ATTACKING;
 						break;
 					} 
-					if (reachedDest(getDestination())){
-						if(getDestination() instanceof OwnableSatellite<?>)
-							{mode = MODES.PROTECTORBIT;}
+					if (flying_part.reachedDest()){
+						if(flying_part.getDestination() instanceof OwnableSatellite<?>) {
+							mode = MODES.PROTECTORBIT;
+						}
 						else
 							mode = MODES.IDLE;
 					}
@@ -175,7 +181,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					{
 						System.out.println("clear to warp!");
 						mode=MODES.ENTER_WARP;
-						current_flying_AI = new SpeedUpAI();
+						flying_part.setCurrent_flying_AI(new SpeedUpAI());
 					}
 					break;
 				case ENTER_WARP:
@@ -183,7 +189,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 						engageWarpDrive(t, shipIteration);
 					break;
 				case EXIT_WARP:
-					if(speed <= type.max_speed)
+					if(flying_part.getSpeed() <= type.max_speed)
 						mode=MODES.ATTACKMOVE;
 					break;
 				case PICKUP_TROOPS:
@@ -208,11 +214,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		else
 			SecondDest = d;
 	}
-
-	public boolean reachedDest(AbstractDestination<?> s){
-		boolean isClose = Constants.CloseEnoughDistance > findSqDistance(s);
-		return isClose;
-	}
 	
 	public Ship identifyClosestEnemy(){
 		Ship currentShip=null;
@@ -225,7 +226,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 					currentShip = location.fleets[i].ships.get(j.next());
 					if(currentShip!=null)
 					{
-						currentDistance = findSqDistance(currentShip);
+						currentDistance = flying_part.findSqDistance(currentShip);
 						if(currentDistance < Constants.Detection_Range_Sq){
 							if(closestShip==null||closestDistance>currentDistance){
 									closestShip = currentShip;
@@ -239,21 +240,16 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	return closestShip;
 	}
 	
-	public double findSqDistance(AbstractDestination<?> target)
-	{
-		double deltaX=target.getXCoord()-pos_x;
-		double deltaY=target.getYCoord()-pos_y;
-		return MathFormula.SumofSquares(deltaX, deltaY);
-	}
-	
 	public void setupAttack(long t, Targetable<?> tgt){
 		target= tgt;
-		setDestination(tgt);
+		flying_part.setDestination(tgt);
 		target.addAggressor(this);
 		nextAttackingtime = t + Constants.Attacking_cooldown;
 		
 		//TODO: get constant 5 out of here
-		current_flying_AI = new TrackingAI(this, Constants.Attacking_Range-5, TrackingAI.IN_RANGE_BEHAVIOR.STOP);
+		flying_part.setCurrent_flying_AI(
+			new TrackingAI(this.flying_part, Constants.Attacking_Range-5, TrackingAI.IN_RANGE_BEHAVIOR.STOP)
+		);
 	}
 	
 	public void userOverride(){
@@ -277,7 +273,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public boolean moveDuringWarp(long t, Iterator<Ship> ship_it)
 	{
 		//System.out.println("move during warp");
-		if(mode==MODES.IN_WARP)
+		if(mode == MODES.IN_WARP)
 		{
 			//System.out.println("...warping...");
 			if(t >= arrival_time)
@@ -289,8 +285,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			else
 			{
 				double dist_moved = type.warp_speed*Constants.TIME_GRANULARITY;
-				pos_x += dist_moved*exit_vec_x;
-				pos_y += dist_moved*exit_vec_y;
+				setWarp_x(getWarp_x() + dist_moved*exit_vec_x);
+				setWarp_y(getWarp_y() + dist_moved*exit_vec_y);
 			}
 		}
 		return false;
@@ -298,15 +294,12 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	private boolean fastEnoughToWarp()
 	{
-		return (speed >= Constants.WARP_EXIT_SPEED);
+		return (flying_part.getSpeed() >= Constants.WARP_EXIT_SPEED);
 	}
 	
-	protected double getAccel()
-	{
-		if(mode==MODES.ENTER_WARP || mode== MODES.EXIT_WARP)
-			return type.warp_accel;
-		else
-			return type.accel_rate;
+	@Override
+	public boolean isInWarpTransition() {
+		return mode == MODES.ENTER_WARP || mode == MODES.EXIT_WARP;
 	}
 	
 	protected boolean enforceSpeedCap()
@@ -318,37 +311,42 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	{
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP) //to ensure if the interface tries to issue an order, it can't
 		{
-			setDestination(d);
+			flying_part.setDestination(d);
 			
 			userOverride();
 			
 			//System.out.println(Integer.toString(id) + " orderToMove: t is " + Long.toString(t) + " and time is " + Long.toString(time));
 			setDest_x_coord(d.getXCoord());
 			setDest_y_coord(d.getYCoord());
-			current_flying_AI = new TrackingAI(this, Constants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
+			flying_part.setCurrent_flying_AI(
+				new TrackingAI(this.flying_part, Constants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED)
+			);
 			mode=MODES.MOVING;
-			//current_flying_AI = new PatrolAI(this, 400.0, 300.0, 100.0, 1);
 		}
 	}
 	
 	public void AIMove(AbstractDestination<?> d)
 	{
-		setDestination(d);
+		flying_part.setDestination(d);
 		setDest_x_coord(d.getXCoord());
 		setDest_y_coord(d.getYCoord());
-		current_flying_AI = new TrackingAI(this, Constants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
+		flying_part.setCurrent_flying_AI(
+			new TrackingAI(this.flying_part, Constants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED)
+		);
 	}
 	
 	public void orderToAttackMove(AbstractDestination<?> d)
 	{
 		if(mode != MODES.EXIT_WARP && mode != MODES.IN_WARP && mode != MODES.ENTER_WARP)
 		{
-			setDestination(d);
+			flying_part.setDestination(d);
 			userOverride();
 			
 			setDest_x_coord(d.getXCoord());
 			setDest_y_coord(d.getYCoord());
-			current_flying_AI = new TrackingAI(this, Constants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED);
+			flying_part.setCurrent_flying_AI(
+				new TrackingAI(this.flying_part, Constants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED)
+			);
 			mode = MODES.USERATTACKMOVE;
 		}
 	}
@@ -382,8 +380,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			exit_vec_y /= exit_vec_len;
 			
 			exit_direction = Math.atan2(exit_vec_y, exit_vec_x);
-			
-			current_flying_AI = new WarpAI(this);
+			flying_part.setCurrent_flying_AI(new WarpAI(this));
 		}
 	}
 	
@@ -391,9 +388,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	{
 		if(mode == MODES.ORBITING|| mode==MODES.PROTECTORBIT || mode==MODES.MOVING  || mode == MODES.ATTACKING) //TODO: what modes is this valid in?
 		{
-			double x_dif = pos_x-sat.getXCoord();
-			double y_dif = pos_y-sat.getYCoord();
-			if(x_dif*x_dif + y_dif*y_dif < Constants.LANDING_RANGE*Constants.LANDING_RANGE)
+			if(flying_part.findSqDistance(sat) < Constants.LANDING_RANGE*Constants.LANDING_RANGE)
 			{
 				if(sat.getOwner() != null)
 				{
@@ -407,7 +402,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 				}
 				else
 				{
-					((OwnableSatellite<?>)getDestination()).changeOwnerAtTime(getOwner(), t);
+					((OwnableSatellite<?>)flying_part.getDestination()).changeOwnerAtTime(getOwner(), t);
 				}
 			}
 		}
@@ -416,9 +411,9 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public void orderToPickupTroops(long t) {
 		
 		if((mode == MODES.ORBITING||mode == MODES.PROTECTORBIT )&&
-				getDestination() instanceof OwnableSatellite<?> &&
-				((OwnableSatellite<?>)getDestination()).getOwner() == owner &&
-				((OwnableSatellite<?>)getDestination()).the_base != null &&
+				flying_part.getDestination() instanceof OwnableSatellite<?> &&
+				((OwnableSatellite<?>)flying_part.getDestination()).getOwner() == owner &&
+				((OwnableSatellite<?>)flying_part.getDestination()).the_base != null &&
 				soldier < type.soldier_capacity)
 		{
 			mode = MODES.PICKUP_TROOPS;
@@ -428,17 +423,15 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	//returns true for success, false if the destination is no longer owned by the player or the base has been destroyed
 	private boolean doTransferTroops()
 	{
-		if(	((OwnableSatellite<?>)getDestination()).getOwner() == owner &&
-				((OwnableSatellite<?>)getDestination()).the_base != null)
+		OwnableSatellite<?> sat = (OwnableSatellite<?>)flying_part.getDestination();
+		if(sat.getOwner() == owner && sat.the_base != null)
 		{
-			double dif_x = getDest_x_coord()-pos_x;
-			double dif_y = getDest_y_coord()-pos_y;
-			if(dif_x*dif_x + dif_y*dif_y <= Constants.LANDING_RANGE*Constants.LANDING_RANGE)
+			if(flying_part.findSqDistance(flying_part.getDestination()) <= Constants.LANDING_RANGE*Constants.LANDING_RANGE)
 			{
 				float get_soldiers = Math.min(type.soldier_capacity - soldier, Constants.troop_transfer_rate*Constants.TIME_GRANULARITY);
-				synchronized(((OwnableSatellite<?>)getDestination()).facilities)
+				synchronized(sat.facilities)
 				{
-					soldier += ((OwnableSatellite<?>)getDestination()).the_base.retrieveSoldiers(get_soldiers);
+					soldier += sat.the_base.retrieveSoldiers(get_soldiers);
 				}
 			}
 			return true;
@@ -469,9 +462,10 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		//deselect the ship, if it was selected
 		SwingUtilities.invokeLater(new ShipDeselector(this));
 		
+		// TODO this is a huge hack, needs to die
 		//compute details of flight plan
-		pos_x=location.x;
-		pos_y=location.y;
+		setWarp_x(location.x);
+		setWarp_y(location.y);
 		arrival_time = time + (long)(exit_vec_len/type.warp_speed);
 		System.out.println("arrival time is " + Long.toString(arrival_time));
 		
@@ -488,17 +482,18 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		Random generator = new Random(arrival_time);
 		
 		//rewrite physics values
-		pos_x=-exit_vec_x*ESCAPE_DIST*EXIT_MULTIPLIER + location.absoluteCurX() + EXIT_PLACE_JITTER*generator.nextGaussian();
-		pos_y=-exit_vec_y*ESCAPE_DIST*EXIT_MULTIPLIER + location.absoluteCurY() + EXIT_PLACE_JITTER*generator.nextGaussian();
-		speed = Constants.WARP_EXIT_SPEED;
-		direction = exit_direction + EXIT_DIRECTION_JITTER*generator.nextGaussian(); //should already be true, but just in case
+		double x=-exit_vec_x*ESCAPE_DIST*EXIT_MULTIPLIER + location.absoluteCurX() + EXIT_PLACE_JITTER*generator.nextGaussian();
+		double y=-exit_vec_y*ESCAPE_DIST*EXIT_MULTIPLIER + location.absoluteCurY() + EXIT_PLACE_JITTER*generator.nextGaussian();
+		double speed = Constants.WARP_EXIT_SPEED;
+		double direction = exit_direction + EXIT_DIRECTION_JITTER*generator.nextGaussian(); //should already be true, but just in case
+		flying_part.setInitialPositionAndVelocity(x, y, speed, direction);
 		
 		mode=MODES.EXIT_WARP;
 		double time = (1.125*speed)/getAccel();
-		setDestination(new DestinationPoint(pos_x+.5*speed*time*Math.cos(direction),pos_y+.5*speed*time*Math.sin(direction)));
-		setDest_x_coord(pos_x+.5*speed*time*Math.cos(direction));
-		setDest_y_coord(pos_y+.5*speed*time*Math.sin(direction));
-		current_flying_AI = new StopAI();
+		flying_part.setDestination(new DestinationPoint(x+.5*speed*time*Math.cos(direction), y+.5*speed*time*Math.sin(direction)));
+		setDest_x_coord(x+.5*speed*time*Math.cos(direction));
+		setDest_y_coord(y+.5*speed*time*Math.sin(direction));
+		flying_part.setCurrent_flying_AI(new StopAI());
 		
 		ship_it.remove();//owner.ships_in_transit.remove(this);
 		location.fleets[owner.getId()].add(this);
@@ -516,11 +511,14 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	
 	private boolean isClearToWarp()
 	{
-		if(direction != exit_direction)
+		// This is somewhat sketchy since it's a floating point equality test.
+		// Since our AI adjusts until the values are exactly equal, this hasn't
+		// caused any problems yet.
+		if(flying_part.getDirection() != exit_direction)
 			return false;
 		
-		double radial_vec_x = pos_x-location.absoluteCurX();
-		double radial_vec_y = pos_y-location.absoluteCurY();
+		double radial_vec_x = flying_part.getPos_x()-location.absoluteCurX();
+		double radial_vec_y = flying_part.getPos_y()-location.absoluteCurY();
 		
 		if(radial_vec_x*radial_vec_x + radial_vec_y*radial_vec_y > ESCAPE_DIST*ESCAPE_DIST)
 		{
@@ -551,20 +549,13 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		return false;
 	}
 	
-	public void shootMissile(long t, double dx, double dy){
-		if (MathFormula.SumofSquares(dx,dy) < Constants.Attacking_Range_Sq &&(nextAttackingtime<=t))
+	public void shootMissile(long t){
+		if (flying_part.findSqDistance(target) < Constants.Attacking_Range_Sq &&(nextAttackingtime<=t))
 		{
 			Missile m = new Missile(this, t, target); 
 			location.missiles.put(m.id, m);
 			nextAttackingtime= t + Constants.Attacking_cooldown;
 		}
-	}
-	
-	public void attack(long t)
-	{
-		double dx = destinationX() - pos_x;
-		double dy = destinationY() - pos_y;
-		shootMissile(t,dx,dy);
 	}
 	
 	@Override
@@ -608,7 +599,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	private void targetLost(long t, LOST_REASON reason, boolean late_order, Targetable<?> tgt /*ignored if late_order is false*/)
 	{
 		//System.out.println("target lost");
-		if (getDestination()==(AbstractDestination<?>)target && (mode==MODES.ATTACKING||mode==MODES.USERATTACKING))
+		if (flying_part.getDestination()==(AbstractDestination<?>)target && (mode==MODES.ATTACKING||mode==MODES.USERATTACKING))
 		{
 			//System.out.println("\tchanging destination...");
 			//Need to look backwards a time grain because otherwise we will get DataNotYetSavedException
@@ -616,7 +607,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			//It is possible that we could write functions to get the lastest position that would be safe,
 			//but at the moment they don't exist.
 			
-			setDestination(new DestinationPoint(
+			flying_part.setDestination(new DestinationPoint(
 							target.getXCoord(),
 							target.getYCoord()
 						));
@@ -647,7 +638,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		{
 			if(GameInterface.GC.GI != null && GameInterface.GC.GI.ShipPanel.getShip() == the_ship)
 			{
-				GameInterface.GC.GI.ShipPanel.updateDestDisplay(the_ship.getDestination());
+				GameInterface.GC.GI.ShipPanel.updateDestDisplay(the_ship.flying_part.getDestination());
 			}
 		}
 	}
@@ -745,9 +736,32 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 
 	@Override
 	public boolean shouldSelect(double x, double y, double tolerance) {
-		return pos_x-tolerance-type.getDim()*type.img.scale/2 <= x &&
-		x <= pos_x + tolerance + type.getDim()*type.img.scale/2 &&
-		pos_y - tolerance - type.getDim()*type.img.scale/2 <= y &&
-		y <= pos_y + tolerance + type.getDim()*type.img.scale/2;
+		double sx = flying_part.getPos_x();
+		double sy = flying_part.getPos_y();
+		
+		return sx-tolerance-type.getDim()*type.img.scale/2 <= x &&
+		x <= sx + tolerance + type.getDim()*type.img.scale/2 &&
+		sy - tolerance - type.getDim()*type.img.scale/2 <= y &&
+		y <= sy + tolerance + type.getDim()*type.img.scale/2;
+	}
+
+	public AbstractDestination<?> getDestination() {
+		return flying_part.getDestination();
+	}
+
+	public double getWarp_x() {
+		return warp_x;
+	}
+
+	public void setWarp_x(double warp_x) {
+		this.warp_x = warp_x;
+	}
+
+	public double getWarp_y() {
+		return warp_y;
+	}
+
+	public void setWarp_y(double warp_y) {
+		this.warp_y = warp_y;
 	}
 }

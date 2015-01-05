@@ -10,11 +10,6 @@ public strictfp class ResearchBuilding extends Facility<ResearchBuilding>{
 		super(loc, id, t, Constants.initial_research_building_endu);
 	}
 	
-	public void research(ResearchOption o)
-	{
-		o.research();
-	}
-	
 	public void updateStatus(long t){}
 	
 	public FacilityType getType(){return FacilityType.RESEARCH_BUILDING;}

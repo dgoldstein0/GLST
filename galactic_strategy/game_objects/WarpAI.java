@@ -2,14 +2,17 @@ package galactic_strategy.game_objects;
 
 public strictfp class WarpAI extends FlyerAI
 {
-	public WarpAI(Ship f)
+	Ship the_ship;
+	
+	public WarpAI(Ship s)
 	{
-		super(f);
+		super(s.flying_part);
+		the_ship = s;
 	}
 	
 	public double calcDesiredDirection(long t)
 	{
-		return ((Ship)the_flyer).exit_direction;
+		return the_ship.exit_direction;
 	}
 	
 	public int directionType()
@@ -20,7 +23,7 @@ public strictfp class WarpAI extends FlyerAI
 	public double calcDesiredSpeed(long t, double angle_chng)
 	{
 		double cosine = Math.cos(angle_chng);
-		return the_flyer.type.max_speed*cosine*Math.abs(cosine);
+		return flying_thing.getCapabilities().getMaxSpeed()*cosine*Math.abs(cosine);
 	}
 	
 	public WarpAI(){}

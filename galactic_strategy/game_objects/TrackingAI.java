@@ -5,7 +5,7 @@ public strictfp class TrackingAI extends FlyerAI
 	double dest_tolerance; //how close we should be to destination before match speed by default
 	IN_RANGE_BEHAVIOR in_range_behavior; //if the AI should try to match the speed of its destination or not
 	
-	public static enum IN_RANGE_BEHAVIOR{NO_SLOWDOWN, MATCH_SPEED, STOP};
+	public static enum IN_RANGE_BEHAVIOR {NO_SLOWDOWN, MATCH_SPEED, STOP};
 	
 	/**TrackingAI constructor.
 	 *
@@ -22,7 +22,7 @@ public strictfp class TrackingAI extends FlyerAI
 	 * @param ms whether the Flyer should try to match its destination's speed
 	 * 		or not.
 	 */
-	public TrackingAI(Flyer<?,?,?> f, double tol, IN_RANGE_BEHAVIOR ms)
+	public TrackingAI(FlyingThing f, double tol, IN_RANGE_BEHAVIOR ms)
 	{
 		super(f);
 		dest_tolerance = tol;
@@ -35,8 +35,8 @@ public strictfp class TrackingAI extends FlyerAI
 	 */
 	public double calcDesiredDirection(long t)
 	{
-		double dest_vec_x = the_flyer.destinationX() - the_flyer.pos_x;
-		double dest_vec_y = the_flyer.destinationY() - the_flyer.pos_y;
+		double dest_vec_x = flying_thing.destination.getXCoord() - flying_thing.getPos_x();
+		double dest_vec_y = flying_thing.destination.getYCoord() - flying_thing.getPos_y();
 	
 		return Math.atan2(dest_vec_y, dest_vec_x);
 	}
@@ -53,20 +53,23 @@ public strictfp class TrackingAI extends FlyerAI
 		// the speed the ship may want to match.  The cosines are used to slow down
 		// the ship when it is not heading directly at its destination
 		double speed_to_match = Math.hypot(
-				the_flyer.destinationVelX(),
-				the_flyer.destinationVelY()
+				flying_thing.destination.getXVel(),
+				flying_thing.destination.getYVel()
 			)*cos*Math.abs(cos);
 			
 		//the time it would take for the ship to match the speed of its target from its current speed
-		double time_to_chng = (the_flyer.speed-speed_to_match)/(the_flyer.type.accel_rate);
+		double time_to_chng = (flying_thing.getSpeed()-speed_to_match)/flying_thing.getCapabilities().getAccel();
 		
 		//the time it would take for the ship to travel the remaining distance to its destination
-		double time_to_dest = Math.hypot(the_flyer.pos_x - the_flyer.destinationX(),the_flyer.pos_y - the_flyer.destinationY())/the_flyer.speed;
+		double time_to_dest = Math.hypot(
+				flying_thing.getPos_x() - flying_thing.destination.getXCoord(),
+				flying_thing.getPos_y() - flying_thing.destination.getYCoord()
+			)/flying_thing.getSpeed();
 		
 		//The "if" here asks: should the Flyer should try to slow down to stop/match speed of destination AND...
 			//is the flyer close enough to its destination that we can say it is there already? OR
 			//(heuristic) is the time needed to match speed greater than time to arrival if traveling at constant speed (same as v^2 > a*d if the destination is not moving) 
-		if(Math.hypot(the_flyer.pos_x - the_flyer.destinationX(),the_flyer.pos_y - the_flyer.destinationY()) < dest_tolerance
+		if(flying_thing.findSqDistance(flying_thing.destination) < dest_tolerance*dest_tolerance
 			|| time_to_chng > time_to_dest)
 		{
 			switch(in_range_behavior)
@@ -83,7 +86,7 @@ public strictfp class TrackingAI extends FlyerAI
 		if(desired_direction < Math.PI/2.0 && desired_direction > -Math.PI/2.0) //else if destination is forward
 		{
 			//go a portion of the max speed - cosines used to slow ship when it isn't going straight
-			return the_flyer.type.max_speed*cos*cos;
+			return flying_thing.getCapabilities().getMaxSpeed()*cos*cos;
 		}
 		else //destination is backward, stop to turn around
 			return 0.0d;

@@ -19,9 +19,8 @@ import javax.swing.ImageIcon;
 public strictfp enum ShipType
 {
 			//name			fuel	hull	money	metal	time to build	troops	image					ThumbPict					max speed	max ang. vel.	max accel	warp accel	warp speed	warp range	tooltip
-	MISSILE	("Missile",		5,		10,		0,		0,		2000,			0,		ImageResource.MISSILE,	null,	.15,				.0015,			.0001,		0.0,		0.0,		0,			"BOOM!  You're dead if you get hit by one of these..."),
+	MISSILE	("Missile",		5,		10,		0,		0,		2000,			0,		ImageResource.MISSILE,	null,						.15,		.0015,			.0001,		0.0,		0.0,		0,			"BOOM!  You're dead if you get hit by one of these..."),
 	JUNK	("Junk",		20,		100,	100,	100,	10000,			400,	ImageResource.JUNK,		ThumbPictResource.JUNK,		.06,		.0007,			.00003,		.0005,		.0016,		100,		"A basic spacecraft often built from spare parts.  It can shoot, but don't expect it to take a beating.");
-	
 	
 	String name;
 	public final int max_energy;
@@ -77,6 +76,10 @@ public strictfp enum ShipType
 			Color c = Constants.DEFAULT_COLORS[i];
 			paint_cache.put(c, new ShipPaintCache(c));
 		}
+	}
+	
+	public FlyingThing.Capabilities getCapabilities(Flyer<?,?,?> f) {
+		return new FlyerCapabilities(f, f.type); 
 	}
 	
 	public TexturePaint getScaledImage(double scale, Color c)

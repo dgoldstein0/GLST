@@ -20,23 +20,16 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	ID id;
 	Player owner;
 	
-	HashSet<Targetter<?>> aggressors; //all the ships/ missiles targeting this
-	
-	private AbstractDestination<?> destination;
 	//save in case SystemPainter wants to paint crosshairs
 	private double dest_x_coord;
 	private double dest_y_coord;
 	
 	//for Targetable
 	int damage;
-	
-	double pos_x; //pos_x and pos_y indicate where in the system the ship is located
-	double pos_y;
-	double direction;
-	double speed;
-
-	FlyerAI current_flying_AI;
 	boolean is_alive;
+	HashSet<Targetter<?>> aggressors; //all the ships/ missiles targeting this
+	
+	public FlyingThing flying_part;
 	
 	//subclasses are responsible for instantiating data_control
 	public Flyer(String nm, ShipType st)
@@ -48,8 +41,8 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 		damage=0;
 		is_alive=true;
 		aggressors = new HashSet<Targetter<?>>();
-		destination=null;
 		target=null;
+		flying_part = new FlyingThing(st.getCapabilities(this));
 	}
 	
 	public Flyer(){}
@@ -60,60 +53,6 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	
 	//ship physics functions
 	
-	//moves the ship one time_granularity.  this is a separate function so that all ships updates can be stepped through 1 by 1.
-	protected void moveIncrement(long t)
-	{
-		//change position
-		pos_x += speed*Constants.TIME_GRANULARITY*Math.cos(direction);
-		pos_y += speed*Constants.TIME_GRANULARITY*Math.sin(direction);
-		
-		double desired_direction_chng;
-
-		switch(current_flying_AI.directionType())
-		{
-			case FlyerAI.ABS_DIRECTION:
-				desired_direction_chng = current_flying_AI.calcDesiredDirection(t) - direction;
-				if(desired_direction_chng > Math.PI)
-					desired_direction_chng -= 2.0*Math.PI;
-				else if(desired_direction_chng < -Math.PI)
-					desired_direction_chng += 2.0*Math.PI;
-				break;
-			case FlyerAI.REL_DIRECTION:
-				desired_direction_chng = current_flying_AI.calcDesiredDirection(t);
-				break;
-			default:
-				System.out.println("directionType not supported by Flyer.moveIncrement");
-				return; //to avoid that desired_direction_chng might not be initialized.
-				//break;
-		}
-		
-		double desired_speed = current_flying_AI.calcDesiredSpeed(t, desired_direction_chng);
-		
-		double accel = getAccel();
-		
-		//change speed
-		if(desired_speed < speed)
-			speed = Math.max(Math.max(speed - accel*Constants.TIME_GRANULARITY, desired_speed), 0.0d);
-		else
-		{
-			if(enforceSpeedCap()) //false allows ships to exceed their speed limitations
-				speed = Math.min(Math.min(speed + accel*Constants.TIME_GRANULARITY, desired_speed), type.max_speed);
-			else
-				speed = Math.min(speed + accel*Constants.TIME_GRANULARITY, desired_speed);
-		}
-		
-		//change direction
-		double actual_chng = Math.min(Math.abs(desired_direction_chng), Math.abs(type.max_angular_vel*Constants.TIME_GRANULARITY)); //finds the absolute value of the amount the direction changes
-		if(desired_direction_chng > 0)
-			direction += actual_chng;
-		else
-			direction -= actual_chng;
-		
-		if(direction > Math.PI)
-			direction -= 2*Math.PI;
-		else if(direction<-Math.PI)
-			direction += 2*Math.PI;
-	}
 	
 	protected boolean enforceSpeedCap(){return true;} //overriding this function allows ships to speed up to warp.  note that if it were Private it would not be overrideable
 	
@@ -124,43 +63,43 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	
 	public double destinationX()
 	{
-		dest_x_coord = destination.getXCoord();
+		dest_x_coord = flying_part.destination.getXCoord();
 		return dest_x_coord;
 	}
 	
 	public double destinationY()
 	{
-		dest_y_coord = destination.getYCoord();
+		dest_y_coord = flying_part.destination.getYCoord();
 		return dest_y_coord;
 	}
 	
 	public double destinationVelX()
 	{
-		return destination.getXVel();
+		return flying_part.destination.getXVel();
 	}
 	
 	public double destinationVelY()
 	{
-		return destination.getYVel();
+		return flying_part.destination.getYVel();
 	}
 	
 	//methods to implement destination
 	@Override
 	public String imageLoc(){return type.img.img_path;}
 	
-	@Override public double getXCoord() {return pos_x;}
-	@Override public double getYCoord() {return pos_y;}
+	@Override public double getXCoord() {return flying_part.getPos_x();}
+	@Override public double getYCoord() {return flying_part.getPos_y();}
 	
 	@Override
 	public double getXVel()
 	{
-		return speed*Math.cos(direction);
+		return flying_part.getSpeed()*Math.cos(flying_part.getDirection());
 	}
 	
 	@Override
 	public double getYVel()
 	{
-		return speed*Math.sin(direction);
+		return flying_part.getSpeed()*Math.sin(flying_part.getDirection());
 	}
 	
 	//for Targetable
@@ -184,14 +123,6 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	
 	public ShipType getType(){return type;}
 	public void setType(ShipType tp){type=tp;}
-	public double getPos_x(){return pos_x;}
-	public double getPos_y(){return pos_y;}
-	public void setPos_x(double x){pos_x=x;}
-	public void setPos_y(double y){pos_y=y;}
-	public double getSpeed(){return speed;}
-	public double getDirection(){return direction;}
-	public void setSpeed(double s){speed=s;}
-	public void setDirection(double d){direction=d;}
 	public String getName(){return name;}
 	public void setName(String nm){name=nm;}
 	public int getDamage(){return damage;}
@@ -204,16 +135,6 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	public void setIs_alive(boolean b) {is_alive = b;}
 	public GSystem getLocation() {return location;}
 	public void setLocation(GSystem sys) {location = sys;}
-	public FlyerAI getCurrent_flying_AI(){return current_flying_AI;}
-	public void setCurrent_flying_AI(FlyerAI ai){current_flying_AI = ai;}
-	
-	public AbstractDestination<?> getDestination() {
-		return destination;
-	}
-
-	public void setDestination(AbstractDestination<?> destination) {
-		this.destination = destination;
-	}
 
 	public double getDest_x_coord() {
 		return dest_x_coord;
@@ -239,4 +160,10 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 		@Override
 		public abstract boolean equals(Object o);
 	}
+
+	// TODO should this be part of FlyingThing?
+	/**
+	 * Things that don't warp should always return false.
+	 */
+	public abstract boolean isInWarpTransition();
 }

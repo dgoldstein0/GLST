@@ -312,8 +312,8 @@ public class SystemPainter extends JPanel
 					Ship s = (Ship)obj;
 					double ship_dim = s.getType().getDim()*s.getType().img.scale;
 					g2.draw(new Ellipse2D.Double(
-							drawX(s.getPos_x() - ship_dim/2.0),
-							drawY(s.getPos_y() - ship_dim/2.0),
+							drawX(s.flying_part.getPos_x() - ship_dim/2.0),
+							drawY(s.flying_part.getPos_y() - ship_dim/2.0),
 							ship_dim*scale,
 							ship_dim*scale
 					));
@@ -375,8 +375,8 @@ public class SystemPainter extends JPanel
 					Ship s = (Ship)mouseover_obj;
 					double ship_draw_size = s.getType().getDim()*s.getType().img.scale; 
 					g2.draw(new Ellipse2D.Double(
-							drawX(s.getPos_x() - ship_draw_size/2.0),
-							drawY(s.getPos_y() - ship_draw_size/2.0),
+							drawX(s.flying_part.getPos_x() - ship_draw_size/2.0),
+							drawY(s.flying_part.getPos_y() - ship_draw_size/2.0),
 							ship_draw_size*scale,
 							ship_draw_size*scale
 					));
@@ -418,11 +418,11 @@ public class SystemPainter extends JPanel
 		
 		ImageResource img = type.img;
 		g2.translate(
-				drawX(s.getPos_x()-img.scale*img.getWidth()/2.0),
-				drawY(s.getPos_y()-img.scale*img.getHeight()/2.0)
+				drawX(s.flying_part.getPos_x()-img.scale*img.getWidth()/2.0),
+				drawY(s.flying_part.getPos_y()-img.scale*img.getHeight()/2.0)
 			);
 		g2.rotate(
-				s.getDirection() + Math.PI/2,
+				s.flying_part.getDirection() + Math.PI/2,
 				img.scale*img.getWidth()*scale/2.0,
 				img.scale*img.getHeight()*scale/2.0
 			);

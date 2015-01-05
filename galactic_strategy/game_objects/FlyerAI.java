@@ -1,14 +1,14 @@
 package galactic_strategy.game_objects;
 public strictfp abstract class FlyerAI
 {
-	Flyer<?,?,?> the_flyer;
+	FlyingThing flying_thing;
 	
 	static final int ABS_DIRECTION=0;
 	static final int REL_DIRECTION=1;
 	
-	public FlyerAI(Flyer<?,?,?> f)
+	public FlyerAI(FlyingThing f)
 	{
-		the_flyer = f;
+		flying_thing = f;
 	}
 	
 	public abstract double calcDesiredDirection(long t);
@@ -16,6 +16,6 @@ public strictfp abstract class FlyerAI
 	public abstract int directionType(); //specifies whether the calcDesiredDirection() returns the actual direction (ABS_DIRECTION) or the change in direction (REL_DIRECTION)
 
 	public FlyerAI() {}
-	public Flyer<?,?,?> getThe_flyer(){return the_flyer;}
-	public void setThe_flyer(Flyer<?,?,?> f){the_flyer = f;}
+	public FlyingThing getFlyingThing(){return flying_thing;}
+	public void setFlyingThing(FlyingThing f){flying_thing = f;}
 }

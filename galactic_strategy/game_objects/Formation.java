@@ -14,9 +14,15 @@ public strictfp class Formation<T extends Formation<T>> implements Saveable<T> {
 	private DescribableDestination<?> dest;
 	private DataSaverControl<T> data_control;
 	
+	double x;
+	double y;
+	double direction;
+	
 	public enum FormationType {
 		LINE(),
 		V();
+		
+		private FormationType(){}
 	}
 	
 	private Formation(){
@@ -61,32 +67,43 @@ public strictfp class Formation<T extends Formation<T>> implements Saveable<T> {
 		
 		@Override
 		public double getXCoord() {
-			// TODO Auto-generated method stub
-			return 0;
+			return f.getXforShip(position);
 		}
 		@Override
 		public double getYCoord() {
-			// TODO Auto-generated method stub
-			return 0;
+			return f.getYforShip(position);
 		}
 		@Override
 		public double getXVel() {
-			// TODO Auto-generated method stub
-			return 0;
+			return f.getXVelforShip(position);
 		}
 		@Override
 		public double getYVel() {
-			// TODO Auto-generated method stub
-			return 0;
+			return f.getYVelforShip(position);
 		}
 		@Override
 		public String imageLoc() {
-			// TODO Auto-generated method stub
-			return null;
+			return f.dest.imageLoc();
 		}
 		@Override
 		public String getName() {
 			return "Formation";
 		}
+	}
+
+	public double getXforShip(int position) {
+		return 0;
+	}
+
+	public double getYforShip(int position) {
+		return 0;
+	}
+	
+	public double getYVelforShip(int position) {
+		return 0;
+	}
+
+	public double getXVelforShip(int position) {
+		return 0;
 	}
 }

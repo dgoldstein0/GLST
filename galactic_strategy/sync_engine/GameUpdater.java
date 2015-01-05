@@ -421,11 +421,11 @@ public class GameUpdater {
 	
 	public void doCollision(Ship a, Ship b, long t) throws DataSaverControl.DataNotYetSavedException
 	{
-		double x_a = a.getPos_x();
-		double y_a = a.getPos_y();
+		double x_a = a.flying_part.getPos_x();
+		double y_a = a.flying_part.getPos_y();
 		
-		double x_b = b.getPos_x();
-		double y_b = b.getPos_y();
+		double x_b = b.flying_part.getPos_x();
+		double y_b = b.flying_part.getPos_y();
 		
 		double dif_x = x_a - x_b;
 		double dif_y = y_a - y_b;
@@ -440,27 +440,31 @@ public class GameUpdater {
 			//do collision
 			
 			//velocity a -= 2*projection onto dif
-			double v_x_a = a.getSpeed()*Math.cos(a.getDirection());
-			double v_y_a = a.getSpeed()*Math.sin(a.getDirection());
+			double speed_a = a.flying_part.getSpeed();
+			double dir_a = a.flying_part.getDirection();
+			double v_x_a = speed_a*Math.cos(dir_a);
+			double v_y_a = speed_a*Math.sin(dir_a);
 			
 			double proj_frac_a;
 			proj_frac_a = (v_x_a*dif_x + v_y_a*dif_y)/len_sq_dif;
 			
 			//velocity b += 2*projection onto dif
-			double v_x_b = b.getSpeed()*Math.cos(b.getDirection());
-			double v_y_b = b.getSpeed()*Math.sin(b.getDirection());
+			double speed_b = b.flying_part.getSpeed();
+			double dir_b = b.flying_part.getDirection();
+			double v_x_b = speed_b*Math.cos(dir_b);
+			double v_y_b = speed_b*Math.sin(dir_b);
 			
 			double proj_frac_b;
 			proj_frac_b = (v_x_b*dif_x + v_y_b*dif_y)/len_sq_dif;
 			
 			if (proj_frac_a < 0.0) //negative indicates ship a is moving in the direction of ship b
 			{
-				a.setSpeed(0.0);
+				a.flying_part.setSpeed(0.0);
 			}
 			
 			if(proj_frac_b > 0.0)
 			{
-				b.setSpeed(0.0);
+				b.flying_part.setSpeed(0.0);
 			}
 		}
 	}

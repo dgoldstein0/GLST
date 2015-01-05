@@ -154,8 +154,8 @@ public class GalacticMapPainter extends JPanel
 					//set up coordinates of equalateral triangle
 					double side = 10.0;
 					double h = side/2.0*Math.sqrt(3.0);
-					double scale_x = scaleNum(s.getPos_x());
-					double scale_y = scaleNum(s.getPos_y());
+					double scale_x = scaleNum(s.getWarp_x());
+					double scale_y = scaleNum(s.getWarp_y());
 					
 					double[] xcoords = {-side/2.0 + scale_x,	side/2.0 + scale_x,	scale_x};
 					double[] ycoords = {-h/3.0 + scale_y,		-h/3.0+scale_y,		2.0/3.0*h+scale_y};

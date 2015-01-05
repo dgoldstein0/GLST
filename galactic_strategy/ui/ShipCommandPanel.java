@@ -149,7 +149,7 @@ public class ShipCommandPanel extends JPanel implements ActionListener
 		soldier_label.setText("  " + Integer.toString(the_ship.getSoldierInt()) + " soldiers");
 
 		if(the_ship.getDestination() instanceof OwnableSatellite<?> && the_ship.getOwner().getId() == GameInterface.GC.getPlayer_id() &&
-				Math.hypot(the_ship.getDest_x_coord()-the_ship.getPos_x(), the_ship.getDest_y_coord()-the_ship.getPos_y()) <= Constants.LANDING_RANGE)
+				the_ship.flying_part.findSqDistance(the_ship.getDestination()) <= Constants.LANDING_RANGE*Constants.LANDING_RANGE)
 		{
 			OwnableSatellite<?> sat = (OwnableSatellite<?>) the_ship.getDestination();
 			Player owner = sat.getOwner();

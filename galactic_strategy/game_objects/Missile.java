@@ -20,21 +20,24 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		owner = s.owner;
 		
 		//set up physics
-		pos_x = s.getPos_x();
-		pos_y = s.getPos_y();
-		direction = s.getDirection();
-		speed = s.getSpeed() + Constants.INITIAL_MISSILE_SPEED;
+		flying_part.setInitialPositionAndVelocity(
+				s.flying_part.getPos_x(),
+				s.flying_part.getPos_y(),
+				s.flying_part.getSpeed() + Constants.INITIAL_MISSILE_SPEED,
+				s.flying_part.getDirection()
+			);
 		location = s.location;
 		
 		target = t;
-		setDestination(t);
+		flying_part.setDestination(t);
 		t.addAggressor(this);
 		target_alive=true;
 		
-		//TODO: why do getXCoord and getYCoord take time values?
-		setDest_x_coord(getDestination().getXCoord());
-		setDest_y_coord(getDestination().getYCoord());
-		current_flying_AI = new TrackingAI(this, 0.0, TrackingAI.IN_RANGE_BEHAVIOR.NO_SLOWDOWN);
+		setDest_x_coord(t.getXCoord());
+		setDest_y_coord(t.getYCoord());
+		flying_part.setCurrent_flying_AI(
+			new TrackingAI(this.flying_part, 0.0, TrackingAI.IN_RANGE_BEHAVIOR.NO_SLOWDOWN)
+		);
 	}
 	
 	public Missile(){}
@@ -56,7 +59,7 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 	{
 		boolean retval = false;
 		
-		moveIncrement(t);
+		flying_part.moveIncrement(t);
 		
 		if (collidedWithTarget(t))
 		{
@@ -70,21 +73,16 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 	//TODO: POTENTIAL COORDINATION HAZARD - if missile/ship update order is changed, this won't work
 	public boolean collidedWithTarget(long t)
 	{
-		//can use current x/y coords for ships because ship positions are updated first
 		//TODO: when is target not alive, and destination not a DestinationPoint?
 		if(target_alive)
 		{
-			double x_dif=this.pos_x-target.getXCoord();
-			double y_dif=this.pos_y-target.getYCoord();
-			return (x_dif*x_dif+y_dif*y_dif<Collide_Range*Collide_Range);
+			return (flying_part.findSqDistance(target)<Collide_Range*Collide_Range);
 		}
 		else
 		{
-			if(getDestination() instanceof DestinationPoint)
+			if(flying_part.getDestination() instanceof DestinationPoint)
 			{
-				double x_dif=this.pos_x-((DestinationPoint)getDestination()).getX();
-				double y_dif=this.pos_y-((DestinationPoint)getDestination()).getY();
-				return (x_dif*x_dif+y_dif*y_dif<Collide_Range*Collide_Range);
+				return flying_part.findSqDistance(flying_part.getDestination()) < Collide_Range*Collide_Range;
 			}
 			else
 			{
@@ -126,7 +124,7 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 	public void targetIsDestroyed(long t)
 	{
 		//also see Ship's targetIsDestroyed function.
-		setDestination(new DestinationPoint(
+		flying_part.setDestination(new DestinationPoint(
 						target.getXCoord(),
 						target.getYCoord()
 					));
@@ -193,5 +191,10 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 			else
 				return 0;
 		}
+	}
+
+	@Override
+	public boolean isInWarpTransition() {
+		return false;
 	}
 }
