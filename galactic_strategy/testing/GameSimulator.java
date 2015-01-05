@@ -129,8 +129,8 @@ public class GameSimulator {
 			List<String> results2 = sim2.simulate(null, null);
 			
 			compareResults(3, results1, results2, sim1, sim2);
-			saveResultsToFile(results1, "test3p1.txt");
-			saveResultsToFile(results2, "test3p2.txt");
+			saveResultsToFile(results1, "logfiles/test3p1.txt");
+			saveResultsToFile(results2, "logfiles/test3p2.txt");
 		}
 		
 		{

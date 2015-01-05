@@ -1,6 +1,5 @@
 package galactic_strategy;
 
-import galactic_strategy.game_objects.Base;
 import galactic_strategy.game_objects.GSystem;
 import galactic_strategy.game_objects.Galaxy;
 import galactic_strategy.game_objects.OwnableSatellite;

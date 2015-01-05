@@ -1,4 +1,5 @@
 *.class
+logfiles/*
 
 # Package Files #
 *.jar

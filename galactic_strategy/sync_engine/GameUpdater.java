@@ -18,6 +18,7 @@ import galactic_strategy.user_actions.Order;
 import java.beans.ExceptionListener;
 import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
@@ -481,7 +482,12 @@ public class GameUpdater {
 	public void setupLogFile(String logname)
 	{
 		try {
-			logFile = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(logname)));
+			File logdir = new File("logfiles");
+			if (!logdir.exists()) {
+				logdir.mkdir();
+			}
+			
+			logFile = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("logfiles/" + logname)));
 			logFile.setExceptionListener(new MyExceptionListener());
 		} catch (IOException e) {
 			e.printStackTrace();
