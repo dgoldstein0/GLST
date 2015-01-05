@@ -48,10 +48,14 @@ public strictfp class TrackingAI extends FlyerAI
 	
 	public double calcDesiredSpeed(long t, double desired_direction) //the argument is the output of calcDesiredDirection()
 	{
-		//if close to dest
+		double cos = Math.cos(desired_direction);
 		
-		//the speed the ship may want to match.  The cosines are used to slow down the ship when it is not heading directly at its destination
-		double speed_to_match= Math.hypot(the_flyer.destinationVelX(),the_flyer.destinationVelY())*Math.cos(desired_direction)*Math.abs(Math.cos(desired_direction));
+		// the speed the ship may want to match.  The cosines are used to slow down
+		// the ship when it is not heading directly at its destination
+		double speed_to_match = Math.hypot(
+				the_flyer.destinationVelX(),
+				the_flyer.destinationVelY()
+			)*cos*Math.abs(cos);
 			
 		//the time it would take for the ship to match the speed of its target from its current speed
 		double time_to_chng = (the_flyer.speed-speed_to_match)/(the_flyer.type.accel_rate);
@@ -79,7 +83,7 @@ public strictfp class TrackingAI extends FlyerAI
 		if(desired_direction < Math.PI/2.0 && desired_direction > -Math.PI/2.0) //else if destination is forward
 		{
 			//go a portion of the max speed - cosines used to slow ship when it isn't going straight
-			return the_flyer.type.max_speed*Math.cos(desired_direction)*Math.cos(desired_direction);
+			return the_flyer.type.max_speed*cos*cos;
 		}
 		else //destination is backward, stop to turn around
 			return 0.0d;
