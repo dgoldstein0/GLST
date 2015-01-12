@@ -89,6 +89,9 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		flying_part.moveIncrement(t);
 		MODES orig_mode;
 		
+		if (mode == MODES.IN_WARP)
+			throw new IllegalStateException("shouldn't call update() if ship is already in warp");
+		
 		/* this do-while is necessary because it lets the ship go through
 		 * multiple states within a time grain */
 		do {
@@ -197,10 +200,7 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 						mode=MODES.ORBITING;
 					break;
 				case IN_WARP:
-					throw new IllegalStateException(
-							"Should never call update on a warping ship - this suggests the ship is" +
-							" in a system, while it should be moving between systems."
-						);
+					break; // nothing more to do.
 			}
 		} while (mode != orig_mode);
 		
