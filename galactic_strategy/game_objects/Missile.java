@@ -33,8 +33,6 @@ public strictfp class Missile extends Flyer<Missile, Missile.MissileId, Iterator
 		t.addAggressor(this);
 		target_alive=true;
 		
-		setDest_x_coord(t.getXCoord());
-		setDest_y_coord(t.getYCoord());
 		flying_part.setCurrent_flying_AI(
 			new TrackingAI(this.flying_part, 0.0, TrackingAI.IN_RANGE_BEHAVIOR.NO_SLOWDOWN)
 		);

@@ -1,6 +1,8 @@
 package galactic_strategy.game_objects;
 
 import galactic_strategy.Constants;
+import galactic_strategy.sync_engine.DataSaverControl;
+import galactic_strategy.sync_engine.Saveable;
 
 /**
  * @author David
@@ -9,7 +11,7 @@ import galactic_strategy.Constants;
  * the game. It might not represent a physical object - it could represent,
  * instead, an arrangement of other actual game objects (e.g. a Formation).
  */
-public class FlyingThing {
+public strictfp class FlyingThing implements Saveable<FlyingThing>{
 	
 	/**
 	 * @author David
@@ -33,10 +35,12 @@ public class FlyingThing {
 	FlyerAI current_flying_AI;
 	AbstractDestination<?> destination;
 	private FlyingThing.Capabilities capabilities;
+	DataSaverControl<FlyingThing> data_control;
 
 	FlyingThing(FlyingThing.Capabilities cap) {
 		destination = null;
 		capabilities = cap;
+		data_control = new DataSaverControl<FlyingThing>(this);
 	}
 	
 	//moves the ship one time_granularity.  this is a separate function so that all ships updates can be stepped through 1 by 1.
@@ -119,7 +123,7 @@ public class FlyingThing {
 		this.direction = direction;
 	}
 	
-	public FlyingThing() {}
+	public FlyingThing() {data_control = new DataSaverControl<FlyingThing>(this);}
 	public double getPos_x(){return pos_x;}
 	public double getPos_y(){return pos_y;}
 	public void setPos_x(double x){pos_x=x;}
@@ -134,4 +138,9 @@ public class FlyingThing {
 	public void setDestination(AbstractDestination<?> destination) {this.destination = destination;}
 	public FlyingThing.Capabilities getCapabilities() {return capabilities;}
 	public void setCapabilities(FlyingThing.Capabilities c) {capabilities = c;}
+
+	@Override
+	public DataSaverControl<FlyingThing> getDataControl() {
+		return data_control;
+	}
 }

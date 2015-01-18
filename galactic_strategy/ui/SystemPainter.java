@@ -318,17 +318,19 @@ public class SystemPainter extends JPanel
 							ship_dim*scale
 					));
 					g2.setColor(Color.ORANGE);
+					double x = s.destinationX();
+					double y = s.destinationY();
 					g2.drawLine(
-							drawXInt(s.getDest_x_coord())-3,
-							drawYInt(s.getDest_y_coord()),
-							drawXInt(s.getDest_x_coord())+3,
-							drawYInt(s.getDest_y_coord())
+							drawXInt(x)-3,
+							drawYInt(y),
+							drawXInt(x)+3,
+							drawYInt(y)
 					);
 					g2.drawLine(
-							drawXInt(s.getDest_x_coord()),
-							drawYInt(s.getDest_y_coord())-3,
-							drawXInt(s.getDest_x_coord()),
-							drawYInt(s.getDest_y_coord())+3
+							drawXInt(x),
+							drawYInt(y)-3,
+							drawXInt(x),
+							drawYInt(y)+3
 					);
 				}
 			}

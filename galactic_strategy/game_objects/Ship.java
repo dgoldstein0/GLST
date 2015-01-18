@@ -316,8 +316,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			userOverride();
 			
 			//System.out.println(Integer.toString(id) + " orderToMove: t is " + Long.toString(t) + " and time is " + Long.toString(time));
-			setDest_x_coord(d.getXCoord());
-			setDest_y_coord(d.getYCoord());
 			flying_part.setCurrent_flying_AI(
 				new TrackingAI(this.flying_part, Constants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED)
 			);
@@ -328,8 +326,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	public void AIMove(AbstractDestination<?> d)
 	{
 		flying_part.setDestination(d);
-		setDest_x_coord(d.getXCoord());
-		setDest_y_coord(d.getYCoord());
 		flying_part.setCurrent_flying_AI(
 			new TrackingAI(this.flying_part, Constants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED)
 		);
@@ -342,8 +338,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			flying_part.setDestination(d);
 			userOverride();
 			
-			setDest_x_coord(d.getXCoord());
-			setDest_y_coord(d.getYCoord());
 			flying_part.setCurrent_flying_AI(
 				new TrackingAI(this.flying_part, Constants.LANDING_RANGE, TrackingAI.IN_RANGE_BEHAVIOR.MATCH_SPEED)
 			);
@@ -491,8 +485,6 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 		mode=MODES.EXIT_WARP;
 		double time = (1.125*speed)/getAccel();
 		flying_part.setDestination(new DestinationPoint(x+.5*speed*time*Math.cos(direction), y+.5*speed*time*Math.sin(direction)));
-		setDest_x_coord(x+.5*speed*time*Math.cos(direction));
-		setDest_y_coord(y+.5*speed*time*Math.sin(direction));
 		flying_part.setCurrent_flying_AI(new StopAI());
 		
 		ship_it.remove();//owner.ships_in_transit.remove(this);

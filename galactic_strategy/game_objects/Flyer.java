@@ -20,10 +20,6 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	ID id;
 	Player owner;
 	
-	//save in case SystemPainter wants to paint crosshairs
-	private double dest_x_coord;
-	private double dest_y_coord;
-	
 	//for Targetable
 	int damage;
 	boolean is_alive;
@@ -63,24 +59,12 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	
 	public double destinationX()
 	{
-		dest_x_coord = flying_part.destination.getXCoord();
-		return dest_x_coord;
+		return flying_part.destination.getXCoord();
 	}
 	
 	public double destinationY()
 	{
-		dest_y_coord = flying_part.destination.getYCoord();
-		return dest_y_coord;
-	}
-	
-	public double destinationVelX()
-	{
-		return flying_part.destination.getXVel();
-	}
-	
-	public double destinationVelY()
-	{
-		return flying_part.destination.getYVel();
+		return flying_part.destination.getYCoord();
 	}
 	
 	//methods to implement destination
@@ -135,22 +119,6 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	public void setIs_alive(boolean b) {is_alive = b;}
 	public GSystem getLocation() {return location;}
 	public void setLocation(GSystem sys) {location = sys;}
-
-	public double getDest_x_coord() {
-		return dest_x_coord;
-	}
-
-	public void setDest_x_coord(double dest_x_coord) {
-		this.dest_x_coord = dest_x_coord;
-	}
-
-	public double getDest_y_coord() {
-		return dest_y_coord;
-	}
-
-	public void setDest_y_coord(double dest_y_coord) {
-		this.dest_y_coord = dest_y_coord;
-	}
 
 	public static abstract class FlyerId<T extends FlyerId<T>>
 	{

@@ -35,6 +35,7 @@ public strictfp class Galaxy
 				for (Ship s : p.getShips_in_transit())
 				{
 					s.data_control.saveData(time);
+					s.flying_part.data_control.saveData(time);
 				}
 			}
 		}
@@ -49,6 +50,7 @@ public strictfp class Galaxy
 				{
 					Ship s = f.ships.get(id);
 					s.data_control.saveData(time);
+					s.flying_part.data_control.saveData(time);
 				}
 			}
 			
@@ -71,6 +73,7 @@ public strictfp class Galaxy
 				for (Ship s : p.getShips_in_transit())
 				{
 					s.data_control.revertToTime(t);
+					s.flying_part.data_control.revertToTime(t);
 				}
 			}
 		}
@@ -85,6 +88,7 @@ public strictfp class Galaxy
 				{
 					Ship s = f.ships.get(id);
 					s.data_control.revertToTime(t);
+					s.flying_part.data_control.revertToTime(t);
 				}
 			}
 			
