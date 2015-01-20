@@ -56,11 +56,11 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 	}
 	
 	/**has same return value as canBuild, but this is called to actually start building the ship*/
-	public boolean addToQueue(Ship ship, long t)
+	public boolean addToQueue(ShipType type, long t)
 	{
 		boolean ret;
-		int met = ship.type.metal_cost;
-		int mon = ship.type.money_cost;
+		int met = type.metal_cost;
+		int mon = type.money_cost;
 		
 		synchronized(location.owner.getMetal_lock()){
 			synchronized(location.owner.getMoney_lock()){
@@ -69,10 +69,10 @@ public strictfp class Shipyard extends Facility<Shipyard>{
 					location.owner.changeMetal(-met);
 					location.owner.changeMoney(-mon);
 					
-					ship.id = new Ship.ShipId(next_queue_id, this);
+					Ship ship = new Ship(type, new Ship.ShipId(next_queue_id, this));
 					synchronized(manufac_queue)
 					{
-						manufac_queue.put(next_queue_id++,ship);
+						manufac_queue.put(next_queue_id++, ship);
 					}
 					ret=true;
 					

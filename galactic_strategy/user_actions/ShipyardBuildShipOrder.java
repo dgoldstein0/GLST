@@ -33,7 +33,7 @@ public strictfp class ShipyardBuildShipOrder extends Order
 		{
 			if(GameInterface.GC.getPlayers()[p_id] == the_yard.getOwner())
 			{
-				the_yard.addToQueue(new Ship(type), scheduled_time);
+				the_yard.addToQueue(type, scheduled_time);
 				decision = Decision.ACCEPT;
 				return true;
 			}

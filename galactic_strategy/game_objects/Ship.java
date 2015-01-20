@@ -46,9 +46,10 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 	long arrival_time;
 	AbstractDestination<?> SecondDest;
 	
-	public Ship(ShipType t)
+	public Ship(ShipType t, Ship.ShipId id)
 	{
 		super(t.name,t);
+		this.id = id;
 		
 		energy = t.max_energy;
 		max_energy = energy;
@@ -719,8 +720,8 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 			else
 				return 1;
 		}
-		
-		public void setManufacturer(Shipyard manufacturer) {this.manufacturer = manufacturer;}
+
+		public void setManufacturer(Shipyard m) {this.manufacturer = m;}
 		public Shipyard getManufacturer() {return manufacturer;}
 		public void setQueue_id(int queue_id) {this.queue_id = queue_id;}
 		public int getQueue_id() {return queue_id;}

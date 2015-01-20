@@ -119,6 +119,8 @@ public strictfp abstract class Flyer<T extends Flyer<T,ID,ITERATOR>, ID extends 
 	public void setIs_alive(boolean b) {is_alive = b;}
 	public GSystem getLocation() {return location;}
 	public void setLocation(GSystem sys) {location = sys;}
+	public FlyingThing getFlyingPart() {return flying_part;}
+	public void setFlyingPart(FlyingThing f){flying_part = f;}
 
 	public static abstract class FlyerId<T extends FlyerId<T>>
 	{
