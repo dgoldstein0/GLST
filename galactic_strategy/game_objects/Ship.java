@@ -709,9 +709,22 @@ public strictfp class Ship extends Flyer<Ship, Ship.ShipId, Fleet.ShipIterator> 
 
 		@Override
 		public int compareTo(ShipId o) {
-			int manufacturer_comp = manufacturer.compareTo(o.manufacturer);
-			if (manufacturer_comp != 0)
-				return manufacturer_comp;
+			if (manufacturer != null && o.manufacturer != null) {
+				int manufacturer_comp = manufacturer.compareTo(o.manufacturer);
+				if (manufacturer_comp != 0)
+					return manufacturer_comp;
+			}
+			// the XmlEncoder from java beans will end up calling this with
+			// partially-instantiated objects by recursing to instantiate a
+			// manufacturer (shipyard) and eventually ending up back at the
+			// same object in the object graph; this makes us at least try
+			// to do something sane in these cases.
+			else if (manufacturer == null && o.manufacturer != null) {
+				return -1;
+			}
+			else if (o.manufacturer == null && manufacturer != null){
+				return 1;
+			}
 			
 			if (queue_id < o.queue_id)
 				return -1;
