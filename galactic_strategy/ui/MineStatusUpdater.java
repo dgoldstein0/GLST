@@ -1,0 +1,22 @@
+package galactic_strategy.ui;
+import galactic_strategy.game_objects.Mine;
+
+import javax.swing.JProgressBar;
+
+public strictfp class MineStatusUpdater extends FacilityStatusUpdater
+{
+	JProgressBar health;
+	Mine the_mine;
+	
+	public MineStatusUpdater(JProgressBar hp, Mine m)
+	{
+		health = hp;
+		the_mine = m;
+	}
+	
+	public void updateFacility()
+	{
+		health.setValue(the_mine.getEndurance()-the_mine.getDamage());
+		health.setString(Integer.toString(the_mine.getEndurance()-the_mine.getDamage()));
+	}
+}
